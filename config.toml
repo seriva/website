@@ -1,0 +1,48 @@
+baseURL = "https://www.luukvanvenrooij.nl/"
+languageCode = "en-us"
+title = "luukvanvenrooij.nl"
+theme = "minimal"
+
+[params]
+    profilePic= "https://www.luukvanvenrooij.nl/images/me.jpg"
+    description= "Welcome to my little corner of the web! Here I showcase some of my private projects and ramble about general things that interest me:) \n\n\n If you have any questions, suggestions or comments feel free to contact me."
+    githubUsername = "seriva"
+    eMailUser = "luukvanvenrooij84"
+    eMailDomain = "gmail.com"
+    accent = "#680000"
+    showBorder = true
+    backgroundColor = "white"
+    font = "Raleway" # should match the name on Google Fonts!
+    highlight = true
+    highlightStyle = "solarized-dark"
+    highlightLanguages = ["javascript", "Delphi"]
+
+[[menu.main]]
+    url = "/"
+    name = "About"
+    weight = 1  
+
+[[menu.main]]
+    url = "/post/"
+    name = "Posts"
+    weight = 2
+
+[[menu.main]]
+    url = "/project/"
+    name = "Projects"
+    weight = 3
+
+ [[menu.icon]]
+    url = "#"
+    name = "envelope-o"
+    weight = 1   
+
+[[menu.icon]]
+    url = "https://github.com/seriva/"
+    name = "github"
+    weight = 1   
+
+[[menu.icon]]
+    url = "https://www.linkedin.com/in/luuk-van-venrooij-67857087/"
+    name = "linkedin"
+    weight = 2
