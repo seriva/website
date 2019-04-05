@@ -43,6 +43,11 @@ theme = "minimal"
     weight = 1   
 
 [[menu.icon]]
+    url = "https://www.youtube.com/user/seriva"
+    name = "youtube"
+    weight = 2
+
+[[menu.icon]]
     url = "https://www.linkedin.com/in/luuk-van-venrooij-67857087/"
     name = "linkedin"
-    weight = 2
+    weight = 3
