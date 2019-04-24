@@ -48,6 +48,6 @@ theme = "minimal"
     weight = 2
 
 [[menu.icon]]
-    url = "https://www.linkedin.com/in/luuk-van-venrooij-67857087/"
+    url = "https://www.linkedin.com/in/luuk-van-venrooij/"
     name = "linkedin"
     weight = 3
