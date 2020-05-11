@@ -51,3 +51,6 @@ theme = "minimal"
     url = "https://www.linkedin.com/in/luuk-van-venrooij/"
     name = "linkedin"
     weight = 3
+
+[markup.goldmark.renderer]
+unsafe= true
