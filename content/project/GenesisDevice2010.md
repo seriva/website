@@ -2,7 +2,7 @@
 title: "Genesis Device 2010"
 description: "A rewrite of Genesis Device 2007."
 tags: ["Object Pascal", "Lazarus", "OpenGL"]
-weight: 4
+weight: 5
 draft: false
 ---
 
