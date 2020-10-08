@@ -15,7 +15,7 @@ theme = "minimal"
     fontColor = "white"
     highlight = true
     highlightStyle = "dracula"
-    highlightLanguages = ["javascript", "Delphi"]
+    highlightLanguages = ["javascript", "delphi", "bash", "json"]
 
 [[menu.main]]
     url = "/"

@@ -8,13 +8,13 @@ draft: false
 
 ## About
 
-```Microtastic``` is a tiny (250 line) CLI tool to aid developing browser based applications in pure ES6 without the overtooling and dependency hell some tool chains introduce. Inspired by [Snowpack](https://www.snowpack.dev/), it is much lighter and simpler but more opinionated in project structure and how to use it.
+**Microtastic** is a tiny (250 line) CLI tool to aid developing browser based applications in pure ES6 without the overtooling and dependency hell some tool chains introduce. Inspired by [Snowpack](https://www.snowpack.dev/), it is much lighter and simpler but more opinionated in project structure and how to use it.
 
 Like [Snowpack](https://www.snowpack.dev/) it used [Rollup](https://rollupjs.org/) to convert CommonJS and multi-file ES6 modules to single-file ES6 modules. These can then be imported and used during development without the need for rebundling the application on every single change.
 
 Then when it is time to make the application production ready, [Rollup](https://rollupjs.org/) is used for bundling taking advantage of the threeshaking and dynamic imports it provides to slim down and carve up the code in smaller chunks.
 
-Since ```Microtastic``` only deals with ES6 code it works great with other JS only libraries like:
+Since **Microtastic** only deals with ES6 code it works great with other JS only libraries like:
 
 - [Mithril.js](https://mithril.js.org/)
 - [JSS](https://cssinjs.org/?v=v10.1.1)
@@ -24,45 +24,45 @@ Since ```Microtastic``` only deals with ES6 code it works great with other JS on
 
 1: Generate a new npm package/project:
 
-```bash
+```shell
 npm init
 ```
 
-2: Install ```Microtastic``` as a dev dependency:
+2: Install **Microtastic** as a dev dependency:
 
-```bash
+```shell
 npm install microtastic  --save-dev
 ```
 
-3: Run ```microtastic init``` to bootstrap the application template:
+3: Run **microtastic init** to bootstrap the application template:
 
-```bash
+```shell
 npx microtastic init
 ```
 
-In the ```app/src/``` folder new code can be added with ```main.js``` as main entry point. Any other resources you need can be added as you fit in the ```app/``` directory.
+In the *app/src/* folder new code can be added with *main.js* as main entry point. Any other resources you need can be added as you fit in the *app/* directory.
 
 ## How to add new dependencies
 
 1: Install the dependency like normal:
 
-```bash
+```shell
 npm install <packagename>
 ```
 
-2: Run ```prepare``` to rebuild the dependencies with:
+2: Run *prepare* to rebuild the dependencies with:
 
-```bash
+```shell
 npm run prepare
 ```
 
-This will regenerate all dependencies and put them in the ```app/src/dependencies/``` folder ready for use.
+This will regenerate all dependencies and put them in the *app/src/dependencies/* folder ready for use.
 
 ## How to develop
 
-```Microtastic``` has a build in development server which can be started with:
+**Microtastic** has a build in development server which can be started with:
 
-```bash
+```shell
 npm run dev
 ```
 
@@ -72,15 +72,15 @@ Since pure ES6 is used you can open and debug the applications in the latest ver
 
 You can prepare the bundled application by running:
 
-```bash
+```shell
 npm run build
 ```
 
-This will bundle and optimise your code and put the application ready to publish in the ```public/``` folder.
+This will bundle and optimise your code and put the application ready to publish in the *public/* folder.
 
 ## Advanced configuration
 
-You can create a  ```.microtastic``` file in the root of your project and add and change the following configurations:
+You can create a  *.microtastic* file in the root of your project and add and change the following configurations:
 
 ```json
 {
@@ -99,6 +99,11 @@ You can create a  ```.microtastic``` file in the root of your project and add an
     <th style="text-align: center">
         <a title="Github" target="_blank" href="https://github.com/seriva/microtastic">
             <img src="/images/github_icon.png"  style="max-width:75px" />
+        </a>
+    </th>
+    <th style="text-align: center">
+        <a title="NPM" target="_blank" href="https://www.npmjs.com/package/microtastic">
+            <img src="/images/npm_icon.png" style="max-width:75px" />
         </a>
     </th>
   </tr>
