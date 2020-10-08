@@ -43,12 +43,12 @@ Currently all work on this project has stopped and it will not be updated anymor
   <tr>
     <th style="text-align: center">
         <a title="Github" target="_blank" href="https://github.com/seriva/GenesisDevice-2007">
-            <img src="https://www.luukvanvenrooij.nl/images/github_icon.png"  style="max-width:75px" />
+            <img src="/images/github_icon.png"  style="max-width:75px" />
         </a>
     </th>
     <th style="text-align: center">
         <a title="Download" target="_blank" href="https://github.com/seriva/GenesisDevice-2007/archive/master.zip">
-            <img src="https://www.luukvanvenrooij.nl/images/download_icon.png" style="max-width:75px" />
+            <img src="/images/download_icon.png" style="max-width:75px" />
         </a>
     </th>
   </tr>

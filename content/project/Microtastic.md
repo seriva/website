@@ -98,7 +98,7 @@ You can create a  ```.microtastic``` file in the root of your project and add an
   <tr>
     <th style="text-align: center">
         <a title="Github" target="_blank" href="https://github.com/seriva/microtastic">
-            <img src="https://www.luukvanvenrooij.nl/images/github_icon.png"  style="max-width:75px" />
+            <img src="/images/github_icon.png"  style="max-width:75px" />
         </a>
     </th>
   </tr>

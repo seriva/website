@@ -17,7 +17,7 @@ Currently all work on this project has stopped and it will not be updated anymor
 On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls. Press the "Go fullscreen" button to make the iFrame fullscreen:)
 
 <div class="iframeWrapper">
-    <iframe id="demo" width="900" height="700" src="https://www.luukvanvenrooij.nl/demo/astrohunter" frameborder="0" allowfullscreen></iframe>
+    <iframe id="demo" width="900" height="700" src="/demo/astrohunter" frameborder="0" allowfullscreen></iframe>
 </div>
 <br>
 <center>
@@ -30,17 +30,17 @@ On desktop use the arrow keys to control the ship and space to shoot. On mobile 
   <tr>
     <th style="text-align: center">
         <a title="Github" target="_blank" href="https://github.com/seriva/Astrohunter">
-            <img src="https://www.luukvanvenrooij.nl/images/github_icon.png"  style="max-width:75px" />
+            <img src="/images/github_icon.png"  style="max-width:75px" />
         </a>
     </th>
     <th style="text-align: center">
         <a title="PlayStore" target="_blank" href="https://play.google.com/store/apps/details?id=com.astrohunter">
-            <img src="https://www.luukvanvenrooij.nl/images/playstore_icon.png" style="max-width:75px" />
+            <img src="/images/playstore_icon.png" style="max-width:75px" />
         </a>
     </th> 
     <th style="text-align: center">
         <a title="Download" target="_blank" href="https://github.com/seriva/Astrohunter/archive/master.zip">
-            <img src="https://www.luukvanvenrooij.nl/images/download_icon.png" style="max-width:75px" />
+            <img src="/images/download_icon.png" style="max-width:75px" />
         </a>
     </th>
   </tr>
