@@ -32,14 +32,13 @@ A simple FPS arena shooter with with Minecraft like destructible maps. The game 
   <tr>
     <th style="text-align: center">
         <a title="Github" target="_blank" href="https://github.com/seriva/Cubetastic">
-            <img src="https://www.luukvanvenrooij.nl/images/github_icon.png"  style="max-width:75px" />
+            <img src="/images/github_icon.png"  style="max-width:75px" />
         </a>
     </th>
     <th style="text-align: center">
         <a title="Download" target="_blank" href="https://github.com/seriva/Cubetastic/archive/master.zip">
-            <img src="https://www.luukvanvenrooij.nl/images/download_icon.png" style="max-width:75px" />
+            <img src="/images/download_icon.png" style="max-width:75px" />
         </a>
     </th>
   </tr>
 </table>
-
