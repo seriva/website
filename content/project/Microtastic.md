@@ -4,7 +4,6 @@ description: "A tiny (250 line) CLI tool to aid developing browser based applica
 tags: ["Javascript", "ES6"]
 weight: 2
 draft: false
-repo: https://github.com/seriva/microtastic
 ---
 
 ## About
