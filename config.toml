@@ -33,7 +33,7 @@ If you have any questions, suggestions or comments feel free to <a href="#" oncl
 
     # Code high
     highlight = true
-    highlightStyle = "dracula"
+    highlightStyle = "vs2015"
     highlightLanguages = ["javascript", "delphi", "bash", "json"]
 
 [[menu.main]]

@@ -4,6 +4,7 @@ description: "A tiny (250 line) CLI tool to aid developing browser based applica
 tags: ["Javascript", "ES6"]
 weight: 2
 draft: false
+repo: https://github.com/seriva/microtastic
 ---
 
 ## About
@@ -20,7 +21,7 @@ Since **Microtastic** only deals with ES6 code it works great with other JS only
 - [JSS](https://cssinjs.org/?v=v10.1.1)
 - [MaquetteJS](https://maquettejs.org/)
 
-## How to bootstrap a new application
+## Bootstrap an application
 
 1: Generate a new npm package/project:
 
@@ -42,7 +43,7 @@ npx microtastic init
 
 In the *app/src/* folder new code can be added with *main.js* as main entry point. Any other resources you need can be added as you fit in the *app/* directory.
 
-## How to add new dependencies
+## Adding dependencies
 
 1: Install the dependency like normal:
 
@@ -58,7 +59,7 @@ npm run prepare
 
 This will regenerate all dependencies and put them in the *app/src/dependencies/* folder ready for use.
 
-## How to develop
+## Development server
 
 **Microtastic** has a build in development server which can be started with:
 
@@ -68,7 +69,7 @@ npm run dev
 
 Since pure ES6 is used you can open and debug the applications in the latest versions of Chrome and Firefox or any other browser that supports the ES6 module standard.
 
-## How to build the production version of your app
+## Production build
 
 You can prepare the bundled application by running:
 
@@ -84,7 +85,7 @@ You can create a  *.microtastic* file in the root of your project and add and ch
 
 ```json
 {
-    "genServiceWorker": false, // Experimental feature that generates an offline-mode service worker. Mainly written for my Cubetatic project and will need additional code from the application side to work.
+    "genServiceWorker": false, // Generates an offline-mode service worker (Needs additional application code)
     "eslintOnBuild": true, // If Rollup need to run ESLint before bundling the code
     "minifyBuild": true, // If Rollup need to minimize the application
     "serverPort": 8181 // Port the debug server is running on.
