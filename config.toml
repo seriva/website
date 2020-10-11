@@ -4,17 +4,34 @@ title = "luukvanvenrooij.nl"
 theme = "minimal"
 
 [params]
+    aboutProfilePic= "/images/me.jpg"
+    aboutDescription= """
+Welcome to my little corner of the web! As you might have guessed my name is Luuk van Venrooij an I am and avid developer both in my both my professional and personal life.
+
+
+Professionally I have worked on many different projects ranging from game engines, mobile apps (Android, iOS) and large industrial asset management systems. Currently I'm a fulltime opensource developer on the [Epiphany Platform](https://github.com/epiphany-platform/epiphany), an industrialized automation of Kubernetes and additional services.
+
+My private projects mostly centers arround graphics and games using OpenGL/WebGL. On this website I showcase some of these and ramble about other interest using Twitter:)
+
+If you have any questions, suggestions or comments feel free to <a href="#" onclick="javascript:Email()">contact me.</a>.
+"""
+    # Twitterfeed for blog
     twitterFeed = '<a class="twitter-timeline" data-theme="dark" data-width="600" href="https://twitter.com/luukvanvenrooij?ref_src=twsrc%5Etfw">Tweets by luukvanvenrooij</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>'
-    githubUsername = "seriva"
+    
+    # Email for sending
     eMailUser = "luukvanvenrooij84"
     eMailDomain = "gmail.com"
+
+    # Colors and fonts
     accent = "#429BEE"
     showBorder = true
-    headerColor = "#1F2429"
-    headerFontColor = "white"
-    backgroundColor = "#292F33"
     font = "Raleway"
-    fontColor = "white"
+    fontColor = "#FFFFFF"
+    backgroundColor = "#292F33"
+    headerColor = "#1F2429"
+    headerFontColor = "#FFFFFF"
+
+    # Code high
     highlight = true
     highlightStyle = "dracula"
     highlightLanguages = ["javascript", "delphi", "bash", "json"]
@@ -29,7 +46,12 @@ theme = "minimal"
     name = "Projects"
     weight = 2
 
- [[menu.icon]]
+[[menu.main]]
+    url = "/about"
+    name = "About"
+    weight = 3
+
+[[menu.icon]]
     url = "#"
     name = "envelope-o"
     weight = 1   
