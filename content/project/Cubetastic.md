@@ -13,10 +13,12 @@ A simple FPS arena shooter with with Minecraft like destructible maps. The game 
 ## Media
 
 <div class="iframeWrapper">
-    <iframe width="560" height="349" src="//www.youtube.com/embed/OdeOq2Ev-Ho?rel=0&amp;hd=1" frameborder="0" allowfullscreen=""></iframe>
+    <iframe width="560" height="349" src="//www.youtube.com/embed/UInnHqqX2OQ?rel=0&amp;hd=1" frameborder="0" allowfullscreen=""></iframe>
 </div>
 
 ## Play!
+
+On desktop use the WASD to move, the mouse to look arround, right mouse button to shoot. On mobile it should present onscreen controls. Press the “Go fullscreen” button to make the iFrame fullscreen:)
 
 <div class="iframeWrapper">
     <iframe id="demo" width="900" height="700" src="https://www.luukvanvenrooij.nl/demo/cubetastic" frameborder="0" allowfullscreen></iframe>
