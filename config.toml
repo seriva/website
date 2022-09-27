@@ -15,9 +15,6 @@ My private projects mostly center arround graphics and games using OpenGL/WebGL.
 
 If you have any questions, suggestions or comments feel free to <a href="#" onclick="javascript:Email()">contact me.</a>.
 """
-    # Twitterfeed for blog
-    twitterFeed = '<a class="twitter-timeline" data-theme="dark" data-width="600" href="https://twitter.com/luukvanvenrooij?ref_src=twsrc%5Etfw">Tweets by luukvanvenrooij</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>'
-
     # Email for sending
     eMailUser = "luukvanvenrooij84"
     eMailDomain = "gmail.com"
@@ -36,30 +33,29 @@ If you have any questions, suggestions or comments feel free to <a href="#" oncl
     highlightStyle = "vs2015"
     highlightLanguages = ["javascript", "delphi", "bash", "json"]
 
+
+
 [[menu.main]]
     url = "/"
-    name = "Blog"
-    weight = 1  
+    name = "About"
+    weight = 1
 
 [[menu.main]]
     url = "/project/"
     name = "Projects"
     weight = 2
 
-[[menu.main]]
-    url = "/about"
-    name = "About"
-    weight = 3
+
 
 [[menu.icon]]
     url = "#"
     name = "envelope-o"
-    weight = 1   
+    weight = 1
 
 [[menu.icon]]
     url = "https://github.com/seriva/"
     name = "github"
-    weight = 1   
+    weight = 1
 
 [[menu.icon]]
     url = "https://www.youtube.com/user/seriva"
@@ -70,11 +66,6 @@ If you have any questions, suggestions or comments feel free to <a href="#" oncl
     url = "https://www.linkedin.com/in/luuk-van-venrooij/"
     name = "linkedin"
     weight = 3
-
-[[menu.icon]]
-    url = "https://twitter.com/luukvanvenrooij"
-    name = "twitter"
-    weight = 4
 
 [markup.goldmark.renderer]
 unsafe= true
