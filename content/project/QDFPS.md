@@ -2,7 +2,7 @@
 title: "QDFPS"
 description: "Tiny 3d shooter with minecraft like level editing."
 tags: ["Object Pascal", "Lazarus", "OpenGL", "SDL"]
-weight: 3
+weight: 4
 draft: false
 ---
 
