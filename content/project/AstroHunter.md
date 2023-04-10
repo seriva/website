@@ -2,7 +2,7 @@
 title: "AstroHunter"
 description: "A simple Asteriod game for web and Android."
 tags: ["Javascript", "Cordova"]
-weight: 6
+weight: 5
 draft: false
 ---
 
