@@ -4,7 +4,7 @@ title = "luukvanvenrooij.nl"
 theme = "minimal"
 
 [params]
-    aboutProfilePic= "/images/me.jpg"
+    aboutProfilePic= "https://avatars.githubusercontent.com/u/11056665?s=400&u=4bdf1d069962e53c5b3dd7b73e01e977854e8800&v=4"
     aboutDescription= """
 Welcome to my little corner of the web! As you might have guessed my name is Luuk van Venrooij and I`m an avid developer both in my professional and personal life.
 
