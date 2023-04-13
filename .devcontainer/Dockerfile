@@ -1,38 +1,14 @@
-# Update the NODE_VERSION arg in docker-compose.yml to pick a Node version: 18, 16, 14
-ARG NODE_VERSION=16
-FROM mcr.microsoft.com/devcontainers/javascript-node:${NODE_VERSION}
+ARG VARIANT=ubuntu-22.04
+FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
+                         
+ENV HUGO_VERSION 0.92.2
 
-# VARIANT can be either 'hugo' for the standard version or 'hugo_extended' for the extended version.
-ARG VARIANT=hugo
-# VERSION can be either 'latest' or a specific version number
-ARG VERSION=latest
+RUN : INSTALL HUGO \
+    && curl -fsSLO https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_Linux-64bit.deb \
+    && dpkg -i hugo*_Linux-64bit.deb \
+    && rm ./hugo_extended_${HUGO_VERSION}_Linux-64bit.deb
 
-# Download Hugo
-RUN apt-get update && apt-get install -y ca-certificates openssl git curl && \
-    rm -rf /var/lib/apt/lists/* && \
-    case ${VERSION} in \
-    latest) \
-    export VERSION=$(curl -s https://api.github.com/repos/gohugoio/hugo/releases/latest | grep "tag_name" | awk '{print substr($2, 3, length($2)-4)}') ;;\
-    esac && \
-    echo ${VERSION} && \
-    case $(uname -m) in \
-    aarch64) \
-    export ARCH=ARM64 ;; \
-    *) \
-    export ARCH=64bit ;; \
-    esac && \
-    echo ${ARCH} && \
-    wget -O ${VERSION}.tar.gz https://github.com/gohugoio/hugo/releases/download/v${VERSION}/${VARIANT}_${VERSION}_Linux-${ARCH}.tar.gz && \
-    tar xf ${VERSION}.tar.gz && \
-    mv hugo /usr/bin/hugo
-
-# Hugo dev server port
-EXPOSE 1313
-
-# [Optional] Uncomment this section to install additional OS packages you may want.
-#
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
-
-# [Optional] Uncomment if you want to install more global node packages
-# RUN sudo -u node npm install -g <your-package-list-here>
+RUN : CLEANUP \
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* 
