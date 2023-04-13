@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Serve Drafts",
+            "label": "Dev Server",
             "type": "shell",
             "command": "hugo server -D",
             "group": {
@@ -12,16 +12,6 @@
                 "isDefault": true
             },
             "isBackground": true,
-            "problemMatcher": []
-        },
-        {
-            "label": "Build",
-            "type": "shell",
-            "command": "hugo",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
             "problemMatcher": []
         }
     ]
