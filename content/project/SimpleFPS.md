@@ -1,5 +1,5 @@
 ---
-title: "Cubetastic"
+title: "SimpleFPS"
 description: "Simple FPS with random map generation."
 tags: ["Javascript", "PWA", "ED6"]
 weight: 1
