@@ -1,7 +1,7 @@
 ---
 title: "SimpleFPS"
 description: "Simple FPS with random map generation."
-tags: ["Javascript", "PWA", "ED6"]
+tags: ["Javascript", "PWA", "ES6"]
 weight: 1
 draft: false
 ---
