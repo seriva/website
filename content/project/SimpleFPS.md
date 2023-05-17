@@ -6,27 +6,14 @@ weight: 1
 draft: false
 ---
 
-## About
-
-Simple FPS with random map generation build using web-technologies with a PWA distribution target for Desktop and Android Mobile phones.
+{{< github_readme "SimpleFPS">}}
 
 ## Media
-
-<div class="iframeWrapper">
-    <iframe width="560" height="349" src="//www.youtube.com/embed/UInnHqqX2OQ?rel=0&amp;hd=1" frameborder="0" allowfullscreen=""></iframe>
-</div>
+{{< youtube_video "UInnHqqX2OQ">}}
 
 ## Play!
-
-On desktop use the WASD to move, the mouse to look arround, right mouse button to shoot. On mobile it should present onscreen controls. Press the “Go fullscreen” button to make the iFrame fullscreen:)
-
-<div class="iframeWrapper">
-    <iframe id="demo" width="900" height="700" src="https://www.luukvanvenrooij.nl/demo/simplefps" frameborder="0" allowfullscreen></iframe>
-</div>
-<br>
-<center>
-<button id="fullscreen" onclick="javascript:fullscreen()">Go Fullscreen</button>
-</center>
+On desktop use the WASD to move, the mouse to look arround, right mouse button to shoot. On mobile it should present onscreen controls.
+{{< demo_embedded "https://www.luukvanvenrooij.nl/demo/simplefps">}}
 
 ## Links
 <br>
