@@ -1,0 +1,11 @@
+{{ if .IsNamedParams }}
+<br>
+<table style="width:100%">
+  <tr>
+    {{ $data := index $.Site.Data.project_links $.Params.data }}
+    {{ range $data }}
+        {{ partial "project_link" . }}
+    {{ end }}
+  </tr>
+</table>
+{{- end -}}
