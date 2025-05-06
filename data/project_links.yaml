@@ -1,21 +1,18 @@
 genesisdevice:
 - title: Github
   image: /images/github_icon.png
-  href: https://github.com/seriva/GenesisDevice
+  href: https://github.com/seriva/genesisdevice
 - title: Download
   image: /images/download_icon.png
-  href: https://github.com/seriva/GenesisDevice/archive/master.zip
+  href: https://github.com/seriva/genesisdevicegenesisdevice/archive/master.zip
 
 astrohunter:
 - title: Github
   image: /images/github_icon.png
-  href: https://github.com/seriva/Astrohunter
-- title: PlayStore
-  image: /images/playstore_icon.png
-  href: https://play.google.com/store/apps/details?id=com.astrohunter
+  href: https://github.com/seriva/astrohunter
 - title: Download
   image: /images/download_icon.png
-  href: https://github.com/seriva/Astrohunter/archive/master.zip
+  href: https://github.com/seriva/astrohunter/archive/master.zip
 
 microtastic:
 - title: Github
@@ -28,15 +25,15 @@ microtastic:
 qdfps:
 - title: Github
   image: /images/github_icon.png
-  href: https://github.com/seriva/QDFPS
+  href: https://github.com/seriva/qdfps
 - title: Download
   image: /images/download_icon.png
-  href: https://github.com/seriva/QDFPS/archive/master.zip
+  href: https://github.com/seriva/qdfps/archive/master.zip
 
 simplefps:
 - title: Github
   image: /images/github_icon.png
-  href: https://github.com/seriva/SimpleFPS
+  href: https://github.com/seriva/simplefps
 - title: Download
   image: /images/download_icon.png
-  href: https://github.com/seriva/SimpleFPS/archive/master.zip
+  href: https://github.com/seriva/simplefps/archive/master.zip
