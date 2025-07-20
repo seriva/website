@@ -4,7 +4,7 @@ genesisdevice:
   href: https://github.com/seriva/genesisdevice
 - title: Download
   image: /images/download_icon.png
-  href: https://github.com/seriva/genesisdevicegenesisdevice/archive/master.zip
+  href: https://github.com/seriva/genesisdevice/archive/master.zip
 
 astrohunter:
 - title: Github
@@ -37,3 +37,11 @@ simplefps:
 - title: Download
   image: /images/download_icon.png
   href: https://github.com/seriva/simplefps/archive/master.zip
+
+snake-ai:
+- title: Github
+  image: /images/github_icon.png
+  href: https://github.com/seriva/snake-ai
+- title: Download
+  image: /images/download_icon.png
+  href: https://github.com/seriva/snake-ai/archive/master.zip
