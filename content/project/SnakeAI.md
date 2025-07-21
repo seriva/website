@@ -6,7 +6,7 @@ weight: 1
 draft: false
 ---
 
-{{< github_readme "snake-ai">}}
+{{< github_readme "snakeai">}}
 
 ## Links
-{{< project_links data="snake-ai">}}
+{{< project_links data="snakeai">}}
