@@ -2,7 +2,7 @@
 title: "SnakeAI"
 description: "A Snake game AI using Deep Q-Network (DQN) and Dueling DQN algorithms, built with PyTorch."
 tags: ["Python", "PyTorch", "AI"]
-weight: 0
+weight: 1
 draft: false
 ---
 
