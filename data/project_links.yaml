@@ -38,10 +38,10 @@ simplefps:
   image: /images/download_icon.png
   href: https://github.com/seriva/simplefps/archive/master.zip
 
-snake-ai:
+snakeai:
 - title: Github
   image: /images/github_icon.png
-  href: https://github.com/seriva/snake-ai
+  href: https://github.com/seriva/snakeai
 - title: Download
   image: /images/download_icon.png
-  href: https://github.com/seriva/snake-ai/archive/master.zip
+  href: https://github.com/seriva/snakeai/archive/master.zip
