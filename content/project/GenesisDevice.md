@@ -2,7 +2,7 @@
 title: "Genesis Device"
 description: "Early attempt to write a game engine inspired by Elder Scrolls: Oblivion and Skyrim."
 tags: ["Object Pascal", "Lazarus", "OpenGL", "SDL", "Newton", "OpenAL"]
-weight: 3
+weight: 4
 draft: false
 ---
 
