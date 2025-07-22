@@ -1,6 +1,6 @@
 ---
 title: "SimpleFPS"
-description: "Simple FPS with random map generation."
+description: "Simple first person arena shooter game."
 tags: ["Javascript", "PWA", "ES6"]
 weight: 2
 draft: false
