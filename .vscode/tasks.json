@@ -6,7 +6,7 @@
         {
             "label": "Dev Server",
             "type": "shell",
-            "command": "hugo server -D",
+            "command": "cd www && python3 -m http.server 8081",
             "group": {
                 "kind": "test",
                 "isDefault": true

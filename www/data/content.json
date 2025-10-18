@@ -1,0 +1,174 @@
+{
+  "site": {
+    "title": "luukvanvenrooij.nl",
+    "description": "Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!",
+    "author": "Luuk van Venrooij",
+    "image": "https://avatars.githubusercontent.com/u/11056665?s=400&u=4bdf1d069962e53c5b3dd7b73e01e977854e8800&v=4",
+    "email": {
+      "name": "luuk",
+      "domain": "vanvenrooij.nl"
+    },
+    "social": [
+      {
+        "icon": "fa-envelope-o",
+        "href": "#",
+        "onclick": "javascript:Email()",
+        "aria-label": "Contact Luuk via email"
+      },
+      {
+        "icon": "fa-github",
+        "href": "https://github.com/seriva/",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "icon": "fa-youtube",
+        "href": "https://www.youtube.com/user/seriva",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "icon": "fa-linkedin",
+        "href": "https://www.linkedin.com/in/luuk-van-venrooij/",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ]
+  },
+  "pages": {
+    "about": {
+      "title": "About",
+      "layout": "about",
+      "content": "<img class=\"about-pic\" src=\"\" alt=\"Luuk van Venrooij profile picture\" loading=\"eager\" id=\"about-image\"><div class=\"about-content\"><p>Welcome to my little corner of the web! As you might have guessed my name is Luuk van Venrooij and I'm an avid developer both in my professional and personal life.</p><p>Professionally I have worked on many different projects ranging from game engines, mobile apps (Android, iOS) and large industrial asset management systems. Currently I'm a fulltime opensource developer on the <a href=\"https://github.com/hitachienergy/epiphany\" rel=\"noopener noreferrer\">Epiphany Platform</a>, an industrialized automation of Kubernetes and additional services.</p><p>My private projects mostly center around graphics and games using OpenGL/WebGL. On this website I showcase some of these projects. I also have a general love for hardware and technology and at some point I might branch out into this as well :)</p><p>If you have any questions, suggestions or comments feel free to <a href=\"#\" onclick=\"javascript:Email()\" aria-label=\"Contact Luuk via email\">contact me</a>.</p></div>",
+      "showInNav": true,
+      "order": 1
+    }
+  },
+  "projects": [
+    {
+      "id": "simplefps",
+      "title": "SimpleFPS",
+      "description": "Simple first person arena shooter game.",
+      "tags": ["Javascript", "PWA", "ES6"],
+      "weight": 2,
+      "github_repo": "simplefps",
+      "demo_url": "https://www.luukvanvenrooij.nl/demo/simplefps",
+      "youtube_videos": ["UInnHqqX2OQ"],
+      "links": [
+        {
+          "title": "Github",
+          "image": "/images/github_icon.png",
+          "href": "https://github.com/seriva/simplefps"
+        },
+        {
+          "title": "Download",
+          "image": "/images/download_icon.png",
+          "href": "https://github.com/seriva/simplefps/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "qdfps",
+      "title": "QDFPS",
+      "description": "Quick and Dirty FPS game.",
+      "tags": ["Javascript", "WebGL"],
+      "weight": 4,
+      "github_repo": "qdfps",
+      "youtube_videos": ["4dWciTdnTTQ"],
+      "links": [
+        {
+          "title": "Github",
+          "image": "/images/github_icon.png",
+          "href": "https://github.com/seriva/qdfps"
+        },
+        {
+          "title": "Download",
+          "image": "/images/download_icon.png",
+          "href": "https://github.com/seriva/qdfps/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "genesisdevice",
+      "title": "Genesis Device",
+      "description": "Early attempt to write a game engine inspired by Elder Scrolls: Oblivion and Skyrim.",
+      "tags": ["Object Pascal", "Lazarus", "OpenGL", "SDL", "Newton", "OpenAL"],
+      "weight": 5,
+      "github_repo": "genesisdevice",
+      "youtube_videos": ["3lrvRvn8EEE", "GlelXcj9M0o"],
+      "links": [
+        {
+          "title": "Github",
+          "image": "/images/github_icon.png",
+          "href": "https://github.com/seriva/genesisdevice"
+        },
+        {
+          "title": "Download",
+          "image": "/images/download_icon.png",
+          "href": "https://github.com/seriva/genesisdevice/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "microtastic",
+      "title": "Microtastic",
+      "description": "Microservice framework for Node.js.",
+      "tags": ["Node.js", "Microservices"],
+      "weight": 3,
+      "github_repo": "microtastic",
+      "links": [
+        {
+          "title": "Github",
+          "image": "/images/github_icon.png",
+          "href": "https://github.com/seriva/microtastic"
+        },
+        {
+          "title": "NPM",
+          "image": "/images/npm_icon.png",
+          "href": "https://www.npmjs.com/package/microtastic"
+        }
+      ]
+    },
+    {
+      "id": "snakeai",
+      "title": "SnakeAI",
+      "description": "AI-powered Snake game with machine learning.",
+      "tags": ["Javascript", "AI", "Machine Learning"],
+      "weight": 1,
+      "github_repo": "snakeai",
+      "links": [
+        {
+          "title": "Github",
+          "image": "/images/github_icon.png",
+          "href": "https://github.com/seriva/snakeai"
+        },
+        {
+          "title": "Download",
+          "image": "/images/download_icon.png",
+          "href": "https://github.com/seriva/snakeai/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "astrohunter",
+      "title": "AstroHunter",
+      "description": "A simple Asteroid game for web and Android.",
+      "tags": ["Javascript", "Cordova"],
+      "weight": 6,
+      "github_repo": "astrohunter",
+      "demo_url": "https://www.luukvanvenrooij.nl/demo/astrohunter",
+      "links": [
+        {
+          "title": "Github",
+          "image": "/images/github_icon.png",
+          "href": "https://github.com/seriva/astrohunter"
+        },
+        {
+          "title": "Download",
+          "image": "/images/download_icon.png",
+          "href": "https://github.com/seriva/astrohunter/archive/master.zip"
+        }
+      ]
+    }
+  ]
+}
