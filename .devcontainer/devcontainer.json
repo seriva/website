@@ -1,7 +1,0 @@
-{
-    "name": "Hugo",
-    "dockerFile": "Dockerfile",
-    "forwardPorts": [
-        1313
-    ]
-}
