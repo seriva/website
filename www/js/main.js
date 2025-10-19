@@ -5,12 +5,13 @@ export const Email = async () => {
         const emailData = data?.site?.email;
         if (emailData) {
             window.location.href = `mailto:${emailData.name}@${emailData.domain}`;
+            console.log(`mailto:${emailData.name}@${emailData.domain}`);
         } else {
-            window.location.href = 'mailto:luuk@vanvenrooij.nl';
+            window.location.href = 'mailto:contact@example.com';
         }
     } catch (error) {
         console.error('Error loading email data:', error);
-        window.location.href = 'mailto:luuk@vanvenrooij.nl';
+        window.location.href = 'mailto:contact@example.com';
     }
 };
 
@@ -149,7 +150,7 @@ let dataLoadPromise = null;
 
 
 // Navbar component - now dynamic
-const createNavbar = (pages = [], socialLinks = [], siteTitle = 'luukvanvenrooij.nl') => {
+const createNavbar = (pages = [], socialLinks = [], siteTitle = 'portfolio.example.com') => {
     const pageLinks = pages
         .filter(page => page.showInNav)
         .sort((a, b) => a.order - b.order)
@@ -213,7 +214,7 @@ const injectNavbar = async () => {
         })) : [];
         
         const socialLinks = data?.site?.social || [];
-        const siteTitle = data?.site?.title || 'luukvanvenrooij.nl';
+        const siteTitle = data?.site?.title || 'portfolio.example.com';
         
         navbarContainer.innerHTML = createNavbar(pages, socialLinks, siteTitle);
         
@@ -400,7 +401,7 @@ export const loadPage = async (pageId) => {
             const page = data.pages[pageId];
             
             // Update page title
-            const siteTitle = data?.site?.title || 'luukvanvenrooij.nl';
+            const siteTitle = data?.site?.title || 'portfolio.example.com';
             document.title = siteTitle;
             
             // Use content directly from JSON (already includes layout)
@@ -417,7 +418,7 @@ export const loadPage = async (pageId) => {
             }
         } else {
             // Page not found
-            const siteTitle = data?.site?.title || 'luukvanvenrooij.nl';
+            const siteTitle = data?.site?.title || 'portfolio.example.com';
             document.title = siteTitle;
             html = `
                 <div class="error-message">
@@ -554,7 +555,7 @@ const handleRoute = async () => {
         if (main) {
             main.innerHTML = '<div class="error-message"><h1>Error loading page</h1><p>Please try refreshing the page.</p></div>';
         }
-        const siteTitle = data?.site?.title || 'luukvanvenrooij.nl';
+        const siteTitle = data?.site?.title || 'portfolio.example.com';
         document.title = siteTitle;
     }
 };
