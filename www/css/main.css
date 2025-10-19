@@ -173,7 +173,7 @@ a:hover {
 
 @media (max-width: 767px) {
     .navbar-brand {
-        color: #ffffff !important;
+        color: var(--text) !important;
     }
 }
 
@@ -248,7 +248,7 @@ a:hover {
 }
 
 .navbar-default .navbar-nav .open .dropdown-menu .divider {
-    background-color: #3a4a5a;
+    background-color: var(--hover);
     height: 1px;
     margin: 5px 0;
 }
@@ -402,6 +402,16 @@ a:hover {
 .navbar.navbar-default {
     border-bottom: var(--border-width) solid var(--accent);
     background-color: var(--header-color);
+    min-height: 50px;
+}
+
+.navbar-default .navbar-nav > li > a {
+    color: var(--header-font-color) !important;
+    padding: 18px 20px 15px 20px;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    height: 50px;
 }
 
 
@@ -535,7 +545,7 @@ img {
 }
 
 .page-body a:hover {
-    color: #ffffff;
+    color: var(--text);
     text-decoration: underline;
 }
 
@@ -559,10 +569,10 @@ img {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background-color: #2a3a4a;
-    border: 2px solid #3a4a5a;
+    background-color: #2a2a2a;
+    border: 2px solid var(--accent);
     border-radius: 8px;
-    color: #ffffff !important;
+    color: var(--text) !important;
     text-decoration: none !important;
     font-weight: 600;
     font-size: 1em;
@@ -577,7 +587,7 @@ img {
 }
 
 .download-btn:hover {
-    background-color: #3a4a5a !important;
+    background-color: var(--hover) !important;
     border-color: var(--accent) !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
@@ -586,7 +596,7 @@ img {
 }
 
 .download-btn:focus {
-    background-color: #3a4a5a;
+    background-color: var(--hover);
     border-color: var(--accent);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
@@ -600,7 +610,7 @@ img {
     border-color: #3a4a5a;
     transform: none;
     box-shadow: none;
-    color: #ffffff;
+    color: var(--text);
     outline: none;
 }
 
@@ -620,7 +630,7 @@ img {
 }
 
 .download-btn span {
-    color: #ffffff !important;
+    color: var(--text) !important;
     font-family: 'Raleway', sans-serif;
     text-decoration: none !important;
     transition: color 0.3s ease;
@@ -634,10 +644,10 @@ img {
 .download-btn:link,
 .download-btn:visited,
 .download-btn:active {
-    color: #ffffff !important;
+    color: var(--text) !important;
     text-decoration: none !important;
-    background-color: #2a3a4a;
-    border: 2px solid #3a4a5a;
+    background-color: #2a2a2a;
+    border: 2px solid var(--accent);
 }
 
 /* Responsive adjustments */
@@ -716,8 +726,8 @@ zero-md {
 
 /* Code styling fallbacks for non-highlighted code */
 .markdown-body code:not([class*="language-"]) {
-    background-color: #3a4a5a;
-    color: #333;
+    background-color: var(--hover);
+    color: var(--text);
     padding: 2px 6px;
     border-radius: 3px;
     font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
@@ -840,10 +850,10 @@ pre code {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background-color: #2a3a4a;
-    border: 2px solid #3a4a5a;
+    background-color: #2a2a2a;
+    border: 2px solid var(--accent);
     border-radius: 8px;
-    color: #ffffff;
+    color: var(--text);
     text-decoration: none;
     font-weight: 600;
     font-size: 1em;
@@ -858,7 +868,7 @@ pre code {
 }
 
 #fullscreen:hover {
-    background-color: #3a4a5a;
+    background-color: var(--hover);
     border-color: var(--accent);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
@@ -867,7 +877,7 @@ pre code {
 }
 
 #fullscreen:focus {
-    background-color: #3a4a5a;
+    background-color: var(--hover);
     border-color: var(--accent);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
@@ -881,6 +891,6 @@ pre code {
     border-color: #3a4a5a;
     transform: none;
     box-shadow: none;
-    color: #ffffff;
+    color: var(--text);
     outline: none;
 }
