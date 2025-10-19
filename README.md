@@ -20,6 +20,15 @@ This migration represents a shift from static site generation to a more dynamic,
 - **GitHub Integration**: Automatic README loading from GitHub repos
 - **Project Showcase**: Videos, demos, and download links
 
+## Tech Stack
+
+- **Frontend**: Pure HTML, CSS, JavaScript
+- **Framework**: Bootstrap 3
+- **Markdown**: Zero-md with Prism.js
+- **Routing**: Client-side SPA routing
+- **Theming**: Dynamic CSS custom properties
+- **Development**: Python HTTP server
+
 ## Quick Start
 
 ### Development
