@@ -9,14 +9,14 @@
       "domain": "gmail.com"
     },
     "colors": {
-      "primary": "#429BEE",
-      "secondary": "#1F2429",
-      "accent": "#429BEE",
-      "background": "#292F33",
-      "text": "#FFFFFF",
-      "textLight": "#CCCCCC",
-      "border": "#3A4A5A",
-      "hover": "#2A3A4A",
+      "primary": "#F59E0B",
+      "secondary": "#1C1917",
+      "accent": "#F59E0B",
+      "background": "#0C0A09",
+      "text": "#FAFAF9",
+      "textLight": "#D6D3D1",
+      "border": "#44403C",
+      "hover": "#451A03",
       "code": {
         "theme": "okaidia"
       }
