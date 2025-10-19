@@ -1,6 +1,15 @@
-# Portfolio Website
+## About
 
-Modern SPA portfolio with dynamic theming, syntax highlighting, and content management.
+This website was originally built using **Hugo** with the **seriva/minimal** GitHub theme, providing a clean and minimal portfolio experience. However, to achieve even greater simplicity and control, we migrated to this custom **minimalist SPA (Single Page Application)** website.
+
+The new implementation offers:
+- **Simplified Architecture**: Pure HTML, CSS, and JavaScript - no build process required
+- **Dynamic Theming**: Real-time color scheme changes without page reloads
+- **Enhanced Performance**: Faster loading with optimized asset delivery
+- **Full Control**: Complete customization of every aspect of the design and functionality
+- **Modern Features**: Syntax highlighting, responsive design, and smooth navigation
+
+This migration represents a shift from static site generation to a more dynamic, maintainable solution that better serves the portfolio's needs.
 
 ## Features
 
@@ -28,16 +37,31 @@ cd www && python3 -m http.server 8081
 
 Access at `http://localhost:8081`
 
-## Content Management
+## Configuration
+
+### Content Management
 
 Edit `data/content.json` to update:
 
-### Site Configuration
+#### Site Configuration
 - **Basic Info**: title, description, author, image
 - **Email**: Contact email configuration
 - **Social Links**: GitHub, YouTube, LinkedIn, etc.
 
-### Dynamic Theming
+#### Projects
+- **Basic Info**: title, description, tags, weight
+- **GitHub Integration**: Automatic README loading
+- **Media**: YouTube videos, demo URLs
+- **Downloads**: Custom download links with icons
+
+#### Pages
+- **Static Content**: About, contact, custom pages
+- **Navigation**: Show/hide in navbar, ordering
+
+#### Color Schemes & Theming
+
+The website supports dynamic color schemes and theming. Change the `colors` section in `content.json` to create your own theme:
+
 ```json
 "colors": {
   "primary": "#F59E0B",
@@ -54,22 +78,8 @@ Edit `data/content.json` to update:
 }
 ```
 
-### Projects
-- **Basic Info**: title, description, tags, weight
-- **GitHub Integration**: Automatic README loading
-- **Media**: YouTube videos, demo URLs
-- **Downloads**: Custom download links with icons
-
-### Pages
-- **Static Content**: About, contact, custom pages
-- **Navigation**: Show/hide in navbar, ordering
-
-## Color Schemes
-
-The website supports dynamic color schemes. Change the `colors` section in `content.json` to create your own theme:
-
-### Color Configuration
-Define your own color scheme by modifying the `colors` object in `content.json`. Each color variable controls different parts of the website:
+#### Color Configuration
+Each color variable controls different parts of the website:
 
 - **primary/accent**: Main accent color (links, highlights, borders)
 - **secondary**: Secondary background color (dropdowns, buttons)
@@ -80,14 +90,14 @@ Define your own color scheme by modifying the `colors` object in `content.json`.
 - **hover**: Hover state colors
 - **code.theme**: Prism.js syntax highlighting theme
 
-### Code Block Themes
+#### Code Block Themes
 Supported Prism.js themes:
 - `okaidia` (default) - Dark theme with colorful syntax
 - `tomorrow` - Clean dark theme
 - `vs-dark` - Visual Studio dark theme
 - `dark` - Simple dark theme
 
-## URLs
+#### URLs
 
 - `/` - About page
 - `/?id=project-id` - Project pages  
@@ -96,11 +106,10 @@ Supported Prism.js themes:
 ## Technical Details
 
 ### Architecture
-- **SPA**: Single-page application with client-side routing
-- **Zero-md**: Markdown rendering with syntax highlighting
-- **Prism.js**: Code syntax highlighting
 - **Bootstrap 3**: Responsive framework
 - **Dynamic CSS**: Color schemes applied via CSS custom properties
+- **Client-side Routing**: URL-based navigation without page reloads
+- **Shadow DOM**: Zero-md component isolation
 
 ### File Structure
 ```
