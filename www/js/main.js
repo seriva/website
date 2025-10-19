@@ -27,6 +27,55 @@ export const Email = async (event) => {
 // Make Email function globally available for onclick handlers
 window.Email = Email;
 
+// Function to re-apply Prism theme when content changes
+const reapplyPrismTheme = () => {
+    if (projectsData?.site?.colors?.code?.theme) {
+        applyPrismTheme(projectsData.site.colors.code.theme);
+    }
+};
+
+// Make reapplyPrismTheme globally available
+window.reapplyPrismTheme = reapplyPrismTheme;
+
+// Function to apply Prism theme to zero-md elements using css-urls attribute
+const applyThemeToZeroMd = (themeName) => {
+    const zeroMdElements = document.querySelectorAll('zero-md');
+    
+    zeroMdElements.forEach((element) => {
+        // Set the css-urls attribute to use the specified Prism theme
+        const themeUrl = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-${themeName}.min.css`;
+        element.setAttribute('css-urls', JSON.stringify([themeUrl]));
+        
+        // Also update the template to include the theme CSS
+        const template = element.querySelector('template');
+        if (template) {
+            // Remove existing Prism theme links
+            const existingThemeLinks = template.content.querySelectorAll('link[href*="prism"]');
+            existingThemeLinks.forEach(link => link.remove());
+            
+            // Add the new theme link
+            const themeLink = document.createElement('link');
+            themeLink.rel = 'stylesheet';
+            themeLink.href = themeUrl;
+            template.content.appendChild(themeLink);
+        }
+    });
+};
+
+// Initialize zero-md elements with default theme
+const initializeZeroMd = () => {
+    if (projectsData?.site?.colors?.code?.theme) {
+        const themeName = projectsData.site.colors.code.theme;
+        applyThemeToZeroMd(themeName);
+    }
+};
+
+// Initialize zero-md when DOM is ready and data is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Wait a bit for data to load
+    setTimeout(initializeZeroMd, 100);
+});
+
 // Function to update meta tags from JSON data
 const updateMetaTags = (siteData) => {
     if (siteData) {
@@ -133,12 +182,18 @@ export const loadGitHubReadme = async (repoName, containerId) => {
             
             const container = document.getElementById(containerId);
             if (container) {
+                // Get the current theme from data
+                const currentTheme = projectsData?.site?.colors?.code?.theme || 'tomorrow';
+                const themeUrl = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-${currentTheme}.min.css`;
+                
                 container.innerHTML = `
-                    <zero-md no-shadow>
+                    <zero-md css-urls='["${themeUrl}"]'>
                         <script type="text/markdown">${content}</script>
                         <template>
-                            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-vsc-dark-plus.min.css">
                             <link rel="stylesheet" href="css/main.css">
+                            <link rel="stylesheet" href="${themeUrl}">
+                            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+                            <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
                         </template>
                     </zero-md>
                 `;
@@ -296,6 +351,11 @@ export const loadProjectsData = async () => {
         // Apply color scheme if available
         if (data?.site?.colors) {
             applyColorScheme(data.site.colors);
+            
+            // Initialize zero-md with the theme after data is loaded
+            setTimeout(() => {
+                initializeZeroMd();
+            }, 200);
         }
         
         return data;
@@ -352,24 +412,8 @@ const applyColorScheme = (colors) => {
 
 // Function to apply Prism.js theme
 const applyPrismTheme = (themeName) => {
-    // Remove existing Prism theme if any
-    const existingTheme = document.querySelector('link[href*="prism"]');
-    if (existingTheme) {
-        existingTheme.remove();
-    }
-    
-    // Load the new Prism theme
-    const themeLink = document.createElement('link');
-    themeLink.rel = 'stylesheet';
-    themeLink.href = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-${themeName}.min.css`;
-    themeLink.onload = () => {
-        // Re-highlight all code blocks after theme loads
-        if (window.Prism) {
-            window.Prism.highlightAll();
-        }
-    };
-    
-    document.head.appendChild(themeLink);
+    // Apply theme to zero-md elements using css-urls
+    applyThemeToZeroMd(themeName);
 };
 
 // Function to get a specific project by ID
@@ -507,6 +551,8 @@ export const loadPage = async (pageId) => {
         }
         
         main.innerHTML = html;
+        
+        // Let zero-md handle Prism.js rendering automatically
     }
 }
 
@@ -548,6 +594,8 @@ export const loadProjectPage = async (projectId) => {
         html += createProjectLinksSection(project.id);
         
         main.innerHTML = html;
+        
+        // Let zero-md handle Prism.js rendering automatically
     }
 }
 

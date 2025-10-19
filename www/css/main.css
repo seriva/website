@@ -715,7 +715,8 @@ zero-md {
     font-size: 1em;
 }
 
-.markdown-body code {
+/* Let Prism.js handle code styling - only basic fallbacks for non-highlighted code */
+.markdown-body code:not([class*="language-"]) {
     background-color: #3a4a5a;
     color: #333;
     padding: 2px 6px;
@@ -724,7 +725,7 @@ zero-md {
     font-size: 0.9em;
 }
 
-.markdown-body pre {
+.markdown-body pre:not([class*="language-"]) {
     background-color: #1e1e1e;
     padding: 0.5em;
     border-radius: 3px;
@@ -735,7 +736,7 @@ zero-md {
     line-height: 1.4;
 }
 
-.markdown-body pre code {
+.markdown-body pre code:not([class*="language-"]) {
     background-color: transparent;
     padding: 0;
     font-size: 0.85em;
@@ -743,12 +744,17 @@ zero-md {
     color: #d4d4d4;
 }
 
+/* Let Prism.js themes handle language-specific styling - remove conflicting overrides */
 .markdown-body pre[class*="language-"] {
-    background-color: #1e1e1e;
+    margin: 0.5em 0;
+    overflow-x: auto;
+    font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+    line-height: 1.4;
 }
 
-.markdown-body code[class*="language-"] {
-    background-color: transparent;
+/* Don't override Prism.js styles - let them handle everything */
+.markdown-body pre[class*="language-"] code {
+    font-family: inherit;
 }
 
 .markdown-body a {
@@ -878,5 +884,4 @@ pre code {
     box-shadow: none;
     color: #ffffff;
     outline: none;
-}
 }
