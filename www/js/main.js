@@ -527,15 +527,6 @@ export const loadPage = async (pageId) => {
             // Use content directly from JSON (already includes layout)
             html = page.content;
             
-            // Update about image if this is the about page
-            if (pageId === 'about' && data?.site?.image) {
-                setTimeout(() => {
-                    const aboutImage = document.getElementById('about-image');
-                    if (aboutImage) {
-                        aboutImage.src = data.site.image;
-                    }
-                }, 0);
-            }
         } else {
             // Page not found
             const siteTitle = data?.site?.title || 'portfolio.example.com';
@@ -661,16 +652,26 @@ const handleRoute = async () => {
     }
     
     try {
-    if (projectId) {
+        // Load data first
+        const data = projectsData || await loadProjectsData();
+        
+        if (projectId) {
             // Load project page
-        await loadProjectPage(projectId);
-        loadAdditionalContent();
+            await loadProjectPage(projectId);
+            loadAdditionalContent();
         } else if (pageId) {
             // Load specific page
             await loadPage(pageId);
-    } else {
-            // Default to about page for all other routes
-            await loadPage('about');
+        } else {
+            // Find and load the default page
+            const defaultPage = Object.keys(data.pages).find(pageId => data.pages[pageId].default);
+            if (defaultPage) {
+                await loadPage(defaultPage);
+            } else {
+                // Fallback to first page if no default is set
+                const firstPage = Object.keys(data.pages)[0];
+                await loadPage(firstPage);
+            }
         }
     } catch (error) {
         console.error('Error loading page:', error);
