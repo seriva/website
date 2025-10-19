@@ -230,15 +230,16 @@ a:hover {
 /* Dropdown menu styling */
 .navbar-default .navbar-nav .open .dropdown-menu {
     background-color: var(--header-color);
-    border: 1px solid var(--accent);
-    border-top: 2px solid var(--accent);
+    border: var(--border-width) solid var(--accent);
+    padding: 0;
     box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
 }
 
 .navbar-default .navbar-nav .open .dropdown-menu > li > a {
     color: var(--header-font-color);
     padding: 10px 20px;
-    font-size: 1em;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
@@ -370,8 +371,8 @@ a:hover {
 @media (min-width: 768px) {
     .navbar-nav .dropdown-menu {
         background-color: var(--header-color);
-        border: 1px solid var(--accent);
-        border-top: 2px solid var(--accent);
+        border: var(--border-width) solid var(--accent);
+        padding: 0;
         box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
         min-width: 200px;
     }
@@ -379,6 +380,8 @@ a:hover {
     .navbar-nav .dropdown-menu > li > a {
         color: var(--header-font-color);
         padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
     }
     
     .navbar-nav .dropdown-menu > li > a:hover,
@@ -403,6 +406,14 @@ a:hover {
     border-bottom: var(--border-width) solid var(--accent);
     background-color: var(--header-color);
     min-height: 50px;
+}
+
+/* Override any white borders in navbar */
+.navbar-default .navbar-header,
+.navbar-default .navbar-collapse,
+.navbar-default .navbar-nav,
+.navbar-default .navbar-brand {
+    border-color: var(--accent) !important;
 }
 
 .navbar-default .navbar-nav > li > a {
