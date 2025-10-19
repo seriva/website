@@ -51,10 +51,10 @@
   "pages": {
     "about": {
       "title": "About",
-      "layout": "about",
-      "content": "<img class=\"about-pic\" src=\"\" alt=\"Luuk van Venrooij profile picture\" loading=\"eager\" id=\"about-image\"><div class=\"about-content\"><p>Welcome to my little corner of the web! As you might have guessed my name is Luuk van Venrooij and I'm an avid developer both in my professional and personal life.</p><p>Professionally I have worked on many different projects ranging from game engines, mobile apps (Android, iOS) and large industrial asset management systems. Currently I'm a fulltime opensource developer on the <a href=\"https://github.com/hitachienergy/epiphany\" rel=\"noopener noreferrer\">Epiphany Platform</a>, an industrialized automation of Kubernetes and additional services.</p><p>My private projects mostly center around graphics and games using OpenGL/WebGL. On this website I showcase some of these projects. I also have a general love for hardware and technology and at some point I might branch out into this as well :)</p><p>If you have any questions, suggestions or comments feel free to <a href=\"#\" onclick=\"javascript:Email()\" aria-label=\"Contact Luuk via email\">contact me</a>.</p></div>",
+      "default": true,
+      "content": "<div style=\"text-align: center;\"><img class=\"about-pic\" src=\"https://avatars.githubusercontent.com/u/11056665?s=400&u=4bdf1d069962e53c5b3dd7b73e01e977854e8800&v=4\" alt=\"Luuk van Venrooij profile picture\" loading=\"eager\"><div class=\"about-content\"><p>Welcome to my little corner of the web! As you might have guessed my name is Luuk van Venrooij and I'm an avid developer both in my professional and personal life.</p><p>Professionally I have worked on many different projects ranging from game engines, mobile apps (Android, iOS) and large industrial asset management systems. Currently I'm a fulltime opensource developer on the <a href=\"https://github.com/hitachienergy/epiphany\" rel=\"noopener noreferrer\">Epiphany Platform</a>, an industrialized automation of Kubernetes and additional services.</p><p>My private projects mostly center around graphics and games using OpenGL/WebGL. On this website I showcase some of these projects. I also have a general love for hardware and technology and at some point I might branch out into this as well :)</p><p>If you have any questions, suggestions or comments feel free to <a href=\"#\" onclick=\"javascript:Email()\" aria-label=\"Contact Luuk via email\">contact me</a>.</p></div></div>",
       "showInNav": true,
-      "order": 1
+      "order": 2
     }
   },
   "projects": [
