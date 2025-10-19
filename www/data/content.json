@@ -8,11 +8,24 @@
       "name": "luukvanvenrooij84",
       "domain": "gmail.com"
     },
+    "colors": {
+      "primary": "#429BEE",
+      "secondary": "#1F2429",
+      "accent": "#429BEE",
+      "background": "#292F33",
+      "text": "#FFFFFF",
+      "textLight": "#CCCCCC",
+      "border": "#3A4A5A",
+      "hover": "#2A3A4A",
+      "code": {
+        "theme": "tomorrow"
+      }
+    },
     "social": [
       {
         "icon": "fa-envelope-o",
-        "href": "#",
-        "onclick": "javascript:Email()",
+        "href": "javascript:void(0)",
+        "onclick": "javascript:Email(event);",
         "aria-label": "Contact Luuk via email"
       },
       {

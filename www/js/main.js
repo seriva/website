@@ -1,5 +1,11 @@
 // Email function - now uses data from JSON
-export const Email = async () => {
+export const Email = async (event) => {
+    // Prevent default behavior to avoid page refresh
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
     try {
         const data = projectsData || await loadProjectsData();
         const emailData = data?.site?.email;
@@ -13,6 +19,8 @@ export const Email = async () => {
         console.error('Error loading email data:', error);
         window.location.href = 'mailto:contact@example.com';
     }
+    
+    return false;
 };
 
 
@@ -284,6 +292,12 @@ export const loadProjectsData = async () => {
         
         const data = await response.json();
         projectsData = data;
+        
+        // Apply color scheme if available
+        if (data?.site?.colors) {
+            applyColorScheme(data.site.colors);
+        }
+        
         return data;
     } catch (error) {
             console.error('Failed to load content data:', error);
@@ -292,6 +306,70 @@ export const loadProjectsData = async () => {
     })();
     
     return dataLoadPromise;
+};
+
+// Function to apply color scheme from content.json
+const applyColorScheme = (colors) => {
+    if (!colors) return;
+    
+    const root = document.documentElement;
+    
+    // Map content.json colors to CSS custom properties
+    const colorMappings = {
+        '--accent': colors.primary,
+        '--font-color': colors.text,
+        '--background-color': colors.background,
+        '--header-color': colors.secondary,
+        '--header-font-color': colors.text,
+        '--text-color': colors.text,
+        '--text-light': colors.textLight,
+        '--border-color': colors.border,
+        '--hover-color': colors.hover,
+        '--accent-color': colors.accent
+    };
+    
+    // Apply Prism.js theme if available
+    if (colors.code && colors.code.theme) {
+        applyPrismTheme(colors.code.theme);
+    }
+    
+    // Apply colors to CSS custom properties
+    Object.entries(colorMappings).forEach(([property, value]) => {
+        if (value) {
+            root.style.setProperty(property, value);
+        }
+    });
+    
+    // Update meta theme-color
+    if (colors.primary) {
+        const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        const msTileColorMeta = document.querySelector('meta[name="msapplication-TileColor"]');
+        
+        if (themeColorMeta) themeColorMeta.setAttribute('content', colors.primary);
+        if (msTileColorMeta) msTileColorMeta.setAttribute('content', colors.primary);
+    }
+};
+
+// Function to apply Prism.js theme
+const applyPrismTheme = (themeName) => {
+    // Remove existing Prism theme if any
+    const existingTheme = document.querySelector('link[href*="prism"]');
+    if (existingTheme) {
+        existingTheme.remove();
+    }
+    
+    // Load the new Prism theme
+    const themeLink = document.createElement('link');
+    themeLink.rel = 'stylesheet';
+    themeLink.href = `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-${themeName}.min.css`;
+    themeLink.onload = () => {
+        // Re-highlight all code blocks after theme loads
+        if (window.Prism) {
+            window.Prism.highlightAll();
+        }
+    };
+    
+    document.head.appendChild(themeLink);
 };
 
 // Function to get a specific project by ID

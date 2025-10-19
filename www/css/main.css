@@ -802,6 +802,33 @@ zero-md {
     margin: 20px 0;
 }
 
+/* Basic code styling - Prism.js themes will handle syntax highlighting */
+pre, code {
+    padding: 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-x: auto;
+}
+
+pre {
+    margin: 16px 0;
+    white-space: pre-wrap;
+}
+
+code {
+    padding: 2px 6px;
+    font-size: 0.9em;
+}
+
+/* Syntax highlighting for code blocks */
+pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
 /* Fullscreen button styling */
 #fullscreen {
     display: inline-flex;
