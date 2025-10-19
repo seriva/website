@@ -1,4 +1,4 @@
-/* CSS Variables from config.toml */
+/* CSS Variables */
 :root {
     --accent: #429BEE;
     --font-color: #FFFFFF;
@@ -7,14 +7,12 @@
     --header-font-color: #FFFFFF;
     --border-width: 2px;
     
-    /* Performance optimizations */
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
     
     /* Text color variable for consistency */
     --text-color: var(--font-color);
     
-    /* Production optimizations */
     --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
     --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
     --shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -30,6 +28,7 @@ body {
     text-align: center;
     flex-direction: column;
     font-family: 'Raleway', sans-serif;
+    font-size: 16px;
     background-color: var(--background-color);
     color: var(--font-color);
     line-height: 1.6;
@@ -268,7 +267,7 @@ a:hover {
     color: var(--accent) !important;
 }
 
-/* Focus effects (only for keyboard navigation) */
+/* Focus effects */
 .navbar-default .navbar-nav > li > a:focus {
     background-color: #151a1e !important;
     color: var(--accent) !important;
@@ -715,7 +714,7 @@ zero-md {
     font-size: 1em;
 }
 
-/* Let Prism.js handle code styling - only basic fallbacks for non-highlighted code */
+/* Code styling fallbacks for non-highlighted code */
 .markdown-body code:not([class*="language-"]) {
     background-color: #3a4a5a;
     color: #333;
@@ -744,7 +743,7 @@ zero-md {
     color: #d4d4d4;
 }
 
-/* Let Prism.js themes handle language-specific styling - remove conflicting overrides */
+/* Language-specific code styling */
 .markdown-body pre[class*="language-"] {
     margin: 0.5em 0;
     overflow-x: auto;
@@ -752,7 +751,7 @@ zero-md {
     line-height: 1.4;
 }
 
-/* Don't override Prism.js styles - let them handle everything */
+/* Prism.js code styling */
 .markdown-body pre[class*="language-"] code {
     font-family: inherit;
 }

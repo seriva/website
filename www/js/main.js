@@ -11,7 +11,6 @@ export const Email = async (event) => {
         const emailData = data?.site?.email;
         if (emailData) {
             window.location.href = `mailto:${emailData.name}@${emailData.domain}`;
-            console.log(`mailto:${emailData.name}@${emailData.domain}`);
         } else {
             window.location.href = 'mailto:contact@example.com';
         }
@@ -72,7 +71,6 @@ const initializeZeroMd = () => {
 
 // Initialize zero-md when DOM is ready and data is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Wait a bit for data to load
     setTimeout(initializeZeroMd, 100);
 });
 
@@ -552,7 +550,6 @@ export const loadPage = async (pageId) => {
         
         main.innerHTML = html;
         
-        // Let zero-md handle Prism.js rendering automatically
     }
 }
 
@@ -595,7 +592,6 @@ export const loadProjectPage = async (projectId) => {
         
         main.innerHTML = html;
         
-        // Let zero-md handle Prism.js rendering automatically
     }
 }
 
