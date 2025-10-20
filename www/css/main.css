@@ -186,7 +186,7 @@ a.icon:hover {
 
 .navbar-nav .dropdown-menu .dropdown-item {
     color: var(--header-font-color);
-    padding: 15px 20px;
+    padding: 10px 20px;
     font-size: 16px;
     font-weight: bold;
     background-color: var(--header-color);
@@ -334,7 +334,7 @@ a.icon:hover {
 .navbar .container-fluid {
     padding-left: 15px;
     padding-right: 15px;
-    max-width: 1400px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
