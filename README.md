@@ -2,29 +2,17 @@
 
 This website was originally built using **[Hugo](https://gohugo.io/)** with the **[seriva/minimal](https://github.com/seriva/minimal-hugo-theme)** GitHub theme, providing a clean and minimal portfolio experience. However, to achieve even greater simplicity and control, we migrated to this custom **minimalist SPA (Single Page Application)** website.
 
-The current implementation offers:
-- **Simplified Architecture**: Pure HTML, CSS, and JavaScript - no build process required
-- **YAML Configuration**: Human-friendly content management with native multiline support
-- **Dynamic Theming**: Real-time color scheme changes without page reloads
-- **Modern Icons**: Font Awesome 6.6.0 with 2,000+ free icons
-- **Performance Optimized**: Consolidated CDN dependencies and efficient caching
-- **GitHub API Optimization**: Rate-limit-free README loading via raw URLs
-- **Full Control**: Complete customization of every aspect of the design and functionality
+This is a modern **minimalist SPA portfolio website** with:
 
-This migration represents a shift from static site generation to a highly optimized, dynamic, and maintainable solution that better serves modern portfolio needs.
+- **YAML Configuration**: Human-readable content files with multiline HTML support  
+- **Dynamic Theming**: Real-time color scheme changes via CSS variables
+- **Modern Stack**: Font Awesome 6.6.0, Bootstrap 5, consolidated jsDelivr CDN
+- **GitHub Integration**: Rate-limit-free README loading with caching
+- **Performance Focus**: Optimized CSS/JS, DOM caching, background preloading
+- **Responsive Design**: Mobile-first with accessibility enhancements
+- **Zero Build Process**: Pure HTML, CSS, and JavaScript
 
-## Features
-
-- **YAML Configuration**: Human-readable content files with multiline HTML support
-- **Dynamic Theming**: Change color schemes via YAML/JSON configuration
-- **Modern Icons**: Font Awesome 6.6.0 with extensive icon library
-- **Optimized Performance**: Consolidated CDN dependencies and efficient caching
-- **GitHub Integration**: Rate-limit-free README loading from repositories
-- **Syntax Highlighting**: Zero-md with Prism.js code blocks and multiple themes
-- **Responsive Design**: Mobile-friendly navigation and layout
-- **SPA Routing**: Single-page application with smooth navigation
-- **Project Showcase**: YouTube videos, live demos, and download links
-- **Accessibility**: Enhanced keyboard navigation and screen reader support
+A shift from static site generation to a dynamic, maintainable solution perfect for showcasing projects and technical skills.
 
 ## Tech Stack
 
@@ -150,31 +138,21 @@ Supported Prism.js themes:
 
 ## Technical Details
 
-### Architecture
-- **Bootstrap 5**: Modern responsive framework with improved accessibility
-- **Dynamic CSS**: Color schemes applied via CSS custom properties
-- **Client-side Routing**: URL-based navigation without page reloads
-- **Shadow DOM**: Zero-md component isolation
-- **DOM Caching**: Optimized element queries for better performance
-- **Resource Hints**: DNS prefetch and preconnect for faster CDN loading
+### Architecture & Performance
 
-### Performance Optimizations
-- **CDN Consolidation**: All dependencies served from jsDelivr for faster loading
-- **GitHub API Optimization**: Uses raw GitHub URLs to bypass API rate limits (60/hour → unlimited)
-- **DNS Prefetching**: Pre-resolves external CDN domains
-- **Deferred Scripts**: Non-critical scripts load after main content  
-- **DOM Caching**: Reduces repeated element queries by ~70%
-- **Consolidated CSS**: ~30% smaller stylesheet with merged selectors and CSS variables
-- **JavaScript Minification**: ~50 lines of redundant code removed, optimized functions
-- **README Caching**: GitHub READMEs preloaded and cached for instant navigation
-- **Template Consolidation**: All HTML templates centralized for maintainability
-- **Rate-limited Preloading**: Respectful GitHub README preloading with 100ms delays
+**Modern Foundation**:
+- Bootstrap 5 responsive framework with accessibility improvements
+- Font Awesome 6.6.0 icon system (2,000+ free icons)
+- jsDelivr CDN consolidation with integrity checks
+- Client-side SPA routing with URL state management
 
-### Code Organization
-- **Templates Object**: All HTML templates consolidated in one location
-- **Helper Functions**: Reusable utilities (e.g., `getPrismThemeUrl()`)
-- **Caching System**: Map-based cache for GitHub README content
-- **Background Preloading**: READMEs fetched asynchronously without blocking UI
+**Optimizations**:
+- GitHub rate-limit bypass (60/hour → unlimited via raw URLs)
+- DOM caching reduces queries by ~70%
+- CSS consolidation (~30% size reduction)
+- JavaScript optimization (~50 lines removed)
+- Background README preloading with respectful rate limiting
+- DNS prefetching and deferred script loading
 
 ### File Structure
 ```
