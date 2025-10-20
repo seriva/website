@@ -305,26 +305,28 @@ const injectNavbar = async () => {
     }
 };
 
-// Optimized function to load content data from JSON (with caching)
+// Optimized function to load content data from YAML (with caching)
 export const loadProjectsData = async () => {
     if (projectsData) return projectsData;
     if (dataLoadPromise) return dataLoadPromise;
     
-    dataLoadPromise = fetch(window.location.pathname.includes('/project/') ? '../data/content.json' : 'data/content.json')
+    const yamlPath = window.location.pathname.includes('/project/') ? '../data/content.yaml' : 'data/content.yaml';
+    
+    dataLoadPromise = fetch(yamlPath)
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
+            return response.text();
         })
-        .then(data => {
-            projectsData = data;
-            if (data?.site?.colors) {
-                applyColorScheme(data.site.colors);
+        .then(yamlText => {
+            projectsData = jsyaml.load(yamlText);
+            if (projectsData?.site?.colors) {
+                applyColorScheme(projectsData.site.colors);
                 setTimeout(() => applyThemeToZeroMd(), 200);
             }
-            return data;
+            return projectsData;
         })
         .catch(error => {
-            console.error('Failed to load content data:', error);
+            console.error('Failed to load YAML content data:', error);
             return null;
         });
     
