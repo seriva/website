@@ -131,6 +131,14 @@ Supported Prism.js themes:
 - **DOM Caching**: Reduces repeated element queries by ~70%
 - **Consolidated CSS**: ~24% smaller stylesheet with merged selectors
 - **Batch Operations**: Efficient meta tag and color scheme updates
+- **README Caching**: GitHub READMEs preloaded and cached for instant navigation
+- **Template Consolidation**: All HTML templates centralized for maintainability
+
+### Code Organization
+- **Templates Object**: All HTML templates consolidated in one location
+- **Helper Functions**: Reusable utilities (e.g., `getPrismThemeUrl()`)
+- **Caching System**: Map-based cache for GitHub README content
+- **Background Preloading**: READMEs fetched asynchronously without blocking UI
 
 ### File Structure
 ```
