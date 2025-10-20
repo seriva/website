@@ -4,6 +4,7 @@
     "description": "Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!",
     "author": "Luuk van Venrooij",
     "image": "https://avatars.githubusercontent.com/u/11056665?s=400&u=4bdf1d069962e53c5b3dd7b73e01e977854e8800&v=4",
+    "github_username": "seriva",
     "email": {
       "name": "luukvanvenrooij84",
       "domain": "gmail.com"
@@ -23,25 +24,25 @@
     },
     "social": [
       {
-        "icon": "bi-envelope",
+        "icon": "fas fa-envelope",
         "href": "javascript:void(0)",
         "onclick": "javascript:Email(event);",
         "aria-label": "Contact Luuk via email"
       },
       {
-        "icon": "bi-github",
+        "icon": "fab fa-github",
         "href": "https://github.com/seriva/",
         "target": "_blank",
         "rel": "noopener noreferrer"
       },
       {
-        "icon": "bi-youtube",
+        "icon": "fab fa-youtube",
         "href": "https://www.youtube.com/user/seriva",
         "target": "_blank",
         "rel": "noopener noreferrer"
       },
       {
-        "icon": "bi-linkedin",
+        "icon": "fab fa-linkedin",
         "href": "https://www.linkedin.com/in/luuk-van-venrooij/",
         "target": "_blank",
         "rel": "noopener noreferrer"
@@ -70,12 +71,12 @@
       "links": [
         {
           "title": "Github",
-          "icon": "bi-github",
+          "icon": "fab fa-github",
           "href": "https://github.com/seriva/simplefps"
         },
         {
           "title": "Download",
-          "icon": "bi-download",
+          "icon": "fas fa-download",
           "href": "https://github.com/seriva/simplefps/archive/master.zip"
         }
       ]
@@ -91,12 +92,12 @@
       "links": [
         {
           "title": "Github",
-          "icon": "bi-github",
+          "icon": "fab fa-github",
           "href": "https://github.com/seriva/qdfps"
         },
         {
           "title": "Download",
-          "icon": "bi-download",
+          "icon": "fas fa-download",
           "href": "https://github.com/seriva/qdfps/archive/master.zip"
         }
       ]
@@ -112,12 +113,12 @@
       "links": [
         {
           "title": "Github",
-          "icon": "bi-github",
+          "icon": "fab fa-github",
           "href": "https://github.com/seriva/genesisdevice"
         },
         {
           "title": "Download",
-          "icon": "bi-download",
+          "icon": "fas fa-download",
           "href": "https://github.com/seriva/genesisdevice/archive/master.zip"
         }
       ]
@@ -132,12 +133,12 @@
       "links": [
         {
           "title": "Github",
-          "icon": "bi-github",
+          "icon": "fab fa-github",
           "href": "https://github.com/seriva/microtastic"
         },
         {
           "title": "NPM",
-          "icon": "bi-box-seam",
+          "icon": "fas fa-cube",
           "href": "https://www.npmjs.com/package/microtastic"
         }
       ]
@@ -152,7 +153,7 @@
       "links": [
         {
           "title": "Github",
-          "icon": "bi-github",
+          "icon": "fab fa-github",
           "href": "https://github.com/seriva/website"
         }
       ]
@@ -167,12 +168,12 @@
       "links": [
         {
           "title": "Github",
-          "icon": "bi-github",
+          "icon": "fab fa-github",
           "href": "https://github.com/seriva/snakeai"
         },
         {
           "title": "Download",
-          "icon": "bi-download",
+          "icon": "fas fa-download",
           "href": "https://github.com/seriva/snakeai/archive/master.zip"
         }
       ]
@@ -188,12 +189,12 @@
       "links": [
         {
           "title": "Github",
-          "icon": "bi-github",
+          "icon": "fab fa-github",
           "href": "https://github.com/seriva/astrohunter"
         },
         {
           "title": "Download",
-          "icon": "bi-download",
+          "icon": "fas fa-download",
           "href": "https://github.com/seriva/astrohunter/archive/master.zip"
         }
       ]
