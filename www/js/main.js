@@ -33,15 +33,8 @@ const Templates = {
     pageLink: (pageId, pageTitle) => 
         `<li class="nav-item navbar-menu"><a class="nav-link" href="/?page=${pageId}" data-spa-route="page">${pageTitle}</a></li>`,
 
-    socialLink: (link) => {
-        const attrs = ['class="nav-link"'];
-        if (link.href) attrs.push(`href="${link.href}"`);
-        if (link.onclick) attrs.push(`onclick="${link.onclick}"`);
-        if (link.target) attrs.push(`target="${link.target}"`);
-        if (link.rel) attrs.push(`rel="${link.rel}"`);
-        if (link['aria-label']) attrs.push(`aria-label="${link['aria-label']}"`);
-        return `<li class="nav-item navbar-icon"><a ${attrs.join(' ')}><i class="${link.icon}"></i></a></li>`;
-    },
+    socialLink: ({ href = '#', onclick = '', target = '', rel = '', 'aria-label': ariaLabel = '', icon }) => 
+        `<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${onclick && `onclick="${onclick}"`} ${target && `target="${target}"`} ${rel && `rel="${rel}"`} ${ariaLabel && `aria-label="${ariaLabel}"`}><i class="${icon}"></i></a></li>`,
 
     projectDropdownItem: (projectId, projectTitle) =>
         `<li><a class="dropdown-item" href="/?id=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
@@ -119,37 +112,27 @@ const Templates = {
 const getPrismThemeUrl = (themeName) => 
     `https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-${themeName}.min.css`;
 
-// Email function - uses data from JSON
+// Combined email function with error fallback
 const Email = async (event) => {
-    event?.preventDefault();
-    event?.stopPropagation();
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
     
-    try {
-        const data = projectsData || await loadProjectsData();
-        const email = data?.site?.email;
-        window.location.href = email ? `mailto:${email.name}@${email.domain}` : 'mailto:contact@example.com';
-    } catch (error) {
-        console.error('Error loading email data:', error);
-        window.location.href = 'mailto:contact@example.com';
-    }
+    const data = projectsData || await loadProjectsData().catch(() => null);
+    const email = data?.site?.email;
+    window.location.href = email ? `mailto:${email.name}@${email.domain}` : 'mailto:contact@example.com';
     return false;
 };
 
 // Make globally available for onclick handlers
 window.Email = Email;
 
-// Function to apply Prism theme to zero-md elements
-const applyThemeToZeroMd = (themeName) => {
-    document.querySelectorAll('zero-md').forEach((element) => {
-        const themeUrl = getPrismThemeUrl(themeName);
-        element.setAttribute('css-urls', JSON.stringify([themeUrl]));
-    });
-};
-
-// Initialize zero-md elements with theme from data
-const initializeZeroMd = () => {
-    const theme = projectsData?.site?.colors?.code?.theme;
-    if (theme) applyThemeToZeroMd(theme);
+// Combined function to apply Prism theme to zero-md elements
+const applyThemeToZeroMd = (themeName = projectsData?.site?.colors?.code?.theme || 'tomorrow') => {
+    if (!themeName) return;
+    const themeUrl = getPrismThemeUrl(themeName);
+    document.querySelectorAll('zero-md').forEach(el => 
+        el.setAttribute('css-urls', JSON.stringify([themeUrl]))
+    );
 };
 
 // Function to update meta tags from JSON data
@@ -182,20 +165,15 @@ const fullscreen = () => {
 
 window.fullscreen = fullscreen;
 
-// Mobile menu management
+// Optimized mobile menu management
 const MobileMenu = {
     close() {
         const collapseElement = document.querySelector('.navbar-collapse');
         const navbarToggle = document.querySelector('.navbar-toggler');
         
         if (collapseElement) {
-            // Use Bootstrap 5 Collapse API
             const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
-            if (bsCollapse) {
-                bsCollapse.hide();
-            } else {
-                collapseElement.classList.remove('show');
-            }
+            bsCollapse ? bsCollapse.hide() : collapseElement.classList.remove('show');
         }
         
         if (navbarToggle) {
@@ -204,19 +182,11 @@ const MobileMenu = {
         }
     },
     
-    shouldCloseOnClick(element) {
-        // Don't close for dropdown toggles or if element has data-keep-menu attribute
-        return !element.classList.contains('dropdown-toggle') && 
-               !element.hasAttribute('data-keep-menu');
-    },
-    
     addClickHandler(element) {
-        element.addEventListener('click', (e) => {
-            if (this.shouldCloseOnClick(element)) {
+        element.addEventListener('click', () => {
+            if (!element.classList.contains('dropdown-toggle') && !element.hasAttribute('data-keep-menu')) {
                 this.close();
             }
-            
-            // Remove focus after click
             setTimeout(() => element.blur(), 100);
         });
     }
@@ -224,69 +194,49 @@ const MobileMenu = {
 
 window.closeMobileMenu = () => MobileMenu.close();
 
-// Fetch and cache a single GitHub README
+// Optimized GitHub README fetching with caching
 const fetchGitHubReadme = async (repoName) => {
-    if (readmeCache.has(repoName)) {
-        return readmeCache.get(repoName);
-    }
+    if (readmeCache.has(repoName)) return readmeCache.get(repoName);
     
-    try {
-        const data = projectsData || await loadProjectsData();
-        const githubUsername = data?.site?.github_username || 'seriva'; // fallback to 'seriva' if not configured
-        
-        // Use raw GitHub URL instead of API to avoid rate limiting
-        const response = await fetch(`https://raw.githubusercontent.com/${githubUsername}/${repoName}/master/README.md`);
-        
-        if (response.ok) {
-            const content = await response.text();
-            readmeCache.set(repoName, content);
-            return content;
-        } else if (response.status === 404) {
-            // Try 'main' branch if 'master' doesn't exist
-            const mainResponse = await fetch(`https://raw.githubusercontent.com/${githubUsername}/${repoName}/main/README.md`);
-            if (mainResponse.ok) {
-                const content = await mainResponse.text();
+    const data = projectsData || await loadProjectsData();
+    const username = data?.site?.github_username || 'seriva';
+    
+    for (const branch of ['master', 'main']) {
+        try {
+            const response = await fetch(`https://raw.githubusercontent.com/${username}/${repoName}/${branch}/README.md`);
+            if (response.ok) {
+                const content = await response.text();
                 readmeCache.set(repoName, content);
                 return content;
             }
+        } catch (error) {
+            console.error(`Error fetching README for ${repoName} from ${branch}:`, error);
         }
-    } catch (error) {
-        console.error(`Error fetching README for ${repoName}:`, error);
     }
     
     return null;
 };
 
-// Preload all GitHub READMEs in the background with delay to avoid overwhelming
+// Preload GitHub READMEs with rate limiting
 const preloadGitHubReadmes = async () => {
     const data = projectsData || await loadProjectsData();
-    if (!data?.projects) return;
+    const repos = data?.projects?.filter(p => p.github_repo).map(p => p.github_repo) || [];
     
-    const repos = data.projects
-        .filter(p => p.github_repo)
-        .map(p => p.github_repo);
-    
-    // Load READMEs with a small delay between requests to be nice to GitHub
     for (const repo of repos) {
-        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
-        fetchGitHubReadme(repo).catch(() => {}); // Ignore errors in background loading
+        await new Promise(resolve => setTimeout(resolve, 100));
+        fetchGitHubReadme(repo).catch(() => {});
     }
 };
 
-// Load GitHub README content
+// Load GitHub README content - optimized
 export const loadGitHubReadme = async (repoName, containerId) => {
     const container = document.getElementById(containerId);
     if (!container) return;
     
     const content = await fetchGitHubReadme(repoName);
-    
-    if (content) {
-        const theme = projectsData?.site?.colors?.code?.theme || 'tomorrow';
-        const themeUrl = getPrismThemeUrl(theme);
-        container.innerHTML = Templates.zeroMd(content, themeUrl);
-    } else {
-        container.innerHTML = Templates.githubReadmeError();
-    }
+    container.innerHTML = content 
+        ? Templates.zeroMd(content, getPrismThemeUrl(projectsData?.site?.colors?.code?.theme || 'tomorrow'))
+        : Templates.githubReadmeError();
 };
 
 // Global variable to store projects data
@@ -296,14 +246,19 @@ let dataLoadPromise = null;
 // Cache for GitHub READMEs
 const readmeCache = new Map();
 
-// Cache frequently accessed DOM elements
+// Enhanced DOM element caching
 const DOMCache = {
     navbar: null,
     main: null,
+    dropdownMenu: null,
     
     init() {
         this.navbar = document.getElementById('navbar-container');
         this.main = document.getElementById('main-content');
+    },
+    
+    getDropdown() {
+        return this.dropdownMenu || (this.dropdownMenu = document.getElementById('projects-dropdown'));
     }
 };
 
@@ -350,33 +305,28 @@ const injectNavbar = async () => {
     }
 };
 
-// Function to load content data from JSON (with caching)
+// Optimized function to load content data from JSON (with caching)
 export const loadProjectsData = async () => {
     if (projectsData) return projectsData;
     if (dataLoadPromise) return dataLoadPromise;
     
-    dataLoadPromise = (async () => {
-        try {
-            const jsonPath = window.location.pathname.includes('/project/') 
-                ? '../data/content.json' 
-                : 'data/content.json';
-            
-            const response = await fetch(jsonPath);
+    dataLoadPromise = fetch(window.location.pathname.includes('/project/') ? '../data/content.json' : 'data/content.json')
+        .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            
-            projectsData = await response.json();
-            
-            if (projectsData?.site?.colors) {
-                applyColorScheme(projectsData.site.colors);
-                setTimeout(initializeZeroMd, 200);
+            return response.json();
+        })
+        .then(data => {
+            projectsData = data;
+            if (data?.site?.colors) {
+                applyColorScheme(data.site.colors);
+                setTimeout(() => applyThemeToZeroMd(), 200);
             }
-            
-            return projectsData;
-        } catch (error) {
+            return data;
+        })
+        .catch(error => {
             console.error('Failed to load content data:', error);
             return null;
-        }
-    })();
+        });
     
     return dataLoadPromise;
 };
@@ -427,27 +377,22 @@ export const loadProjectLinks = async (projectId, containerId) => {
     container.innerHTML = Templates.projectLinksSection(linksHtml);
 };
 
-// Function to load a generic page
+// Utility to set page title
+const setPageTitle = (data) => {
+    document.title = data?.site?.title || 'portfolio.example.com';
+};
+
+// Function to load a generic page - optimized
 export const loadPage = async (pageId) => {
     const data = projectsData || await loadProjectsData();
-    
     if (!DOMCache.main) return;
     
-    let html = '';
-    
-    if (data?.pages?.[pageId]) {
-        const page = data.pages[pageId];
-        document.title = data?.site?.title || 'portfolio.example.com';
-        html = page.content;
-    } else {
-        document.title = data?.site?.title || 'portfolio.example.com';
-        html = Templates.errorMessage('Page Not Found', 'The requested page could not be found.');
-    }
-    
-    DOMCache.main.innerHTML = html;
+    setPageTitle(data);
+    DOMCache.main.innerHTML = data?.pages?.[pageId]?.content || 
+        Templates.errorMessage('Page Not Found', 'The requested page could not be found.');
 }
 
-// Load individual project page
+// Load individual project page - optimized
 export const loadProjectPage = async (projectId) => {
     if (!DOMCache.main) return;
     
@@ -457,41 +402,33 @@ export const loadProjectPage = async (projectId) => {
         return;
     }
     
-    document.title = (projectsData || await loadProjectsData())?.site?.title || 'portfolio.example.com';
+    setPageTitle(projectsData);
     
-    const parts = [
-        Templates.projectHeader(project.title, project.description, project.tags)
-    ];
+    const parts = [Templates.projectHeader(project.title, project.description, project.tags)];
     
-    if (project.github_repo) {
-        parts.push(Templates.githubReadme(project.github_repo));
-    }
-    
+    if (project.github_repo) parts.push(Templates.githubReadme(project.github_repo));
     if (project.youtube_videos?.length) {
         const videos = project.youtube_videos.map(id => Templates.youtubeVideo(id)).join('');
         parts.push(Templates.mediaSection(videos));
     }
-    
-    if (project.demo_url) {
-        parts.push(Templates.demoIframe(project.demo_url));
-    }
+    if (project.demo_url) parts.push(Templates.demoIframe(project.demo_url));
     
     parts.push(Templates.projectLinks(project.id));
     DOMCache.main.innerHTML = parts.join('');
 }
 
-// Populate projects dropdown menu
+// Populate projects dropdown menu - optimized
 export const loadProjectsDropdown = async () => {
-    const dropdown = document.getElementById('projects-dropdown');
+    const dropdown = DOMCache.getDropdown();
     const data = projectsData || await loadProjectsData();
-    if (!data || !dropdown) return;
+    if (!data?.projects || !dropdown) return;
     
     dropdown.innerHTML = data.projects
         .sort((a, b) => a.weight - b.weight)
         .map(p => Templates.projectDropdownItem(p.id, p.title))
         .join('');
     
-    dropdown.querySelectorAll('a').forEach(item => MobileMenu.addClickHandler(item));
+    dropdown.querySelectorAll('a').forEach(MobileMenu.addClickHandler);
 };
 
 // Load additional content (GitHub README, project links)
@@ -531,7 +468,7 @@ const handleRoute = async () => {
         if (DOMCache.main) {
             DOMCache.main.innerHTML = Templates.errorMessage('Error loading page', 'Please try refreshing the page.');
         }
-        document.title = projectsData?.site?.title || 'portfolio.example.com';
+        setPageTitle(projectsData);
     }
 };
 
