@@ -6,13 +6,9 @@
     --header-color: #1F2429;
     --header-font-color: #FFFFFF;
     --border-width: 2px;
-    
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
-    
-    /* Text color variable for consistency */
     --text-color: var(--font-color);
-    
     --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
     --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
     --shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -23,7 +19,7 @@ html, body {
 }
 
 body {
-    padding-top: 55px;
+    padding-top: 56px;
     display: flex;
     text-align: center;
     flex-direction: column;
@@ -46,50 +42,39 @@ main {
     box-sizing: border-box;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-    main {
-        padding: 15px;
-        max-width: 100%;
-    }
-    
-    .about-pic {
-        width: 12vh;
-        height: 12vh;
-    }
-    
-    .about-content {
-        text-align: center;
-    }
-    
-    .about-content h1 {
-        font-size: 1.5em;
-    }
+img {
+    max-width: 100%;
 }
 
-@media (max-width: 480px) {
-    body {
-        padding-top: 50px;
-    }
-    
-    main {
-        padding: 10px;
-    }
-    
-    .about-pic {
-        width: 10vh;
-        height: 10vh;
-    }
+/* Links */
+a {
+    color: var(--accent);
+    transition: color var(--transition-fast);
 }
 
-/* About page styles */
+a.icon:hover {
+    text-decoration: none;
+}
+
+/* Tags */
+.item-tag {
+    background-color: #2a3a4a;
+    color: var(--accent);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+    margin: 2px;
+}
+
+/* About page */
 .about-pic {
     width: 15vh;
     height: 15vh;
     border-radius: 50%;
     margin-bottom: 20px;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-normal);
 }
 
 .about-pic:hover {
@@ -106,7 +91,6 @@ main {
 .about-content h1 {
     color: var(--accent);
     margin-bottom: 1.5rem;
-    text-align: center;
 }
 
 .about-content p {
@@ -119,41 +103,6 @@ main {
     font-weight: 600;
 }
 
-/*apply accent colour to links*/
-
-a {
-    color: white;
-}
-
-a:link, a:visited {
-    color: var(--accent);
-}
-
-a.icon:hover {
-    text-decoration: none;
-}
-
-a:hover {
-    color: var(--accent) !important;
-}
-
-
-/*list item for posts and projects*/
-
-.item {
-    padding: 10px 0;
-}
-
-.item-tag {
-    background-color: #2a3a4a;
-    color: var(--accent);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    display: inline-block;
-    margin: 2px;
-}
-
 /*navigation bar*/
 
 .navbar-icon {
@@ -162,292 +111,253 @@ a:hover {
 }
 
 .navbar-menu {
-    font-size: 130%;
+    font-size: 115%;
     font-weight: bold;
 }
 
-/* Mobile navbar brand styling */
-.navbar-brand {
-    color: var(--header-font-color) !important;
+.navbar-menu .nav-link {
+    font-size: 115%;
+    font-weight: bold;
 }
 
-@media (max-width: 767px) {
-    .navbar-brand {
-        color: var(--text) !important;
-    }
+/* Navbar link hover/focus states */
+.navbar-menu .nav-link:hover,
+.navbar-menu .nav-link:focus {
+    background-color: #151a1e;
+    color: var(--accent);
+}
+
+/* Mobile navbar brand */
+.navbar-brand {
+    color: var(--header-font-color);
+    font-weight: bold;
 }
 
 /* Mobile menu button styling */
-.navbar-toggle {
-    background-color: transparent !important;
-    border: none !important;
-    outline: none !important;
+.navbar-toggler {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    transition: transform 0.2s ease;
 }
 
-.navbar-toggle:focus {
-    background-color: transparent !important;
-    outline: 2px solid var(--accent) !important;
+.navbar-toggler:focus {
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
-.navbar-toggle:focus:not(:focus-visible) {
-    background-color: transparent !important;
-    outline: none !important;
+.navbar-toggler:focus:not(:focus-visible) {
+    outline: none;
 }
 
-.navbar-toggle .icon-bar {
-    background-color: var(--header-font-color);
-    transition: background-color 0.3s ease;
+.navbar-toggler-icon {
+    transition: all 0.3s ease;
 }
 
-.navbar-toggle:hover .icon-bar {
-    background-color: var(--accent);
+.navbar-toggler:hover .navbar-toggler-icon {
+    filter: brightness(1.2);
 }
 
-.navbar-toggle:focus .icon-bar {
-    background-color: var(--accent);
+.navbar-toggler:focus .navbar-toggler-icon {
+    filter: brightness(1.2);
 }
 
-.navbar-toggle:focus:not(:focus-visible) .icon-bar {
-    background-color: var(--header-font-color);
+.navbar-toggler:focus:not(:focus-visible) .navbar-toggler-icon {
+    filter: none;
 }
 
-/* Force normal state after collapse */
-.navbar-toggle:not(.collapsed) .icon-bar {
-    background-color: var(--header-font-color) !important;
+/* Hamburger menu press effect */
+.navbar-toggler:active {
+    transform: scale(0.9);
 }
 
-.navbar-toggle.collapsed .icon-bar {
-    background-color: var(--header-font-color) !important;
-}
-
-/* Ensure normal state when not actively being interacted with */
-.navbar-toggle:not(:hover):not(:focus) .icon-bar {
-    background-color: var(--header-font-color) !important;
+.navbar-toggler:active .navbar-toggler-icon {
+    filter: brightness(0.8);
 }
 
 
 /* Dropdown menu styling */
-.navbar-default .navbar-nav .open .dropdown-menu {
+.navbar-nav .dropdown-menu {
     background-color: var(--header-color);
     border: var(--border-width) solid var(--accent);
     padding: 0;
     box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
 }
 
-.navbar-default .navbar-nav .open .dropdown-menu > li > a {
+.navbar-nav .dropdown-menu .dropdown-item {
     color: var(--header-font-color);
-    padding: 10px 20px;
+    padding: 15px 20px;
     font-size: 16px;
     font-weight: bold;
+    background-color: var(--header-color);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
-.navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
-.navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
-    background-color: #2a3a4a;
+.navbar-nav .dropdown-menu .dropdown-item:hover,
+.navbar-nav .dropdown-menu .dropdown-item:focus,
+.navbar-nav .dropdown-menu .dropdown-item:active,
+.navbar-nav .dropdown-menu .dropdown-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
     color: var(--accent);
 }
 
-.navbar-default .navbar-nav .open .dropdown-menu .divider {
+.navbar-nav .dropdown-menu .dropdown-divider {
     background-color: var(--hover);
     height: 1px;
     margin: 5px 0;
 }
 
-/* Dropdown toggle button when open */
-.navbar-default .navbar-nav > .open > a,
-.navbar-default .navbar-nav > .open > a:hover,
-.navbar-default .navbar-nav > .open > a:focus {
-    background-color: #151a1e !important;
-    color: var(--accent) !important;
+/* All navbar link states - consolidated */
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus,
+.navbar-nav .dropdown .nav-link.show {
+    background-color: #151a1e;
+    color: var(--accent);
 }
 
-/* Hover effects for all navbar items */
-.navbar-default .navbar-nav > li > a:hover {
-    background-color: #151a1e !important;
-    color: var(--accent) !important;
-}
-
-/* Focus effects */
-.navbar-default .navbar-nav > li > a:focus {
-    background-color: #151a1e !important;
-    color: var(--accent) !important;
+.navbar-nav .nav-link:focus {
     outline: 2px solid var(--accent);
     outline-offset: -2px;
 }
 
-/* Remove focus after click */
-.navbar-default .navbar-nav > li > a:focus:not(:focus-visible) {
-    background-color: transparent !important;
-    color: var(--header-font-color) !important;
+.navbar-nav .nav-link:focus:not(:focus-visible) {
+    background-color: transparent;
+    color: var(--header-font-color);
     outline: none;
 }
 
-/* Hover effects for navbar icons */
-.navbar-default .navbar-nav .navbar-icon > a:hover {
-    background-color: #151a1e !important;
-}
-
-.navbar-default .navbar-nav .navbar-icon > a:focus {
-    background-color: #151a1e !important;
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-}
-
-.navbar-default .navbar-nav .navbar-icon > a:hover i {
-    color: var(--accent) !important;
-}
-
-.navbar-default .navbar-nav .navbar-icon > a:focus i {
-    color: var(--accent) !important;
-}
-
-/* Remove focus after click for icons */
-.navbar-default .navbar-nav .navbar-icon > a:focus:not(:focus-visible) {
-    background-color: transparent !important;
-}
-
-.navbar-default .navbar-nav .navbar-icon > a:focus:not(:focus-visible) i {
-    color: var(--header-font-color) !important;
+/* Navbar icon specific */
+.navbar-nav .navbar-icon .nav-link:hover i,
+.navbar-nav .navbar-icon .nav-link:focus i {
+    color: var(--accent);
 }
 
 /* Mobile dropdown adjustments */
 @media (max-width: 767px) {
-    /* Make the entire mobile menu 70% of screen height when projects are open */
+    body {
+        padding-top: 50px;
+    }
+    
+    main {
+        padding: 10px;
+    }
+    
+    .about-pic {
+        width: 10vh;
+        height: 10vh;
+    }
+    
+    .navbar-brand {
+        color: var(--text);
+    }
+    
+    /* Mobile menu scrolling */
     .navbar-collapse {
         max-height: 70vh !important;
         overflow-y: auto;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--header-color);
+        border-bottom: var(--border-width) solid var(--accent);
     }
     
-    /* Keep dropdown items normal size */
     .navbar-nav .dropdown-menu {
         max-height: none;
         overflow-y: visible;
-        border: none !important;
-        box-shadow: none !important;
+        border: none;
+        box-shadow: none;
     }
     
-    /* Fix mobile menu button focus states */
-    .navbar-nav > li > a:hover {
-        background-color: #151a1e !important;
-        color: var(--accent) !important;
-    }
+    /* Mobile navbar link states inherit from desktop */
     
-    .navbar-nav > li > a:focus {
-        background-color: #151a1e !important;
-        color: var(--accent) !important;
-        outline: 2px solid var(--accent);
-        outline-offset: -2px;
-    }
-    
-    .navbar-nav > li > a:focus:not(:focus-visible) {
-        background-color: transparent !important;
-        color: var(--header-font-color) !important;
-        outline: none;
-    }
-    
-    /* Move social media links down when projects dropdown is open */
-    .navbar-nav .open .dropdown-menu ~ .navbar-right {
-        margin-top: 20px;
-        padding-top: 15px;
-        border-top: 1px solid #3a4a5a;
-    }
-    
-    /* Ensure social media links are visible when dropdown is open */
-    .navbar-nav .open .dropdown-menu ~ .navbar-right {
-        position: relative;
-        z-index: 1000;
-    }
-    
-    /* Style the social media links container when dropdown is open */
-    .navbar-nav .open ~ .navbar-right {
-        background-color: var(--header-color);
-        margin-top: 10px;
+    /* Social media links horizontal on mobile */
+    .navbar-nav.ms-auto {
+        flex-direction: row !important;
+        justify-content: center;
         padding: 10px 0;
+        margin-top: 10px;
+    }
+    
+    .navbar-nav.ms-auto .navbar-icon {
+        display: inline-flex;
+    }
+    
+    .navbar-nav.ms-auto .nav-link {
+        padding: 10px 15px !important;
+        height: auto !important;
     }
 }
 
-/* Desktop dropdown menu styling */
+/* Tablet responsiveness */
+@media (max-width: 768px) and (min-width: 481px) {
+    main {
+        padding: 15px;
+        max-width: 100%;
+    }
+    
+    .about-pic {
+        width: 12vh;
+        height: 12vh;
+    }
+    
+    .about-content h1 {
+        font-size: 1.5em;
+    }
+}
+
+/* Desktop dropdown */
 @media (min-width: 768px) {
     .navbar-nav .dropdown-menu {
-        background-color: var(--header-color);
-        border: var(--border-width) solid var(--accent);
-        padding: 0;
-        box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
         min-width: 200px;
     }
     
-    .navbar-nav .dropdown-menu > li > a {
-        color: var(--header-font-color);
-        padding: 10px 20px;
-        font-size: 16px;
-        font-weight: bold;
-    }
-    
-    .navbar-nav .dropdown-menu > li > a:hover,
-    .navbar-nav .dropdown-menu > li > a:focus {
-        background-color: #2a3a4a;
-        color: var(--accent);
+    .navbar .container-fluid {
+        padding-left: 20px;
+        padding-right: 20px;
     }
 }
 
-.navbar-default .navbar-nav>li>a {
-    color: var(--header-font-color) !important;
-}
-
-/* Active navigation state */
-.navbar-default .navbar-nav>li>a.active {
-    color: var(--accent) !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-
-.navbar.navbar-default {
+/* Bootstrap 5 navbar */
+.navbar.navbar-dark {
     border-bottom: var(--border-width) solid var(--accent);
     background-color: var(--header-color);
     min-height: 50px;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
 }
 
-/* Override any white borders in navbar */
-.navbar-default .navbar-header,
-.navbar-default .navbar-collapse,
-.navbar-default .navbar-nav,
-.navbar-default .navbar-brand {
-    border-color: var(--accent) !important;
+.navbar .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-.navbar-default .navbar-nav > li > a {
-    color: var(--header-font-color) !important;
-    padding: 18px 20px 15px 20px;
+.navbar .navbar-nav .nav-link {
+    color: var(--header-font-color);
+    padding: 15px 20px;
     line-height: 1.2;
     display: flex;
     align-items: center;
     height: 50px;
 }
 
-
-
-
-img {
-    max-width: 100%;
+/* Active navigation state */
+.navbar-nav .nav-link.active {
+    color: var(--accent);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
-.iframeWrapper {
-	position: relative;
-	padding-bottom: 56.25%; /* 16:9 */
-	padding-top: 25px;
-	height: 0;
-}
-.iframeWrapper iframe {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-    height: 100%;
-    max-width: 100%;
+.dropdown-menu {
+    border-radius: 0;
 }
 
-/* Project page styles */
+/* Project and iframe styling */
 .project-title {
     color: var(--accent);
     font-size: 1.3em;
@@ -466,32 +376,27 @@ img {
     margin: 0.8em 0;
 }
 
-/* Loading states */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
+.youtube-video {
+    margin: 20px 0;
 }
 
-.loading::after {
-    content: '';
+.iframeWrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    padding-top: 25px;
+    height: 0;
+}
+
+.iframeWrapper iframe {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid var(--accent);
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* SPA Loading and Error States */
+/* Loading and Error States */
 .loading-spinner {
     text-align: center;
     padding: 2rem;
@@ -508,7 +413,6 @@ img {
 .error-message {
     text-align: center;
     padding: 2rem;
-    color: #ff6b6b;
     max-width: 600px;
     margin: 0 auto;
 }
@@ -522,48 +426,9 @@ img {
 .error-message p {
     color: #cccccc;
     font-size: 1.1em;
-    line-height: 1.5;
 }
 
-/* Generic page styles */
-.page-content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    line-height: 1.6;
-}
 
-.page-content h1 {
-    color: var(--accent);
-    margin-bottom: 2rem;
-    font-size: 2.5em;
-    text-align: center;
-}
-
-.page-body {
-    color: var(--text-color);
-}
-
-.page-body p {
-    margin-bottom: 1.5rem;
-    font-size: 1.1em;
-}
-
-.page-body a {
-    color: var(--accent);
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.page-body a:hover {
-    color: var(--text);
-    text-decoration: underline;
-}
-
-/* Project links section */
-.project-links {
-    margin: 20px 0;
-}
 
 /* Download buttons container */
 .download-buttons {
@@ -574,8 +439,9 @@ img {
     justify-content: flex-start;
 }
 
-/* Individual download button */
-.download-btn {
+/* Download buttons */
+.download-btn,
+#fullscreen {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -583,30 +449,29 @@ img {
     background-color: #2a2a2a;
     border: 2px solid var(--accent);
     border-radius: 8px;
-    color: var(--text) !important;
-    text-decoration: none !important;
+    color: var(--text);
+    text-decoration: none;
     font-weight: 600;
     font-size: 1em;
     font-family: 'Raleway', sans-serif;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
     cursor: pointer;
-    /* Reset link defaults */
     outline: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     appearance: none;
 }
 
-.download-btn:hover {
-    background-color: var(--hover) !important;
-    border-color: var(--accent) !important;
+.download-btn:hover,
+#fullscreen:hover {
+    background-color: var(--hover);
+    border-color: var(--accent);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
-    color: var(--accent) !important;
-    text-decoration: none !important;
+    color: var(--accent);
+    text-decoration: none;
 }
 
-.download-btn:focus {
+.download-btn:focus,
+#fullscreen:focus {
     background-color: var(--hover);
     border-color: var(--accent);
     transform: translateY(-2px);
@@ -616,7 +481,8 @@ img {
     outline-offset: 2px;
 }
 
-.download-btn:focus:not(:focus-visible) {
+.download-btn:focus:not(:focus-visible),
+#fullscreen:focus:not(:focus-visible) {
     background-color: #2a3a4a;
     border-color: #3a4a5a;
     transform: none;
@@ -625,7 +491,8 @@ img {
     outline: none;
 }
 
-.download-btn:active {
+.download-btn:active,
+#fullscreen:active {
     transform: translateY(0);
 }
 
@@ -633,7 +500,7 @@ img {
     width: 24px;
     height: 24px;
     display: block;
-    transition: filter 0.3s ease;
+    transition: filter var(--transition-normal);
 }
 
 .download-btn:hover img {
@@ -641,36 +508,12 @@ img {
 }
 
 .download-btn span {
-    color: var(--text) !important;
-    font-family: 'Raleway', sans-serif;
-    text-decoration: none !important;
-    transition: color 0.3s ease;
+    color: var(--text);
+    transition: color var(--transition-normal);
 }
 
 .download-btn:hover span {
-    color: var(--accent) !important;
-}
-
-/* Override any inherited link styles */
-.download-btn:link,
-.download-btn:visited,
-.download-btn:active {
-    color: var(--text) !important;
-    text-decoration: none !important;
-    background-color: #2a2a2a;
-    border: 2px solid var(--accent);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .download-buttons {
-        flex-direction: column;
-    }
-    
-    .download-btn {
-        width: 100%;
-        justify-content: center;
-    }
+    color: var(--accent);
 }
 
 /* Zero-md styling */
@@ -679,7 +522,7 @@ zero-md {
     text-align: left;
 }
 
-/* Markdown body styling for zero-md */
+/* Markdown body styling */
 .markdown-body {
     font-family: 'Raleway', sans-serif;
     font-size: 1em;
@@ -688,39 +531,23 @@ zero-md {
     text-align: left;
 }
 
-.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+.markdown-body h1, .markdown-body h2, .markdown-body h3, 
+.markdown-body h4, .markdown-body h5, .markdown-body h6 {
     color: #FFFFFF;
-    margin: 1em 0 0.5em 0;
+    margin: 1em 0 0.5em;
     font-weight: bold;
     line-height: 1.25;
 }
 
-.markdown-body h1 {
-    font-size: 1.8em;
-    margin-top: 0;
-}
+.markdown-body h1 { font-size: 1.8em; margin-top: 0; }
+.markdown-body h2 { font-size: 1.4em; }
+.markdown-body h3 { font-size: 1.2em; }
+.markdown-body h4 { font-size: 1.1em; }
 
-.markdown-body h2 {
-    font-size: 1.4em;
-}
-
-.markdown-body h3 {
-    font-size: 1.2em;
-}
-
-.markdown-body h4 {
-    font-size: 1.1em;
-}
-
-.markdown-body h5, .markdown-body h6 {
-    font-size: 1em;
-}
-
-.markdown-body p {
+.markdown-body p, .markdown-body li {
     margin: 0.5em 0;
     line-height: 1.6;
     color: #cccccc;
-    font-size: 1em;
 }
 
 .markdown-body ul, .markdown-body ol {
@@ -730,9 +557,6 @@ zero-md {
 
 .markdown-body li {
     margin: 0.25em 0;
-    line-height: 1.6;
-    color: #cccccc;
-    font-size: 1em;
 }
 
 /* Code styling fallbacks for non-highlighted code */
@@ -778,20 +602,18 @@ zero-md {
 }
 
 .markdown-body a {
-    color: #429BEE;
+    color: var(--accent);
     text-decoration: none;
 }
 
 .markdown-body a:hover {
-    color: #429BEE;
     text-decoration: underline;
 }
 
 .markdown-body blockquote {
-    border-left: 4px solid #429BEE;
+    border-left: 4px solid var(--accent);
     padding-left: 1em;
     margin: 0.5em 0;
-    color: #cccccc;
     font-style: italic;
 }
 
@@ -809,12 +631,8 @@ zero-md {
 
 .markdown-body th {
     background-color: #2a3a4a;
-    color: #429BEE;
+    color: var(--accent);
     font-weight: bold;
-}
-
-.markdown-body td {
-    color: #cccccc;
 }
 
 .markdown-body hr {
@@ -823,85 +641,38 @@ zero-md {
     margin: 0.5em 0;
 }
 
-/* YouTube video styling */
-.youtube-video {
-    margin: 20px 0;
-}
-
-/* Basic code styling - Prism.js themes will handle syntax highlighting */
-pre, code {
+/* Basic code styling */
+pre {
     padding: 12px;
+    margin: 16px 0;
     border-radius: 6px;
     font-family: 'Courier New', monospace;
     font-size: 14px;
     line-height: 1.4;
     overflow-x: auto;
-}
-
-pre {
-    margin: 16px 0;
     white-space: pre-wrap;
 }
 
 code {
     padding: 2px 6px;
     font-size: 0.9em;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
 }
 
-/* Syntax highlighting for code blocks */
 pre code {
     background: transparent;
-    border: none;
     padding: 0;
 }
 
-/* Fullscreen button styling */
-#fullscreen {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background-color: #2a2a2a;
-    border: 2px solid var(--accent);
-    border-radius: 8px;
-    color: var(--text);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1em;
-    font-family: 'Raleway', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    /* Reset button defaults */
-    outline: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
-
-#fullscreen:hover {
-    background-color: var(--hover);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
-    color: var(--accent);
-    text-decoration: none;
-}
-
-#fullscreen:focus {
-    background-color: var(--hover);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
-    color: var(--accent);
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-}
-
-#fullscreen:focus:not(:focus-visible) {
-    background-color: #2a3a4a;
-    border-color: #3a4a5a;
-    transform: none;
-    box-shadow: none;
-    color: var(--text);
-    outline: none;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .download-buttons {
+        flex-direction: column;
+    }
+    
+    .download-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }

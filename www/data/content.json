@@ -23,25 +23,25 @@
     },
     "social": [
       {
-        "icon": "fa-envelope-o",
+        "icon": "bi-envelope",
         "href": "javascript:void(0)",
         "onclick": "javascript:Email(event);",
         "aria-label": "Contact Luuk via email"
       },
       {
-        "icon": "fa-github",
+        "icon": "bi-github",
         "href": "https://github.com/seriva/",
         "target": "_blank",
         "rel": "noopener noreferrer"
       },
       {
-        "icon": "fa-youtube",
+        "icon": "bi-youtube",
         "href": "https://www.youtube.com/user/seriva",
         "target": "_blank",
         "rel": "noopener noreferrer"
       },
       {
-        "icon": "fa-linkedin",
+        "icon": "bi-linkedin",
         "href": "https://www.linkedin.com/in/luuk-van-venrooij/",
         "target": "_blank",
         "rel": "noopener noreferrer"
