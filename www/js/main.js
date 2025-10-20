@@ -172,10 +172,6 @@ const updateMetaTags = (siteData) => {
     metaUpdates.forEach(({ selector, value }) => {
         if (value) document.querySelector(selector)?.setAttribute('content', value);
     });
-    
-    if (siteData.image && DOMCache.imagePreload) {
-        DOMCache.imagePreload.setAttribute('href', siteData.image);
-    }
 };
 
 // Fullscreen function for demo iframes
@@ -296,12 +292,10 @@ const readmeCache = new Map();
 const DOMCache = {
     navbar: null,
     main: null,
-    imagePreload: null,
     
     init() {
         this.navbar = document.getElementById('navbar-container');
         this.main = document.getElementById('main-content');
-        this.imagePreload = document.getElementById('preload-image');
     }
 };
 

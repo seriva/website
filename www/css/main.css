@@ -83,7 +83,7 @@ a.icon:hover {
 
 .about-content {
     text-align: center;
-    max-width: 600px;
+    max-width: 750px;
     margin: 0 auto;
     line-height: 1.6;
 }
@@ -572,6 +572,7 @@ zero-md {
 .markdown-body p, .markdown-body li {
     margin: 0.5em 0;
     line-height: 1.6;
+    font-size: 1.1em;
     color: #cccccc;
 }
 
