@@ -5,7 +5,6 @@ This website was originally built using **[Hugo](https://gohugo.io/)** with the 
 The new implementation offers:
 - **Simplified Architecture**: Pure HTML, CSS, and JavaScript - no build process required
 - **Dynamic Theming**: Real-time color scheme changes without page reloads
-- **Enhanced Performance**: Optimized with DNS prefetching, DOM caching, and deferred scripts
 - **Full Control**: Complete customization of every aspect of the design and functionality
 - **Modern Features**: Bootstrap 5, Bootstrap Icons, syntax highlighting, and smooth navigation
 
@@ -19,7 +18,6 @@ This migration represents a shift from static site generation to a highly optimi
 - **SPA Routing**: Single-page application with smooth navigation
 - **GitHub Integration**: Automatic README loading from GitHub repos
 - **Project Showcase**: Videos, demos, and download links
-- **Optimized Performance**: DNS prefetching, DOM caching, deferred scripts
 - **Modern Icons**: Bootstrap Icons 5 integration
 
 ## Tech Stack
