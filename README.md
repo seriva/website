@@ -1,6 +1,6 @@
 ## About
 
-This website was originally built using **Hugo** with the **seriva/minimal** GitHub theme, providing a clean and minimal portfolio experience. However, to achieve even greater simplicity and control, we migrated to this custom **minimalist SPA (Single Page Application)** website.
+This website was originally built using **[Hugo](https://gohugo.io/)** with the **[seriva/minimal](https://github.com/seriva/minimal-hugo-theme)** GitHub theme, providing a clean and minimal portfolio experience. However, to achieve even greater simplicity and control, we migrated to this custom **minimalist SPA (Single Page Application)** website.
 
 The new implementation offers:
 - **Simplified Architecture**: Pure HTML, CSS, and JavaScript - no build process required
