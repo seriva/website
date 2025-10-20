@@ -3,7 +3,6 @@
     "title": "luukvanvenrooij.nl",
     "description": "Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!",
     "author": "Luuk van Venrooij",
-    "image": "https://avatars.githubusercontent.com/u/11056665?s=400&u=4bdf1d069962e53c5b3dd7b73e01e977854e8800&v=4",
     "github_username": "seriva",
     "email": {
       "name": "luukvanvenrooij84",
@@ -126,7 +125,7 @@
     {
       "id": "microtastic",
       "title": "Microtastic",
-      "description": "Microservice framework for Node.js.",
+      "description": "Frontend framework for web applications development using Node.js.",
       "tags": ["Node.js", "Microservices"],
       "weight": 3,
       "github_repo": "microtastic",
@@ -162,7 +161,7 @@
       "id": "snakeai",
       "title": "SnakeAI",
       "description": "AI-powered Snake game with machine learning.",
-      "tags": ["Javascript", "AI", "Machine Learning"],
+      "tags": ["Python", "AI", "Machine Learning"],
       "weight": 1,
       "github_repo": "snakeai",
       "links": [
