@@ -126,7 +126,7 @@
       "id": "microtastic",
       "title": "Microtastic",
       "description": "Frontend framework for web applications development using Node.js.",
-      "tags": ["Node.js", "Microservices"],
+      "tags": ["Node.js", "MicrJavascriptoservices"],
       "weight": 3,
       "github_repo": "microtastic",
       "links": [
