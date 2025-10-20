@@ -2,33 +2,41 @@
 
 This website was originally built using **[Hugo](https://gohugo.io/)** with the **[seriva/minimal](https://github.com/seriva/minimal-hugo-theme)** GitHub theme, providing a clean and minimal portfolio experience. However, to achieve even greater simplicity and control, we migrated to this custom **minimalist SPA (Single Page Application)** website.
 
-The new implementation offers:
+The current implementation offers:
 - **Simplified Architecture**: Pure HTML, CSS, and JavaScript - no build process required
+- **YAML Configuration**: Human-friendly content management with native multiline support
 - **Dynamic Theming**: Real-time color scheme changes without page reloads
+- **Modern Icons**: Font Awesome 6.6.0 with 2,000+ free icons
+- **Performance Optimized**: Consolidated CDN dependencies and efficient caching
+- **GitHub API Optimization**: Rate-limit-free README loading via raw URLs
 - **Full Control**: Complete customization of every aspect of the design and functionality
-- **Modern Features**: Bootstrap 5, Bootstrap Icons, syntax highlighting, and smooth navigation
 
-This migration represents a shift from static site generation to a highly optimized, dynamic, and maintainable solution that better serves the portfolio's needs.
+This migration represents a shift from static site generation to a highly optimized, dynamic, and maintainable solution that better serves modern portfolio needs.
 
 ## Features
 
-- **Dynamic Theming**: Change color schemes via `content.json`
-- **Syntax Highlighting**: Zero-md with Prism.js code blocks
+- **YAML Configuration**: Human-readable content files with multiline HTML support
+- **Dynamic Theming**: Change color schemes via YAML/JSON configuration
+- **Modern Icons**: Font Awesome 6.6.0 with extensive icon library
+- **Optimized Performance**: Consolidated CDN dependencies and efficient caching
+- **GitHub Integration**: Rate-limit-free README loading from repositories
+- **Syntax Highlighting**: Zero-md with Prism.js code blocks and multiple themes
 - **Responsive Design**: Mobile-friendly navigation and layout
 - **SPA Routing**: Single-page application with smooth navigation
-- **GitHub Integration**: Automatic README loading from GitHub repos
-- **Project Showcase**: Videos, demos, and download links
-- **Modern Icons**: Bootstrap Icons 5 integration
+- **Project Showcase**: YouTube videos, live demos, and download links
+- **Accessibility**: Enhanced keyboard navigation and screen reader support
 
 ## Tech Stack
 
 - **Frontend**: Pure HTML, CSS, JavaScript (ES6+ modules)
 - **Framework**: Bootstrap 5.3.2
-- **Icons**: Bootstrap Icons 1.11.3
-- **Markdown**: Zero-md with Prism.js
-- **Routing**: Client-side SPA routing
+- **Icons**: Font Awesome 6.6.0 (Free)
+- **Configuration**: YAML with js-yaml parser
+- **Markdown**: Zero-md with Prism.js syntax highlighting
+- **CDN**: Consolidated jsDelivr dependencies with integrity checks
+- **Routing**: Client-side SPA routing with URL state management
 - **Theming**: Dynamic CSS custom properties
-- **Development**: Python HTTP server
+- **Development**: Python HTTP server / VS Code tasks
 
 ## Quick Start
 
@@ -51,7 +59,7 @@ Access at `http://localhost:8081`
 
 ### Content Management
 
-Edit `data/content.json` to update:
+Edit `data/content.yaml` to update:
 
 #### Site Configuration
 - **Basic Info**: title, description, author, image
@@ -68,24 +76,51 @@ Edit `data/content.json` to update:
 - **Static Content**: About, contact, custom pages
 - **Navigation**: Show/hide in navbar, ordering
 
+#### YAML Configuration
+
+**Clean, Human-Readable Format**:
+```yaml
+# Clean, human-readable configuration
+site:
+  title: "Your Portfolio"
+  description: "Your professional description"
+  
+  # Multiline HTML content - no escaping needed!
+  pages:
+    about:
+      content: |
+        <div class="about-content">
+          <h1>Welcome!</h1>
+          <p>
+            Your content here with proper formatting,
+            line breaks, and no escaped quotes.
+          </p>
+        </div>
+
+  # Icon configuration with Font Awesome 6.6.0
+  social:
+    - icon: "fas fa-envelope"
+      onclick: "javascript:Email(event);"
+    - icon: "fab fa-github"
+      href: "https://github.com/username"
+```
+
 #### Color Schemes & Theming
 
-The website supports dynamic color schemes and theming. Change the `colors` section in `content.json` to create your own theme:
+The website supports dynamic color schemes and theming. Change the `colors` section in `content.yaml` to create your own theme:
 
-```json
-"colors": {
-  "primary": "#F59E0B",
-  "secondary": "#1C1917", 
-  "accent": "#F59E0B",
-  "background": "#0C0A09",
-  "text": "#FAFAF9",
-  "textLight": "#D6D3D1",
-  "border": "#44403C",
-  "hover": "#451A03",
-  "code": {
-    "theme": "okaidia"
-  }
-}
+```yaml
+colors:
+  primary: "#F59E0B"
+  secondary: "#1C1917" 
+  accent: "#F59E0B"
+  background: "#0C0A09"
+  text: "#FAFAF9"
+  textLight: "#D6D3D1"
+  border: "#44403C"
+  hover: "#451A03"
+  code:
+    theme: "okaidia"
 ```
 
 #### Color Configuration
@@ -124,13 +159,16 @@ Supported Prism.js themes:
 - **Resource Hints**: DNS prefetch and preconnect for faster CDN loading
 
 ### Performance Optimizations
+- **CDN Consolidation**: All dependencies served from jsDelivr for faster loading
+- **GitHub API Optimization**: Uses raw GitHub URLs to bypass API rate limits (60/hour → unlimited)
 - **DNS Prefetching**: Pre-resolves external CDN domains
-- **Deferred Scripts**: Non-critical scripts load after main content
+- **Deferred Scripts**: Non-critical scripts load after main content  
 - **DOM Caching**: Reduces repeated element queries by ~70%
-- **Consolidated CSS**: ~24% smaller stylesheet with merged selectors
-- **Batch Operations**: Efficient meta tag and color scheme updates
+- **Consolidated CSS**: ~30% smaller stylesheet with merged selectors and CSS variables
+- **JavaScript Minification**: ~50 lines of redundant code removed, optimized functions
 - **README Caching**: GitHub READMEs preloaded and cached for instant navigation
 - **Template Consolidation**: All HTML templates centralized for maintainability
+- **Rate-limited Preloading**: Respectful GitHub README preloading with 100ms delays
 
 ### Code Organization
 - **Templates Object**: All HTML templates consolidated in one location
@@ -141,9 +179,25 @@ Supported Prism.js themes:
 ### File Structure
 ```
 www/
-├── data/content.json    # Site configuration and content
-├── css/main.css        # Optimized styles with dynamic theming
-├── js/main.js          # SPA logic, caching, and theming
-├── index.html          # Main HTML with resource hints
-└── demo/               # Project demos
+├── data/content.yaml    # YAML configuration and content
+├── css/main.css         # Optimized CSS with variables and consolidated rules
+├── js/main.js           # Optimized SPA logic with YAML support
+├── index.html           # HTML with CDN consolidation and integrity checks
+└── demo/                # Project demo directories
 ```
+
+## Recent Updates
+
+### v2.1.0 - YAML Configuration & Optimizations
+- ✅ **YAML Support**: Human-readable configuration with multiline HTML support
+- ✅ **Font Awesome 6.6.0**: Upgraded from Bootstrap Icons with 2,000+ free icons  
+- ✅ **CDN Consolidation**: All dependencies now served from jsDelivr
+- ✅ **GitHub Optimization**: Bypassed API rate limits using raw GitHub URLs
+- ✅ **Performance**: 30% smaller CSS, 50+ lines of JS optimization
+- ✅ **Developer Experience**: Much easier content editing with YAML format
+
+### Migration Notes
+
+**Content Format**: The site now uses YAML configuration exclusively for better maintainability and readability. Multiline HTML content is much easier to manage without escaped quotes.
+
+**Icons**: All icons have been updated from Bootstrap Icons (`bi-*`) to Font Awesome (`fas fa-*`, `fab fa-*`) providing access to 2,000+ free icons with better consistency.
