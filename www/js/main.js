@@ -40,7 +40,7 @@ const Templates = {
         if (link.target) attrs.push(`target="${link.target}"`);
         if (link.rel) attrs.push(`rel="${link.rel}"`);
         if (link['aria-label']) attrs.push(`aria-label="${link['aria-label']}"`);
-        return `<li class="nav-item navbar-icon"><a ${attrs.join(' ')}><i class="bi ${link.icon}"></i></a></li>`;
+        return `<li class="nav-item navbar-icon"><a ${attrs.join(' ')}><i class="${link.icon}"></i></a></li>`;
     },
 
     projectDropdownItem: (projectId, projectTitle) =>
@@ -48,7 +48,7 @@ const Templates = {
 
     projectLink: (link) => `
         <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn" onclick="closeMobileMenu()">
-            <i class="bi ${link.icon}"></i>
+            <i class="${link.icon}"></i>
             <span>${link.title}</span>
         </a>
     `,
@@ -63,7 +63,7 @@ const Templates = {
             <p>On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls.</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="bi bi-arrows-fullscreen"></i><span>Go Fullscreen</span></button></center>
+            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
         </div>`,
 
     githubReadme: (repoName) => 
@@ -121,7 +121,7 @@ const Templates = {
 
 // Helper function to get Prism theme URL
 const getPrismThemeUrl = (themeName) => 
-    `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-${themeName}.min.css`;
+    `https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-${themeName}.min.css`;
 
 // Email function - uses data from JSON
 const Email = async (event) => {
@@ -239,11 +239,14 @@ const fetchGitHubReadme = async (repoName) => {
     }
     
     try {
-        const response = await fetch(`https://api.github.com/repos/seriva/${repoName}/contents/README.md`);
-        const data = await response.json();
+        const data = projectsData || await loadProjectsData();
+        const githubUsername = data?.site?.github_username || 'seriva'; // fallback to 'seriva' if not configured
         
-        if (data.content) {
-            const binaryString = atob(data.content);
+        const response = await fetch(`https://api.github.com/repos/${githubUsername}/${repoName}/contents/README.md`);
+        const apiData = await response.json();
+        
+        if (apiData.content) {
+            const binaryString = atob(apiData.content);
             const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
             const content = new TextDecoder('utf-8').decode(bytes);
             readmeCache.set(repoName, content);
