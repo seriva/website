@@ -238,15 +238,21 @@ const fetchGitHubReadme = async (repoName) => {
         const data = projectsData || await loadProjectsData();
         const githubUsername = data?.site?.github_username || 'seriva'; // fallback to 'seriva' if not configured
         
-        const response = await fetch(`https://api.github.com/repos/${githubUsername}/${repoName}/contents/README.md`);
-        const apiData = await response.json();
+        // Use raw GitHub URL instead of API to avoid rate limiting
+        const response = await fetch(`https://raw.githubusercontent.com/${githubUsername}/${repoName}/master/README.md`);
         
-        if (apiData.content) {
-            const binaryString = atob(apiData.content);
-            const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
-            const content = new TextDecoder('utf-8').decode(bytes);
+        if (response.ok) {
+            const content = await response.text();
             readmeCache.set(repoName, content);
             return content;
+        } else if (response.status === 404) {
+            // Try 'main' branch if 'master' doesn't exist
+            const mainResponse = await fetch(`https://raw.githubusercontent.com/${githubUsername}/${repoName}/main/README.md`);
+            if (mainResponse.ok) {
+                const content = await mainResponse.text();
+                readmeCache.set(repoName, content);
+                return content;
+            }
         }
     } catch (error) {
         console.error(`Error fetching README for ${repoName}:`, error);
@@ -255,14 +261,20 @@ const fetchGitHubReadme = async (repoName) => {
     return null;
 };
 
-// Preload all GitHub READMEs in the background
+// Preload all GitHub READMEs in the background with delay to avoid overwhelming
 const preloadGitHubReadmes = async () => {
     const data = projectsData || await loadProjectsData();
     if (!data?.projects) return;
     
-    data.projects
+    const repos = data.projects
         .filter(p => p.github_repo)
-        .forEach(p => fetchGitHubReadme(p.github_repo));
+        .map(p => p.github_repo);
+    
+    // Load READMEs with a small delay between requests to be nice to GitHub
+    for (const repo of repos) {
+        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
+        fetchGitHubReadme(repo).catch(() => {}); // Ignore errors in background loading
+    }
 };
 
 // Load GitHub README content
