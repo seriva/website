@@ -123,8 +123,8 @@ a.icon:hover {
 /* Navbar link hover/focus states */
 .navbar-menu .nav-link:hover,
 .navbar-menu .nav-link:focus {
-    background-color: #151a1e;
-    color: var(--accent);
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--accent) !important;
 }
 
 /* Mobile navbar brand */
@@ -211,7 +211,7 @@ a.icon:hover {
 .navbar-nav .nav-link:hover,
 .navbar-nav .nav-link:focus,
 .navbar-nav .dropdown .nav-link.show {
-    background-color: #151a1e;
+    background-color: rgba(255, 255, 255, 0.1);
     color: var(--accent);
 }
 
@@ -461,6 +461,7 @@ a.icon:hover {
 }
 
 .download-btn:hover,
+.download-btn:focus,
 #fullscreen:hover {
     background-color: var(--hover);
     border-color: var(--accent);
@@ -492,19 +493,20 @@ a.icon:hover {
 }
 
 .download-btn:active,
+.download-btn:active,
 #fullscreen:active {
     transform: translateY(0);
 }
 
-.download-btn img {
-    width: 24px;
-    height: 24px;
-    display: block;
-    transition: filter var(--transition-normal);
+.download-btn i,
+#fullscreen i {
+    font-size: 1.5em;
+    transition: transform var(--transition-normal);
 }
 
-.download-btn:hover img {
-    opacity: 0.8;
+.download-btn:hover i,
+#fullscreen:hover i {
+    transform: scale(1.1);
 }
 
 .download-btn span {
@@ -512,8 +514,31 @@ a.icon:hover {
     transition: color var(--transition-normal);
 }
 
-.download-btn:hover span {
+.download-btn:hover span,
+.download-btn:focus span {
     color: var(--accent);
+}
+
+/* Ensure no underline on download button links */
+.download-btn,
+.download-btn:link,
+.download-btn:visited,
+.download-btn:hover,
+.download-btn:focus,
+.download-btn:active {
+    text-decoration: none !important;
+}
+
+/* Ensure consistent color in markdown body */
+.markdown-body .download-btn,
+.markdown-body .download-btn:link,
+.markdown-body .download-btn:visited {
+    color: var(--text) !important;
+}
+
+.markdown-body .download-btn:hover,
+.markdown-body .download-btn:focus {
+    color: var(--accent) !important;
 }
 
 /* Zero-md styling */
