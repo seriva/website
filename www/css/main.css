@@ -368,12 +368,13 @@ a.icon:hover {
 .project-description {
     margin: 0 0 0.5em 0;
     color: #cccccc;
-    font-size: 1em;
-    line-height: 1.4;
+    font-size: 1.1em;
+    line-height: 1.6;
 }
 
 .project-tags {
     margin: 0.8em 0;
+    font-size: 1.1em;
 }
 
 .youtube-video {

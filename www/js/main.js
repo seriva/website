@@ -99,14 +99,10 @@ const Templates = {
             <div class="download-buttons">${linksHtml}</div>
         </div>`,
 
-    projectTitle: (title) => 
-        `<h1 class="project-title">${title}</h1>`,
-
-    projectDescription: (description) => 
-        `<p class="project-description">${description}</p>`,
-
-    projectTags: (tags) => 
-        `<div class="project-tags">${tags.map(tag => `<span class="item-tag">${tag}</span>`).join(' ')}</div>`,
+    projectHeader: (title, description, tags) => `
+        <h1 class="project-title">${title}</h1>
+        <p class="project-description">${description}</p>
+        <div class="project-tags">${tags.map(tag => `<span class="item-tag">${tag}</span>`).join(' ')}</div>`,
 
     mediaSection: (videosHtml) => `
         <div class="markdown-body">
@@ -464,9 +460,7 @@ export const loadProjectPage = async (projectId) => {
     document.title = (projectsData || await loadProjectsData())?.site?.title || 'portfolio.example.com';
     
     const parts = [
-        Templates.projectTitle(project.title),
-        Templates.projectDescription(project.description),
-        Templates.projectTags(project.tags)
+        Templates.projectHeader(project.title, project.description, project.tags)
     ];
     
     if (project.github_repo) {
