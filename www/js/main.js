@@ -1,4 +1,20 @@
 // ===========================
+// CONSTANTS
+// ===========================
+
+const CONSTANTS = {
+	PRISM_CDN_BASE: "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-",
+	DEFAULT_THEME: "tomorrow",
+	DEFAULT_TITLE: "portfolio.example.com",
+	DEFAULT_EMAIL: "contact@example.com",
+	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
+	MOBILE_BREAKPOINT: 767,
+	PRELOAD_DELAY: 100,
+	BLUR_DELAY: 100,
+	THEME_APPLY_DELAY: 200,
+};
+
+// ===========================
 // HTML TEMPLATES
 // ===========================
 
@@ -113,38 +129,66 @@ const Templates = {
 // APPLICATION CODE
 // ===========================
 
-// Helper function to get Prism theme URL
+// ===========================
+// UTILITY FUNCTIONS
+// ===========================
+
+/**
+ * Get the Prism theme URL for syntax highlighting
+ * @param {string} themeName - The theme name
+ * @returns {string} The complete URL to the theme CSS
+ */
 const getPrismThemeUrl = (themeName) =>
-	`https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-${themeName}.min.css`;
+	`${CONSTANTS.PRISM_CDN_BASE}${themeName}.min.css`;
 
-// Combined email function with error fallback
+/**
+ * Handle email click events with fallback
+ * @param {Event} event - The click event
+ * @returns {Promise<boolean>} Always returns false to prevent default behavior
+ */
 const Email = async (event) => {
-	event?.preventDefault?.();
-	event?.stopPropagation?.();
+	try {
+		event?.preventDefault?.();
+		event?.stopPropagation?.();
 
-	const data = projectsData || (await loadProjectsData().catch(() => null));
-	const email = data?.site?.email;
-	window.location.href = email
-		? `mailto:${email.name}@${email.domain}`
-		: "mailto:contact@example.com";
+		const data = projectsData || (await loadProjectsData().catch(() => null));
+		const email = data?.site?.email;
+		window.location.href = email
+			? `mailto:${email.name}@${email.domain}`
+			: `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
+	} catch (error) {
+		console.error("Error handling email click:", error);
+		window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
+	}
 	return false;
 };
 
 // Make globally available for onclick handlers
 window.Email = Email;
 
-// Combined function to apply Prism theme to zero-md elements
+/**
+ * Apply Prism theme to all zero-md elements
+ * @param {string} themeName - The theme name to apply
+ */
 const applyThemeToZeroMd = (
-	themeName = projectsData?.site?.colors?.code?.theme || "tomorrow",
+	themeName = projectsData?.site?.colors?.code?.theme ||
+		CONSTANTS.DEFAULT_THEME,
 ) => {
-	if (!themeName) return;
-	const themeUrl = getPrismThemeUrl(themeName);
-	document.querySelectorAll("zero-md").forEach((el) => {
-		el.setAttribute("css-urls", JSON.stringify([themeUrl]));
-	});
+	try {
+		if (!themeName) return;
+		const themeUrl = getPrismThemeUrl(themeName);
+		document.querySelectorAll("zero-md").forEach((el) => {
+			el.setAttribute("css-urls", JSON.stringify([themeUrl]));
+		});
+	} catch (error) {
+		console.error("Error applying theme to zero-md elements:", error);
+	}
 };
 
-// Function to update meta tags from JSON data
+/**
+ * Update page meta tags from site data
+ * @param {Object} siteData - Site configuration data
+ */
 const updateMetaTags = (siteData) => {
 	if (!siteData) return;
 
@@ -165,22 +209,38 @@ const updateMetaTags = (siteData) => {
 	});
 };
 
-// Fullscreen function for demo iframes
+/**
+ * Request fullscreen for demo iframe
+ */
 const fullscreen = () => {
-	const iframe = document.getElementById("demo");
-	if (!iframe) return;
+	try {
+		const iframe = document.getElementById("demo");
+		if (!iframe) {
+			console.warn("Demo iframe not found for fullscreen request");
+			return;
+		}
 
-	const request =
-		iframe.requestFullscreen ||
-		iframe.webkitRequestFullscreen ||
-		iframe.mozRequestFullScreen ||
-		iframe.msRequestFullscreen;
-	request?.call(iframe);
+		const request =
+			iframe.requestFullscreen ||
+			iframe.webkitRequestFullscreen ||
+			iframe.mozRequestFullScreen ||
+			iframe.msRequestFullscreen;
+
+		if (request) {
+			request.call(iframe);
+		} else {
+			console.warn("Fullscreen API not supported by this browser");
+		}
+	} catch (error) {
+		console.error("Error requesting fullscreen:", error);
+	}
 };
 
 window.fullscreen = fullscreen;
 
-// Optimized mobile menu management
+/**
+ * Mobile menu management with Bootstrap integration
+ */
 const MobileMenu = {
 	close() {
 		const collapseElement = document.querySelector(".navbar-collapse");
@@ -197,6 +257,10 @@ const MobileMenu = {
 		}
 	},
 
+	/**
+	 * Add click handler to element for mobile menu management
+	 * @param {HTMLElement} element - Element to add handler to
+	 */
 	addClickHandler(element) {
 		element.addEventListener("click", () => {
 			if (
@@ -205,25 +269,33 @@ const MobileMenu = {
 			) {
 				this.close();
 			}
-			setTimeout(() => element.blur(), 100);
+			setTimeout(() => element.blur(), CONSTANTS.BLUR_DELAY);
 		});
 	},
 };
 
 window.closeMobileMenu = () => MobileMenu.close();
 
-// Optimized GitHub README fetching with caching
+// ===========================
+// GITHUB API INTEGRATION
+// ===========================
+
+/**
+ * Fetch GitHub README with caching and fallback branches
+ * @param {string} repoName - Repository name
+ * @returns {Promise<string|null>} README content or null if not found
+ */
 const fetchGitHubReadme = async (repoName) => {
 	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
 
 	const data = projectsData || (await loadProjectsData());
 	const username = data?.site?.github_username || "seriva";
+	const branches = ["master", "main"];
 
-	for (const branch of ["master", "main"]) {
+	for (const branch of branches) {
 		try {
-			const response = await fetch(
-				`https://raw.githubusercontent.com/${username}/${repoName}/${branch}/README.md`,
-			);
+			const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
+			const response = await fetch(url);
 			if (response.ok) {
 				const content = await response.text();
 				readmeCache.set(repoName, content);
@@ -240,7 +312,9 @@ const fetchGitHubReadme = async (repoName) => {
 	return null;
 };
 
-// Preload GitHub READMEs with rate limiting
+/**
+ * Preload GitHub READMEs with rate limiting to improve performance
+ */
 const preloadGitHubReadmes = async () => {
 	const data = projectsData || (await loadProjectsData());
 	const repos =
@@ -248,43 +322,75 @@ const preloadGitHubReadmes = async () => {
 		[];
 
 	for (const repo of repos) {
-		await new Promise((resolve) => setTimeout(resolve, 100));
+		await new Promise((resolve) =>
+			setTimeout(resolve, CONSTANTS.PRELOAD_DELAY),
+		);
 		fetchGitHubReadme(repo).catch(() => {});
 	}
 };
 
-// Load GitHub README content - optimized
+/**
+ * Load GitHub README content into specified container
+ * @param {string} repoName - Repository name
+ * @param {string} containerId - Container element ID
+ */
 export const loadGitHubReadme = async (repoName, containerId) => {
-	const container = document.getElementById(containerId);
-	if (!container) return;
+	try {
+		const container = document.getElementById(containerId);
+		if (!container) {
+			console.warn(`Container with ID '${containerId}' not found`);
+			return;
+		}
 
-	const content = await fetchGitHubReadme(repoName);
-	container.innerHTML = content
-		? Templates.zeroMd(
-				content,
-				getPrismThemeUrl(projectsData?.site?.colors?.code?.theme || "tomorrow"),
-			)
-		: Templates.githubReadmeError();
+		const content = await fetchGitHubReadme(repoName);
+		const themeName =
+			projectsData?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
+
+		container.innerHTML = content
+			? Templates.zeroMd(content, getPrismThemeUrl(themeName))
+			: Templates.githubReadmeError();
+	} catch (error) {
+		console.error(`Error loading GitHub README for ${repoName}:`, error);
+		const container = document.getElementById(containerId);
+		if (container) {
+			container.innerHTML = Templates.githubReadmeError();
+		}
+	}
 };
 
-// Global variable to store projects data
+// ===========================
+// STATE MANAGEMENT
+// ===========================
+
+// Global state variables for application data
 let projectsData = null;
 let dataLoadPromise = null;
-
-// Cache for GitHub READMEs
 const readmeCache = new Map();
 
-// Enhanced DOM element caching
+// ===========================
+// DOM MANAGEMENT
+// ===========================
+
+/**
+ * Enhanced DOM element caching for performance
+ */
 const DOMCache = {
 	navbar: null,
 	main: null,
 	dropdownMenu: null,
 
+	/**
+	 * Initialize DOM cache
+	 */
 	init() {
 		this.navbar = document.getElementById("navbar-container");
 		this.main = document.getElementById("main-content");
 	},
 
+	/**
+	 * Get projects dropdown menu element with lazy loading
+	 * @returns {HTMLElement|null}
+	 */
 	getDropdown() {
 		if (!this.dropdownMenu) {
 			this.dropdownMenu = document.getElementById("projects-dropdown");
@@ -293,7 +399,17 @@ const DOMCache = {
 	},
 };
 
-// Create navbar HTML
+// ===========================
+// NAVIGATION & UI FUNCTIONS
+// ===========================
+
+/**
+ * Create navbar HTML structure
+ * @param {Array} pages - Array of page objects
+ * @param {Array} socialLinks - Array of social link objects
+ * @param {string} siteTitle - Site title
+ * @returns {string} Complete navbar HTML
+ */
 const createNavbar = (
 	pages = [],
 	socialLinks = [],
@@ -312,7 +428,9 @@ const createNavbar = (
 	return Templates.navbar(pageLinks, socialLinksHtml, siteTitle);
 };
 
-// Inject navbar into the page
+/**
+ * Inject navbar into the page with event handlers
+ */
 const injectNavbar = async () => {
 	if (!DOMCache.navbar) return;
 
@@ -324,7 +442,7 @@ const injectNavbar = async () => {
 	DOMCache.navbar.innerHTML = createNavbar(
 		pages,
 		data?.site?.social || [],
-		data?.site?.title || "portfolio.example.com",
+		data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 	);
 
 	// Initialize Bootstrap dropdowns
@@ -341,12 +459,19 @@ const injectNavbar = async () => {
 	const toggleBtn = DOMCache.navbar.querySelector(".navbar-toggler");
 	if (toggleBtn) {
 		toggleBtn.addEventListener("click", () =>
-			setTimeout(() => toggleBtn.blur(), 100),
+			setTimeout(() => toggleBtn.blur(), CONSTANTS.BLUR_DELAY),
 		);
 	}
 };
 
-// Optimized function to load content data from YAML (with caching)
+// ===========================
+// DATA LOADING & MANAGEMENT
+// ===========================
+
+/**
+ * Load content data from YAML with caching and error handling
+ * @returns {Promise<Object|null>} Projects data or null on error
+ */
 export const loadProjectsData = async () => {
 	if (projectsData) return projectsData;
 	if (dataLoadPromise) return dataLoadPromise;
@@ -365,7 +490,7 @@ export const loadProjectsData = async () => {
 			projectsData = jsyaml.load(yamlText);
 			if (projectsData?.site?.colors) {
 				applyColorScheme(projectsData.site.colors);
-				setTimeout(() => applyThemeToZeroMd(), 200);
+				setTimeout(() => applyThemeToZeroMd(), CONSTANTS.THEME_APPLY_DELAY);
 			}
 			return projectsData;
 		})
@@ -377,7 +502,10 @@ export const loadProjectsData = async () => {
 	return dataLoadPromise;
 };
 
-// Function to apply color scheme from content.json
+/**
+ * Apply color scheme from configuration to CSS custom properties
+ * @param {Object} colors - Color configuration object
+ */
 const applyColorScheme = (colors) => {
 	if (!colors) return;
 
@@ -402,35 +530,64 @@ const applyColorScheme = (colors) => {
 	if (colors.code?.theme) applyThemeToZeroMd(colors.code.theme);
 };
 
-// Get a specific project by ID
+// ===========================
+// PROJECT MANAGEMENT FUNCTIONS
+// ===========================
+
+/**
+ * Get a specific project by ID
+ * @param {string} projectId - Project identifier
+ * @returns {Promise<Object|null>} Project object or null if not found
+ */
 export const getProject = async (projectId) => {
 	const data = await loadProjectsData();
 	return data?.projects?.find((project) => project.id === projectId) || null;
 };
 
-// Load project links dynamically
+/**
+ * Load project links dynamically into specified container
+ * @param {string} projectId - Project identifier
+ * @param {string} containerId - Container element ID
+ */
 export const loadProjectLinks = async (projectId, containerId) => {
-	const container = document.getElementById(containerId);
-	if (!container) return;
+	try {
+		const container = document.getElementById(containerId);
+		if (!container) {
+			console.warn(`Container with ID '${containerId}' not found`);
+			return;
+		}
 
-	const project = await getProject(projectId);
-	if (!project?.links) {
-		container.style.display = "none";
-		return;
+		const project = await getProject(projectId);
+		if (!project?.links) {
+			container.style.display = "none";
+			return;
+		}
+
+		const linksHtml = project.links
+			.map((link) => Templates.projectLink(link))
+			.join("");
+		container.innerHTML = Templates.projectLinksSection(linksHtml);
+	} catch (error) {
+		console.error(`Error loading project links for ${projectId}:`, error);
+		const container = document.getElementById(containerId);
+		if (container) {
+			container.style.display = "none";
+		}
 	}
-
-	const linksHtml = project.links
-		.map((link) => Templates.projectLink(link))
-		.join("");
-	container.innerHTML = Templates.projectLinksSection(linksHtml);
 };
 
-// Utility to set page title
+/**
+ * Set page title from data or use default
+ * @param {Object} data - Site data
+ */
 const setPageTitle = (data) => {
-	document.title = data?.site?.title || "portfolio.example.com";
+	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 };
 
-// Function to load a generic page - optimized
+/**
+ * Load a generic page by ID
+ * @param {string} pageId - Page identifier
+ */
 export const loadPage = async (pageId) => {
 	const data = projectsData || (await loadProjectsData());
 	if (!DOMCache.main) return;
@@ -444,7 +601,10 @@ export const loadPage = async (pageId) => {
 		);
 };
 
-// Load individual project page - optimized
+/**
+ * Load individual project page with all sections
+ * @param {string} projectId - Project identifier
+ */
 export const loadProjectPage = async (projectId) => {
 	if (!DOMCache.main) return;
 
@@ -477,7 +637,9 @@ export const loadProjectPage = async (projectId) => {
 	DOMCache.main.innerHTML = parts.join("");
 };
 
-// Populate projects dropdown menu - optimized
+/**
+ * Populate projects dropdown menu with all projects
+ */
 export const loadProjectsDropdown = async () => {
 	const dropdown = DOMCache.getDropdown();
 	const data = projectsData || (await loadProjectsData());
@@ -491,7 +653,9 @@ export const loadProjectsDropdown = async () => {
 	dropdown.querySelectorAll("a").forEach(MobileMenu.addClickHandler);
 };
 
-// Load additional content (GitHub README, project links)
+/**
+ * Load additional content like GitHub READMEs and project links
+ */
 export const loadAdditionalContent = () => {
 	const readme = document.getElementById("github-readme");
 	const links = document.getElementById("project-links");
@@ -502,7 +666,13 @@ export const loadAdditionalContent = () => {
 		loadProjectLinks(links.dataset.project, "project-links");
 };
 
-// SPA routing function
+// ===========================
+// ROUTING & PAGE MANAGEMENT
+// ===========================
+
+/**
+ * Handle SPA routing based on URL parameters
+ */
 const handleRoute = async () => {
 	MobileMenu.close();
 
@@ -538,7 +708,13 @@ const handleRoute = async () => {
 	}
 };
 
-// Initialize page when DOM is loaded
+// ===========================
+// APPLICATION INITIALIZATION
+// ===========================
+
+/**
+ * Initialize the application when DOM is loaded
+ */
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		DOMCache.init();
@@ -567,7 +743,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 });
 
-// Update navbar links for SPA routing
+/**
+ * Update navbar links to handle SPA routing
+ */
 const updateNavbarLinks = () => {
 	document.querySelectorAll("[data-spa-route]").forEach((link) => {
 		link.addEventListener("click", (e) => {
@@ -583,11 +761,13 @@ const updateNavbarLinks = () => {
 	});
 };
 
-// Add mobile menu outside click handler
+/**
+ * Add click handler to close mobile menu when clicking outside
+ */
 const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
 		if (
-			window.innerWidth <= 767 &&
+			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
 			DOMCache.navbar &&
 			!DOMCache.navbar.contains(event.target)
 		) {
