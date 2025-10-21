@@ -24,7 +24,7 @@ site:
     border: "#44403C"
     hover: "#451A03"
     code:
-      theme: "okaidia"
+      theme: "monokai"
   
   # Social media links
   social:

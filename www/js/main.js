@@ -3,8 +3,8 @@
 // ===========================
 
 const CONSTANTS = {
-	PRISM_CDN_BASE: "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-",
-	DEFAULT_THEME: "tomorrow",
+	HLJS_CDN_BASE: "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/",
+	DEFAULT_THEME: "github-dark", // Highlight.js theme
 	DEFAULT_TITLE: "portfolio.example.com",
 	DEFAULT_EMAIL: "contact@example.com",
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
@@ -96,12 +96,79 @@ const Templates = {
             <p>${message}</p>
         </div>`,
 
-	zeroMd: (content, themeUrl) => `
-        <zero-md css-urls='["${themeUrl}"]'>
+	zeroMd: (content, themeUrl, colors) => `
+        <zero-md>
             <script type="text/markdown">${content}</script>
-            <template>
-                <link rel="stylesheet" href="css/main.css">
+            <template data-append>
                 <link rel="stylesheet" href="${themeUrl}">
+                <style>
+                    /* Essential shadow DOM styles - matches main.css .markdown-body */
+                    :host {
+                        display: block;
+                        width: 100%;
+                        background-color: transparent;
+                    }
+                    
+                    /* Base markdown-body styling */
+                    .markdown-body {
+                        font-family: "Raleway", sans-serif;
+                        font-size: 1em;
+                        line-height: 1.6;
+                        color: ${colors.textLight};
+                        text-align: left;
+                        background-color: transparent;
+                    }
+                    
+                    /* Heading styles - remove default borders and set colors */
+                    .markdown-body h1,
+                    .markdown-body h2,
+                    .markdown-body h3,
+                    .markdown-body h4,
+                    .markdown-body h5,
+                    .markdown-body h6 {
+                        color: ${colors.text};
+                        margin: 1em 0 0.5em;
+                        font-weight: bold;
+                        line-height: 1.25;
+                        border-bottom: none !important;
+                        text-decoration: none;
+                        background-color: transparent;
+                    }
+                    
+                    .markdown-body h1 { font-size: 1.8em; margin-top: 0; }
+                    .markdown-body h2 { font-size: 1.4em; }
+                    .markdown-body h3 { font-size: 1.2em; }
+                    .markdown-body h4 { font-size: 1.1em; }
+                    
+                    /* Paragraph and list text */
+                    .markdown-body p,
+                    .markdown-body li {
+                        margin: 0.5em 0;
+                        line-height: 1.6;
+                        font-size: 1.1em;
+                        color: ${colors.textLight};
+                    }
+                    
+                    .markdown-body ul,
+                    .markdown-body ol {
+                        margin: 0.5em 0;
+                        padding-left: 2em;
+                    }
+                    
+                    .markdown-body li {
+                        margin: 0.25em 0;
+                    }
+                    
+                    /* Links */
+                    .markdown-body a {
+                        color: ${colors.primary};
+                        text-decoration: none;
+                    }
+                    
+                    .markdown-body a:hover {
+                        text-decoration: underline;
+                    }
+                </style>
             </template>
         </zero-md>`,
 
@@ -143,14 +210,12 @@ const Templates = {
 // ===========================
 
 /**
- * Get the Prism theme URL for syntax highlighting
- * @param {string} themeName - The theme name
+ * Get the Highlight.js theme URL for syntax highlighting (zero-md v3)
+ * @param {string} themeName - The Highlight.js theme name
  * @returns {string} The complete URL to the theme CSS
  */
-const getPrismThemeUrl = (themeName) =>
-	`${CONSTANTS.PRISM_CDN_BASE}${themeName}.min.css`;
-
-/**
+const getHljsThemeUrl = (themeName) =>
+	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`; /**
  * Handle email click events with fallback
  * @param {Event} event - The click event
  * @returns {Promise<boolean>} Always returns false to prevent default behavior
@@ -176,7 +241,7 @@ const Email = async (event) => {
 window.Email = Email;
 
 /**
- * Apply Prism theme to all zero-md elements
+ * Apply Highlight.js theme to all zero-md elements (zero-md v3)
  * @param {string} themeName - The theme name to apply
  */
 const applyThemeToZeroMd = (
@@ -185,9 +250,37 @@ const applyThemeToZeroMd = (
 ) => {
 	try {
 		if (!themeName) return;
-		const themeUrl = getPrismThemeUrl(themeName);
+		const themeUrl = getHljsThemeUrl(themeName);
+
 		document.querySelectorAll("zero-md").forEach((el) => {
-			el.setAttribute("css-urls", JSON.stringify([themeUrl]));
+			// For v3, we need to recreate the element to update the theme
+			// Since shadow DOM is sealed, we trigger a re-render
+			const template = el.querySelector("template[data-append]");
+			if (template) {
+				// Update the Highlight.js theme link in the template
+				const existingLinks = template.content.querySelectorAll(
+					'link[href*="highlight.js"], link[href*="hljs"]',
+				);
+				existingLinks.forEach((link) => {
+					link.href = themeUrl;
+				});
+
+				// If no existing link, add one
+				if (existingLinks.length === 0) {
+					const link = document.createElement("link");
+					link.rel = "stylesheet";
+					link.href = themeUrl;
+					template.content.appendChild(link);
+				}
+
+				// Force re-render by temporarily removing and re-adding
+				const parent = el.parentNode;
+				const nextSibling = el.nextSibling;
+				parent.removeChild(el);
+				setTimeout(() => {
+					parent.insertBefore(el, nextSibling);
+				}, 10);
+			}
 		});
 	} catch (error) {
 		console.error("Error applying theme to zero-md elements:", error);
@@ -354,9 +447,10 @@ export const loadGitHubReadme = async (repoName, containerId) => {
 		const content = await fetchGitHubReadme(repoName);
 		const themeName =
 			projectsData?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
+		const colors = projectsData?.site?.colors || {};
 
 		container.innerHTML = content
-			? Templates.zeroMd(content, getPrismThemeUrl(themeName))
+			? Templates.zeroMd(content, getHljsThemeUrl(themeName), colors)
 			: Templates.githubReadmeError();
 	} catch (error) {
 		console.error(`Error loading GitHub README for ${repoName}:`, error);

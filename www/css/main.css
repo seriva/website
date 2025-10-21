@@ -639,10 +639,27 @@ pre code {
 	padding: 0;
 }
 
-/* Zero-md styling */
+/* ===========================
+   ZERO-MD V3 STYLING
+   =========================== */
+
+/* External container styling - only styles that can reach outside shadow DOM */
 zero-md {
 	display: block;
 	text-align: left;
+	width: 100%;
+	background-color: var(--background-color);
+}
+
+/* Note: All internal zero-md styling is injected via template data-append
+   because shadow DOM isolates styles. See Templates.zeroMd() in main.js */
+
+zero-md pre code:not([class*="language-"]) {
+	background-color: transparent;
+	padding: 0;
+	font-size: 0.85em;
+	display: block;
+	color: var(--text-light);
 }
 
 /* ===========================
@@ -783,8 +800,9 @@ textarea:focus {
 	line-height: 1.4;
 }
 
-/* Prism.js code styling */
-.markdown-body pre[class*="language-"] code {
+/* Highlight.js code styling */
+.markdown-body pre[class*="language-"] code,
+.markdown-body pre code[class*="hljs"] {
 	font-family: inherit;
 }
 
