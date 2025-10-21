@@ -573,14 +573,21 @@ a.icon:hover {
 	transform: translateY(0);
 }
 
-.download-btn i,
 #fullscreen i {
 	font-size: 1.5em;
 	transition: transform var(--transition-normal);
 }
 
-.download-btn:hover i,
 #fullscreen:hover i {
+	transform: scale(1.1);
+}
+
+.download-btn i {
+	font-size: 1.5em;
+	transition: transform var(--transition-normal);
+}
+
+.download-btn:hover i {
 	transform: scale(1.1);
 }
 
