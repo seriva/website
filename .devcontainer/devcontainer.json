@@ -1,0 +1,32 @@
+{
+	"name": "Website Dev Environment",
+	"image": "alpine:3.19",
+
+	"postCreateCommand": "apk add --no-cache curl git darkhttpd && curl -fsSL https://github.com/biomejs/biome/releases/latest/download/biome-linux-x64-musl -o /tmp/biome && chmod 755 /tmp/biome && mv /tmp/biome /usr/local/bin/biome && git config --global --add safe.directory /workspaces/website && /usr/local/bin/biome --version",
+
+	"customizations": {
+		"vscode": {
+			"extensions": ["biomejs.biome"],
+			"settings": {
+				"editor.defaultFormatter": "biomejs.biome",
+				"editor.formatOnSave": true,
+				"editor.codeActionsOnSave": {
+					"quickfix.biome": "explicit",
+					"source.organizeImports.biome": "explicit"
+				},
+				"extensions.ignoreRecommendations": true,
+				"biome.lsp.bin": "/usr/local/bin/biome"
+			}
+		}
+	},
+
+	"forwardPorts": [8081],
+	"portsAttributes": {
+		"8081": {
+			"label": "Dev Server",
+			"onAutoForward": "notify"
+		}
+	},
+
+	"remoteUser": "root"
+}

@@ -21,10 +21,29 @@ Key features:
 - Zero-md for markdown rendering with Prism.js syntax highlighting
 - jsDelivr CDN for external dependencies
 
+## Development Environment
+
+This project includes a VS Code devcontainer for a consistent development environment:
+
+- **Container**: Alpine Linux 3.19
+- **Dev Server**: darkhttpd (lightweight HTTP server)
+- **Code Quality**: Biome for linting and formatting
+- **Port**: 8081 (auto-forwarded)
+
+### Prerequisites
+- VS Code with Dev Containers extension
+- Docker
+
 ## Getting Started
 
-Start a local development server:
+### Using Dev Container (Recommended)
+1. Open project in VS Code
+2. When prompted, click "Reopen in Container" or use `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
+3. VS Code will build the container and install dependencies (darkhttpd + Biome)
+4. Run the dev server: `Ctrl+Shift+P` → "Tasks: Run Task" → "Dev Server"
+5. Open `http://localhost:8081`
 
+### Manual Setup
 **Using VS Code:**
 1. Open project in VS Code
 2. `Ctrl+Shift+P` → "Tasks: Run Task" → "Dev Server"
@@ -35,6 +54,14 @@ cd www && python3 -m http.server 8081
 ```
 
 Then open `http://localhost:8081`
+
+### Code Quality Tools
+
+The devcontainer includes Biome for code formatting and linting:
+
+- **Format code**: `Ctrl+Shift+P` → "Tasks: Run Task" → "Format Code"
+- **Check code quality**: `Ctrl+Shift+P` → "Tasks: Run Task" → "Check Code Quality"
+- **Auto-format**: Enabled on save in VS Code
 
 ## Configuration
 
