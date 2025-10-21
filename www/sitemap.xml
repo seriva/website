@@ -16,52 +16,68 @@
     <priority>0.9</priority>
   </url>
   
+  <!-- Blog -->
+  <url>
+    <loc>https://luukvanvenrooij.nl/?blog</loc>
+    <lastmod>2025-10-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Blog Post -->
+  <url>
+    <loc>https://luukvanvenrooij.nl/?blog=2025-10-21-building-portfolio-website</loc>
+    <lastmod>2025-10-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
   <!-- Projects -->
   <url>
-    <loc>https://luukvanvenrooij.nl/?id=simplefps</loc>
-    <lastmod>2025-10-20</lastmod>
+    <loc>https://luukvanvenrooij.nl/?project=snakeai</loc>
+    <lastmod>2025-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://luukvanvenrooij.nl/?id=snakeai</loc>
-    <lastmod>2025-10-20</lastmod>
+    <loc>https://luukvanvenrooij.nl/?project=simplefps</loc>
+    <lastmod>2025-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://luukvanvenrooij.nl/?id=microtastic</loc>
-    <lastmod>2025-10-20</lastmod>
+    <loc>https://luukvanvenrooij.nl/?project=microtastic</loc>
+    <lastmod>2025-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://luukvanvenrooij.nl/?id=website</loc>
-    <lastmod>2025-10-20</lastmod>
+    <loc>https://luukvanvenrooij.nl/?project=website</loc>
+    <lastmod>2025-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://luukvanvenrooij.nl/?id=qdfps</loc>
-    <lastmod>2025-10-20</lastmod>
+    <loc>https://luukvanvenrooij.nl/?project=qdfps</loc>
+    <lastmod>2025-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>https://luukvanvenrooij.nl/?id=genesisdevice</loc>
-    <lastmod>2025-10-20</lastmod>
+    <loc>https://luukvanvenrooij.nl/?project=genesisdevice</loc>
+    <lastmod>2025-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>https://luukvanvenrooij.nl/?id=astrohunter</loc>
-    <lastmod>2025-10-20</lastmod>
+    <loc>https://luukvanvenrooij.nl/?project=astrohunter</loc>
+    <lastmod>2025-10-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
