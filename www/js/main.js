@@ -123,6 +123,15 @@ const Templates = {
             <h2>Media</h2>
             ${videosHtml}
         </div>`,
+
+	footer: (authorName, currentYear) => `
+        <footer class="footer mt-auto py-1" style="background-color: var(--header-color); border-top: var(--border-width) solid var(--accent);">
+            <div class="container-fluid" style="max-width: 1000px;">
+                <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.75em;">
+                    &copy; ${currentYear} ${authorName}. All rights reserved.
+                </p>
+            </div>
+        </footer>`,
 };
 
 // ===========================
@@ -377,6 +386,7 @@ const readmeCache = new Map();
 const DOMCache = {
 	navbar: null,
 	main: null,
+	footer: null,
 	dropdownMenu: null,
 
 	/**
@@ -385,6 +395,7 @@ const DOMCache = {
 	init() {
 		this.navbar = document.getElementById("navbar-container");
 		this.main = document.getElementById("main-content");
+		this.footer = document.getElementById("footer-container");
 	},
 
 	/**
@@ -426,6 +437,47 @@ const createNavbar = (
 		.join("");
 
 	return Templates.navbar(pageLinks, socialLinksHtml, siteTitle);
+};
+
+/**
+ * Get current year from a reliable time server with fallback
+ * @returns {Promise<number>} Current year
+ */
+const getCurrentYear = async () => {
+	try {
+		// Try to get time from WorldTimeAPI (free and reliable)
+		const response = await fetch("https://worldtimeapi.org/api/timezone/UTC", {
+			method: "GET",
+			cache: "no-cache",
+		});
+
+		if (response.ok) {
+			const data = await response.json();
+			const serverDate = new Date(data.datetime);
+			return serverDate.getFullYear();
+		}
+	} catch (error) {
+		console.warn(
+			"Failed to fetch server time, using local time as fallback:",
+			error,
+		);
+	}
+
+	// Fallback to local system time
+	return new Date().getFullYear();
+};
+
+/**
+ * Inject footer into the page
+ */
+const injectFooter = async () => {
+	if (!DOMCache.footer) return;
+
+	const data = projectsData || (await loadProjectsData());
+	const authorName = data?.site?.author || "Portfolio Owner";
+	const currentYear = await getCurrentYear();
+
+	DOMCache.footer.innerHTML = Templates.footer(authorName, currentYear);
 };
 
 /**
@@ -725,6 +777,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (data?.site) updateMetaTags(data.site);
 
 		await injectNavbar();
+		await injectFooter();
 		await loadProjectsDropdown();
 		await handleRoute();
 
