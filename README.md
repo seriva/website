@@ -1,8 +1,8 @@
 ## About
 
-This is my personal portfolio website. I originally built it with Hugo and a minimal theme, but wanted more control over the design and functionality, so I rewrote it as a simple single-page application.
+This is my personal portfolio website. I originally built it with [Hugo](https://gohugo.io/) and my [seriva/minimal](https://github.com/seriva/minimal-hugo-theme) theme, but wanted more control over the design and functionality, so I rewrote it as a simple single-page application.
 
-It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicated setup needed. The content is managed through a YAML file which makes editing much easier than dealing with escaped JSON strings.
+It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicated setup needed. The content is managed through a YAML file.
 
 Key features:
 - YAML configuration for easy content management
