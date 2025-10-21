@@ -267,7 +267,7 @@ const MobileMenu = {
 				!element.classList.contains("dropdown-toggle") &&
 				!element.hasAttribute("data-keep-menu")
 			) {
-				this.close();
+				MobileMenu.close();
 			}
 			setTimeout(() => element.blur(), CONSTANTS.BLUR_DELAY);
 		});
@@ -451,9 +451,9 @@ const injectNavbar = async () => {
 	});
 
 	// Add mobile menu click handlers
-	DOMCache.navbar.querySelectorAll("a").forEach((link) => {
+	for (const link of DOMCache.navbar.querySelectorAll("a")) {
 		MobileMenu.addClickHandler(link);
-	});
+	}
 
 	// Handle mobile menu button blur
 	const toggleBtn = DOMCache.navbar.querySelector(".navbar-toggler");
@@ -650,7 +650,9 @@ export const loadProjectsDropdown = async () => {
 		.map((p) => Templates.projectDropdownItem(p.id, p.title))
 		.join("");
 
-	dropdown.querySelectorAll("a").forEach(MobileMenu.addClickHandler);
+	for (const link of dropdown.querySelectorAll("a")) {
+		MobileMenu.addClickHandler(link);
+	}
 };
 
 /**
