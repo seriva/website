@@ -644,34 +644,6 @@ const createNavbar = (
 };
 
 /**
- * Get current year from a reliable time server with fallback
- * @returns {Promise<number>} Current year
- */
-const getCurrentYear = async () => {
-	try {
-		// Try to get time from WorldTimeAPI (free and reliable)
-		const response = await fetch("https://worldtimeapi.org/api/timezone/UTC", {
-			method: "GET",
-			cache: "no-cache",
-		});
-
-		if (response.ok) {
-			const data = await response.json();
-			const serverDate = new Date(data.datetime);
-			return serverDate.getFullYear();
-		}
-	} catch (error) {
-		console.warn(
-			"Failed to fetch server time, using local time as fallback:",
-			error,
-		);
-	}
-
-	// Fallback to local system time
-	return new Date().getFullYear();
-};
-
-/**
  * Inject footer into the page
  */
 const injectFooter = async () => {
@@ -679,7 +651,7 @@ const injectFooter = async () => {
 
 	const data = projectsData || (await loadProjectsData());
 	const authorName = data?.site?.author || "Portfolio Owner";
-	const currentYear = await getCurrentYear();
+	const currentYear = new Date().getFullYear();
 
 	DOMCache.footer.innerHTML = Templates.footer(authorName, currentYear);
 };
