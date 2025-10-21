@@ -64,6 +64,17 @@ const Templates = {
 	projectDropdownItem: (projectId, projectTitle) =>
 		`<li><a class="dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
 
+	projectsDropdown: () => `
+		<li class="nav-item navbar-menu dropdown">
+			<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				Projects
+			</a>
+			<ul class="dropdown-menu" id="projects-dropdown">
+				<li><a class="dropdown-item" href="#">Loading projects...</a></li>
+			</ul>
+		</li>
+	`,
+
 	projectLink: (link) => `
         <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn" onclick="closeMobileMenu()">
             <i class="${link.icon}"></i>
@@ -598,16 +609,7 @@ const createNavbar = (
 		: "";
 
 	// Create projects dropdown (always present)
-	const projectsDropdown = `
-		<li class="nav-item navbar-menu dropdown">
-			<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-				Projects
-			</a>
-			<ul class="dropdown-menu" id="projects-dropdown">
-				<li><a class="dropdown-item" href="#">Loading projects...</a></li>
-			</ul>
-		</li>
-	`;
+	const projectsDropdown = Templates.projectsDropdown();
 
 	// Create page links (sorted by order)
 	const pageLinks = otherPages
@@ -687,7 +689,6 @@ const injectNavbar = async () => {
 			id: "blog",
 			title: data.blog.title || "Blog",
 			showInNav: true,
-			order: data.blog.order || 999,
 		});
 	}
 
@@ -824,20 +825,23 @@ const parseBlogPost = (markdown) => {
  */
 const loadBlogPosts = async () => {
 	try {
-		// Load the blog manifest to get list of posts
-		const manifestResponse = await fetch("data/blog/manifest.json");
-		if (!manifestResponse.ok) {
-			console.error("Blog manifest not found");
+		// Get blog post list from content.yaml
+		const data = projectsData || (await loadProjectsData());
+		const postFiles = data?.blog?.posts || [];
+
+		if (postFiles.length === 0) {
+			console.info("No blog posts configured in content.yaml");
 			return [];
 		}
 
-		const manifest = await manifestResponse.json();
-
 		const posts = await Promise.all(
-			manifest.map(async ({ filename }) => {
+			postFiles.map(async (filename) => {
 				try {
 					const response = await fetch(`data/blog/${filename}`);
-					if (!response.ok) return null;
+					if (!response.ok) {
+						console.warn(`Blog post not found: ${filename}`);
+						return null;
+					}
 
 					const markdown = await response.text();
 					const { metadata, content } = parseBlogPost(markdown);

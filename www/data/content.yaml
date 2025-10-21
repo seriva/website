@@ -52,9 +52,12 @@ site:
 blog:
   title: "Blog"
   showInNav: false
-  order: 1
   postsPerPage: 5
   dateFormat: "MMMM D, YYYY"
+  # List your blog post markdown files here (filename only)
+  # They will be loaded from data/blog/ directory
+  posts:
+    - "2025-10-21-building-portfolio-website.md"
 
 # Project Portfolio
 projects:
