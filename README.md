@@ -148,25 +148,21 @@ tags: ["tag1", "tag2"]
 Write your content here in markdown...
 ```
 
-3. Update `data/blog/manifest.json` to include the new post:
-
-```json
-{
-  "filename": "2025-10-21-your-post-title.md",
-  "slug": "2025-10-21-your-post-title",
-  "date": "2025-10-21"
-}
-```
-
-### Blog Configuration
-
-Configure pagination and display settings in `content.yaml`:
+3. Add the filename to the `posts` array in `data/content.yaml`:
 
 ```yaml
 blog:
+  title: "Blog"
+  showInNav: true
+  order: 1
   postsPerPage: 5
   dateFormat: "MMMM D, YYYY"
+  posts:
+    - "2025-10-21-your-post-title.md"
+    - "2025-10-20-another-post.md"
 ```
+
+That's it! No need to maintain a separate manifest.json file. The blog posts are automatically sorted by date (newest first) and displayed with pagination.
 
 ## How it works
 
