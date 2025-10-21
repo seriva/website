@@ -6,6 +6,7 @@ It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicate
 
 Key features:
 - YAML configuration for easy content management
+- Built-in blog with markdown posts and pagination
 - Dynamic color themes you can change in the config
 - Font Awesome icons and Bootstrap for styling
 - Loads project READMEs directly from GitHub
@@ -125,9 +126,55 @@ colors:
 
 Available code themes: `okaidia`, `tomorrow`, `vs-dark`, `dark`
 
+## Blog Feature
+
+The blog system uses markdown files stored in `data/blog/`:
+
+### Adding a New Blog Post
+
+1. Create a new markdown file in `data/blog/` with the format `YYYY-MM-DD-title.md`
+2. Add frontmatter at the top:
+
+```markdown
+---
+title: "Your Post Title"
+date: "2025-10-21"
+excerpt: "A brief summary of your post"
+tags: ["tag1", "tag2"]
+---
+
+# Your Post Content
+
+Write your content here in markdown...
+```
+
+3. Update `data/blog/manifest.json` to include the new post:
+
+```json
+{
+  "filename": "2025-10-21-your-post-title.md",
+  "slug": "2025-10-21-your-post-title",
+  "date": "2025-10-21"
+}
+```
+
+### Blog Configuration
+
+Configure pagination and display settings in `content.yaml`:
+
+```yaml
+blog:
+  postsPerPage: 5
+  dateFormat: "MMMM D, YYYY"
+```
+
 ## How it works
 
-- `/` shows the about page
-- `/?id=project-id` shows individual projects
+- `/` shows the default page (configured with `default: true` in pages)
+- `/?page=<page-id>` shows any page (e.g., `/?page=about`)
+- `/?blog` shows the blog listing (if blog is enabled)
+- `/?blog&p=2` shows blog listing with pagination (page 2)
+- `/?blog=<slug>` shows individual blog posts (e.g., `/?blog=getting-started`)
+- `/?project=<project-id>` shows individual projects
 - Project READMEs are loaded from GitHub automatically 
 - Everything is client-side routed (no page reloads)

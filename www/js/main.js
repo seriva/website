@@ -19,7 +19,13 @@ const CONSTANTS = {
 // ===========================
 
 const Templates = {
-	navbar: (pageLinks, socialLinksHtml, siteTitle) => `
+	navbar: (
+		blogLink,
+		projectsDropdown,
+		pageLinks,
+		socialLinksHtml,
+		siteTitle,
+	) => `
     <nav class="navbar navbar-expand-md navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand d-md-none" href="#">${siteTitle}</a>
@@ -28,15 +34,9 @@ const Templates = {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    ${blogLink}
+                    ${projectsDropdown}
                     ${pageLinks}
-                    <li class="nav-item navbar-menu dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Projects
-                        </a>
-                        <ul class="dropdown-menu" id="projects-dropdown">
-                            <li><a class="dropdown-item" href="#">Loading projects...</a></li>
-                        </ul>
-                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     ${socialLinksHtml}
@@ -46,8 +46,10 @@ const Templates = {
     </nav>
     `,
 
-	pageLink: (pageId, pageTitle) =>
-		`<li class="nav-item navbar-menu"><a class="nav-link" href="/?page=${pageId}" data-spa-route="page">${pageTitle}</a></li>`,
+	pageLink: (pageId, pageTitle) => {
+		const href = pageId === "blog" ? "/?blog" : `/?page=${pageId}`;
+		return `<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
+	},
 
 	socialLink: ({
 		href = "#",
@@ -60,7 +62,7 @@ const Templates = {
 		`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${onclick && `onclick="${onclick}"`} ${target && `target="${target}"`} ${rel && `rel="${rel}"`} ${ariaLabel && `aria-label="${ariaLabel}"`}><i class="${icon}"></i></a></li>`,
 
 	projectDropdownItem: (projectId, projectTitle) =>
-		`<li><a class="dropdown-item" href="/?id=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
+		`<li><a class="dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
 
 	projectLink: (link) => `
         <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn" onclick="closeMobileMenu()">
@@ -87,6 +89,72 @@ const Templates = {
 
 	projectLinks: (projectId) =>
 		`<div id="project-links" data-project="${projectId}"></div>`,
+
+	blogPostCard: (post, index) => `
+        <article class="blog-post-card" data-index="${index}">
+            <h2 class="blog-post-title">
+                <a href="/?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
+            </h2>
+            <div class="blog-post-meta">
+                <span class="blog-post-date"><i class="far fa-calendar"></i> ${post.date}</span>
+                ${post.tags?.length ? `<span class="blog-post-tags">${post.tags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")}</span>` : ""}
+            </div>
+            <p class="blog-post-excerpt">${post.excerpt}</p>
+            <a href="/?blog=${post.slug}" class="blog-read-more" data-spa-route="blog">Read more →</a>
+        </article>`,
+
+	blogPagination: (currentPage, totalPages) => {
+		if (totalPages <= 1) return "";
+
+		let html =
+			'<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">';
+
+		// Previous button
+		html += `<li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+            <a class="page-link" href="/?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>`;
+
+		// Page numbers
+		for (let i = 1; i <= totalPages; i++) {
+			if (
+				i === 1 ||
+				i === totalPages ||
+				(i >= currentPage - 1 && i <= currentPage + 1)
+			) {
+				html += `<li class="page-item ${i === currentPage ? "active" : ""}">
+                    <a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a>
+                </li>`;
+			} else if (i === currentPage - 2 || i === currentPage + 2) {
+				html +=
+					'<li class="page-item disabled"><span class="page-link">...</span></li>';
+			}
+		}
+
+		// Next button
+		html += `<li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+            <a class="page-link" href="/?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>`;
+
+		html += "</ul></nav>";
+		return html;
+	},
+
+	blogPost: (post, content, themeUrl, colors) => `
+        <article class="blog-post-full">
+            <h1 class="project-title">${post.title}</h1>
+            <p class="project-description">${post.date}</p>
+            ${post.tags?.length ? `<div class="project-tags">${post.tags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")}</div>` : ""}
+            <div class="blog-post-content">
+                ${Templates.zeroMd(content, themeUrl, colors)}
+            </div>
+            <footer class="blog-post-footer">
+                <a href="/?blog" class="blog-back-link" data-spa-route="page">← Back to Blog</a>
+            </footer>
+        </article>`,
 
 	loadingSpinner: () => '<div class="loading-spinner">Loading...</div>',
 
@@ -510,7 +578,7 @@ const DOMCache = {
 
 /**
  * Create navbar HTML structure
- * @param {Array} pages - Array of page objects
+ * @param {Array} pages - Array of page objects (includes blog if configured)
  * @param {Array} socialLinks - Array of social link objects
  * @param {string} siteTitle - Site title
  * @returns {string} Complete navbar HTML
@@ -520,7 +588,29 @@ const createNavbar = (
 	socialLinks = [],
 	siteTitle = "portfolio.example.com",
 ) => {
-	const pageLinks = pages
+	// Separate blog from other pages
+	const blogPage = pages.find((page) => page.id === "blog");
+	const otherPages = pages.filter((page) => page.id !== "blog");
+
+	// Create blog link if it exists
+	const blogLink = blogPage
+		? Templates.pageLink(blogPage.id, blogPage.title)
+		: "";
+
+	// Create projects dropdown (always present)
+	const projectsDropdown = `
+		<li class="nav-item navbar-menu dropdown">
+			<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				Projects
+			</a>
+			<ul class="dropdown-menu" id="projects-dropdown">
+				<li><a class="dropdown-item" href="#">Loading projects...</a></li>
+			</ul>
+		</li>
+	`;
+
+	// Create page links (sorted by order)
+	const pageLinks = otherPages
 		.filter((page) => page.showInNav)
 		.sort((a, b) => a.order - b.order)
 		.map((page) => Templates.pageLink(page.id, page.title))
@@ -530,7 +620,13 @@ const createNavbar = (
 		.map((link) => Templates.socialLink(link))
 		.join("");
 
-	return Templates.navbar(pageLinks, socialLinksHtml, siteTitle);
+	return Templates.navbar(
+		blogLink,
+		projectsDropdown,
+		pageLinks,
+		socialLinksHtml,
+		siteTitle,
+	);
 };
 
 /**
@@ -584,6 +680,16 @@ const injectNavbar = async () => {
 	const pages = data?.pages
 		? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
 		: [];
+
+	// Add blog as a navigation item if configured
+	if (data?.blog?.showInNav) {
+		pages.push({
+			id: "blog",
+			title: data.blog.title || "Blog",
+			showInNav: true,
+			order: data.blog.order || 999,
+		});
+	}
 
 	DOMCache.navbar.innerHTML = createNavbar(
 		pages,
@@ -674,6 +780,178 @@ const applyColorScheme = (colors) => {
 	});
 
 	if (colors.code?.theme) applyThemeToZeroMd(colors.code.theme);
+};
+
+// ===========================
+// BLOG MANAGEMENT FUNCTIONS
+// ===========================
+
+/**
+ * Parse blog post frontmatter and content
+ * @param {string} markdown - Raw markdown with frontmatter
+ * @returns {Object} Parsed post object with metadata and content
+ */
+const parseBlogPost = (markdown) => {
+	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+	const match = markdown.match(frontmatterRegex);
+
+	if (!match) {
+		return { metadata: {}, content: markdown };
+	}
+
+	const [, frontmatter, content] = match;
+	const metadata = {};
+
+	frontmatter.split("\n").forEach((line) => {
+		const [key, ...valueParts] = line.split(":");
+		if (key && valueParts.length) {
+			const value = valueParts.join(":").trim();
+			// Handle arrays in frontmatter
+			if (value.startsWith("[") && value.endsWith("]")) {
+				metadata[key.trim()] = JSON.parse(value.replace(/'/g, '"'));
+			} else {
+				metadata[key.trim()] = value.replace(/^["']|["']$/g, "");
+			}
+		}
+	});
+
+	return { metadata, content: content.trim() };
+};
+
+/**
+ * Load all blog posts from the blog directory
+ * @returns {Promise<Array>} Array of blog post objects
+ */
+const loadBlogPosts = async () => {
+	try {
+		// Load the blog manifest to get list of posts
+		const manifestResponse = await fetch("data/blog/manifest.json");
+		if (!manifestResponse.ok) {
+			console.error("Blog manifest not found");
+			return [];
+		}
+
+		const manifest = await manifestResponse.json();
+
+		const posts = await Promise.all(
+			manifest.map(async ({ filename }) => {
+				try {
+					const response = await fetch(`data/blog/${filename}`);
+					if (!response.ok) return null;
+
+					const markdown = await response.text();
+					const { metadata, content } = parseBlogPost(markdown);
+
+					const slug = filename.replace(/\.md$/, "");
+
+					return {
+						slug,
+						title: metadata.title || "Untitled",
+						date: metadata.date || "",
+						excerpt: metadata.excerpt || "",
+						tags: metadata.tags || [],
+						content,
+						filename,
+					};
+				} catch (error) {
+					console.error(`Error loading blog post ${filename}:`, error);
+					return null;
+				}
+			}),
+		);
+
+		// Filter out failed loads and sort by date (newest first)
+		return posts
+			.filter((post) => post !== null)
+			.sort((a, b) => new Date(b.date) - new Date(a.date));
+	} catch (error) {
+		console.error("Error loading blog posts:", error);
+		return [];
+	}
+};
+
+/**
+ * Load blog listing page with pagination
+ * @param {number} page - Page number (1-indexed)
+ */
+export const loadBlogPage = async (page = 1) => {
+	if (!DOMCache.main) return;
+
+	const data = projectsData || (await loadProjectsData());
+	setPageTitle(data);
+
+	DOMCache.main.innerHTML = Templates.loadingSpinner();
+
+	const posts = await loadBlogPosts();
+	const postsPerPage = data?.blog?.postsPerPage || 5;
+	const totalPages = Math.ceil(posts.length / postsPerPage);
+	const currentPage = Math.max(1, Math.min(page, totalPages));
+
+	const startIndex = (currentPage - 1) * postsPerPage;
+	const endIndex = startIndex + postsPerPage;
+	const pagePosts = posts.slice(startIndex, endIndex);
+
+	if (pagePosts.length === 0) {
+		DOMCache.main.innerHTML = `
+			<div class="blog-container">
+				<p class="blog-empty">No blog posts yet. Check back soon!</p>
+			</div>`;
+		return;
+	}
+
+	const postsHtml = pagePosts
+		.map((post, index) => Templates.blogPostCard(post, startIndex + index))
+		.join("");
+
+	const paginationHtml = Templates.blogPagination(currentPage, totalPages);
+
+	DOMCache.main.innerHTML = `
+		<div class="blog-container">
+			<div class="blog-posts">
+				${postsHtml}
+			</div>
+			${paginationHtml}
+		</div>`;
+
+	// Add SPA routing to blog links
+	updateNavbarLinks();
+};
+
+/**
+ * Load individual blog post
+ * @param {string} slug - Blog post slug
+ */
+export const loadBlogPost = async (slug) => {
+	if (!DOMCache.main) return;
+
+	const data = projectsData || (await loadProjectsData());
+	setPageTitle(data);
+
+	DOMCache.main.innerHTML = Templates.loadingSpinner();
+
+	const posts = await loadBlogPosts();
+	const post = posts.find((p) => p.slug === slug);
+
+	if (!post) {
+		DOMCache.main.innerHTML = Templates.errorMessage(
+			"Blog Post Not Found",
+			"The requested blog post could not be found.",
+		);
+		return;
+	}
+
+	const themeName = data?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
+	const colors = data?.site?.colors || {};
+
+	DOMCache.main.innerHTML = Templates.blogPost(
+		post,
+		post.content,
+		getHljsThemeUrl(themeName),
+		colors,
+	);
+
+	// Add SPA routing to back link
+	updateNavbarLinks();
 };
 
 // ===========================
@@ -792,7 +1070,7 @@ export const loadProjectsDropdown = async () => {
 	if (!data?.projects || !dropdown) return;
 
 	dropdown.innerHTML = data.projects
-		.sort((a, b) => a.weight - b.weight)
+		.sort((a, b) => a.order - b.order)
 		.map((p) => Templates.projectDropdownItem(p.id, p.title))
 		.join("");
 
@@ -827,13 +1105,25 @@ const handleRoute = async () => {
 	if (DOMCache.main) DOMCache.main.innerHTML = Templates.loadingSpinner();
 
 	const params = new URLSearchParams(window.location.search);
-	const projectId = params.get("id");
+	const projectId = params.get("project");
 	const pageId = params.get("page");
+	const blogParam = params.get("blog");
+	const blogPageNum = params.get("p");
 
 	try {
 		const data = projectsData || (await loadProjectsData());
 
-		if (projectId) {
+		if (blogParam !== null) {
+			// blog parameter exists
+			if (blogParam === "") {
+				// /?blog or /?blog&p=2 - Blog listing
+				const page = blogPageNum ? parseInt(blogPageNum, 10) : 1;
+				await loadBlogPage(page);
+			} else {
+				// /?blog=slug - Individual blog post
+				await loadBlogPost(blogParam);
+			}
+		} else if (projectId) {
 			await loadProjectPage(projectId);
 			loadAdditionalContent();
 		} else if (pageId) {
@@ -844,6 +1134,9 @@ const handleRoute = async () => {
 				Object.keys(data.pages)[0];
 			await loadPage(defaultPage);
 		}
+
+		// Update active nav link after route loads
+		updateActiveNavLink();
 	} catch (error) {
 		console.error("Error loading page:", error);
 		if (DOMCache.main) {
@@ -893,6 +1186,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /**
+ * Update active state in navbar based on current route
+ */
+const updateActiveNavLink = () => {
+	const params = new URLSearchParams(window.location.search);
+	const pageId = params.get("page");
+	const projectId = params.get("project");
+	const blogParam = params.get("blog");
+
+	// Remove all active states
+	document.querySelectorAll(".navbar-nav a").forEach((l) => {
+		l.classList.remove("active");
+	});
+
+	// Set active based on current route
+	if (blogParam !== null) {
+		// Highlight blog nav link
+		const blogLink = document.querySelector('a[href="/?blog"]');
+		if (blogLink) blogLink.classList.add("active");
+	} else if (pageId) {
+		// Highlight page nav link
+		const pageLink = document.querySelector(`a[href="/?page=${pageId}"]`);
+		if (pageLink) pageLink.classList.add("active");
+	} else if (projectId) {
+		// Highlight project dropdown item
+		const projectLink = document.querySelector(
+			`a[href="/?project=${projectId}"]`,
+		);
+		if (projectLink) projectLink.classList.add("active");
+	}
+};
+
+/**
  * Update navbar links to handle SPA routing
  */
 const updateNavbarLinks = () => {
@@ -901,10 +1226,6 @@ const updateNavbarLinks = () => {
 			e.preventDefault();
 			MobileMenu.close();
 			window.history.pushState({}, "", link.getAttribute("href"));
-			document.querySelectorAll(".navbar-nav a").forEach((l) => {
-				l.classList.remove("active");
-			});
-			link.classList.add("active");
 			handleRoute();
 		});
 	});
