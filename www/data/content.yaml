@@ -17,7 +17,6 @@ site:
   colors:
     primary: "#F59E0B"
     secondary: "#1C1917"
-    accent: "#F59E0B"
     background: "#0C0A09"
     text: "#FAFAF9"
     textLight: "#D6D3D1"

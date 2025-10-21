@@ -242,10 +242,13 @@ const Templates = {
                     .markdown-body a {
                         color: ${colors.primary};
                         text-decoration: none;
+                        display: inline-block;
+                        transition: transform 0.2s ease;
                     }
                     
                     .markdown-body a:hover {
-                        text-decoration: underline;
+                        text-decoration: none;
+                        transform: translateY(-2px);
                     }
                 </style>
             </template>
@@ -273,7 +276,7 @@ const Templates = {
 	footer: (authorName, currentYear) => `
         <footer class="footer mt-auto py-1" style="background-color: var(--header-color); border-top: var(--border-width) solid var(--accent);">
             <div class="container-fluid" style="max-width: 1000px;">
-                <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.75em;">
+                <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.9em;">
                     &copy; ${currentYear} ${authorName}. All rights reserved.
                 </p>
             </div>
@@ -561,6 +564,7 @@ const DOMCache = {
 	main: null,
 	footer: null,
 	dropdownMenu: null,
+	navbarLinks: null,
 
 	/**
 	 * Initialize DOM cache
@@ -569,6 +573,14 @@ const DOMCache = {
 		this.navbar = document.getElementById("navbar-container");
 		this.main = document.getElementById("main-content");
 		this.footer = document.getElementById("footer-container");
+	},
+
+	/**
+	 * Clear cached navbar-related elements (call after navbar rebuild)
+	 */
+	clearNavbarCache() {
+		this.dropdownMenu = null;
+		this.navbarLinks = null;
 	},
 
 	/**
@@ -698,6 +710,9 @@ const injectNavbar = async () => {
 		data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 	);
 
+	// Clear cached navbar elements after rebuild
+	DOMCache.clearNavbarCache();
+
 	// Initialize Bootstrap dropdowns
 	document.querySelectorAll(".dropdown-toggle").forEach((el) => {
 		new bootstrap.Dropdown(el);
@@ -772,7 +787,6 @@ const applyColorScheme = (colors) => {
 		"--text-light": colors.textLight,
 		"--border-color": colors.border,
 		"--hover-color": colors.hover,
-		"--accent-color": colors.accent,
 	};
 
 	const root = document.documentElement;
@@ -834,40 +848,47 @@ const loadBlogPosts = async () => {
 			return [];
 		}
 
-		const posts = await Promise.all(
+		// Use Promise.allSettled for better error resilience
+		const results = await Promise.allSettled(
 			postFiles.map(async (filename) => {
-				try {
-					const response = await fetch(`data/blog/${filename}`);
-					if (!response.ok) {
-						console.warn(`Blog post not found: ${filename}`);
-						return null;
-					}
-
-					const markdown = await response.text();
-					const { metadata, content } = parseBlogPost(markdown);
-
-					const slug = filename.replace(/\.md$/, "");
-
-					return {
-						slug,
-						title: metadata.title || "Untitled",
-						date: metadata.date || "",
-						excerpt: metadata.excerpt || "",
-						tags: metadata.tags || [],
-						content,
-						filename,
-					};
-				} catch (error) {
-					console.error(`Error loading blog post ${filename}:`, error);
-					return null;
+				const response = await fetch(`data/blog/${filename}`);
+				if (!response.ok) {
+					throw new Error(`Blog post not found: ${filename}`);
 				}
+
+				const markdown = await response.text();
+				const { metadata, content } = parseBlogPost(markdown);
+
+				const slug = filename.replace(/\.md$/, "");
+
+				return {
+					slug,
+					title: metadata.title || "Untitled",
+					date: metadata.date || "",
+					excerpt: metadata.excerpt || "",
+					tags: metadata.tags || [],
+					content,
+					filename,
+				};
 			}),
 		);
 
-		// Filter out failed loads and sort by date (newest first)
-		return posts
-			.filter((post) => post !== null)
-			.sort((a, b) => new Date(b.date) - new Date(a.date));
+		// Extract successful results and log failures
+		const posts = results
+			.map((result, index) => {
+				if (result.status === "fulfilled") {
+					return result.value;
+				}
+				console.warn(
+					`Failed to load blog post ${postFiles[index]}:`,
+					result.reason,
+				);
+				return null;
+			})
+			.filter((post) => post !== null);
+
+		// Sort by date (newest first)
+		return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 	} catch (error) {
 		console.error("Error loading blog posts:", error);
 		return [];
@@ -1198,26 +1219,30 @@ const updateActiveNavLink = () => {
 	const projectId = params.get("project");
 	const blogParam = params.get("blog");
 
+	// Cache navbar links to avoid multiple DOM queries
+	if (!DOMCache.navbarLinks) {
+		DOMCache.navbarLinks = document.querySelectorAll(".navbar-nav a");
+	}
+
 	// Remove all active states
-	document.querySelectorAll(".navbar-nav a").forEach((l) => {
+	DOMCache.navbarLinks.forEach((l) => {
 		l.classList.remove("active");
 	});
 
-	// Set active based on current route
+	// Build selector based on current route and query once
+	let activeSelector = null;
 	if (blogParam !== null) {
-		// Highlight blog nav link
-		const blogLink = document.querySelector('a[href="/?blog"]');
-		if (blogLink) blogLink.classList.add("active");
+		activeSelector = 'a[href="/?blog"]';
 	} else if (pageId) {
-		// Highlight page nav link
-		const pageLink = document.querySelector(`a[href="/?page=${pageId}"]`);
-		if (pageLink) pageLink.classList.add("active");
+		activeSelector = `a[href="/?page=${pageId}"]`;
 	} else if (projectId) {
-		// Highlight project dropdown item
-		const projectLink = document.querySelector(
-			`a[href="/?project=${projectId}"]`,
-		);
-		if (projectLink) projectLink.classList.add("active");
+		activeSelector = `a[href="/?project=${projectId}"]`;
+	}
+
+	// Set active state if we have a matching route
+	if (activeSelector) {
+		const activeLink = document.querySelector(activeSelector);
+		if (activeLink) activeLink.classList.add("active");
 	}
 };
 

@@ -158,6 +158,17 @@ a.icon:hover {
 	font-weight: 600;
 }
 
+.about-content a {
+	display: inline-block;
+	text-decoration: none;
+	transition: transform var(--transition-fast);
+}
+
+.about-content a:hover {
+	text-decoration: none;
+	transform: translateY(-2px);
+}
+
 /*navigation bar*/
 
 /* ===========================
@@ -436,7 +447,7 @@ a.icon:hover {
 /* Project and iframe styling */
 .project-title {
 	color: var(--accent);
-	font-size: 1.3em;
+	font-size: 1.5em;
 	margin: 0 0 0.02em 0;
 	font-weight: bold;
 }
@@ -444,7 +455,7 @@ a.icon:hover {
 .project-description {
 	margin: 0 0 0.5em 0;
 	color: var(--text-light);
-	font-size: 1.1em;
+	font-size: 1.2em;
 	line-height: 1.6;
 }
 
@@ -573,34 +584,6 @@ a.icon:hover {
 	transform: translateY(0);
 }
 
-#fullscreen i {
-	font-size: 1.5em;
-	transition: transform var(--transition-normal);
-}
-
-#fullscreen:hover i {
-	transform: scale(1.1);
-}
-
-.download-btn i {
-	font-size: 1.5em;
-	transition: transform var(--transition-normal);
-}
-
-.download-btn:hover i {
-	transform: scale(1.1);
-}
-
-.download-btn span {
-	color: var(--text-color);
-	transition: color var(--transition-normal);
-}
-
-.download-btn:hover span,
-.download-btn:focus span {
-	color: var(--accent);
-}
-
 /* Download button link states - consolidated */
 .download-btn,
 .download-btn:link,
@@ -621,6 +604,28 @@ a.icon:hover {
 .markdown-body .download-btn:hover,
 .markdown-body .download-btn:focus {
 	color: var(--accent);
+}
+
+.download-btn span {
+	color: var(--text-color);
+	transition: color var(--transition-normal);
+}
+
+.download-btn:hover span,
+.download-btn:focus span {
+	color: var(--accent);
+}
+
+/* Icon styles for buttons - must come after other .download-btn rules */
+#fullscreen i,
+.download-btn i {
+	font-size: 1.5em;
+	transition: transform var(--transition-normal);
+}
+
+#fullscreen:hover i,
+.download-btn:hover i {
+	transform: scale(1.1);
 }
 
 /* ===========================
@@ -821,10 +826,13 @@ textarea:focus {
 .markdown-body a {
 	color: var(--accent);
 	text-decoration: none;
+	display: inline-block;
+	transition: transform var(--transition-fast);
 }
 
 .markdown-body a:hover {
-	text-decoration: underline;
+	text-decoration: none;
+	transform: translateY(-2px);
 }
 
 .markdown-body blockquote {
@@ -1045,6 +1053,7 @@ textarea:focus {
 	color: var(--accent);
 	text-decoration: none;
 	font-weight: 600;
+	font-size: 1.2em;
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
