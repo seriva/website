@@ -18,7 +18,7 @@ Key features:
 - Bootstrap 5.3.2 for styling
 - Font Awesome 6.6.0 for icons
 - YAML configuration with js-yaml parser
-- Zero-md for markdown rendering with Prism.js syntax highlighting
+- Zero-md v3 for markdown rendering with Highlight.js syntax highlighting
 - jsDelivr CDN for external dependencies
 
 ## Development Environment
