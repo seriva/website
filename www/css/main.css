@@ -331,6 +331,11 @@ a.icon:hover {
 		box-shadow: none;
 	}
 
+	/* Indent dropdown items on mobile */
+	.navbar-nav .dropdown-menu .dropdown-item {
+		padding-left: 40px;
+	}
+
 	/* Mobile navbar link states inherit from desktop */
 
 	/* Social media links horizontal on mobile */
