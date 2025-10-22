@@ -2,9 +2,6 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
-Sitemap: https://luukvanvenrooij.nl/sitemap.xml
-
 # Disallow demo folders if they contain test data
 User-agent: *
 Disallow: /demo/

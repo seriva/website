@@ -193,6 +193,64 @@ colors:
 
 **Available code themes:** `okaidia`, `tomorrow`, `vs-dark`, `dark`
 
+### Internationalization (i18n)
+
+The site includes a built-in i18n framework for multi-language support. Currently configured for English only, but designed for easy expansion:
+
+```yaml
+site:
+  i18n:
+    defaultLanguage: "en"
+    availableLanguages: ["en"]
+
+translations:
+  en:
+    nav:
+      projects: "Projects"
+      blog: "Blog"
+    search:
+      placeholder: "Search projects and blog posts..."
+      noResults: "No results found"
+    blog:
+      readMore: "Read more →"
+      backToBlog: "← Back to Blog"
+    # ... more translations
+```
+
+**To add a new language:**
+
+1. Add language code to `availableLanguages`:
+   ```yaml
+   availableLanguages: ["en", "nl", "es"]
+   ```
+
+2. Copy the `en` translations section and translate:
+   ```yaml
+   translations:
+     en:
+       nav:
+         projects: "Projects"
+     nl:
+       nav:
+         projects: "Projecten"
+     es:
+       nav:
+         projects: "Proyectos"
+   ```
+
+3. Implement language switcher in UI (optional - framework supports it via `i18n.setLanguage('nl')`)
+
+**Translation keys used:**
+- `nav.*` - Navigation items
+- `search.*` - Search UI strings
+- `blog.*` - Blog page text
+- `project.*` - Project page labels
+- `general.*` - Error messages and common text
+- `footer.*` - Footer text
+- `badges.*` - Result type badges
+
+All UI strings are automatically translated using the `i18n.t()` function, making it easy to maintain consistency across languages.
+
 ## How it works
 
 - `/` shows the default page (configured with `default: true` in pages)
@@ -204,3 +262,4 @@ colors:
 - Project READMEs are loaded from GitHub automatically
 - Search functionality works on both desktop (unfold navbar) and mobile (full-page overlay)
 - Everything is client-side routed (no page reloads)
+- Translations loaded from YAML and applied automatically
