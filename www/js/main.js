@@ -12,18 +12,16 @@ const CONSTANTS = {
 	PRELOAD_DELAY: 100,
 	THEME_APPLY_DELAY: 200,
 	SEARCH_DEBOUNCE_MS: 300,
+	PAGE_TRANSITION_DELAY: 300,
+	SEARCH_PAGE_CLOSE_DELAY: 200,
+	SEARCH_MIN_CHARS: 2,
+	SEARCH_MAX_RESULTS: 8,
 };
 
 // ===========================
 // UTILITY FUNCTIONS
 // ===========================
 
-/**
- * Debounce utility function
- * @param {Function} func - Function to debounce
- * @param {number} wait - Wait time in milliseconds
- * @returns {Function} Debounced function
- */
 const debounce = (func, wait) => {
 	let timeout;
 	return (...args) => {
@@ -32,40 +30,22 @@ const debounce = (func, wait) => {
 	};
 };
 
-/**
- * Escape HTML entities to prevent XSS attacks
- * @param {string} str - String to escape
- * @returns {string} Escaped HTML string
- */
 const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
 	return div.innerHTML;
 };
 
-/**
- * Tagged template literal for safer HTML templating
- * Automatically escapes all interpolated values unless marked as safe
- * @param {Array<string>} strings - Template string parts
- * @param {...any} values - Interpolated values
- * @returns {string} Processed HTML string
- */
+// Template literal helper - escapes values unless marked with safe()
 const html = (strings, ...values) => {
 	return strings.reduce((result, str, i) => {
 		const value = values[i];
 		if (value === undefined || value === null) return result + str;
 		if (value?.__safe) return result + str + value.content;
-		// Automatically escape HTML entities for security
 		return result + str + escapeHtml(String(value));
 	}, "");
 };
 
-/**
- * Mark content as safe HTML (bypasses escaping)
- * Use with caution - only for trusted HTML content
- * @param {string} content - HTML content to mark as safe
- * @returns {Object} Safe content wrapper
- */
 const safe = (content) => ({ __safe: true, content });
 
 // ===========================
@@ -76,22 +56,11 @@ const i18n = {
 	currentLanguage: null,
 	translations: {},
 
-	/**
-	 * Initialize i18n with configuration from YAML
-	 * @param {Object} config - i18n configuration from content.yaml
-	 * @param {Object} translations - Translations object from content.yaml
-	 */
 	init(config, translations) {
 		this.currentLanguage = config?.defaultLanguage || "en";
 		this.translations = translations || {};
 	},
 
-	/**
-	 * Get translation for a key
-	 * @param {string} key - Translation key in dot notation (e.g., 'nav.projects')
-	 * @param {string} lang - Optional language code (defaults to current language)
-	 * @returns {string} Translated string or key if not found
-	 */
 	t(key, lang = null) {
 		const language = lang || this.currentLanguage;
 		const keys = key.split(".");
@@ -101,25 +70,17 @@ const i18n = {
 			if (value && typeof value === "object") {
 				value = value[k];
 			} else {
-				return key; // Return key if translation not found
+				return key;
 			}
 		}
 
 		return typeof value === "string" ? value : key;
 	},
 
-	/**
-	 * Get current language
-	 * @returns {string} Current language code
-	 */
 	getCurrentLanguage() {
 		return this.currentLanguage;
 	},
 
-	/**
-	 * Set current language
-	 * @param {string} lang - Language code to set
-	 */
 	setLanguage(lang) {
 		if (this.translations[lang]) {
 			this.currentLanguage = lang;
@@ -250,32 +211,43 @@ const Templates = {
 		if (totalPages <= 1) return "";
 
 		const pageNumbers = [];
+		let lastAdded = 0;
 
-		// Build page numbers array
+		// Build page numbers array more efficiently
 		for (let i = 1; i <= totalPages; i++) {
-			if (
+			// Always show: first, last, current, and adjacent pages
+			const shouldShow =
 				i === 1 ||
 				i === totalPages ||
-				(i >= currentPage - 1 && i <= currentPage + 1)
-			) {
-				pageNumbers.push(html`<li class="page-item ${i === currentPage ? "active" : ""}">
-                    <a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a>
-                </li>`);
-			} else if (i === currentPage - 2 || i === currentPage + 2) {
+				(i >= currentPage - 1 && i <= currentPage + 1);
+
+			if (shouldShow) {
+				// Add ellipsis if there's a gap
+				if (lastAdded > 0 && i - lastAdded > 1) {
+					pageNumbers.push(
+						'<li class="page-item disabled"><span class="page-link">...</span></li>',
+					);
+				}
+
+				const activeClass = i === currentPage ? " active" : "";
 				pageNumbers.push(
-					html`<li class="page-item disabled"><span class="page-link">...</span></li>`,
+					`<li class="page-item${activeClass}"><a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
 				);
+				lastAdded = i;
 			}
 		}
 
-		return html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
-            <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+		const prevDisabled = currentPage === 1 ? " disabled" : "";
+		const nextDisabled = currentPage === totalPages ? " disabled" : "";
+
+		return `<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
+            <li class="page-item${prevDisabled}">
                 <a class="page-link" href="/?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            ${safe(pageNumbers.join(""))}
-            <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+            ${pageNumbers.join("")}
+            <li class="page-item${nextDisabled}">
                 <a class="page-link" href="/?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
@@ -473,27 +445,14 @@ const Templates = {
 // APPLICATION CODE
 // ===========================
 
-// ===========================
-// UTILITY FUNCTIONS
-// ===========================
-
-/**
- * Get the Highlight.js theme URL for syntax highlighting (zero-md v3)
- * @param {string} themeName - The Highlight.js theme name
- * @returns {string} The complete URL to the theme CSS
- */
 const getHljsThemeUrl = (themeName) =>
-	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`; /**
- * Handle email click events with fallback
- * @param {Event} event - The click event
- * @returns {Promise<boolean>} Always returns false to prevent default behavior
- */
+	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
+
 const Email = async (event) => {
 	try {
 		event?.preventDefault?.();
 		event?.stopPropagation?.();
-
-		const data = projectsData || (await loadProjectsData().catch(() => null));
+		const data = projectsData || (await loadProjectsData());
 		const email = data?.site?.email;
 		window.location.href = email
 			? `mailto:${email.name}@${email.domain}`
@@ -504,13 +463,8 @@ const Email = async (event) => {
 	}
 };
 
-// Make globally available for onclick handlers
 window.Email = Email;
 
-/**
- * Apply Highlight.js theme to all zero-md elements (zero-md v3)
- * @param {string} themeName - The theme name to apply
- */
 const applyThemeToZeroMd = (
 	themeName = projectsData?.site?.colors?.code?.theme ||
 		CONSTANTS.DEFAULT_THEME,
@@ -521,12 +475,9 @@ const applyThemeToZeroMd = (
 		const zeroMdElements = document.querySelectorAll("zero-md");
 
 		zeroMdElements.forEach((el) => {
-			// For v3, we need to recreate the element to update the theme
-			// Since shadow DOM is sealed, we trigger a re-render
 			const template = el.querySelector("template[data-append]");
 			if (!template) return;
 
-			// Update the Highlight.js theme link in the template
 			const existingLinks = template.content.querySelectorAll(
 				'link[href*="highlight.js"], link[href*="hljs"]',
 			);
@@ -536,34 +487,23 @@ const applyThemeToZeroMd = (
 					link.href = themeUrl;
 				});
 			} else {
-				// If no existing link, add one
 				const link = document.createElement("link");
 				link.rel = "stylesheet";
 				link.href = themeUrl;
 				template.content.appendChild(link);
 			}
 
-			// Force re-render by temporarily removing and re-adding
-			// Use requestAnimationFrame for smoother rendering
-			const parent = el.parentNode;
-			const nextSibling = el.nextSibling;
-			parent.removeChild(el);
-			requestAnimationFrame(() => {
-				parent.insertBefore(el, nextSibling);
-			});
+			if (typeof el.render === "function") {
+				el.render();
+			}
 		});
 	} catch (error) {
 		console.error("Error applying theme to zero-md elements:", error);
 	}
 };
 
-/**
- * Update page meta tags from site data
- * @param {Object} siteData - Site configuration data
- */
 const updateMetaTags = (siteData) => {
 	if (!siteData) return;
-
 	if (siteData.title) document.title = siteData.title;
 
 	const metaUpdates = [
@@ -574,13 +514,11 @@ const updateMetaTags = (siteData) => {
 			selector: 'meta[name="msapplication-TileColor"]',
 			value: siteData.colors?.primary,
 		},
-		// Open Graph tags
 		{ selector: 'meta[property="og:title"]', value: siteData.title },
 		{
 			selector: 'meta[property="og:description"]',
 			value: siteData.description,
 		},
-		// Twitter Card tags
 		{
 			selector: 'meta[property="twitter:title"]',
 			value: siteData.title,
@@ -596,16 +534,10 @@ const updateMetaTags = (siteData) => {
 	});
 };
 
-/**
- * Request fullscreen for demo iframe
- */
 const fullscreen = () => {
 	try {
 		const iframe = document.getElementById("demo");
-		if (!iframe) {
-			console.warn("Demo iframe not found for fullscreen request");
-			return;
-		}
+		if (!iframe) return;
 
 		const request =
 			iframe.requestFullscreen ||
@@ -613,11 +545,7 @@ const fullscreen = () => {
 			iframe.mozRequestFullScreen ||
 			iframe.msRequestFullscreen;
 
-		if (request) {
-			request.call(iframe);
-		} else {
-			console.warn("Fullscreen API not supported by this browser");
-		}
+		if (request) request.call(iframe);
 	} catch (error) {
 		console.error("Error requesting fullscreen:", error);
 	}
@@ -625,9 +553,6 @@ const fullscreen = () => {
 
 window.fullscreen = fullscreen;
 
-/**
- * Mobile menu management with Bootstrap integration
- */
 const MobileMenu = {
 	close() {
 		const collapseElement = document.querySelector(".navbar-collapse");
@@ -644,10 +569,6 @@ const MobileMenu = {
 		}
 	},
 
-	/**
-	 * Add click handler to element for mobile menu management
-	 * @param {HTMLElement} element - Element to add handler to
-	 */
 	addClickHandler(element) {
 		element.addEventListener("click", () => {
 			if (
@@ -667,184 +588,174 @@ window.closeMobileMenu = () => MobileMenu.close();
 // SEARCH FUNCTIONALITY
 // ===========================
 
-/**
- * Search functionality for projects and blog posts using Fuse.js
- */
 const Search = {
 	data: [],
 	fuse: null,
 	isInitialized: false,
+	initPromise: null,
 
-	/**
-	 * Initialize search index with projects and blog posts
-	 * Uses metadata from YAML for fast indexing without loading full blog posts
-	 */
-	async init() {
+	async init(includeReadmes = false) {
 		if (this.isInitialized) return;
+		if (this.initPromise) return this.initPromise;
 
-		const data = await getData();
-		const projects = data?.projects || [];
-		const blogPosts = data?.blog?.posts || [];
+		this.initPromise = (async () => {
+			try {
+				const data = await getData();
+				const projects = data?.projects || [];
+				const blogPosts = data?.blog?.posts || [];
 
-		// Fetch README content for projects
-		const projectsWithContent = await Promise.all(
-			projects.map(async (p) => {
-				let readmeContent = "";
-				if (p.github_repo) {
-					const readme = await fetchGitHubReadme(p.github_repo);
-					readmeContent = readme || "";
-				}
-				return {
+				// Index projects without fetching READMEs initially (lazy loading)
+				const projectsIndexed = projects.map((p) => ({
 					id: p.id,
 					title: p.title,
 					description: p.description,
 					tags: p.tags || [],
-					content: readmeContent,
+					content: "", // Will be lazy loaded if needed
 					type: "project",
 					url: `/?project=${p.id}`,
-				};
-			}),
-		);
+					github_repo: p.github_repo, // Store for lazy loading
+				}));
 
-		// Index blog posts using metadata from YAML (no need to load markdown files)
-		const blogPostsIndexed = blogPosts.map((p) => {
-			// Support both old format (string) and new format (object with metadata)
-			if (typeof p === "string") {
-				// Old format: just filename, derive slug
-				const slug = p.replace(/\.md$/, "");
-				return {
-					id: slug,
-					title: slug,
-					description: "",
-					tags: [],
-					type: "blog",
-					url: `/?blog=${slug}`,
+				// If explicitly requested, fetch READMEs for better search results
+				let projectsWithContent = projectsIndexed;
+				if (includeReadmes) {
+					projectsWithContent = await Promise.all(
+						projectsIndexed.map(async (p) => {
+							if (p.github_repo) {
+								const readme = await fetchGitHubReadme(p.github_repo);
+								return { ...p, content: readme || "" };
+							}
+							return p;
+						}),
+					);
+				}
+
+				// Index blog posts using metadata from YAML (no need to load markdown files)
+				const blogPostsIndexed = blogPosts.map((p) => {
+					// Support both old format (string) and new format (object with metadata)
+					if (typeof p === "string") {
+						// Old format: just filename, derive slug
+						const slug = p.replace(/\.md$/, "");
+						return {
+							id: slug,
+							title: slug,
+							description: "",
+							tags: [],
+							type: "blog",
+							url: `/?blog=${slug}`,
+						};
+					}
+					// New format: object with metadata
+					const slug = p.filename.replace(/\.md$/, "");
+					return {
+						id: slug,
+						title: p.title || slug,
+						description: p.excerpt || "",
+						tags: p.tags || [],
+						type: "blog",
+						url: `/?blog=${slug}`,
+					};
+				});
+
+				// Index all searchable content
+				this.data = [...projectsWithContent, ...blogPostsIndexed];
+
+				const fuseOptions = {
+					keys: [
+						{ name: "title", weight: 2 },
+						{ name: "description", weight: 1.5 },
+						{ name: "tags", weight: 1.2 },
+						{ name: "content", weight: 0.5 },
+					],
+					threshold: 0.4,
+					distance: 100,
+					minMatchCharLength: CONSTANTS.SEARCH_MIN_CHARS,
+					includeScore: true,
+					includeMatches: true,
 				};
+
+				this.fuse = new Fuse(this.data, fuseOptions);
+				this.isInitialized = true;
+			} catch (error) {
+				console.error("Error initializing search:", error);
+				this.initPromise = null;
 			}
-			// New format: object with metadata
-			const slug = p.filename.replace(/\.md$/, "");
-			return {
-				id: slug,
-				title: p.title || slug,
-				description: p.excerpt || "",
-				tags: p.tags || [],
-				type: "blog",
-				url: `/?blog=${slug}`,
-			};
-		});
+		})();
 
-		// Index all searchable content
-		this.data = [...projectsWithContent, ...blogPostsIndexed];
-
-		const fuseOptions = {
-			keys: [
-				{ name: "title", weight: 2 },
-				{ name: "description", weight: 1.5 },
-				{ name: "tags", weight: 1.2 },
-				{ name: "content", weight: 0.5 },
-			],
-			threshold: 0.4,
-			distance: 100,
-			minMatchCharLength: 2,
-			includeScore: true,
-			includeMatches: true,
-		};
-
-		this.fuse = new Fuse(this.data, fuseOptions);
-		this.isInitialized = true;
+		return this.initPromise;
 	},
 
-	/**
-	 * Search through indexed data using Fuse.js
-	 * @param {string} query - Search query
-	 * @returns {Array} Filtered results
-	 */
 	search(query) {
-		if (!query || query.length < 2 || !this.fuse) return [];
+		if (!query || query.length < CONSTANTS.SEARCH_MIN_CHARS || !this.fuse)
+			return [];
 
-		const results = this.fuse.search(query, { limit: 8 });
+		const results = this.fuse.search(query, {
+			limit: CONSTANTS.SEARCH_MAX_RESULTS,
+		});
 		return results.map((result) => result.item);
 	},
 
-	/**
-	 * Highlight matching text in search results
-	 * @param {string} text - Text to highlight
-	 * @param {string} query - Search query
-	 * @returns {string} HTML with highlighted text
-	 */
 	highlight(text, query) {
 		if (!query) return text;
-
 		const regex = new RegExp(`(${query})`, "gi");
 		return text.replace(regex, "<mark>$1</mark>");
 	},
 };
 
-/**
- * Search by tag - triggers search with the tag as query
- * @param {string} tag - Tag to search for
- */
 const searchByTag = (tag) => {
-	// Open unified search page for both mobile and desktop
-	const searchPage = document.getElementById("search-page");
-	const searchInput = document.getElementById("search-page-input");
+	const searchPage = DOMCache.getSearchPage();
+	const searchInput = DOMCache.getSearchInput();
 
 	if (searchPage && searchInput) {
 		searchPage.classList.add("show");
 		searchInput.value = tag;
 		requestAnimationFrame(() => {
 			searchInput.focus();
-			// Trigger search
 			searchInput.dispatchEvent(new Event("input", { bubbles: true }));
 		});
 	}
 };
 
-// Make searchByTag available globally for onclick handlers
 window.searchByTag = searchByTag;
 
 // ===========================
 // GITHUB API INTEGRATION
 // ===========================
 
-/**
- * Fetch GitHub README with caching and fallback branches
- * @param {string} repoName - Repository name
- * @returns {Promise<string|null>} README content or null if not found
- */
 const fetchGitHubReadme = async (repoName) => {
+	if (!repoName) return null;
 	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
 
-	const data = await getData();
-	const username = data?.site?.github_username || "seriva";
-	const branches = ["master", "main"];
+	try {
+		const data = await getData();
+		const username = data?.site?.github_username || "seriva";
+		const branches = ["master", "main"];
 
-	for (const branch of branches) {
-		try {
-			const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
-			const response = await fetch(url);
-			if (response.ok) {
-				const content = await response.text();
-				readmeCache.set(repoName, content);
-				return content;
+		for (const branch of branches) {
+			try {
+				const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
+				const response = await fetch(url);
+				if (response.ok) {
+					const content = await response.text();
+					readmeCache.set(repoName, content);
+					return content;
+				}
+			} catch {
+				// Try next branch
 			}
-		} catch (error) {
-			console.error(
-				`Error fetching README for ${repoName} from ${branch}:`,
-				error,
-			);
 		}
-	}
 
-	return null;
+		readmeCache.set(repoName, null);
+		return null;
+	} catch (error) {
+		console.error(`Error fetching README for ${repoName}:`, error);
+		return null;
+	}
 };
 
-/**
- * Load GitHub README content into specified container
- * @param {string} repoName - Repository name
- * @param {string} containerId - Container element ID
- */
 export const loadGitHubReadme = async (repoName, containerId) => {
+	if (!repoName || !containerId) return;
+
 	const container = document.getElementById(containerId);
 	if (!container) return;
 
@@ -876,42 +787,69 @@ const readmeCache = new Map();
 // DOM MANAGEMENT
 // ===========================
 
-/**
- * Enhanced DOM element caching for performance
- */
 const DOMCache = {
 	navbar: null,
 	main: null,
 	footer: null,
 	dropdownMenu: null,
 	navbarLinks: null,
+	searchPage: null,
+	searchPageInput: null,
+	searchPageResults: null,
+	searchToggle: null,
 
-	/**
-	 * Initialize DOM cache
-	 */
 	init() {
 		this.navbar = document.getElementById("navbar-container");
 		this.main = document.getElementById("main-content");
 		this.footer = document.getElementById("footer-container");
 	},
 
-	/**
-	 * Clear cached navbar-related elements (call after navbar rebuild)
-	 */
 	clearNavbarCache() {
 		this.dropdownMenu = null;
 		this.navbarLinks = null;
+		this.searchToggle = null;
 	},
 
-	/**
-	 * Get projects dropdown menu element with lazy loading
-	 * @returns {HTMLElement|null}
-	 */
+	clearSearchCache() {
+		this.searchPage = null;
+		this.searchPageInput = null;
+		this.searchPageResults = null;
+		this.searchToggle = null;
+	},
+
 	getDropdown() {
 		if (!this.dropdownMenu) {
 			this.dropdownMenu = document.getElementById("projects-dropdown");
 		}
 		return this.dropdownMenu;
+	},
+
+	getSearchPage() {
+		if (!this.searchPage) {
+			this.searchPage = document.getElementById("search-page");
+		}
+		return this.searchPage;
+	},
+
+	getSearchInput() {
+		if (!this.searchPageInput) {
+			this.searchPageInput = document.getElementById("search-page-input");
+		}
+		return this.searchPageInput;
+	},
+
+	getSearchResults() {
+		if (!this.searchPageResults) {
+			this.searchPageResults = document.getElementById("search-page-results");
+		}
+		return this.searchPageResults;
+	},
+
+	getSearchToggle() {
+		if (!this.searchToggle) {
+			this.searchToggle = document.getElementById("search-toggle");
+		}
+		return this.searchToggle;
 	},
 };
 
@@ -919,14 +857,6 @@ const DOMCache = {
 // NAVIGATION & UI FUNCTIONS
 // ===========================
 
-/**
- * Create navbar HTML structure
- * @param {Array} pages - Array of page objects (includes blog if configured)
- * @param {Array} socialLinks - Array of social link objects
- * @param {Object} searchConfig - Search configuration
- * @param {string} siteTitle - Site title
- * @returns {string} Complete navbar HTML
- */
 const createNavbar = (
 	pages = [],
 	socialLinks = [],
@@ -969,24 +899,28 @@ const createNavbar = (
 	);
 };
 
-/**
- * Inject footer into the page
- */
 const injectFooter = async () => {
-	if (!DOMCache.footer) return;
+	if (!DOMCache.footer) {
+		console.warn("Footer container not found");
+		return;
+	}
 
-	const data = await getData();
-	const authorName = data?.site?.author || "Portfolio Owner";
-	const currentYear = new Date().getFullYear();
+	try {
+		const data = await getData();
+		const authorName = data?.site?.author || "Portfolio Owner";
+		const currentYear = new Date().getFullYear();
 
-	DOMCache.footer.innerHTML = Templates.footer(authorName, currentYear);
+		DOMCache.footer.innerHTML = Templates.footer(authorName, currentYear);
+	} catch (error) {
+		console.error("Error injecting footer:", error);
+	}
 };
 
-/**
- * Inject navbar into the page with event handlers
- */
 const injectNavbar = async () => {
-	if (!DOMCache.navbar) return;
+	if (!DOMCache.navbar) {
+		console.warn("Navbar container not found");
+		return;
+	}
 
 	const data = await getData();
 	const pages = data?.pages
@@ -1050,12 +984,6 @@ const injectNavbar = async () => {
 	}
 };
 
-/**
- * Shared search handler function
- * @param {string} query - Search query
- * @param {HTMLElement} resultsContainer - Results container element
- * @param {Function} onResultClick - Callback for result clicks
- */
 const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 	const results = Search.search(query);
 
@@ -1096,19 +1024,16 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 	}
 };
 
-/**
- * Initialize search functionality (both desktop and mobile use unified search page)
- */
 const initializeSearch = () => {
-	const searchToggle = document.getElementById("search-toggle");
+	const searchToggle = DOMCache.getSearchToggle();
 
-	// Initialize search data once
-	Search.init();
+	// Initialize search data lazily (without fetching READMEs initially)
+	Search.init(false);
 
 	// Function to open search page
 	const openSearchPage = () => {
-		const searchPage = document.getElementById("search-page");
-		const searchInput = document.getElementById("search-page-input");
+		const searchPage = DOMCache.getSearchPage();
+		const searchInput = DOMCache.getSearchInput();
 
 		if (searchPage) {
 			searchPage.classList.add("show");
@@ -1127,21 +1052,17 @@ const initializeSearch = () => {
 	}
 };
 
-/**
- * Initialize search page functionality (used for both mobile and desktop)
- * @param {Object} searchConfig - Search configuration
- */
 const initializeSearchPage = (searchConfig) => {
-	const searchPage = document.getElementById("search-page");
+	const searchPage = DOMCache.getSearchPage();
 	const searchPageBack = document.getElementById("search-page-back");
-	const searchPageInput = document.getElementById("search-page-input");
-	const searchPageResults = document.getElementById("search-page-results");
+	const searchPageInput = DOMCache.getSearchInput();
+	const searchPageResults = DOMCache.getSearchResults();
 	const searchPageClear = document.getElementById("search-page-clear");
 
 	if (!searchPage || !searchPageBack || !searchPageInput || !searchPageResults)
 		return;
 
-	const minChars = searchConfig.minChars || 2;
+	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
 
 	// Close search page with animation
 	const closeSearchPage = () => {
@@ -1150,7 +1071,7 @@ const initializeSearchPage = (searchConfig) => {
 			searchPage.classList.remove("show", "closing");
 			searchPageInput.value = "";
 			searchPageResults.innerHTML = "";
-		}, 200); // Match animation duration
+		}, CONSTANTS.SEARCH_PAGE_CLOSE_DELAY);
 	};
 
 	searchPageBack.addEventListener("click", closeSearchPage);
@@ -1200,21 +1121,8 @@ const initializeSearchPage = (searchConfig) => {
 // DATA LOADING & MANAGEMENT
 // ===========================
 
-/**
- * Load content data from YAML with caching and error handling
- * @returns {Promise<Object|null>} Projects data or null on error
- */
-/**
- * Get cached projects data or load if not available
- * @returns {Promise<Object>} Projects data
- */
 const getData = async () => projectsData || (await loadProjectsData());
 
-/**
- * Get theme name from data or use default
- * @param {Object} data - Projects data
- * @returns {string} Theme name
- */
 const getTheme = (data) =>
 	data?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
 
@@ -1226,36 +1134,38 @@ export const loadProjectsData = async () => {
 		? "../data/content.yaml"
 		: "data/content.yaml";
 
-	dataLoadPromise = fetch(yamlPath)
-		.then((response) => {
-			if (!response.ok)
+	dataLoadPromise = (async () => {
+		try {
+			const response = await fetch(yamlPath);
+			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
-			return response.text();
-		})
-		.then((yamlText) => {
+			}
+
+			const yamlText = await response.text();
 			projectsData = jsyaml.load(yamlText);
+
 			if (projectsData?.site?.colors) {
 				applyColorScheme(projectsData.site.colors);
 				setTimeout(() => applyThemeToZeroMd(), CONSTANTS.THEME_APPLY_DELAY);
 			}
+
 			// Initialize i18n
 			if (projectsData?.site?.i18n && projectsData?.translations) {
 				i18n.init(projectsData.site.i18n, projectsData.translations);
 			}
+
 			return projectsData;
-		})
-		.catch((error) => {
+		} catch (error) {
 			console.error("Failed to load YAML content data:", error);
+			projectsData = null;
+			dataLoadPromise = null;
 			return null;
-		});
+		}
+	})();
 
 	return dataLoadPromise;
 };
 
-/**
- * Apply color scheme from configuration to CSS custom properties
- * @param {Object} colors - Color configuration object
- */
 const applyColorScheme = (colors) => {
 	if (!colors) return;
 
@@ -1283,11 +1193,6 @@ const applyColorScheme = (colors) => {
 // BLOG MANAGEMENT FUNCTIONS
 // ===========================
 
-/**
- * Parse blog post frontmatter and content
- * @param {string} markdown - Raw markdown with frontmatter
- * @returns {Object} Parsed post object with metadata and content
- */
 const parseBlogPost = (markdown) => {
 	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 	const match = markdown.match(frontmatterRegex);
@@ -1315,11 +1220,6 @@ const parseBlogPost = (markdown) => {
 	return { metadata, content: content.trim() };
 };
 
-/**
- * Load all blog posts from the blog directory
- * Uses metadata from YAML when available for better performance
- * @returns {Promise<Array>} Array of blog post objects
- */
 const loadBlogPosts = async () => {
 	try {
 		const data = await getData();
@@ -1350,7 +1250,7 @@ const loadBlogPosts = async () => {
 					};
 				}
 
-				// Old format: fetch and parse markdown file
+				// Old format: fetch and parse markdown file for metadata
 				const response = await fetch(`data/blog/${filename}`);
 				if (!response.ok) {
 					throw new Error(`Blog post not found: ${filename}`);
@@ -1393,10 +1293,6 @@ const loadBlogPosts = async () => {
 	}
 };
 
-/**
- * Load blog listing page with pagination
- * @param {number} page - Page number (1-indexed)
- */
 export const loadBlogPage = async (page = 1) => {
 	if (!DOMCache.main) return;
 
@@ -1453,10 +1349,6 @@ export const loadBlogPage = async (page = 1) => {
 	// SPA routing handled via event delegation
 };
 
-/**
- * Load individual blog post
- * @param {string} slug - Blog post slug
- */
 export const loadBlogPost = async (slug) => {
 	if (!DOMCache.main) return;
 
@@ -1507,24 +1399,22 @@ export const loadBlogPost = async (slug) => {
 // PROJECT MANAGEMENT FUNCTIONS
 // ===========================
 
-/**
- * Get a specific project by ID
- * @param {string} projectId - Project identifier
- * @returns {Promise<Object|null>} Project object or null if not found
- */
 export const getProject = async (projectId) => {
 	const data = await loadProjectsData();
 	return data?.projects?.find((project) => project.id === projectId) || null;
 };
 
-/**
- * Load project links dynamically into specified container
- * @param {string} projectId - Project identifier
- * @param {string} containerId - Container element ID
- */
 export const loadProjectLinks = async (projectId, containerId) => {
+	if (!projectId || !containerId) {
+		console.warn("loadProjectLinks called with missing parameters");
+		return;
+	}
+
 	const container = document.getElementById(containerId);
-	if (!container) return;
+	if (!container) {
+		console.warn(`Container ${containerId} not found`);
+		return;
+	}
 
 	try {
 		const project = await getProject(projectId);
@@ -1542,108 +1432,127 @@ export const loadProjectLinks = async (projectId, containerId) => {
 	}
 };
 
-/**
- * Set page title from data or use default
- * @param {Object} data - Site data
- */
 const setPageTitle = (data) => {
 	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 };
 
-/**
- * Load a generic page by ID
- * @param {string} pageId - Page identifier
- */
 export const loadPage = async (pageId) => {
-	const data = await getData();
-	if (!DOMCache.main) return;
-
-	setPageTitle(data);
-	DOMCache.main.innerHTML =
-		data?.pages?.[pageId]?.content ||
-		Templates.errorMessage(
-			i18n.t("general.notFound"),
-			i18n.t("general.notFoundMessage"),
-		);
-};
-
-/**
- * Load individual project page with all sections
- * @param {string} projectId - Project identifier
- */
-export const loadProjectPage = async (projectId) => {
-	if (!DOMCache.main) return;
-
-	const project = await getProject(projectId);
-	if (!project) {
-		DOMCache.main.innerHTML = Templates.errorMessage(
-			i18n.t("general.projectNotFound"),
-			i18n.t("general.projectNotFoundMessage"),
-		);
+	if (!DOMCache.main) {
+		console.warn("Main content container not found");
 		return;
 	}
 
-	setPageTitle(projectsData);
-
-	DOMCache.main.innerHTML = [
-		Templates.projectHeader(project.title, project.description, project.tags),
-		project.github_repo &&
-			Templates.dynamicContainer(
-				"github-readme",
-				"repo",
-				project.github_repo,
-				i18n.t("project.loadingReadme"),
-			),
-		project.youtube_videos?.length &&
-			Templates.mediaSection(
-				project.youtube_videos.map((id) => Templates.youtubeVideo(id)).join(""),
-			),
-		project.demo_url && Templates.demoIframe(project.demo_url),
-		Templates.dynamicContainer("project-links", "project", project.id, ""),
-	]
-		.filter(Boolean)
-		.join("");
-};
-
-/**
- * Populate projects dropdown menu with all projects
- */
-export const loadProjectsDropdown = async () => {
-	const dropdown = DOMCache.getDropdown();
-	const data = await getData();
-	if (!data?.projects || !dropdown) return;
-
-	dropdown.innerHTML = data.projects
-		.sort((a, b) => a.order - b.order)
-		.map((p) => Templates.projectDropdownItem(p.id, p.title))
-		.join("");
-
-	for (const link of dropdown.querySelectorAll("a")) {
-		MobileMenu.addClickHandler(link);
+	try {
+		const data = await getData();
+		setPageTitle(data);
+		DOMCache.main.innerHTML =
+			data?.pages?.[pageId]?.content ||
+			Templates.errorMessage(
+				i18n.t("general.notFound"),
+				i18n.t("general.notFoundMessage"),
+			);
+	} catch (error) {
+		console.error(`Error loading page ${pageId}:`, error);
+		DOMCache.main.innerHTML = Templates.errorMessage(
+			i18n.t("general.error"),
+			i18n.t("general.errorMessage"),
+		);
 	}
 };
 
-/**
- * Load additional content like GitHub READMEs and project links
- */
+export const loadProjectPage = async (projectId) => {
+	if (!DOMCache.main) {
+		console.warn("Main content container not found");
+		return;
+	}
+
+	try {
+		const project = await getProject(projectId);
+		if (!project) {
+			DOMCache.main.innerHTML = Templates.errorMessage(
+				i18n.t("general.projectNotFound"),
+				i18n.t("general.projectNotFoundMessage"),
+			);
+			return;
+		}
+
+		setPageTitle(projectsData);
+
+		DOMCache.main.innerHTML = [
+			Templates.projectHeader(project.title, project.description, project.tags),
+			project.github_repo &&
+				Templates.dynamicContainer(
+					"github-readme",
+					"repo",
+					project.github_repo,
+					i18n.t("project.loadingReadme"),
+				),
+			project.youtube_videos?.length &&
+				Templates.mediaSection(
+					project.youtube_videos
+						.map((id) => Templates.youtubeVideo(id))
+						.join(""),
+				),
+			project.demo_url && Templates.demoIframe(project.demo_url),
+			Templates.dynamicContainer("project-links", "project", project.id, ""),
+		]
+			.filter(Boolean)
+			.join("");
+	} catch (error) {
+		console.error(`Error loading project page ${projectId}:`, error);
+		DOMCache.main.innerHTML = Templates.errorMessage(
+			i18n.t("general.error"),
+			i18n.t("general.errorMessage"),
+		);
+	}
+};
+
+export const loadProjectsDropdown = async () => {
+	const dropdown = DOMCache.getDropdown();
+	if (!dropdown) {
+		console.warn("Projects dropdown not found");
+		return;
+	}
+
+	try {
+		const data = await getData();
+		if (!data?.projects) {
+			console.warn("No projects data available");
+			return;
+		}
+
+		dropdown.innerHTML = data.projects
+			.sort((a, b) => a.order - b.order)
+			.map((p) => Templates.projectDropdownItem(p.id, p.title))
+			.join("");
+
+		for (const link of dropdown.querySelectorAll("a")) {
+			MobileMenu.addClickHandler(link);
+		}
+	} catch (error) {
+		console.error("Error loading projects dropdown:", error);
+	}
+};
+
 export const loadAdditionalContent = () => {
-	["github-readme", "project-links"].forEach((id) => {
-		const el = document.getElementById(id);
-		if (!el) return;
-		const repo = el.dataset.repo;
-		const project = el.dataset.project;
-		if (repo) loadGitHubReadme(repo, id);
-		if (project) loadProjectLinks(project, id);
-	});
+	try {
+		["github-readme", "project-links"].forEach((id) => {
+			const el = document.getElementById(id);
+			if (!el) return;
+			const repo = el.dataset.repo;
+			const project = el.dataset.project;
+			if (repo) loadGitHubReadme(repo, id);
+			if (project) loadProjectLinks(project, id);
+		});
+	} catch (error) {
+		console.error("Error loading additional content:", error);
+	}
 };
 
 // ===========================
 // ROUTING & PAGE MANAGEMENT
 // ===========================
 
-/**
- * Handle SPA routing based on URL parameters
- */
 const handleRoute = async () => {
 	MobileMenu.close();
 
@@ -1651,7 +1560,9 @@ const handleRoute = async () => {
 	if (DOMCache.main) {
 		DOMCache.main.classList.add("page-transition-out");
 		// Wait for fade out animation
-		await new Promise((resolve) => setTimeout(resolve, 150));
+		await new Promise((resolve) =>
+			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
+		);
 	}
 
 	if (DOMCache.main) DOMCache.main.innerHTML = Templates.loadingSpinner();
@@ -1708,9 +1619,6 @@ const handleRoute = async () => {
 // APPLICATION INITIALIZATION
 // ===========================
 
-/**
- * Initialize the application when DOM is loaded
- */
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		DOMCache.init();
@@ -1739,9 +1647,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 });
 
-/**
- * Update active state in navbar based on current route
- */
 const updateActiveNavLink = () => {
 	const params = new URLSearchParams(window.location.search);
 	const pageId = params.get("page");
@@ -1775,10 +1680,6 @@ const updateActiveNavLink = () => {
 	}
 };
 
-/**
- * Handle SPA routing for links with data-spa-route attribute
- * Uses event delegation to avoid memory leaks from multiple listeners
- */
 const handleSpaLinkClick = (e) => {
 	const link = e.target.closest("[data-spa-route]");
 	if (!link) return;
@@ -1789,16 +1690,10 @@ const handleSpaLinkClick = (e) => {
 	handleRoute();
 };
 
-/**
- * Set up SPA routing using event delegation (called once at init)
- */
 const setupSpaRouting = () => {
 	document.addEventListener("click", handleSpaLinkClick);
 };
 
-/**
- * Add click handler to close mobile menu when clicking outside
- */
 const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
 		if (
