@@ -60,16 +60,16 @@ site:
 # Blog Configuration
 blog:
   title: "Blog"
-  showInNav: false
+  showInNav: true
   postsPerPage: 5
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
     - filename: "2025-10-21-building-portfolio-website.md"
-      title: "Building My Portfolio Website"
+      title: "Building a Portfolio Website: A Journey Through Time (and Many Rewrites)"
       date: "2025-10-21"
-      excerpt: "How I built this minimalist SPA portfolio website with vanilla JavaScript, YAML configuration, and zero build tools."
-      tags: ["JavaScript", "HTML", "CSS", "Web Development"]
+      excerpt: "From hand-coded HTML to LAMP stacks to Hugo, and finally to vibe-coding a portfolio in a few hours with AI assistance. Here's my portfolio website origin story."
+      tags: ["Web Development", "JavaScript", "Personal", "AI"]
 
 # Project Portfolio
 projects:
@@ -211,7 +211,6 @@ projects:
 pages:
   about:
     title: "About"
-    default: true
     showInNav: true
     order: 1
     # Multiline HTML content using YAML literal block syntax
