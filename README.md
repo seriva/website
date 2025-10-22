@@ -11,7 +11,7 @@ Key features:
 - Dynamic color themes you can change in the config
 - Font Awesome icons and Bootstrap for styling
 - Loads project READMEs directly from GitHub
-- Mobile-friendly responsive design with dedicated mobile search page
+- Mobile-friendly responsive design with unified full-page search
 - Fast loading with optimized assets
 
 ## Tech Stack
@@ -167,8 +167,9 @@ site:
 - **Searches**: titles, descriptions, tags, and full content
 - **Indexes**: markdown posts and GitHub READMEs
 - **Clickable tags**: Click any tag on projects or blog posts to instantly filter by that tag
-- **Desktop**: Unfold search bar in navbar
-- **Mobile**: Full-page search overlay with larger text
+- **Unified experience**: Search icon in navbar opens full-page search overlay on both desktop and mobile
+- **Smooth animations**: Elegant slide-down and fade-in effects when opening search
+- **Centered layout**: Search results constrained to 750px max-width, matching blog content
 - **Real-time**: Results with 300ms debounce
 - **Performance**: Scales to hundreds of posts efficiently
 - Up to 8 results with match highlighting
@@ -274,6 +275,6 @@ All UI strings are automatically translated using the `i18n.t()` function, makin
 - `/?blog=<slug>` shows individual blog posts (e.g., `/?blog=getting-started`)
 - `/?project=<project-id>` shows individual projects
 - Project READMEs are loaded from GitHub automatically
-- Search functionality works on both desktop (unfold navbar) and mobile (full-page overlay)
+- Search functionality uses a unified full-page overlay for both desktop and mobile
 - Everything is client-side routed (no page reloads)
 - Translations loaded from YAML and applied automatically
