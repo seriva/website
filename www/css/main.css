@@ -397,37 +397,26 @@ a.icon:hover {
 		display: flex;
 	}
 
+	/* Mobile search results - scaled to match blog post cards for consistency */
 	.mobile-search-results .search-result-item {
-		padding: 0.5rem;
+		padding: 1.5rem;
 		margin: 0.25rem;
 	}
 
-	.mobile-search-results .result-icon {
-		width: 32px;
-		height: 32px;
-		font-size: 0.9em;
-		margin-right: 0.75rem;
-	}
-
 	.mobile-search-results .result-title {
-		font-size: 1.1em;
-		margin-bottom: 0.4rem;
+		font-size: 1.3em;
+		margin-bottom: 0.5rem;
 	}
 
 	.mobile-search-results .result-description {
 		font-size: 0.9em;
 		margin-bottom: 0.5rem;
-		line-height: 1.5;
+		line-height: 1.6;
 	}
 
 	.mobile-search-results .result-tag {
-		font-size: 0.75em;
-		padding: 3px 8px;
-	}
-
-	.mobile-search-results .result-type {
-		font-size: 0.75em;
-		padding: 3px 7px;
+		font-size: 0.85em;
+		padding: 4px 10px;
 	}
 
 	/* Blog - consolidated */
@@ -600,8 +589,7 @@ a.icon:hover {
 
 /* Search result item */
 .search-result-item {
-	display: flex;
-	align-items: flex-start;
+	display: block;
 	padding: 0.75rem;
 	margin: 0.25rem;
 	border: 1px solid var(--border-color);
@@ -623,23 +611,8 @@ a.icon:hover {
 	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.2);
 }
 
-.result-icon {
-	flex-shrink: 0;
-	width: 24px;
-	height: 24px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: var(--hover-color);
-	border-radius: var(--border-radius);
-	margin-right: 0.5rem;
-	color: var(--accent);
-	font-size: 0.75em;
-}
-
 .result-content {
-	flex: 1;
-	min-width: 0;
+	width: 100%;
 }
 
 .result-title {
@@ -676,23 +649,6 @@ a.icon:hover {
 	background-color: var(--hover-color);
 	color: var(--accent);
 	border-radius: var(--border-radius);
-}
-
-.result-type {
-	flex-shrink: 0;
-	font-size: 0.6em;
-	padding: 2px 5px;
-	background-color: var(--accent);
-	color: var(--background-color);
-	border-radius: var(--border-radius);
-	font-weight: bold;
-	text-transform: uppercase;
-}
-
-.result-type-blog {
-	background-color: var(--hover-color);
-	color: var(--accent);
-	border: 1px solid var(--accent);
 }
 
 /* Highlight matched text */

@@ -33,7 +33,19 @@ const debounce = (func, wait) => {
 };
 
 /**
+ * Escape HTML entities to prevent XSS attacks
+ * @param {string} str - String to escape
+ * @returns {string} Escaped HTML string
+ */
+const escapeHtml = (str) => {
+	const div = document.createElement("div");
+	div.textContent = str;
+	return div.innerHTML;
+};
+
+/**
  * Tagged template literal for safer HTML templating
+ * Automatically escapes all interpolated values unless marked as safe
  * @param {Array<string>} strings - Template string parts
  * @param {...any} values - Interpolated values
  * @returns {string} Processed HTML string
@@ -43,12 +55,14 @@ const html = (strings, ...values) => {
 		const value = values[i];
 		if (value === undefined || value === null) return result + str;
 		if (value?.__safe) return result + str + value.content;
-		return result + str + String(value);
+		// Automatically escape HTML entities for security
+		return result + str + escapeHtml(String(value));
 	}, "");
 };
 
 /**
  * Mark content as safe HTML (bypasses escaping)
+ * Use with caution - only for trusted HTML content
  * @param {string} content - HTML content to mark as safe
  * @returns {Object} Safe content wrapper
  */
@@ -436,15 +450,18 @@ const Templates = {
 
 	searchResult: (item, query) => {
 		const isProject = item.type === "project";
+		const typeTag = isProject
+			? i18n.t("badges.project")
+			: i18n.t("badges.blog");
+		const allTags = [typeTag, ...item.tags];
+
 		return html`
             <a href="${item.url}" class="search-result-item" data-spa-route="${item.type}">
-                <div class="result-icon"><i class="${isProject ? "fas fa-folder" : "far fa-file-alt"}"></i></div>
                 <div class="result-content">
                     <div class="result-title">${safe(Search.highlight(item.title, query))}</div>
                     <div class="result-description">${safe(Search.highlight(item.description, query))}</div>
-                    ${item.tags.length ? safe(`<div class="result-tags">${item.tags.map((tag) => `<span class="result-tag">${tag}</span>`).join("")}</div>`) : ""}
+                    ${allTags.length ? safe(`<div class="result-tags">${allTags.map((tag) => `<span class="result-tag">${tag}</span>`).join("")}</div>`) : ""}
                 </div>
-                <span class="result-type${isProject ? "" : " result-type-blog"}">${isProject ? i18n.t("badges.project") : i18n.t("badges.blog")}</span>
             </a>`;
 	},
 
@@ -838,23 +855,6 @@ const fetchGitHubReadme = async (repoName) => {
 };
 
 /**
- * Preload GitHub READMEs with rate limiting to improve performance
- */
-const preloadGitHubReadmes = async () => {
-	const data = await getData();
-	const repos =
-		data?.projects?.filter((p) => p.github_repo).map((p) => p.github_repo) ||
-		[];
-
-	for (const repo of repos) {
-		await new Promise((resolve) =>
-			setTimeout(resolve, CONSTANTS.PRELOAD_DELAY),
-		);
-		fetchGitHubReadme(repo).catch(() => {});
-	}
-};
-
-/**
  * Load GitHub README content into specified container
  * @param {string} repoName - Repository name
  * @param {string} containerId - Container element ID
@@ -1121,7 +1121,7 @@ const initializeSearch = (searchConfig) => {
 	// Handle search toggle button (desktop only)
 	searchToggle.addEventListener("click", (e) => {
 		// Only handle desktop search unfold if we're on desktop
-		if (window.innerWidth >= 768) {
+		if (window.innerWidth > CONSTANTS.MOBILE_BREAKPOINT) {
 			e.stopPropagation();
 			searchBarContainer.classList.toggle("show");
 			if (searchBarContainer.classList.contains("show")) {
@@ -1207,8 +1207,8 @@ const initializeMobileSearch = (searchConfig) => {
 	const minChars = searchConfig.minChars || 2;
 
 	const handleSearchToggleClick = (e) => {
-		// Check if we're on mobile (window width < 768px)
-		if (window.innerWidth < 768) {
+		// Check if we're on mobile
+		if (window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
 			e.stopPropagation();
 			mobileSearchPage.classList.add("show");
 			requestAnimationFrame(() => mobileSearchInput.focus());
@@ -1500,9 +1500,7 @@ export const loadBlogPage = async (page = 1) => {
 			</div>
 			${paginationHtml}
 		</div>`;
-
-	// Add SPA routing to blog links
-	updateNavbarLinks();
+	// SPA routing handled via event delegation
 };
 
 /**
@@ -1552,9 +1550,7 @@ export const loadBlogPost = async (slug) => {
 		getHljsThemeUrl(themeName),
 		colors,
 	);
-
-	// Add SPA routing to back link
-	updateNavbarLinks();
+	// SPA routing handled via event delegation
 };
 
 // ===========================
@@ -1763,11 +1759,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 		await handleRoute();
 
 		window.addEventListener("popstate", handleRoute);
-		updateNavbarLinks();
+		setupSpaRouting(); // Set up event delegation for SPA links (once)
 		addMobileMenuOutsideClickHandler();
 
-		// Preload GitHub READMEs in the background
-		preloadGitHubReadmes();
+		// Note: GitHub READMEs are preloaded during Search.init() if search is enabled
 	} catch (error) {
 		console.error("Error initializing page:", error);
 		if (DOMCache.main) {
@@ -1816,17 +1811,24 @@ const updateActiveNavLink = () => {
 };
 
 /**
- * Update navbar links to handle SPA routing
+ * Handle SPA routing for links with data-spa-route attribute
+ * Uses event delegation to avoid memory leaks from multiple listeners
  */
-const updateNavbarLinks = () => {
-	document.querySelectorAll("[data-spa-route]").forEach((link) => {
-		link.addEventListener("click", (e) => {
-			e.preventDefault();
-			MobileMenu.close();
-			window.history.pushState({}, "", link.getAttribute("href"));
-			handleRoute();
-		});
-	});
+const handleSpaLinkClick = (e) => {
+	const link = e.target.closest("[data-spa-route]");
+	if (!link) return;
+
+	e.preventDefault();
+	MobileMenu.close();
+	window.history.pushState({}, "", link.getAttribute("href"));
+	handleRoute();
+};
+
+/**
+ * Set up SPA routing using event delegation (called once at init)
+ */
+const setupSpaRouting = () => {
+	document.addEventListener("click", handleSpaLinkClick);
 };
 
 /**
