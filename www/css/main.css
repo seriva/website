@@ -394,6 +394,416 @@ a.icon:hover {
 	}
 }
 
+/* ===========================
+   SEARCH FUNCTIONALITY
+   =========================== */
+
+/* Search nav item - matches other navbar icons */
+.search-nav-item {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+/* Search toggle button - styled like navbar icons */
+.search-toggle {
+	background: none;
+	border: none;
+	color: var(--text-color);
+	cursor: pointer;
+	padding: 0.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: color var(--transition-fast);
+	flex-shrink: 0;
+}
+
+.search-toggle:hover,
+.search-toggle:focus {
+	color: var(--accent);
+}
+
+/* Search bar container - unfolds horizontally */
+.search-bar-container {
+	width: 0;
+	overflow: hidden;
+	transition:
+		width var(--transition-normal),
+		opacity var(--transition-normal);
+	opacity: 0;
+	display: flex;
+	align-items: center;
+}
+
+.search-bar-container.show {
+	width: 300px;
+	opacity: 1;
+	margin-left: var(--spacing-sm);
+}
+
+/* Search input wrapper */
+.search-input-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.search-input {
+	width: 100%;
+	padding: 4px 28px 4px 10px;
+	background-color: var(--hover-color);
+	border: 1px solid var(--border-color);
+	border-radius: 20px;
+	color: var(--text-color);
+	font-size: 0.75em;
+	transition: border-color var(--transition-fast);
+}
+
+.search-input:focus {
+	outline: none;
+	border-color: var(--accent);
+	background-color: var(--background-color);
+}
+
+.search-input::placeholder {
+	color: var(--text-light);
+	opacity: 0.6;
+}
+
+.search-clear {
+	position: absolute;
+	right: 4px;
+	background: none;
+	border: none;
+	color: var(--text-light);
+	cursor: pointer;
+	padding: 4px 6px;
+	display: none;
+	transition: color var(--transition-fast);
+	font-size: 0.85em;
+}
+
+.search-clear:hover {
+	color: var(--accent);
+}
+
+.search-input:not(:placeholder-shown) ~ .search-clear {
+	display: block;
+}
+
+/* Search results dropdown - appears below the search bar */
+.search-results-dropdown {
+	position: fixed;
+	top: 60px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 700px;
+	max-width: 90vw;
+	background-color: var(--header-color);
+	border: var(--border-width) solid var(--border-color);
+	border-radius: var(--border-radius);
+	max-height: 400px;
+	overflow-y: auto;
+	display: none;
+	z-index: var(--z-dropdown);
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+	padding: 0.25rem 0;
+}
+
+.search-results-dropdown.show {
+	display: block;
+}
+
+/* Mobile adjustments for results */
+@media (max-width: 767px) {
+	.search-results-dropdown {
+		left: 0;
+		right: 0;
+		width: auto;
+	}
+}
+
+/* Search result item */
+.search-result-item {
+	display: flex;
+	align-items: flex-start;
+	padding: 0.75rem;
+	margin: 0.5rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background-color: rgba(255, 255, 255, 0.02);
+	color: var(--text-color);
+	text-decoration: none;
+	transition: all var(--transition-normal);
+}
+
+.search-result-item:last-child {
+	margin-bottom: 0.5rem;
+}
+
+.search-result-item:hover {
+	background-color: rgba(255, 255, 255, 0.05);
+	border-color: var(--accent);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.2);
+}
+
+.result-icon {
+	flex-shrink: 0;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: var(--hover-color);
+	border-radius: var(--border-radius);
+	margin-right: 0.5rem;
+	color: var(--accent);
+	font-size: 0.75em;
+}
+
+.result-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.result-title {
+	font-weight: bold;
+	margin-bottom: 0.25rem;
+	color: var(--accent);
+	font-size: 0.85em;
+	line-height: 1.3;
+}
+
+.result-description {
+	font-size: 0.7em;
+	color: var(--text-light);
+	margin-bottom: 0.4rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	line-height: 1.4;
+}
+
+.result-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	margin-top: 0.4rem;
+}
+
+.result-tag {
+	font-size: 0.6em;
+	padding: 2px 6px;
+	background-color: var(--hover-color);
+	color: var(--accent);
+	border-radius: var(--border-radius);
+}
+
+.result-type {
+	flex-shrink: 0;
+	font-size: 0.6em;
+	padding: 2px 5px;
+	background-color: var(--accent);
+	color: var(--background-color);
+	border-radius: var(--border-radius);
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.result-type-blog {
+	background-color: var(--hover-color);
+	color: var(--accent);
+	border: 1px solid var(--accent);
+}
+
+/* Highlight matched text */
+.search-result-item mark {
+	background-color: var(--accent);
+	color: var(--background-color);
+	padding: 1px 3px;
+	border-radius: 2px;
+	font-weight: bold;
+}
+
+/* No results message */
+.search-no-results {
+	padding: var(--spacing-xl);
+	text-align: center;
+	color: var(--text-light);
+}
+
+.search-no-results i {
+	font-size: 2em;
+	margin-bottom: var(--spacing-md);
+	opacity: 0.5;
+}
+
+.search-no-results p {
+	margin: 0;
+	font-size: 0.9em;
+}
+
+/* Mobile-specific search result styling - larger text like blog cards */
+@media (max-width: 767px) {
+	.mobile-search-results .search-result-item {
+		padding: 1rem;
+		margin: 0.75rem 0.5rem;
+	}
+
+	.mobile-search-results .result-icon {
+		width: 32px;
+		height: 32px;
+		font-size: 0.9em;
+		margin-right: 0.75rem;
+	}
+
+	.mobile-search-results .result-title {
+		font-size: 1.1em;
+		margin-bottom: 0.4rem;
+	}
+
+	.mobile-search-results .result-description {
+		font-size: 0.9em;
+		margin-bottom: 0.5rem;
+		line-height: 1.5;
+	}
+
+	.mobile-search-results .result-tag {
+		font-size: 0.75em;
+		padding: 3px 8px;
+	}
+
+	.mobile-search-results .result-type {
+		font-size: 0.75em;
+		padding: 3px 7px;
+	}
+}
+
+/* Mobile search page - full screen overlay */
+.mobile-search-page {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--background-color);
+	z-index: 2000;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.mobile-search-page.show {
+	display: flex;
+}
+
+.mobile-search-header {
+	display: flex;
+	align-items: center;
+	padding: 1rem;
+	background-color: var(--header-color);
+	border-bottom: 1px solid var(--border-color);
+	gap: 0.75rem;
+}
+
+.mobile-search-back {
+	background: none;
+	border: none;
+	color: var(--text-color);
+	cursor: pointer;
+	padding: 0.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.2em;
+	transition: color var(--transition-fast);
+}
+
+.mobile-search-back:hover {
+	color: var(--accent);
+}
+
+.mobile-search-input-wrapper {
+	flex: 1;
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+.mobile-search-input {
+	width: 100%;
+	padding: 0.6rem 2.5rem 0.6rem 1rem;
+	background-color: var(--hover-color);
+	border: 1px solid var(--border-color);
+	border-radius: 20px;
+	color: var(--text-color);
+	font-size: 1em;
+}
+
+.mobile-search-input:focus {
+	outline: none;
+	border-color: var(--accent);
+	background-color: var(--background-color);
+}
+
+.mobile-search-clear {
+	position: absolute;
+	right: 0.5rem;
+	background: none;
+	border: none;
+	color: var(--text-light);
+	cursor: pointer;
+	padding: 0.25rem 0.5rem;
+	display: none;
+	transition: color var(--transition-fast);
+}
+
+.mobile-search-clear:hover {
+	color: var(--accent);
+}
+
+.mobile-search-input:not(:placeholder-shown) ~ .mobile-search-clear {
+	display: block;
+}
+
+.mobile-search-content {
+	flex: 1;
+	overflow-y: auto;
+	padding: 1rem;
+}
+
+.mobile-search-results {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+/* Mobile search adjustments */
+@media (max-width: 767px) {
+	/* Hide the search bar container and results on mobile */
+	.search-bar-container,
+	.search-results-dropdown {
+		display: none;
+	}
+
+	/* Keep the search toggle button visible - it will trigger mobile search page */
+	.search-nav-item {
+		display: flex;
+	}
+}
+
+@media (min-width: 768px) {
+	/* Hide mobile search page on desktop */
+	.mobile-search-page {
+		display: none;
+	}
+}
+
 /* Desktop styles (min-width: 768px) */
 @media (min-width: 768px) {
 	.navbar-nav .dropdown-menu {
@@ -432,6 +842,11 @@ a.icon:hover {
 	display: flex;
 	align-items: center;
 	height: 50px;
+}
+
+.navbar .navbar-nav .nav-link:hover {
+	color: var(--accent);
+	background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Active navigation state */

@@ -7,10 +7,11 @@ It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicate
 Key features:
 - YAML configuration for easy content management
 - Built-in blog with markdown posts and pagination
+- Full-text search across projects and blog posts
 - Dynamic color themes you can change in the config
 - Font Awesome icons and Bootstrap for styling
 - Loads project READMEs directly from GitHub
-- Mobile-friendly responsive design
+- Mobile-friendly responsive design with dedicated mobile search page
 - Fast loading with optimized assets
 
 ## Tech Stack
@@ -64,16 +65,102 @@ The devcontainer includes Biome for code formatting and linting:
 - **Check code quality**: `Ctrl+Shift+P` → "Tasks: Run Task" → "Check Code Quality"
 - **Auto-format**: Enabled on save in VS Code
 
-## Configuration
+## Features & Configuration
 
-All content is managed through `data/content.yaml`. This includes:
+All content is managed through `data/content.yaml`. The configuration file supports:
 
-- Site info (title, description, social links)
-- Project details (descriptions, GitHub repos, demo links) 
-- Page content (like the about page)
-- Color themes
+### Projects
 
-### Example YAML structure:
+Add projects with detailed information including GitHub repos, demos, and custom links:
+
+```yaml
+projects:
+  - id: "my-project"
+    title: "Cool Project"
+    description: "A brief description of what this project does"
+    tags: ["JavaScript", "HTML", "CSS"]
+    weight: 1                    # Display order
+    github_repo: "my-project"    # Auto-loads README from GitHub
+    demo_url: "https://example.com/demo"
+    youtube_videos: ["dQw4w9WgXcQ"]
+    links:
+      - title: "GitHub"
+        icon: "fab fa-github"
+        href: "https://github.com/username/my-project"
+      - title: "Live Demo"
+        icon: "fas fa-external-link-alt"
+        href: "https://example.com"
+```
+
+**Features:**
+- READMEs automatically loaded from GitHub
+- YouTube video embeds
+- Custom links with Font Awesome icons
+- Tag-based organization
+
+### Blog
+
+Create markdown blog posts in `data/blog/` with automatic pagination:
+
+**1. Create a markdown file** (format: `YYYY-MM-DD-title.md`):
+
+```markdown
+---
+title: "Your Post Title"
+date: "2025-10-21"
+excerpt: "A brief summary of your post"
+tags: ["tag1", "tag2"]
+---
+
+# Your Post Content
+
+Write your content here in markdown...
+```
+
+**2. Configure blog settings** in `data/content.yaml`:
+
+```yaml
+blog:
+  title: "Blog"
+  showInNav: true
+  order: 1
+  postsPerPage: 5
+  dateFormat: "MMMM D, YYYY"
+  posts:
+    - "2025-10-21-your-post-title.md"
+    - "2025-10-20-another-post.md"
+```
+
+**Features:**
+- Markdown with syntax highlighting (Highlight.js)
+- Automatic date sorting (newest first)
+- Pagination support
+- Tags and excerpts
+- No separate manifest needed
+
+### Search
+
+Client-side full-text search across all projects and blog posts:
+
+```yaml
+site:
+  search:
+    enabled: true
+    placeholder: "Search projects and blog posts..."
+    minChars: 2
+```
+
+**Features:**
+- Searches titles, descriptions, tags, and full content
+- Indexes markdown posts and GitHub READMEs
+- Desktop: Unfold search bar in navbar
+- Mobile: Full-page search overlay with larger text
+- Real-time results with 300ms debounce
+- Up to 8 results with match highlighting
+- Works offline after initial load
+- Performance: Good for 20-50 posts (consider Fuse.js/Lunr.js for 100+)
+
+### Pages & Styling
 
 ```yaml
 site:
@@ -94,29 +181,6 @@ social:
   - icon: "fab fa-github" 
     href: "https://github.com/username"
 
-projects:
-  - id: "my-project"
-    title: "Cool Project"
-    description: "A brief description of what this project does"
-    tags: ["JavaScript", "HTML", "CSS"]
-    weight: 1
-    github_repo: "my-project"
-    demo_url: "https://example.com/demo"
-    youtube_videos: ["dQw4w9WgXcQ"]
-    links:
-      - title: "GitHub"
-        icon: "fab fa-github"
-        href: "https://github.com/username/my-project"
-      - title: "Live Demo"
-        icon: "fas fa-external-link-alt"
-        href: "https://example.com"
-```
-
-### Color themes
-
-Change colors by editing the `colors` section:
-
-```yaml
 colors:
   primary: "#F59E0B"
   background: "#0C0A09" 
@@ -124,45 +188,7 @@ colors:
   # ... etc
 ```
 
-Available code themes: `okaidia`, `tomorrow`, `vs-dark`, `dark`
-
-## Blog Feature
-
-The blog system uses markdown files stored in `data/blog/`:
-
-### Adding a New Blog Post
-
-1. Create a new markdown file in `data/blog/` with the format `YYYY-MM-DD-title.md`
-2. Add frontmatter at the top:
-
-```markdown
----
-title: "Your Post Title"
-date: "2025-10-21"
-excerpt: "A brief summary of your post"
-tags: ["tag1", "tag2"]
----
-
-# Your Post Content
-
-Write your content here in markdown...
-```
-
-3. Add the filename to the `posts` array in `data/content.yaml`:
-
-```yaml
-blog:
-  title: "Blog"
-  showInNav: true
-  order: 1
-  postsPerPage: 5
-  dateFormat: "MMMM D, YYYY"
-  posts:
-    - "2025-10-21-your-post-title.md"
-    - "2025-10-20-another-post.md"
-```
-
-That's it! No need to maintain a separate manifest.json file. The blog posts are automatically sorted by date (newest first) and displayed with pagination.
+**Available code themes:** `okaidia`, `tomorrow`, `vs-dark`, `dark`
 
 ## How it works
 
@@ -172,5 +198,6 @@ That's it! No need to maintain a separate manifest.json file. The blog posts are
 - `/?blog&p=2` shows blog listing with pagination (page 2)
 - `/?blog=<slug>` shows individual blog posts (e.g., `/?blog=getting-started`)
 - `/?project=<project-id>` shows individual projects
-- Project READMEs are loaded from GitHub automatically 
+- Project READMEs are loaded from GitHub automatically
+- Search functionality works on both desktop (unfold navbar) and mobile (full-page overlay)
 - Everything is client-side routed (no page reloads)

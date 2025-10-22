@@ -24,6 +24,7 @@ const Templates = {
 		projectsDropdown,
 		pageLinks,
 		socialLinksHtml,
+		searchBar,
 		siteTitle,
 	) => `
     <nav class="navbar navbar-expand-md navbar-dark fixed-top">
@@ -39,6 +40,7 @@ const Templates = {
                     ${pageLinks}
                 </ul>
                 <ul class="navbar-nav ms-auto">
+                    ${searchBar}
                     ${socialLinksHtml}
                 </ul>
             </div>
@@ -281,6 +283,80 @@ const Templates = {
                 </p>
             </div>
         </footer>`,
+
+	searchBar: (placeholder) => `
+        <li class="nav-item navbar-icon search-nav-item">
+            <button class="nav-link search-toggle" id="search-toggle" aria-label="Search">
+                <i class="fas fa-search"></i>
+            </button>
+            <div class="search-bar-container" id="search-bar-container">
+                <div class="search-input-wrapper">
+                    <input 
+                        type="search" 
+                        id="search-input" 
+                        class="search-input" 
+                        placeholder="${placeholder}"
+                        autocomplete="off"
+                        aria-label="Search"
+                    />
+                    <button class="search-clear" id="search-clear" aria-label="Clear search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="search-results-dropdown" id="search-results"></div>
+        </li>`,
+
+	mobileSearchPage: (placeholder) => `
+        <div class="mobile-search-page" id="mobile-search-page">
+            <div class="mobile-search-header">
+                <button class="mobile-search-back" id="mobile-search-back" aria-label="Go back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="mobile-search-input-wrapper">
+                    <input 
+                        type="search" 
+                        id="mobile-search-input" 
+                        class="mobile-search-input" 
+                        placeholder="${placeholder}"
+                        autocomplete="off"
+                        aria-label="Search"
+                    />
+                    <button class="mobile-search-clear" id="mobile-search-clear" aria-label="Clear search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mobile-search-content">
+                <div class="mobile-search-results" id="mobile-search-results"></div>
+            </div>
+        </div>`,
+
+	searchResult: (item, query) => {
+		const typeIcon =
+			item.type === "project" ? "fas fa-folder" : "far fa-file-alt";
+		const typeBadge =
+			item.type === "project"
+				? '<span class="result-type">Project</span>'
+				: '<span class="result-type result-type-blog">Blog</span>';
+
+		return `
+            <a href="${item.url}" class="search-result-item" data-spa-route="${item.type}">
+                <div class="result-icon"><i class="${typeIcon}"></i></div>
+                <div class="result-content">
+                    <div class="result-title">${Search.highlight(item.title, query)}</div>
+                    <div class="result-description">${Search.highlight(item.description, query)}</div>
+                    ${item.tags.length ? `<div class="result-tags">${item.tags.map((tag) => `<span class="result-tag">${tag}</span>`).join("")}</div>` : ""}
+                </div>
+                ${typeBadge}
+            </a>`;
+	},
+
+	searchNoResults: () => `
+        <div class="search-no-results">
+            <i class="fas fa-search"></i>
+            <p>No results found</p>
+        </div>`,
 };
 
 // ===========================
@@ -461,6 +537,100 @@ const MobileMenu = {
 window.closeMobileMenu = () => MobileMenu.close();
 
 // ===========================
+// SEARCH FUNCTIONALITY
+// ===========================
+
+/**
+ * Search functionality for projects and blog posts
+ */
+const Search = {
+	data: [],
+	isInitialized: false,
+
+	/**
+	 * Initialize search index with projects and blog posts
+	 */
+	async init() {
+		if (this.isInitialized) return;
+
+		const data = projectsData || (await loadProjectsData());
+		const projects = data?.projects || [];
+		const blogPosts = await loadBlogPosts();
+
+		// Fetch README content for projects
+		const projectsWithContent = await Promise.all(
+			projects.map(async (p) => {
+				let readmeContent = "";
+				if (p.github_repo) {
+					const readme = await fetchGitHubReadme(p.github_repo);
+					readmeContent = readme || "";
+				}
+				return {
+					id: p.id,
+					title: p.title,
+					description: p.description,
+					tags: p.tags || [],
+					content: readmeContent,
+					type: "project",
+					url: `/?project=${p.id}`,
+				};
+			}),
+		);
+
+		// Index all searchable content
+		this.data = [
+			...projectsWithContent,
+			...blogPosts.map((p) => ({
+				id: p.slug,
+				title: p.title,
+				description: p.excerpt || "",
+				tags: p.tags || [],
+				content: p.content || "",
+				type: "blog",
+				url: `/?blog=${p.slug}`,
+			})),
+		];
+
+		this.isInitialized = true;
+	},
+
+	/**
+	 * Search through indexed data
+	 * @param {string} query - Search query
+	 * @returns {Array} Filtered results
+	 */
+	search(query) {
+		if (!query || query.length < 2) return [];
+
+		const q = query.toLowerCase().trim();
+
+		return this.data
+			.filter((item) => {
+				const titleMatch = item.title.toLowerCase().includes(q);
+				const descMatch = item.description.toLowerCase().includes(q);
+				const tagMatch = item.tags.some((tag) => tag.toLowerCase().includes(q));
+				const contentMatch = item.content.toLowerCase().includes(q);
+
+				return titleMatch || descMatch || tagMatch || contentMatch;
+			})
+			.slice(0, 8); // Limit to 8 results
+	},
+
+	/**
+	 * Highlight matching text in search results
+	 * @param {string} text - Text to highlight
+	 * @param {string} query - Search query
+	 * @returns {string} HTML with highlighted text
+	 */
+	highlight(text, query) {
+		if (!query) return text;
+
+		const regex = new RegExp(`(${query})`, "gi");
+		return text.replace(regex, "<mark>$1</mark>");
+	},
+};
+
+// ===========================
 // GITHUB API INTEGRATION
 // ===========================
 
@@ -603,12 +773,14 @@ const DOMCache = {
  * Create navbar HTML structure
  * @param {Array} pages - Array of page objects (includes blog if configured)
  * @param {Array} socialLinks - Array of social link objects
+ * @param {Object} searchConfig - Search configuration
  * @param {string} siteTitle - Site title
  * @returns {string} Complete navbar HTML
  */
 const createNavbar = (
 	pages = [],
 	socialLinks = [],
+	searchConfig = {},
 	siteTitle = "portfolio.example.com",
 ) => {
 	// Separate blog from other pages
@@ -634,11 +806,17 @@ const createNavbar = (
 		.map((link) => Templates.socialLink(link))
 		.join("");
 
+	// Create search bar if enabled
+	const searchBar = searchConfig?.enabled
+		? Templates.searchBar(searchConfig.placeholder || "Search...")
+		: "";
+
 	return Templates.navbar(
 		blogLink,
 		projectsDropdown,
 		pageLinks,
 		socialLinksHtml,
+		searchBar,
 		siteTitle,
 	);
 };
@@ -679,8 +857,20 @@ const injectNavbar = async () => {
 	DOMCache.navbar.innerHTML = createNavbar(
 		pages,
 		data?.site?.social || [],
+		data?.site?.search || {},
 		data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 	);
+
+	// Inject mobile search page if enabled
+	if (data?.site?.search?.enabled) {
+		const existingMobileSearch = document.getElementById("mobile-search-page");
+		if (!existingMobileSearch) {
+			document.body.insertAdjacentHTML(
+				"beforeend",
+				Templates.mobileSearchPage(data.site.search.placeholder || "Search..."),
+			);
+		}
+	}
 
 	// Clear cached navbar elements after rebuild
 	DOMCache.clearNavbarCache();
@@ -702,6 +892,218 @@ const injectNavbar = async () => {
 			setTimeout(() => toggleBtn.blur(), CONSTANTS.BLUR_DELAY),
 		);
 	}
+
+	// Initialize search if enabled
+	if (data?.site?.search?.enabled) {
+		initializeSearch(data.site.search);
+		initializeMobileSearch(data.site.search);
+	}
+};
+
+/**
+ * Initialize search functionality
+ * @param {Object} searchConfig - Search configuration
+ */
+const initializeSearch = (searchConfig) => {
+	const searchInput = document.getElementById("search-input");
+	const searchResults = document.getElementById("search-results");
+	const searchClear = document.getElementById("search-clear");
+	const searchToggle = document.getElementById("search-toggle");
+	const searchBarContainer = document.getElementById("search-bar-container");
+
+	if (!searchInput || !searchResults || !searchToggle || !searchBarContainer)
+		return;
+
+	const minChars = searchConfig.minChars || 2;
+	let debounceTimeout;
+
+	// Initialize search data
+	Search.init();
+
+	// Handle search toggle button (desktop only)
+	searchToggle.addEventListener("click", (e) => {
+		// Only handle desktop search unfold if we're on desktop
+		if (window.innerWidth >= 768) {
+			e.stopPropagation();
+			searchBarContainer.classList.toggle("show");
+			if (searchBarContainer.classList.contains("show")) {
+				setTimeout(() => searchInput.focus(), 50);
+			}
+		}
+		// On mobile, this is handled by initializeMobileSearch
+	});
+
+	// Handle search input
+	searchInput.addEventListener("input", (e) => {
+		clearTimeout(debounceTimeout);
+		const query = e.target.value.trim();
+
+		if (query.length < minChars) {
+			searchResults.classList.remove("show");
+			return;
+		}
+
+		// Debounce search
+		debounceTimeout = setTimeout(() => {
+			const results = Search.search(query);
+
+			if (results.length > 0) {
+				searchResults.innerHTML = results
+					.map((item) => Templates.searchResult(item, query))
+					.join("");
+				searchResults.classList.add("show");
+
+				// Add SPA routing to result links
+				searchResults.querySelectorAll("[data-spa-route]").forEach((link) => {
+					link.addEventListener("click", (e) => {
+						e.preventDefault();
+						searchInput.value = "";
+						searchResults.classList.remove("show");
+						searchBarContainer.classList.remove("show");
+						window.history.pushState({}, "", link.getAttribute("href"));
+						handleRoute();
+					});
+				});
+			} else {
+				searchResults.innerHTML = Templates.searchNoResults();
+				searchResults.classList.add("show");
+			}
+		}, 300);
+	});
+
+	// Handle clear button
+	if (searchClear) {
+		searchClear.addEventListener("click", () => {
+			searchInput.value = "";
+			searchResults.classList.remove("show");
+			searchInput.focus();
+		});
+	}
+
+	// Close search dropdown when clicking outside
+	document.addEventListener("click", (e) => {
+		if (
+			!searchBarContainer?.contains(e.target) &&
+			!searchToggle.contains(e.target)
+		) {
+			searchBarContainer.classList.remove("show");
+			searchResults.classList.remove("show");
+		}
+	});
+
+	// Handle ESC key to close search
+	searchInput.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
+			searchInput.value = "";
+			searchResults.classList.remove("show");
+			searchBarContainer.classList.remove("show");
+			searchInput.blur();
+		}
+	});
+};
+
+/**
+ * Initialize mobile search page functionality
+ * @param {Object} searchConfig - Search configuration
+ */
+const initializeMobileSearch = (searchConfig) => {
+	const mobileSearchPage = document.getElementById("mobile-search-page");
+	const searchToggle = document.getElementById("search-toggle");
+	const mobileSearchBack = document.getElementById("mobile-search-back");
+	const mobileSearchInput = document.getElementById("mobile-search-input");
+	const mobileSearchResults = document.getElementById("mobile-search-results");
+	const mobileSearchClear = document.getElementById("mobile-search-clear");
+
+	if (
+		!mobileSearchPage ||
+		!searchToggle ||
+		!mobileSearchBack ||
+		!mobileSearchInput ||
+		!mobileSearchResults
+	)
+		return;
+
+	const minChars = searchConfig.minChars || 2;
+	let debounceTimeout;
+
+	// Initialize search data
+	Search.init();
+
+	// Open mobile search page on mobile, handle desktop search on desktop
+	// On mobile, this button will trigger the mobile search page
+	// The desktop search unfold is handled in initializeSearch()
+	const handleSearchToggleClick = (e) => {
+		// Check if we're on mobile (window width < 768px)
+		if (window.innerWidth < 768) {
+			e.stopPropagation();
+			mobileSearchPage.classList.add("show");
+			setTimeout(() => mobileSearchInput.focus(), 50);
+		}
+		// On desktop, the desktop search handler takes care of it
+	};
+
+	searchToggle.addEventListener("click", handleSearchToggleClick);
+
+	// Close mobile search page
+	const closeMobileSearch = () => {
+		mobileSearchPage.classList.remove("show");
+		mobileSearchInput.value = "";
+		mobileSearchResults.innerHTML = "";
+	};
+
+	mobileSearchBack.addEventListener("click", closeMobileSearch);
+
+	// Handle search input
+	mobileSearchInput.addEventListener("input", (e) => {
+		clearTimeout(debounceTimeout);
+		const query = e.target.value.trim();
+
+		if (query.length < minChars) {
+			mobileSearchResults.innerHTML = "";
+			return;
+		}
+
+		// Debounce search
+		debounceTimeout = setTimeout(() => {
+			const results = Search.search(query);
+
+			if (results.length > 0) {
+				mobileSearchResults.innerHTML = results
+					.map((item) => Templates.searchResult(item, query))
+					.join("");
+
+				// Add SPA routing to result links
+				mobileSearchResults
+					.querySelectorAll("[data-spa-route]")
+					.forEach((link) => {
+						link.addEventListener("click", (e) => {
+							e.preventDefault();
+							closeMobileSearch();
+							window.history.pushState({}, "", link.getAttribute("href"));
+							handleRoute();
+						});
+					});
+			} else {
+				mobileSearchResults.innerHTML = Templates.searchNoResults();
+			}
+		}, 300);
+	});
+
+	// Handle clear button
+	if (mobileSearchClear) {
+		mobileSearchClear.addEventListener("click", () => {
+			mobileSearchInput.value = "";
+			mobileSearchResults.innerHTML = "";
+			mobileSearchInput.focus();
+		});
+	}
+
+	// Handle ESC key to close search
+	mobileSearchInput.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
+			closeMobileSearch();
+		}
+	});
 };
 
 // ===========================
