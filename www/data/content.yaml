@@ -60,7 +60,7 @@ site:
 # Blog Configuration
 blog:
   title: "Blog"
-  showInNav: true
+  showInNav: false
   postsPerPage: 5
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
