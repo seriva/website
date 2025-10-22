@@ -10,8 +10,26 @@ const CONSTANTS = {
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
 	MOBILE_BREAKPOINT: 767,
 	PRELOAD_DELAY: 100,
-	BLUR_DELAY: 100,
 	THEME_APPLY_DELAY: 200,
+	SEARCH_DEBOUNCE_MS: 300,
+};
+
+// ===========================
+// UTILITY FUNCTIONS
+// ===========================
+
+/**
+ * Debounce utility function
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Wait time in milliseconds
+ * @returns {Function} Debounced function
+ */
+const debounce = (func, wait) => {
+	let timeout;
+	return (...args) => {
+		clearTimeout(timeout);
+		timeout = setTimeout(() => func(...args), wait);
+	};
 };
 
 // ===========================
@@ -409,36 +427,39 @@ const applyThemeToZeroMd = (
 	try {
 		if (!themeName) return;
 		const themeUrl = getHljsThemeUrl(themeName);
+		const zeroMdElements = document.querySelectorAll("zero-md");
 
-		document.querySelectorAll("zero-md").forEach((el) => {
+		zeroMdElements.forEach((el) => {
 			// For v3, we need to recreate the element to update the theme
 			// Since shadow DOM is sealed, we trigger a re-render
 			const template = el.querySelector("template[data-append]");
-			if (template) {
-				// Update the Highlight.js theme link in the template
-				const existingLinks = template.content.querySelectorAll(
-					'link[href*="highlight.js"], link[href*="hljs"]',
-				);
+			if (!template) return;
+
+			// Update the Highlight.js theme link in the template
+			const existingLinks = template.content.querySelectorAll(
+				'link[href*="highlight.js"], link[href*="hljs"]',
+			);
+
+			if (existingLinks.length > 0) {
 				existingLinks.forEach((link) => {
 					link.href = themeUrl;
 				});
-
+			} else {
 				// If no existing link, add one
-				if (existingLinks.length === 0) {
-					const link = document.createElement("link");
-					link.rel = "stylesheet";
-					link.href = themeUrl;
-					template.content.appendChild(link);
-				}
-
-				// Force re-render by temporarily removing and re-adding
-				const parent = el.parentNode;
-				const nextSibling = el.nextSibling;
-				parent.removeChild(el);
-				setTimeout(() => {
-					parent.insertBefore(el, nextSibling);
-				}, 10);
+				const link = document.createElement("link");
+				link.rel = "stylesheet";
+				link.href = themeUrl;
+				template.content.appendChild(link);
 			}
+
+			// Force re-render by temporarily removing and re-adding
+			// Use requestAnimationFrame for smoother rendering
+			const parent = el.parentNode;
+			const nextSibling = el.nextSibling;
+			parent.removeChild(el);
+			requestAnimationFrame(() => {
+				parent.insertBefore(el, nextSibling);
+			});
 		});
 	} catch (error) {
 		console.error("Error applying theme to zero-md elements:", error);
@@ -529,7 +550,7 @@ const MobileMenu = {
 			) {
 				MobileMenu.close();
 			}
-			setTimeout(() => element.blur(), CONSTANTS.BLUR_DELAY);
+			requestAnimationFrame(() => element.blur());
 		});
 	},
 };
@@ -889,7 +910,7 @@ const injectNavbar = async () => {
 	const toggleBtn = DOMCache.navbar.querySelector(".navbar-toggler");
 	if (toggleBtn) {
 		toggleBtn.addEventListener("click", () =>
-			setTimeout(() => toggleBtn.blur(), CONSTANTS.BLUR_DELAY),
+			requestAnimationFrame(() => toggleBtn.blur()),
 		);
 	}
 
@@ -897,6 +918,36 @@ const injectNavbar = async () => {
 	if (data?.site?.search?.enabled) {
 		initializeSearch(data.site.search);
 		initializeMobileSearch(data.site.search);
+	}
+};
+
+/**
+ * Shared search handler function
+ * @param {string} query - Search query
+ * @param {HTMLElement} resultsContainer - Results container element
+ * @param {Function} onResultClick - Callback for result clicks
+ */
+const handleSearchQuery = (query, resultsContainer, onResultClick) => {
+	const results = Search.search(query);
+
+	if (results.length > 0) {
+		resultsContainer.innerHTML = results
+			.map((item) => Templates.searchResult(item, query))
+			.join("");
+		resultsContainer.classList.add("show");
+
+		// Add SPA routing to result links
+		resultsContainer.querySelectorAll("[data-spa-route]").forEach((link) => {
+			link.addEventListener("click", (e) => {
+				e.preventDefault();
+				onResultClick();
+				window.history.pushState({}, "", link.getAttribute("href"));
+				handleRoute();
+			});
+		});
+	} else {
+		resultsContainer.innerHTML = Templates.searchNoResults();
+		resultsContainer.classList.add("show");
 	}
 };
 
@@ -915,9 +966,8 @@ const initializeSearch = (searchConfig) => {
 		return;
 
 	const minChars = searchConfig.minChars || 2;
-	let debounceTimeout;
 
-	// Initialize search data
+	// Initialize search data once
 	Search.init();
 
 	// Handle search toggle button (desktop only)
@@ -927,15 +977,23 @@ const initializeSearch = (searchConfig) => {
 			e.stopPropagation();
 			searchBarContainer.classList.toggle("show");
 			if (searchBarContainer.classList.contains("show")) {
-				setTimeout(() => searchInput.focus(), 50);
+				requestAnimationFrame(() => searchInput.focus());
 			}
 		}
 		// On mobile, this is handled by initializeMobileSearch
 	});
 
+	// Create debounced search handler
+	const performSearch = debounce((query) => {
+		handleSearchQuery(query, searchResults, () => {
+			searchInput.value = "";
+			searchResults.classList.remove("show");
+			searchBarContainer.classList.remove("show");
+		});
+	}, CONSTANTS.SEARCH_DEBOUNCE_MS);
+
 	// Handle search input
 	searchInput.addEventListener("input", (e) => {
-		clearTimeout(debounceTimeout);
 		const query = e.target.value.trim();
 
 		if (query.length < minChars) {
@@ -943,32 +1001,7 @@ const initializeSearch = (searchConfig) => {
 			return;
 		}
 
-		// Debounce search
-		debounceTimeout = setTimeout(() => {
-			const results = Search.search(query);
-
-			if (results.length > 0) {
-				searchResults.innerHTML = results
-					.map((item) => Templates.searchResult(item, query))
-					.join("");
-				searchResults.classList.add("show");
-
-				// Add SPA routing to result links
-				searchResults.querySelectorAll("[data-spa-route]").forEach((link) => {
-					link.addEventListener("click", (e) => {
-						e.preventDefault();
-						searchInput.value = "";
-						searchResults.classList.remove("show");
-						searchBarContainer.classList.remove("show");
-						window.history.pushState({}, "", link.getAttribute("href"));
-						handleRoute();
-					});
-				});
-			} else {
-				searchResults.innerHTML = Templates.searchNoResults();
-				searchResults.classList.add("show");
-			}
-		}, 300);
+		performSearch(query);
 	});
 
 	// Handle clear button
@@ -1024,10 +1057,9 @@ const initializeMobileSearch = (searchConfig) => {
 		return;
 
 	const minChars = searchConfig.minChars || 2;
-	let debounceTimeout;
 
-	// Initialize search data
-	Search.init();
+	// Search data is already initialized in initializeSearch
+	// No need to call Search.init() again
 
 	// Open mobile search page on mobile, handle desktop search on desktop
 	// On mobile, this button will trigger the mobile search page
@@ -1037,7 +1069,7 @@ const initializeMobileSearch = (searchConfig) => {
 		if (window.innerWidth < 768) {
 			e.stopPropagation();
 			mobileSearchPage.classList.add("show");
-			setTimeout(() => mobileSearchInput.focus(), 50);
+			requestAnimationFrame(() => mobileSearchInput.focus());
 		}
 		// On desktop, the desktop search handler takes care of it
 	};
@@ -1053,9 +1085,13 @@ const initializeMobileSearch = (searchConfig) => {
 
 	mobileSearchBack.addEventListener("click", closeMobileSearch);
 
+	// Create debounced search handler
+	const performSearch = debounce((query) => {
+		handleSearchQuery(query, mobileSearchResults, closeMobileSearch);
+	}, CONSTANTS.SEARCH_DEBOUNCE_MS);
+
 	// Handle search input
 	mobileSearchInput.addEventListener("input", (e) => {
-		clearTimeout(debounceTimeout);
 		const query = e.target.value.trim();
 
 		if (query.length < minChars) {
@@ -1063,30 +1099,7 @@ const initializeMobileSearch = (searchConfig) => {
 			return;
 		}
 
-		// Debounce search
-		debounceTimeout = setTimeout(() => {
-			const results = Search.search(query);
-
-			if (results.length > 0) {
-				mobileSearchResults.innerHTML = results
-					.map((item) => Templates.searchResult(item, query))
-					.join("");
-
-				// Add SPA routing to result links
-				mobileSearchResults
-					.querySelectorAll("[data-spa-route]")
-					.forEach((link) => {
-						link.addEventListener("click", (e) => {
-							e.preventDefault();
-							closeMobileSearch();
-							window.history.pushState({}, "", link.getAttribute("href"));
-							handleRoute();
-						});
-					});
-			} else {
-				mobileSearchResults.innerHTML = Templates.searchNoResults();
-			}
-		}, 300);
+		performSearch(query);
 	});
 
 	// Handle clear button

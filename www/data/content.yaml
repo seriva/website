@@ -27,7 +27,7 @@ site:
   
   # Search configuration
   search:
-    enabled: false
+    enabled: true
     placeholder: "Search projects and blog posts..."
     minChars: 2
   
