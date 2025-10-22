@@ -265,7 +265,7 @@ translations:
     
     # Search
     search:
-      placeholder: "Search projects and blog posts..."
+      placeholder: "Search..."
       noResults: "No results found"
       loading: "Loading..."
     
