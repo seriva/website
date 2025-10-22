@@ -32,6 +32,28 @@ const debounce = (func, wait) => {
 	};
 };
 
+/**
+ * Tagged template literal for safer HTML templating
+ * @param {Array<string>} strings - Template string parts
+ * @param {...any} values - Interpolated values
+ * @returns {string} Processed HTML string
+ */
+const html = (strings, ...values) => {
+	return strings.reduce((result, str, i) => {
+		const value = values[i];
+		if (value === undefined || value === null) return result + str;
+		if (value?.__safe) return result + str + value.content;
+		return result + str + String(value);
+	}, "");
+};
+
+/**
+ * Mark content as safe HTML (bypasses escaping)
+ * @param {string} content - HTML content to mark as safe
+ * @returns {Object} Safe content wrapper
+ */
+const safe = (content) => ({ __safe: true, content });
+
 // ===========================
 // INTERNATIONALIZATION (i18n)
 // ===========================
@@ -105,7 +127,7 @@ const Templates = {
 		socialLinksHtml,
 		searchBar,
 		siteTitle,
-	) => `
+	) => html`
     <nav class="navbar navbar-expand-md navbar-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand d-md-none" href="#">${siteTitle}</a>
@@ -114,13 +136,13 @@ const Templates = {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    ${blogLink}
-                    ${projectsDropdown}
-                    ${pageLinks}
+                    ${safe(blogLink)}
+                    ${safe(projectsDropdown)}
+                    ${safe(pageLinks)}
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    ${searchBar}
-                    ${socialLinksHtml}
+                    ${safe(searchBar)}
+                    ${safe(socialLinksHtml)}
                 </ul>
             </div>
         </div>
@@ -129,7 +151,7 @@ const Templates = {
 
 	pageLink: (pageId, pageTitle) => {
 		const href = pageId === "blog" ? "/?blog" : `/?page=${pageId}`;
-		return `<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
+		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
 	},
 
 	socialLink: ({
@@ -140,12 +162,12 @@ const Templates = {
 		"aria-label": ariaLabel = "",
 		icon,
 	}) =>
-		`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${onclick && `onclick="${onclick}"`} ${target && `target="${target}"`} ${rel && `rel="${rel}"`} ${ariaLabel && `aria-label="${ariaLabel}"`}><i class="${icon}"></i></a></li>`,
+		html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${onclick && `onclick="${onclick}"`} ${target && `target="${target}"`} ${rel && `rel="${rel}"`} ${ariaLabel && `aria-label="${ariaLabel}"`}><i class="${icon}"></i></a></li>`,
 
 	projectDropdownItem: (projectId, projectTitle) =>
-		`<li><a class="dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
+		html`<li><a class="dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
 
-	projectsDropdown: () => `
+	projectsDropdown: () => html`
 		<li class="nav-item navbar-menu dropdown">
 			<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 				Projects
@@ -156,18 +178,18 @@ const Templates = {
 		</li>
 	`,
 
-	projectLink: (link) => `
+	projectLink: (link) => html`
         <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn" onclick="closeMobileMenu()">
             <i class="${link.icon}"></i>
             <span>${link.title}</span>
         </a>`,
 
-	youtubeVideo: (videoId) => `
+	youtubeVideo: (videoId) => html`
         <div class="youtube-video"><div class="iframeWrapper">
             <iframe width="560" height="349" src="//www.youtube.com/embed/${videoId}?rel=0&amp;hd=1" frameborder="0" allowfullscreen></iframe>
         </div></div>`,
 
-	demoIframe: (demoUrl) => `
+	demoIframe: (demoUrl) => html`
         <div class="markdown-body"><h2>${i18n.t("project.demo")}</h2>
             <p>${i18n.t("project.demoInstructions")}</p>
             <div class="iframeWrapper">
@@ -177,32 +199,35 @@ const Templates = {
 
 	// Simple data-attribute containers for dynamic loading
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
-		`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
+		html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
 
 	// Helper for rendering tags (clickable to search by tag if search is enabled)
 	tagList: (tags) =>
-		tags?.length
-			? tags
-					.map((tag) => {
-						// Check if search is enabled in the loaded data
-						const searchEnabled = projectsData?.site?.search?.enabled !== false;
-						const clickableClass = searchEnabled ? " clickable-tag" : "";
-						const onclickAttr = searchEnabled
-							? ` onclick="event.stopPropagation(); searchByTag('${tag}')"`
-							: "";
-						return `<span class="item-tag${clickableClass}"${onclickAttr}>${tag}</span>`;
-					})
-					.join(" ")
-			: "",
+		safe(
+			tags?.length
+				? tags
+						.map((tag) => {
+							// Check if search is enabled in the loaded data
+							const searchEnabled =
+								projectsData?.site?.search?.enabled !== false;
+							const clickableClass = searchEnabled ? " clickable-tag" : "";
+							const onclickAttr = searchEnabled
+								? ` onclick="event.stopPropagation(); searchByTag('${tag}')"`
+								: "";
+							return html`<span class="item-tag${clickableClass}"${onclickAttr}>${tag}</span>`;
+						})
+						.join(" ")
+				: "",
+		),
 
-	blogPostCard: (post, index) => `
+	blogPostCard: (post, index) => html`
         <article class="blog-post-card" data-index="${index}">
             <h2 class="blog-post-title">
                 <a href="/?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
             </h2>
             <div class="blog-post-meta">
                 <span class="blog-post-date"><i class="far fa-calendar"></i> ${post.date}</span>
-                ${post.tags?.length ? `<span class="blog-post-tags">${Templates.tagList(post.tags)}</span>` : ""}
+                ${post.tags?.length ? safe(`<span class="blog-post-tags">${Templates.tagList(post.tags).content}</span>`) : ""}
             </div>
             <p class="blog-post-excerpt">${post.excerpt}</p>
             <a href="/?blog=${post.slug}" class="blog-read-more" data-spa-route="blog">${i18n.t("blog.readMore")}</a>
@@ -211,50 +236,47 @@ const Templates = {
 	blogPagination: (currentPage, totalPages) => {
 		if (totalPages <= 1) return "";
 
-		let html =
-			'<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">';
+		const pageNumbers = [];
 
-		// Previous button
-		html += `<li class="page-item ${currentPage === 1 ? "disabled" : ""}">
-            <a class="page-link" href="/?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>`;
-
-		// Page numbers
+		// Build page numbers array
 		for (let i = 1; i <= totalPages; i++) {
 			if (
 				i === 1 ||
 				i === totalPages ||
 				(i >= currentPage - 1 && i <= currentPage + 1)
 			) {
-				html += `<li class="page-item ${i === currentPage ? "active" : ""}">
+				pageNumbers.push(html`<li class="page-item ${i === currentPage ? "active" : ""}">
                     <a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a>
-                </li>`;
+                </li>`);
 			} else if (i === currentPage - 2 || i === currentPage + 2) {
-				html +=
-					'<li class="page-item disabled"><span class="page-link">...</span></li>';
+				pageNumbers.push(
+					html`<li class="page-item disabled"><span class="page-link">...</span></li>`,
+				);
 			}
 		}
 
-		// Next button
-		html += `<li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
-            <a class="page-link" href="/?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>`;
-
-		html += "</ul></nav>";
-		return html;
+		return html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
+            <li class="page-item ${currentPage === 1 ? "disabled" : ""}">
+                <a class="page-link" href="/?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            ${safe(pageNumbers.join(""))}
+            <li class="page-item ${currentPage === totalPages ? "disabled" : ""}">
+                <a class="page-link" href="/?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul></nav>`;
 	},
 
-	blogPost: (post, content, themeUrl, colors) => `
+	blogPost: (post, content, themeUrl, colors) => html`
         <article class="blog-post-full">
             <h1 class="project-title">${post.title}</h1>
             <p class="project-description">${post.date}</p>
-            ${post.tags?.length ? `<div class="project-tags">${Templates.tagList(post.tags)}</div>` : ""}
+            ${post.tags?.length ? safe(`<div class="project-tags">${Templates.tagList(post.tags).content}</div>`) : ""}
             <div class="blog-post-content">
-                ${Templates.zeroMd(content, themeUrl, colors)}
+                ${safe(Templates.zeroMd(content, themeUrl, colors))}
             </div>
             <footer class="blog-post-footer">
                 <a href="/?blog" class="blog-back-link" data-spa-route="page">${i18n.t("blog.backToBlog")}</a>
@@ -262,15 +284,15 @@ const Templates = {
         </article>`,
 
 	loadingSpinner: () =>
-		`<div class="loading-spinner">${i18n.t("general.loading")}</div>`,
+		html`<div class="loading-spinner">${i18n.t("general.loading")}</div>`,
 
-	errorMessage: (title, message) => `
+	errorMessage: (title, message) => html`
         <div class="error-message">
             <h1>${title}</h1>
             <p>${message}</p>
         </div>`,
 
-	zeroMd: (content, themeUrl, colors) => `
+	zeroMd: (content, themeUrl, colors) => html`
         <zero-md>
             <script type="text/markdown">${content}</script>
             <template data-append>
@@ -349,26 +371,26 @@ const Templates = {
             </template>
         </zero-md>`,
 
-	githubReadmeError: () => `<p>${i18n.t("project.readmeError")}</p>`,
+	githubReadmeError: () => html`<p>${i18n.t("project.readmeError")}</p>`,
 
-	projectLinksSection: (linksHtml) => `
+	projectLinksSection: (linksHtml) => html`
         <div class="markdown-body">
             <h2>${i18n.t("project.links")}</h2>
-            <div class="download-buttons">${linksHtml}</div>
+            <div class="download-buttons">${safe(linksHtml)}</div>
         </div>`,
 
-	projectHeader: (title, description, tags) => `
+	projectHeader: (title, description, tags) => html`
         <h1 class="project-title">${title}</h1>
         <p class="project-description">${description}</p>
-        <div class="project-tags">${Templates.tagList(tags)}</div>`,
+        <div class="project-tags">${safe(Templates.tagList(tags).content)}</div>`,
 
-	mediaSection: (videosHtml) => `
+	mediaSection: (videosHtml) => html`
         <div class="markdown-body">
             <h2>${i18n.t("project.media")}</h2>
-            ${videosHtml}
+            ${safe(videosHtml)}
         </div>`,
 
-	footer: (authorName, currentYear) => `
+	footer: (authorName, currentYear) => html`
         <footer class="footer mt-auto py-3">
             <div class="container-fluid" style="max-width: 1000px;">
                 <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.9em;">
@@ -378,33 +400,33 @@ const Templates = {
         </footer>`,
 
 	// Helper for creating search input components
-	searchInput: (id, cssClass, placeholder) => `
+	searchInput: (id, cssClass, placeholder) => html`
         <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="Search"/>
         <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="Clear search">
             <i class="fas fa-times"></i>
         </button>`,
 
-	searchBar: (placeholder) => `
+	searchBar: (placeholder) => html`
         <li class="nav-item navbar-icon search-nav-item">
             <button class="nav-link search-toggle" id="search-toggle" aria-label="Search">
                 <i class="fas fa-search"></i>
             </button>
             <div class="search-bar-container" id="search-bar-container">
                 <div class="search-input-wrapper">
-                    ${Templates.searchInput("search-input", "search-input", placeholder)}
+                    ${safe(Templates.searchInput("search-input", "search-input", placeholder))}
                 </div>
             </div>
             <div class="search-results-dropdown" id="search-results"></div>
         </li>`,
 
-	mobileSearchPage: (placeholder) => `
+	mobileSearchPage: (placeholder) => html`
         <div class="mobile-search-page" id="mobile-search-page">
             <div class="mobile-search-header">
                 <button class="mobile-search-back" id="mobile-search-back" aria-label="Go back">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="mobile-search-input-wrapper">
-                    ${Templates.searchInput("mobile-search-input", "mobile-search-input", placeholder)}
+                    ${safe(Templates.searchInput("mobile-search-input", "mobile-search-input", placeholder))}
                 </div>
             </div>
             <div class="mobile-search-content">
@@ -414,19 +436,19 @@ const Templates = {
 
 	searchResult: (item, query) => {
 		const isProject = item.type === "project";
-		return `
+		return html`
             <a href="${item.url}" class="search-result-item" data-spa-route="${item.type}">
                 <div class="result-icon"><i class="${isProject ? "fas fa-folder" : "far fa-file-alt"}"></i></div>
                 <div class="result-content">
-                    <div class="result-title">${Search.highlight(item.title, query)}</div>
-                    <div class="result-description">${Search.highlight(item.description, query)}</div>
-                    ${item.tags.length ? `<div class="result-tags">${item.tags.map((tag) => `<span class="result-tag">${tag}</span>`).join("")}</div>` : ""}
+                    <div class="result-title">${safe(Search.highlight(item.title, query))}</div>
+                    <div class="result-description">${safe(Search.highlight(item.description, query))}</div>
+                    ${item.tags.length ? safe(`<div class="result-tags">${item.tags.map((tag) => `<span class="result-tag">${tag}</span>`).join("")}</div>`) : ""}
                 </div>
                 <span class="result-type${isProject ? "" : " result-type-blog"}">${isProject ? i18n.t("badges.project") : i18n.t("badges.blog")}</span>
             </a>`;
 	},
 
-	searchNoResults: () => `
+	searchNoResults: () => html`
         <div class="search-no-results">
             <i class="fas fa-search"></i>
             <p>${i18n.t("search.noResults")}</p>

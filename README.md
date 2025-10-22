@@ -23,6 +23,7 @@ Key features:
 - YAML configuration with js-yaml parser
 - Zero-md v3 for markdown rendering with Highlight.js syntax highlighting
 - jsDelivr CDN for external dependencies
+- Tagged template literals for secure HTML templating
 
 ## Development Environment
 
@@ -31,6 +32,7 @@ This project includes a VS Code devcontainer for a consistent development enviro
 - **Container**: Alpine Linux 3.19
 - **Dev Server**: darkhttpd (lightweight HTTP server)
 - **Code Quality**: Biome for linting and formatting
+- **Extensions**: lit-html for syntax highlighting in template literals
 - **Port**: 8081 (auto-forwarded)
 
 ### Prerequisites

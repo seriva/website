@@ -6,7 +6,7 @@
 
 	"customizations": {
 		"vscode": {
-			"extensions": ["biomejs.biome"],
+			"extensions": ["biomejs.biome", "bierner.lit-html"],
 			"settings": {
 				"editor.defaultFormatter": "biomejs.biome",
 				"editor.formatOnSave": true,
