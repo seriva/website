@@ -100,7 +100,7 @@ main {
 }
 
 main.page-transition-out {
-	animation: fadeOut 0.15s ease-in-out forwards;
+	animation: fadeOut 0.3s ease-in-out forwards;
 }
 
 @keyframes fadeOut {
