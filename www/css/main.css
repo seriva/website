@@ -181,8 +181,6 @@ a.icon:hover {
 	transform: translateY(-2px);
 }
 
-/*navigation bar*/
-
 /* ===========================
    NAVIGATION
    =========================== */
@@ -398,13 +396,18 @@ a.icon:hover {
 	}
 
 	.blog-post-title {
-		font-size: 1.3em;
+		font-size: 1.25em;
 	}
 
 	.blog-post-meta {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 0.5rem;
+		font-size: 0.95em;
+	}
+
+	.blog-post-excerpt {
+		font-size: 1em;
 	}
 
 	.blog-pagination .page-link {
@@ -485,13 +488,13 @@ a.icon:hover {
 	color: var(--text-light);
 }
 
-.search-no-results i {
+.search-no-results > i {
 	font-size: 2em;
 	margin-bottom: var(--spacing-md);
 	opacity: 0.5;
 }
 
-.search-no-results p {
+.search-no-results > p {
 	margin: 0;
 	font-size: 0.9em;
 }
@@ -634,7 +637,7 @@ a.icon:hover {
 .search-page-results {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 1.5rem;
 	width: 100%;
 	max-width: 750px;
 	text-align: left;
@@ -797,8 +800,93 @@ a.icon:hover {
 	justify-content: flex-start;
 }
 
-/* Download buttons - consolidated */
-.download-btn,
+/* Download buttons - ordered by ascending specificity */
+/* Base styles (0,1,0) */
+.download-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 24px;
+	background-color: #2a2a2a;
+	border: 2px solid var(--accent);
+	border-radius: 8px;
+	color: var(--text);
+	text-decoration: none;
+	font:
+		600 1em "Raleway",
+		sans-serif;
+	transition: all var(--transition-normal);
+	cursor: pointer;
+	outline: none;
+	appearance: none;
+}
+
+/* Child element styles (0,1,1) */
+.download-btn > i {
+	font-size: 1.5em;
+	color: var(--text-color);
+	transition:
+		transform var(--transition-normal),
+		color var(--transition-normal);
+	display: inline-flex;
+	align-items: center;
+}
+
+.download-btn > span {
+	color: var(--text-color);
+	transition: color var(--transition-normal);
+	display: inline-flex;
+	align-items: center;
+}
+
+/* Pseudo-class states (0,2,0) */
+.download-btn:link,
+.download-btn:visited {
+	text-decoration: none;
+}
+
+.download-btn:hover,
+.download-btn:focus {
+	background-color: var(--hover-color);
+	border-color: var(--accent);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
+	color: var(--accent);
+	text-decoration: none;
+}
+
+.download-btn:active {
+	transform: translateY(0);
+	text-decoration: none;
+}
+
+.download-btn:focus {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* Pseudo-class with child elements (0,2,1) - highest specificity */
+.download-btn:hover > i {
+	transform: scale(1.1);
+	color: var(--accent);
+}
+
+.download-btn:hover > span,
+.download-btn:focus > span {
+	color: var(--accent);
+}
+
+/* Complex pseudo-class (0,3,0) */
+.download-btn:focus:not(:focus-visible) {
+	background-color: var(--hover-color);
+	border-color: var(--border-color);
+	transform: none;
+	box-shadow: none;
+	color: var(--text-color);
+	outline: none;
+}
+
+/* Fullscreen button (ID selector - highest specificity) */
 #fullscreen {
 	display: inline-flex;
 	align-items: center;
@@ -818,8 +906,23 @@ a.icon:hover {
 	appearance: none;
 }
 
-.download-btn:hover,
-.download-btn:focus,
+#fullscreen > i {
+	font-size: 1.5em;
+	color: var(--text-color);
+	transition:
+		transform var(--transition-normal),
+		color var(--transition-normal);
+	display: inline-flex;
+	align-items: center;
+}
+
+#fullscreen > span {
+	color: var(--text-color);
+	transition: color var(--transition-normal);
+	display: inline-flex;
+	align-items: center;
+}
+
 #fullscreen:hover,
 #fullscreen:focus {
 	background-color: var(--hover-color);
@@ -830,13 +933,25 @@ a.icon:hover {
 	text-decoration: none;
 }
 
-.download-btn:focus,
+#fullscreen:active {
+	transform: translateY(0);
+}
+
+#fullscreen:hover > i {
+	transform: scale(1.1);
+	color: var(--accent);
+}
+
+#fullscreen:hover > span,
+#fullscreen:focus > span {
+	color: var(--accent);
+}
+
 #fullscreen:focus {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
 
-.download-btn:focus:not(:focus-visible),
 #fullscreen:focus:not(:focus-visible) {
 	background-color: var(--hover-color);
 	border-color: var(--border-color);
@@ -846,63 +961,16 @@ a.icon:hover {
 	outline: none;
 }
 
-.download-btn:active,
-#fullscreen:active {
-	transform: translateY(0);
-}
-
-/* Download button link states - consolidated */
-.download-btn,
-.download-btn:link,
-.download-btn:visited,
-.download-btn:hover,
-.download-btn:focus,
-.download-btn:active,
+/* Markdown body specific styles for download buttons */
 .markdown-body .download-btn,
 .markdown-body .download-btn:link,
 .markdown-body .download-btn:visited {
 	text-decoration: none;
-}
-
-.markdown-body .download-btn {
 	color: var(--text);
 }
 
 .markdown-body .download-btn:hover,
 .markdown-body .download-btn:focus {
-	color: var(--accent);
-}
-
-/* Icon and span styles for download buttons */
-#fullscreen i,
-.download-btn i {
-	font-size: 1.5em;
-	color: var(--text-color);
-	transition:
-		transform var(--transition-normal),
-		color var(--transition-normal);
-	display: inline-flex;
-	align-items: center;
-}
-
-#fullscreen:hover i,
-.download-btn:hover i {
-	transform: scale(1.1);
-	color: var(--accent);
-}
-
-#fullscreen span,
-.download-btn span {
-	color: var(--text-color);
-	transition: color var(--transition-normal);
-	display: inline-flex;
-	align-items: center;
-}
-
-#fullscreen:hover span,
-#fullscreen:focus span,
-.download-btn:hover span,
-.download-btn:focus span {
 	color: var(--accent);
 }
 
@@ -1174,12 +1242,12 @@ textarea:focus {
 .blog-posts {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 1.5rem;
 	margin-bottom: 2rem;
 }
 
 .blog-post-card {
-	padding: 1rem;
+	padding: 1.5rem;
 	background-color: rgba(255, 255, 255, 0.02);
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius-large);
@@ -1196,7 +1264,7 @@ textarea:focus {
 
 .blog-post-title {
 	margin: 0 0 0.35rem 0;
-	font-size: 1.2em;
+	font-size: 1.35em;
 	font-weight: bold;
 	line-height: 1.3;
 }
@@ -1217,7 +1285,7 @@ textarea:focus {
 	align-items: center;
 	gap: 0.75rem;
 	margin-bottom: 0.75rem;
-	font-size: 0.85em;
+	font-size: 1em;
 	color: var(--text-light);
 }
 
@@ -1237,7 +1305,7 @@ textarea:focus {
 	color: var(--text-light);
 	line-height: 1.5;
 	margin-bottom: 0;
-	font-size: 0.95em;
+	font-size: 1.05em;
 }
 
 /* Blog pagination */
@@ -1281,7 +1349,7 @@ textarea:focus {
 .blog-pagination .page-item.active .page-link {
 	background-color: var(--accent);
 	border-color: var(--accent);
-	color: var(--secondary);
+	color: var(--background-color);
 	font-weight: bold;
 }
 
