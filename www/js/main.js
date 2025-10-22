@@ -179,10 +179,19 @@ const Templates = {
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
 		`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
 
-	// Helper for rendering tags
+	// Helper for rendering tags (clickable to search by tag)
 	tagList: (tags) =>
 		tags?.length
-			? tags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")
+			? tags
+					.map((tag) => {
+						const isClickable = Search.isInitialized;
+						const clickableClass = isClickable ? " clickable-tag" : "";
+						const onclickAttr = isClickable
+							? ` onclick="event.stopPropagation(); searchByTag(\'${tag}\')"`
+							: "";
+						return `<span class="item-tag${clickableClass}"${onclickAttr}>${tag}</span>`;
+					})
+					.join(" ")
 			: "",
 
 	blogPostCard: (post, index) => `
@@ -721,6 +730,55 @@ const Search = {
 		return text.replace(regex, "<mark>$1</mark>");
 	},
 };
+
+/**
+ * Search by tag - triggers search with the tag as query
+ * @param {string} tag - Tag to search for
+ */
+const searchByTag = (tag) => {
+	const isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
+
+	if (isMobile) {
+		// Mobile: open search page and populate input
+		const mobileSearchPage = document.getElementById("mobile-search-page");
+		const mobileSearchInput = document.getElementById("mobile-search-input");
+
+		if (mobileSearchPage && mobileSearchInput) {
+			mobileSearchPage.classList.add("show");
+			mobileSearchInput.value = tag;
+			requestAnimationFrame(() => {
+				mobileSearchInput.focus();
+				// Trigger search
+				mobileSearchInput.dispatchEvent(new Event("input", { bubbles: true }));
+			});
+		}
+	} else {
+		// Desktop: open search bar and populate input
+		const searchBarContainer = document.getElementById("search-bar-container");
+		const searchInput = document.getElementById("search-input");
+
+		if (searchBarContainer && searchInput) {
+			// Scroll to top to ensure navbar is visible
+			window.scrollTo({ top: 0, behavior: "smooth" });
+
+			// First ensure search bar is visible (unfold animation)
+			searchBarContainer.classList.add("show");
+
+			// Set the tag value
+			searchInput.value = tag;
+
+			// Use setTimeout to ensure DOM has updated, animation started, and search is initialized
+			setTimeout(() => {
+				searchInput.focus();
+				// Trigger search by simulating user input
+				searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+			}, 150);
+		}
+	}
+};
+
+// Make searchByTag available globally for onclick handlers
+window.searchByTag = searchByTag;
 
 // ===========================
 // GITHUB API INTEGRATION

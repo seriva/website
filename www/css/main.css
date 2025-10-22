@@ -118,6 +118,18 @@ a.icon:hover {
 	margin: 2px;
 }
 
+.clickable-tag {
+	cursor: pointer;
+	transition: all var(--transition-fast);
+}
+
+.clickable-tag:hover {
+	background-color: var(--accent);
+	color: var(--background-color);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* ===========================
    PAGE-SPECIFIC STYLES
    =========================== */

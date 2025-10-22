@@ -140,12 +140,6 @@ blog:
       tags: ["tag3"]
 ```
 
-**Why include metadata in YAML?**
-- ⚡ **Fast search**: No need to load all markdown files for search indexing
-- 🚀 **Performance**: Scales to hundreds of blog posts without slowdown
-- 📝 **Single source**: Metadata in one place for easy management
-- 🔍 **Better SEO**: Can generate sitemaps/feeds without parsing markdown
-
 **Features:**
 - Markdown with syntax highlighting (Highlight.js)
 - Automatic date sorting (newest first)
