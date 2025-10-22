@@ -264,9 +264,9 @@ All UI strings are automatically translated using the `i18n.t()` function, makin
 
 ## How it works
 
-- `/` shows the default page (configured with `default: true` in pages)
+- `/` shows the blog listing (default homepage)
 - `/?page=<page-id>` shows any page (e.g., `/?page=about`)
-- `/?blog` shows the blog listing (if blog is enabled)
+- `/?blog` shows the blog listing
 - `/?blog&p=2` shows blog listing with pagination (page 2)
 - `/?blog=<slug>` shows individual blog posts (e.g., `/?blog=getting-started`)
 - `/?project=<project-id>` shows individual projects

@@ -1710,7 +1710,7 @@ const handleRoute = async () => {
 	const blogPageNum = params.get("p");
 
 	try {
-		const data = await getData();
+		await getData();
 
 		if (blogParam !== null) {
 			blogParam === ""
@@ -1719,12 +1719,11 @@ const handleRoute = async () => {
 		} else if (projectId) {
 			await loadProjectPage(projectId);
 			loadAdditionalContent();
+		} else if (pageId) {
+			await loadPage(pageId);
 		} else {
-			const targetPage =
-				pageId ||
-				Object.keys(data.pages).find((id) => data.pages[id].default) ||
-				Object.keys(data.pages)[0];
-			await loadPage(targetPage);
+			// Default to blog if no other route is specified
+			await loadBlogPage(1);
 		}
 
 		updateActiveNavLink();
