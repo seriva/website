@@ -562,10 +562,11 @@ window.closeMobileMenu = () => MobileMenu.close();
 // ===========================
 
 /**
- * Search functionality for projects and blog posts
+ * Search functionality for projects and blog posts using Fuse.js
  */
 const Search = {
 	data: [],
+	fuse: null,
 	isInitialized: false,
 
 	/**
@@ -612,29 +613,35 @@ const Search = {
 			})),
 		];
 
+		// Configure Fuse.js with weighted search keys
+		const fuseOptions = {
+			keys: [
+				{ name: "title", weight: 2 },
+				{ name: "description", weight: 1.5 },
+				{ name: "tags", weight: 1.2 },
+				{ name: "content", weight: 0.5 },
+			],
+			threshold: 0.4,
+			distance: 100,
+			minMatchCharLength: 2,
+			includeScore: true,
+			includeMatches: true,
+		};
+
+		this.fuse = new Fuse(this.data, fuseOptions);
 		this.isInitialized = true;
 	},
 
 	/**
-	 * Search through indexed data
+	 * Search through indexed data using Fuse.js
 	 * @param {string} query - Search query
 	 * @returns {Array} Filtered results
 	 */
 	search(query) {
-		if (!query || query.length < 2) return [];
+		if (!query || query.length < 2 || !this.fuse) return [];
 
-		const q = query.toLowerCase().trim();
-
-		return this.data
-			.filter((item) => {
-				const titleMatch = item.title.toLowerCase().includes(q);
-				const descMatch = item.description.toLowerCase().includes(q);
-				const tagMatch = item.tags.some((tag) => tag.toLowerCase().includes(q));
-				const contentMatch = item.content.toLowerCase().includes(q);
-
-				return titleMatch || descMatch || tagMatch || contentMatch;
-			})
-			.slice(0, 8); // Limit to 8 results
+		const results = this.fuse.search(query, { limit: 8 });
+		return results.map((result) => result.item);
 	},
 
 	/**

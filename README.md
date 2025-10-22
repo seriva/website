@@ -7,7 +7,7 @@ It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicate
 Key features:
 - YAML configuration for easy content management
 - Built-in blog with markdown posts and pagination
-- Full-text search across projects and blog posts
+- Fuzzy search with Fuse.js across projects and blog posts
 - Dynamic color themes you can change in the config
 - Font Awesome icons and Bootstrap for styling
 - Loads project READMEs directly from GitHub
@@ -19,6 +19,7 @@ Key features:
 - HTML, CSS, JavaScript (no build process)
 - Bootstrap 5.3.2 for styling
 - Font Awesome 6.6.0 for icons
+- Fuse.js 7.0.0 for fuzzy search
 - YAML configuration with js-yaml parser
 - Zero-md v3 for markdown rendering with Highlight.js syntax highlighting
 - jsDelivr CDN for external dependencies
@@ -140,7 +141,7 @@ blog:
 
 ### Search
 
-Client-side full-text search across all projects and blog posts:
+Powered by [Fuse.js](https://www.fusejs.io/) for fast, fuzzy search across all projects and blog posts:
 
 ```yaml
 site:
@@ -151,14 +152,16 @@ site:
 ```
 
 **Features:**
-- Searches titles, descriptions, tags, and full content
-- Indexes markdown posts and GitHub READMEs
-- Desktop: Unfold search bar in navbar
-- Mobile: Full-page search overlay with larger text
-- Real-time results with 300ms debounce
+- **Fuzzy matching**: Finds results even with typos (e.g., "reactt" → "react")
+- **Weighted results**: Title matches prioritized over content matches
+- **Searches**: titles, descriptions, tags, and full content
+- **Indexes**: markdown posts and GitHub READMEs
+- **Desktop**: Unfold search bar in navbar
+- **Mobile**: Full-page search overlay with larger text
+- **Real-time**: Results with 300ms debounce
+- **Performance**: Scales to hundreds of posts efficiently
 - Up to 8 results with match highlighting
 - Works offline after initial load
-- Performance: Good for 20-50 posts (consider Fuse.js/Lunr.js for 100+)
 
 ### Pages & Styling
 
