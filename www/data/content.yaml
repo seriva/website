@@ -25,6 +25,12 @@ site:
     code:
       theme: "monokai"
   
+  # Search configuration
+  search:
+    enabled: false
+    placeholder: "Search projects and blog posts..."
+    minChars: 2
+  
   # Social media links
   social:
     - icon: "fas fa-envelope"
