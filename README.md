@@ -128,9 +128,23 @@ blog:
   postsPerPage: 5
   dateFormat: "MMMM D, YYYY"
   posts:
-    - "2025-10-21-your-post-title.md"
-    - "2025-10-20-another-post.md"
+    - filename: "2025-10-21-your-post-title.md"
+      title: "Your Post Title"
+      date: "2025-10-21"
+      excerpt: "A brief summary of your post"
+      tags: ["tag1", "tag2"]
+    - filename: "2025-10-20-another-post.md"
+      title: "Another Post"
+      date: "2025-10-20"
+      excerpt: "Summary of another post"
+      tags: ["tag3"]
 ```
+
+**Why include metadata in YAML?**
+- ⚡ **Fast search**: No need to load all markdown files for search indexing
+- 🚀 **Performance**: Scales to hundreds of blog posts without slowdown
+- 📝 **Single source**: Metadata in one place for easy management
+- 🔍 **Better SEO**: Can generate sitemaps/feeds without parsing markdown
 
 **Features:**
 - Markdown with syntax highlighting (Highlight.js)

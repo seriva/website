@@ -64,10 +64,13 @@ blog:
   showInNav: false
   postsPerPage: 5
   dateFormat: "MMMM D, YYYY"
-  # List your blog post markdown files here (filename only)
-  # They will be loaded from data/blog/ directory
+  # Blog posts with metadata for search indexing
   posts:
-    - "2025-10-21-building-portfolio-website.md"
+    - filename: "2025-10-21-building-portfolio-website.md"
+      title: "Building My Portfolio Website"
+      date: "2025-10-21"
+      excerpt: "How I built this minimalist SPA portfolio website with vanilla JavaScript, YAML configuration, and zero build tools."
+      tags: ["JavaScript", "HTML", "CSS", "Web Development"]
 
 # Project Portfolio
 projects:
