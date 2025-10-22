@@ -164,6 +164,7 @@ site:
 - **Weighted results**: Title matches prioritized over content matches
 - **Searches**: titles, descriptions, tags, and full content
 - **Indexes**: markdown posts and GitHub READMEs
+- **Clickable tags**: Click any tag on projects or blog posts to instantly filter by that tag
 - **Desktop**: Unfold search bar in navbar
 - **Mobile**: Full-page search overlay with larger text
 - **Real-time**: Results with 300ms debounce
