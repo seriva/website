@@ -33,7 +33,6 @@ site:
   # Search configuration
   search:
     enabled: true
-    placeholder: "Search..."
     minChars: 2
   
   # Social media links
