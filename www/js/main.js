@@ -188,7 +188,7 @@ const Templates = {
 						const searchEnabled = projectsData?.site?.search?.enabled !== false;
 						const clickableClass = searchEnabled ? " clickable-tag" : "";
 						const onclickAttr = searchEnabled
-							? ` onclick="event.stopPropagation(); searchByTag('${tag}\')"`
+							? ` onclick="event.stopPropagation(); searchByTag('${tag}')"`
 							: "";
 						return `<span class="item-tag${clickableClass}"${onclickAttr}>${tag}</span>`;
 					})
@@ -1501,12 +1501,27 @@ export const loadBlogPost = async (slug) => {
 		return;
 	}
 
+	// Load content if not already loaded (for YAML metadata posts)
+	let content = post.content;
+	if (!content && post.filename) {
+		try {
+			const response = await fetch(`data/blog/${post.filename}`);
+			if (response.ok) {
+				const markdown = await response.text();
+				const parsed = parseBlogPost(markdown);
+				content = parsed.content;
+			}
+		} catch (error) {
+			console.error(`Error loading blog post content: ${post.filename}`, error);
+		}
+	}
+
 	const themeName = data?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
 	const colors = data?.site?.colors || {};
 
 	DOMCache.main.innerHTML = Templates.blogPost(
 		post,
-		post.content,
+		content,
 		getHljsThemeUrl(themeName),
 		colors,
 	);
