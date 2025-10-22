@@ -84,6 +84,34 @@ main {
 	max-width: 750px;
 	width: 100%;
 	box-sizing: border-box;
+	animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Page transition animation */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+main.page-transition-out {
+	animation: fadeOut 0.15s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
 }
 
 img {
@@ -389,6 +417,7 @@ a.icon:hover {
 	.blog-post-card {
 		padding: 1rem;
 		margin: 0.25rem;
+		text-align: center;
 	}
 
 	.blog-posts {
@@ -401,9 +430,10 @@ a.icon:hover {
 
 	.blog-post-meta {
 		flex-direction: column;
-		align-items: flex-start;
+		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.95em;
+		justify-content: center;
 	}
 
 	.blog-post-excerpt {
@@ -517,20 +547,38 @@ a.icon:hover {
 	flex-direction: column;
 	overflow: hidden;
 	opacity: 0;
-	animation: fadeIn var(--transition-normal) forwards;
+	transform: scale(0.95);
+	animation: searchFadeIn 0.25s ease-out forwards;
 }
 
 .search-page.show {
 	display: flex;
 }
 
-/* Fade-in animation for search page */
-@keyframes fadeIn {
+.search-page.closing {
+	animation: searchFadeOut 0.2s ease-in forwards;
+}
+
+/* Search page animations */
+@keyframes searchFadeIn {
 	from {
 		opacity: 0;
+		transform: scale(0.95);
 	}
 	to {
 		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes searchFadeOut {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.95);
 	}
 }
 
@@ -541,7 +589,7 @@ a.icon:hover {
 	height: 56px;
 	padding: 0 1rem;
 	background-color: var(--header-color);
-	border-bottom: 1px solid var(--border-color);
+	border-bottom: var(--border-width) solid var(--accent);
 	animation: slideDown var(--transition-normal) ease-out;
 }
 
