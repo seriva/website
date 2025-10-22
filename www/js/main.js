@@ -632,7 +632,7 @@ const Search = {
 	async init() {
 		if (this.isInitialized) return;
 
-		const data = projectsData || (await loadProjectsData());
+		const data = await getData();
 		const projects = data?.projects || [];
 		const blogPosts = data?.blog?.posts || [];
 
@@ -683,17 +683,15 @@ const Search = {
 			};
 		});
 
-		// Index all searchable content (removed content field for blog posts)
+		// Index all searchable content
 		this.data = [...projectsWithContent, ...blogPostsIndexed];
 
-		// Configure Fuse.js with weighted search keys
-		// Note: Projects search includes README content, blog posts search only metadata
 		const fuseOptions = {
 			keys: [
 				{ name: "title", weight: 2 },
 				{ name: "description", weight: 1.5 },
 				{ name: "tags", weight: 1.2 },
-				{ name: "content", weight: 0.5 }, // Only used for project READMEs
+				{ name: "content", weight: 0.5 },
 			],
 			threshold: 0.4,
 			distance: 100,
@@ -793,7 +791,7 @@ window.searchByTag = searchByTag;
 const fetchGitHubReadme = async (repoName) => {
 	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
 
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	const username = data?.site?.github_username || "seriva";
 	const branches = ["master", "main"];
 
@@ -821,7 +819,7 @@ const fetchGitHubReadme = async (repoName) => {
  * Preload GitHub READMEs with rate limiting to improve performance
  */
 const preloadGitHubReadmes = async () => {
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	const repos =
 		data?.projects?.filter((p) => p.github_repo).map((p) => p.github_repo) ||
 		[];
@@ -845,9 +843,9 @@ export const loadGitHubReadme = async (repoName, containerId) => {
 
 	try {
 		const content = await fetchGitHubReadme(repoName);
-		const themeName =
-			projectsData?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
-		const colors = projectsData?.site?.colors || {};
+		const data = await getData();
+		const themeName = getTheme(data);
+		const colors = data?.site?.colors || {};
 
 		container.innerHTML = content
 			? Templates.zeroMd(content, getHljsThemeUrl(themeName), colors)
@@ -974,7 +972,7 @@ const createNavbar = (
 const injectFooter = async () => {
 	if (!DOMCache.footer) return;
 
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	const authorName = data?.site?.author || "Portfolio Owner";
 	const currentYear = new Date().getFullYear();
 
@@ -987,7 +985,7 @@ const injectFooter = async () => {
 const injectNavbar = async () => {
 	if (!DOMCache.navbar) return;
 
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	const pages = data?.pages
 		? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
 		: [];
@@ -1186,12 +1184,6 @@ const initializeMobileSearch = (searchConfig) => {
 
 	const minChars = searchConfig.minChars || 2;
 
-	// Search data is already initialized in initializeSearch
-	// No need to call Search.init() again
-
-	// Open mobile search page on mobile, handle desktop search on desktop
-	// On mobile, this button will trigger the mobile search page
-	// The desktop search unfold is handled in initializeSearch()
 	const handleSearchToggleClick = (e) => {
 		// Check if we're on mobile (window width < 768px)
 		if (window.innerWidth < 768) {
@@ -1255,6 +1247,20 @@ const initializeMobileSearch = (searchConfig) => {
  * Load content data from YAML with caching and error handling
  * @returns {Promise<Object|null>} Projects data or null on error
  */
+/**
+ * Get cached projects data or load if not available
+ * @returns {Promise<Object>} Projects data
+ */
+const getData = async () => projectsData || (await loadProjectsData());
+
+/**
+ * Get theme name from data or use default
+ * @param {Object} data - Projects data
+ * @returns {string} Theme name
+ */
+const getTheme = (data) =>
+	data?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
+
 export const loadProjectsData = async () => {
 	if (projectsData) return projectsData;
 	if (dataLoadPromise) return dataLoadPromise;
@@ -1359,8 +1365,7 @@ const parseBlogPost = (markdown) => {
  */
 const loadBlogPosts = async () => {
 	try {
-		// Get blog post list from content.yaml
-		const data = projectsData || (await loadProjectsData());
+		const data = await getData();
 		const postFiles = data?.blog?.posts || [];
 
 		if (postFiles.length === 0) {
@@ -1438,7 +1443,7 @@ const loadBlogPosts = async () => {
 export const loadBlogPage = async (page = 1) => {
 	if (!DOMCache.main) return;
 
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	setPageTitle(data);
 
 	DOMCache.main.innerHTML = Templates.loadingSpinner();
@@ -1485,7 +1490,7 @@ export const loadBlogPage = async (page = 1) => {
 export const loadBlogPost = async (slug) => {
 	if (!DOMCache.main) return;
 
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	setPageTitle(data);
 
 	DOMCache.main.innerHTML = Templates.loadingSpinner();
@@ -1516,7 +1521,7 @@ export const loadBlogPost = async (slug) => {
 		}
 	}
 
-	const themeName = data?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
+	const themeName = getTheme(data);
 	const colors = data?.site?.colors || {};
 
 	DOMCache.main.innerHTML = Templates.blogPost(
@@ -1582,7 +1587,7 @@ const setPageTitle = (data) => {
  * @param {string} pageId - Page identifier
  */
 export const loadPage = async (pageId) => {
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	if (!DOMCache.main) return;
 
 	setPageTitle(data);
@@ -1637,7 +1642,7 @@ export const loadProjectPage = async (projectId) => {
  */
 export const loadProjectsDropdown = async () => {
 	const dropdown = DOMCache.getDropdown();
-	const data = projectsData || (await loadProjectsData());
+	const data = await getData();
 	if (!data?.projects || !dropdown) return;
 
 	dropdown.innerHTML = data.projects
@@ -1683,7 +1688,7 @@ const handleRoute = async () => {
 	const blogPageNum = params.get("p");
 
 	try {
-		const data = projectsData || (await loadProjectsData());
+		const data = await getData();
 
 		if (blogParam !== null) {
 			blogParam === ""
