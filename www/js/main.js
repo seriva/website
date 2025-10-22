@@ -1143,11 +1143,14 @@ const initializeSearchPage = (searchConfig) => {
 
 	const minChars = searchConfig.minChars || 2;
 
-	// Close search page
+	// Close search page with animation
 	const closeSearchPage = () => {
-		searchPage.classList.remove("show");
-		searchPageInput.value = "";
-		searchPageResults.innerHTML = "";
+		searchPage.classList.add("closing");
+		setTimeout(() => {
+			searchPage.classList.remove("show", "closing");
+			searchPageInput.value = "";
+			searchPageResults.innerHTML = "";
+		}, 200); // Match animation duration
 	};
 
 	searchPageBack.addEventListener("click", closeSearchPage);
@@ -1644,6 +1647,13 @@ export const loadAdditionalContent = () => {
 const handleRoute = async () => {
 	MobileMenu.close();
 
+	// Add fade out animation
+	if (DOMCache.main) {
+		DOMCache.main.classList.add("page-transition-out");
+		// Wait for fade out animation
+		await new Promise((resolve) => setTimeout(resolve, 150));
+	}
+
 	if (DOMCache.main) DOMCache.main.innerHTML = Templates.loadingSpinner();
 
 	const params = new URLSearchParams(window.location.search);
@@ -1673,10 +1683,18 @@ const handleRoute = async () => {
 			return; // Exit early since handleRoute will call updateActiveNavLink
 		}
 
+		// Remove transition class and trigger fade in
+		if (DOMCache.main) {
+			DOMCache.main.classList.remove("page-transition-out");
+			// Force reflow to restart animation
+			void DOMCache.main.offsetWidth;
+		}
+
 		updateActiveNavLink();
 	} catch (error) {
 		console.error("Error loading page:", error);
 		if (DOMCache.main) {
+			DOMCache.main.classList.remove("page-transition-out");
 			DOMCache.main.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
