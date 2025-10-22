@@ -180,6 +180,7 @@ site:
 site:
   title: "Your Portfolio"
   description: "Your description"
+  defaultRoute: "/?blog"  # Options: "/?blog", "/?page=about", "project=projectId"
   
 pages:
   about:
@@ -264,7 +265,9 @@ All UI strings are automatically translated using the `i18n.t()` function, makin
 
 ## How it works
 
-- `/` shows the blog listing (default homepage)
+- `/` redirects to the configured default route (set via `site.defaultRoute` in `content.yaml`)
+  - Default: `/?blog` (blog listing as homepage)
+  - Can be changed to: `/?page=about`, `/?project=projectId`, etc.
 - `/?page=<page-id>` shows any page (e.g., `/?page=about`)
 - `/?blog` shows the blog listing
 - `/?blog&p=2` shows blog listing with pagination (page 2)

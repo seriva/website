@@ -1710,7 +1710,7 @@ const handleRoute = async () => {
 	const blogPageNum = params.get("p");
 
 	try {
-		await getData();
+		const data = await getData();
 
 		if (blogParam !== null) {
 			blogParam === ""
@@ -1722,8 +1722,12 @@ const handleRoute = async () => {
 		} else if (pageId) {
 			await loadPage(pageId);
 		} else {
-			// Default to blog if no other route is specified
-			await loadBlogPage(1);
+			// Redirect to configured default route for proper nav highlighting
+			const defaultRoute = data.site?.defaultRoute || "/?blog";
+			window.history.replaceState({}, "", defaultRoute);
+			// Recursively handle the new route
+			await handleRoute();
+			return; // Exit early since handleRoute will call updateActiveNavLink
 		}
 
 		updateActiveNavLink();
