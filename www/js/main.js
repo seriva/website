@@ -33,6 +33,67 @@ const debounce = (func, wait) => {
 };
 
 // ===========================
+// INTERNATIONALIZATION (i18n)
+// ===========================
+
+const i18n = {
+	currentLanguage: null,
+	translations: {},
+
+	/**
+	 * Initialize i18n with configuration from YAML
+	 * @param {Object} config - i18n configuration from content.yaml
+	 * @param {Object} translations - Translations object from content.yaml
+	 */
+	init(config, translations) {
+		this.currentLanguage = config?.defaultLanguage || "en";
+		this.translations = translations || {};
+	},
+
+	/**
+	 * Get translation for a key
+	 * @param {string} key - Translation key in dot notation (e.g., 'nav.projects')
+	 * @param {string} lang - Optional language code (defaults to current language)
+	 * @returns {string} Translated string or key if not found
+	 */
+	t(key, lang = null) {
+		const language = lang || this.currentLanguage;
+		const keys = key.split(".");
+		let value = this.translations[language];
+
+		for (const k of keys) {
+			if (value && typeof value === "object") {
+				value = value[k];
+			} else {
+				return key; // Return key if translation not found
+			}
+		}
+
+		return typeof value === "string" ? value : key;
+	},
+
+	/**
+	 * Get current language
+	 * @returns {string} Current language code
+	 */
+	getCurrentLanguage() {
+		return this.currentLanguage;
+	},
+
+	/**
+	 * Set current language
+	 * @param {string} lang - Language code to set
+	 */
+	setLanguage(lang) {
+		if (this.translations[lang]) {
+			this.currentLanguage = lang;
+			return true;
+		}
+		return false;
+	},
+};
+
+// ===========================
 // HTML TEMPLATES
 // ===========================
 
@@ -107,11 +168,11 @@ const Templates = {
         </div></div>`,
 
 	demoIframe: (demoUrl) => `
-        <div class="markdown-body"><h2>Play!</h2>
-            <p>On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls.</p>
+        <div class="markdown-body"><h2>${i18n.t("project.demo")}</h2>
+            <p>${i18n.t("project.demoInstructions")}</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
+            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>${i18n.t("project.fullscreen")}</span></button></center>
         </div>`,
 
 	// Simple data-attribute containers for dynamic loading
@@ -134,7 +195,7 @@ const Templates = {
                 ${post.tags?.length ? `<span class="blog-post-tags">${Templates.tagList(post.tags)}</span>` : ""}
             </div>
             <p class="blog-post-excerpt">${post.excerpt}</p>
-            <a href="/?blog=${post.slug}" class="blog-read-more" data-spa-route="blog">Read more →</a>
+            <a href="/?blog=${post.slug}" class="blog-read-more" data-spa-route="blog">${i18n.t("blog.readMore")}</a>
         </article>`,
 
 	blogPagination: (currentPage, totalPages) => {
@@ -186,11 +247,12 @@ const Templates = {
                 ${Templates.zeroMd(content, themeUrl, colors)}
             </div>
             <footer class="blog-post-footer">
-                <a href="/?blog" class="blog-back-link" data-spa-route="page">← Back to Blog</a>
+                <a href="/?blog" class="blog-back-link" data-spa-route="page">${i18n.t("blog.backToBlog")}</a>
             </footer>
         </article>`,
 
-	loadingSpinner: () => '<div class="loading-spinner">Loading...</div>',
+	loadingSpinner: () =>
+		`<div class="loading-spinner">${i18n.t("general.loading")}</div>`,
 
 	errorMessage: (title, message) => `
         <div class="error-message">
@@ -277,11 +339,11 @@ const Templates = {
             </template>
         </zero-md>`,
 
-	githubReadmeError: () => "<p>Error loading README from GitHub.</p>",
+	githubReadmeError: () => `<p>${i18n.t("project.readmeError")}</p>`,
 
 	projectLinksSection: (linksHtml) => `
         <div class="markdown-body">
-            <h2>Links</h2>
+            <h2>${i18n.t("project.links")}</h2>
             <div class="download-buttons">${linksHtml}</div>
         </div>`,
 
@@ -292,7 +354,7 @@ const Templates = {
 
 	mediaSection: (videosHtml) => `
         <div class="markdown-body">
-            <h2>Media</h2>
+            <h2>${i18n.t("project.media")}</h2>
             ${videosHtml}
         </div>`,
 
@@ -300,7 +362,7 @@ const Templates = {
         <footer class="footer mt-auto py-1" style="background-color: var(--header-color); border-top: var(--border-width) solid var(--accent);">
             <div class="container-fluid" style="max-width: 1000px;">
                 <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.9em;">
-                    &copy; ${currentYear} ${authorName}. All rights reserved.
+                    &copy; ${currentYear} ${authorName}. ${i18n.t("footer.rights")}.
                 </p>
             </div>
         </footer>`,
@@ -350,14 +412,14 @@ const Templates = {
                     <div class="result-description">${Search.highlight(item.description, query)}</div>
                     ${item.tags.length ? `<div class="result-tags">${item.tags.map((tag) => `<span class="result-tag">${tag}</span>`).join("")}</div>` : ""}
                 </div>
-                <span class="result-type${isProject ? "" : " result-type-blog"}">${isProject ? "Project" : "Blog"}</span>
+                <span class="result-type${isProject ? "" : " result-type-blog"}">${isProject ? i18n.t("badges.project") : i18n.t("badges.blog")}</span>
             </a>`;
 	},
 
 	searchNoResults: () => `
         <div class="search-no-results">
             <i class="fas fa-search"></i>
-            <p>No results found</p>
+            <p>${i18n.t("search.noResults")}</p>
         </div>`,
 };
 
@@ -814,7 +876,9 @@ const createNavbar = (
 
 	// Create search bar if enabled
 	const searchBar = searchConfig?.enabled
-		? Templates.searchBar(searchConfig.placeholder || "Search...")
+		? Templates.searchBar(
+				searchConfig.placeholder || i18n.t("search.placeholder"),
+			)
 		: "";
 
 	return Templates.navbar(
@@ -873,7 +937,9 @@ const injectNavbar = async () => {
 		if (!existingMobileSearch) {
 			document.body.insertAdjacentHTML(
 				"beforeend",
-				Templates.mobileSearchPage(data.site.search.placeholder || "Search..."),
+				Templates.mobileSearchPage(
+					data.site.search.placeholder || i18n.t("search.placeholder"),
+				),
 			);
 		}
 	}
@@ -1132,6 +1198,10 @@ export const loadProjectsData = async () => {
 				applyColorScheme(projectsData.site.colors);
 				setTimeout(() => applyThemeToZeroMd(), CONSTANTS.THEME_APPLY_DELAY);
 			}
+			// Initialize i18n
+			if (projectsData?.site?.i18n && projectsData?.translations) {
+				i18n.init(projectsData.site.i18n, projectsData.translations);
+			}
 			return projectsData;
 		})
 		.catch((error) => {
@@ -1331,8 +1401,8 @@ export const loadBlogPost = async (slug) => {
 
 	if (!post) {
 		DOMCache.main.innerHTML = Templates.errorMessage(
-			"Blog Post Not Found",
-			"The requested blog post could not be found.",
+			i18n.t("general.blogNotFound"),
+			i18n.t("general.blogNotFoundMessage"),
 		);
 		return;
 	}
@@ -1410,8 +1480,8 @@ export const loadPage = async (pageId) => {
 	DOMCache.main.innerHTML =
 		data?.pages?.[pageId]?.content ||
 		Templates.errorMessage(
-			"Page Not Found",
-			"The requested page could not be found.",
+			i18n.t("general.notFound"),
+			i18n.t("general.notFoundMessage"),
 		);
 };
 
@@ -1425,8 +1495,8 @@ export const loadProjectPage = async (projectId) => {
 	const project = await getProject(projectId);
 	if (!project) {
 		DOMCache.main.innerHTML = Templates.errorMessage(
-			"Project not found",
-			"The requested project could not be found.",
+			i18n.t("general.projectNotFound"),
+			i18n.t("general.projectNotFoundMessage"),
 		);
 		return;
 	}
@@ -1440,7 +1510,7 @@ export const loadProjectPage = async (projectId) => {
 				"github-readme",
 				"repo",
 				project.github_repo,
-				"Loading README from GitHub...",
+				i18n.t("project.loadingReadme"),
 			),
 		project.youtube_videos?.length &&
 			Templates.mediaSection(
@@ -1526,8 +1596,8 @@ const handleRoute = async () => {
 		console.error("Error loading page:", error);
 		if (DOMCache.main) {
 			DOMCache.main.innerHTML = Templates.errorMessage(
-				"Error loading page",
-				"Please try refreshing the page.",
+				i18n.t("general.error"),
+				i18n.t("general.errorMessage"),
 			);
 		}
 		setPageTitle(projectsData);

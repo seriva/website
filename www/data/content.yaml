@@ -8,6 +8,11 @@ site:
   author: "Luuk van Venrooij"
   github_username: "seriva"
   
+  # Internationalization
+  i18n:
+    defaultLanguage: "en"
+    availableLanguages: ["en"]
+  
   # Email configuration
   email:
     name: "luukvanvenrooij84"
@@ -28,7 +33,7 @@ site:
   # Search configuration
   search:
     enabled: true
-    placeholder: "Search projects and blog posts..."
+    placeholder: "Search..."
     minChars: 2
   
   # Social media links
@@ -246,3 +251,57 @@ pages:
           </p>
         </div>
       </div>
+
+# Translations
+# To add a new language, copy the 'en' section and translate the values
+translations:
+  en:
+    # Navigation
+    nav:
+      projects: "Projects"
+      blog: "Blog"
+    
+    # Search
+    search:
+      placeholder: "Search projects and blog posts..."
+      noResults: "No results found"
+      loading: "Loading..."
+    
+    # Blog
+    blog:
+      readMore: "Read more →"
+      backToBlog: "← Back to Blog"
+      noPosts: "No blog posts yet. Check back soon!"
+      previous: "Previous"
+      next: "Next"
+    
+    # Project
+    project:
+      links: "Links"
+      media: "Media"
+      demo: "Play!"
+      demoInstructions: "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls."
+      fullscreen: "Go Fullscreen"
+      loadingReadme: "Loading README from GitHub..."
+      readmeError: "Error loading README from GitHub."
+    
+    # General
+    general:
+      loading: "Loading..."
+      error: "Error loading page"
+      errorMessage: "Please try refreshing the page."
+      notFound: "Page Not Found"
+      notFoundMessage: "The requested page could not be found."
+      projectNotFound: "Project not found"
+      projectNotFoundMessage: "The requested project could not be found."
+      blogNotFound: "Blog Post Not Found"
+      blogNotFoundMessage: "The requested blog post could not be found."
+    
+    # Footer
+    footer:
+      rights: "All rights reserved"
+    
+    # Badges
+    badges:
+      project: "Project"
+      blog: "Blog"
