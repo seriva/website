@@ -433,6 +433,11 @@ a.icon:hover {
 	/* Blog - consolidated */
 	.blog-post-card {
 		padding: 1rem;
+		margin: 0.25rem;
+	}
+
+	.blog-posts {
+		gap: 0.5rem;
 	}
 
 	.blog-post-title {
