@@ -359,7 +359,7 @@ const Templates = {
         </div>`,
 
 	footer: (authorName, currentYear) => `
-        <footer class="footer mt-auto py-1" style="background-color: var(--header-color); border-top: var(--border-width) solid var(--accent);">
+        <footer class="footer mt-auto py-3">
             <div class="container-fluid" style="max-width: 1000px;">
                 <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.9em;">
                     &copy; ${currentYear} ${authorName}. ${i18n.t("footer.rights")}.
@@ -617,13 +617,14 @@ const Search = {
 
 	/**
 	 * Initialize search index with projects and blog posts
+	 * Uses metadata from YAML for fast indexing without loading full blog posts
 	 */
 	async init() {
 		if (this.isInitialized) return;
 
 		const data = projectsData || (await loadProjectsData());
 		const projects = data?.projects || [];
-		const blogPosts = await loadBlogPosts();
+		const blogPosts = data?.blog?.posts || [];
 
 		// Fetch README content for projects
 		const projectsWithContent = await Promise.all(
@@ -645,27 +646,44 @@ const Search = {
 			}),
 		);
 
-		// Index all searchable content
-		this.data = [
-			...projectsWithContent,
-			...blogPosts.map((p) => ({
-				id: p.slug,
-				title: p.title,
+		// Index blog posts using metadata from YAML (no need to load markdown files)
+		const blogPostsIndexed = blogPosts.map((p) => {
+			// Support both old format (string) and new format (object with metadata)
+			if (typeof p === "string") {
+				// Old format: just filename, derive slug
+				const slug = p.replace(/\.md$/, "");
+				return {
+					id: slug,
+					title: slug,
+					description: "",
+					tags: [],
+					type: "blog",
+					url: `/?blog=${slug}`,
+				};
+			}
+			// New format: object with metadata
+			const slug = p.filename.replace(/\.md$/, "");
+			return {
+				id: slug,
+				title: p.title || slug,
 				description: p.excerpt || "",
 				tags: p.tags || [],
-				content: p.content || "",
 				type: "blog",
-				url: `/?blog=${p.slug}`,
-			})),
-		];
+				url: `/?blog=${slug}`,
+			};
+		});
+
+		// Index all searchable content (removed content field for blog posts)
+		this.data = [...projectsWithContent, ...blogPostsIndexed];
 
 		// Configure Fuse.js with weighted search keys
+		// Note: Projects search includes README content, blog posts search only metadata
 		const fuseOptions = {
 			keys: [
 				{ name: "title", weight: 2 },
 				{ name: "description", weight: 1.5 },
 				{ name: "tags", weight: 1.2 },
-				{ name: "content", weight: 0.5 },
+				{ name: "content", weight: 0.5 }, // Only used for project READMEs
 			],
 			threshold: 0.4,
 			distance: 100,
@@ -1277,6 +1295,7 @@ const parseBlogPost = (markdown) => {
 
 /**
  * Load all blog posts from the blog directory
+ * Uses metadata from YAML when available for better performance
  * @returns {Promise<Array>} Array of blog post objects
  */
 const loadBlogPosts = async () => {
@@ -1292,7 +1311,25 @@ const loadBlogPosts = async () => {
 
 		// Use Promise.allSettled for better error resilience
 		const results = await Promise.allSettled(
-			postFiles.map(async (filename) => {
+			postFiles.map(async (post) => {
+				// Support both old format (string) and new format (object with metadata)
+				const filename = typeof post === "string" ? post : post.filename;
+				const slug = filename.replace(/\.md$/, "");
+
+				// If we have metadata in YAML, use it to avoid parsing markdown
+				if (typeof post === "object" && post.title) {
+					return {
+						slug,
+						title: post.title,
+						date: post.date || "",
+						excerpt: post.excerpt || "",
+						tags: post.tags || [],
+						content: null, // Don't load content for listing page
+						filename,
+					};
+				}
+
+				// Old format: fetch and parse markdown file
 				const response = await fetch(`data/blog/${filename}`);
 				if (!response.ok) {
 					throw new Error(`Blog post not found: ${filename}`);
@@ -1300,8 +1337,6 @@ const loadBlogPosts = async () => {
 
 				const markdown = await response.text();
 				const { metadata, content } = parseBlogPost(markdown);
-
-				const slug = filename.replace(/\.md$/, "");
 
 				return {
 					slug,

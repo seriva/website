@@ -1043,11 +1043,14 @@ a.icon:hover {
 	transform: scale(1.1);
 }
 
+#fullscreen span,
 .download-btn span {
 	color: var(--text-color);
 	transition: color var(--transition-normal);
 }
 
+#fullscreen:hover span,
+#fullscreen:focus span,
 .download-btn:hover span,
 .download-btn:focus span {
 	color: var(--accent);
