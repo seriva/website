@@ -99,8 +99,7 @@ const Templates = {
         <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn" onclick="closeMobileMenu()">
             <i class="${link.icon}"></i>
             <span>${link.title}</span>
-        </a>
-    `,
+        </a>`,
 
 	youtubeVideo: (videoId) => `
         <div class="youtube-video"><div class="iframeWrapper">
@@ -115,11 +114,15 @@ const Templates = {
             </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
         </div>`,
 
-	githubReadme: (repoName) =>
-		`<div id="github-readme" data-repo="${repoName}"><p>Loading README from GitHub...</p></div>`,
+	// Simple data-attribute containers for dynamic loading
+	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
+		`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
 
-	projectLinks: (projectId) =>
-		`<div id="project-links" data-project="${projectId}"></div>`,
+	// Helper for rendering tags
+	tagList: (tags) =>
+		tags?.length
+			? tags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")
+			: "",
 
 	blogPostCard: (post, index) => `
         <article class="blog-post-card" data-index="${index}">
@@ -128,7 +131,7 @@ const Templates = {
             </h2>
             <div class="blog-post-meta">
                 <span class="blog-post-date"><i class="far fa-calendar"></i> ${post.date}</span>
-                ${post.tags?.length ? `<span class="blog-post-tags">${post.tags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")}</span>` : ""}
+                ${post.tags?.length ? `<span class="blog-post-tags">${Templates.tagList(post.tags)}</span>` : ""}
             </div>
             <p class="blog-post-excerpt">${post.excerpt}</p>
             <a href="/?blog=${post.slug}" class="blog-read-more" data-spa-route="blog">Read more →</a>
@@ -178,7 +181,7 @@ const Templates = {
         <article class="blog-post-full">
             <h1 class="project-title">${post.title}</h1>
             <p class="project-description">${post.date}</p>
-            ${post.tags?.length ? `<div class="project-tags">${post.tags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")}</div>` : ""}
+            ${post.tags?.length ? `<div class="project-tags">${Templates.tagList(post.tags)}</div>` : ""}
             <div class="blog-post-content">
                 ${Templates.zeroMd(content, themeUrl, colors)}
             </div>
@@ -285,7 +288,7 @@ const Templates = {
 	projectHeader: (title, description, tags) => `
         <h1 class="project-title">${title}</h1>
         <p class="project-description">${description}</p>
-        <div class="project-tags">${tags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")}</div>`,
+        <div class="project-tags">${Templates.tagList(tags)}</div>`,
 
 	mediaSection: (videosHtml) => `
         <div class="markdown-body">
@@ -302,6 +305,13 @@ const Templates = {
             </div>
         </footer>`,
 
+	// Helper for creating search input components
+	searchInput: (id, cssClass, placeholder) => `
+        <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="Search"/>
+        <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="Clear search">
+            <i class="fas fa-times"></i>
+        </button>`,
+
 	searchBar: (placeholder) => `
         <li class="nav-item navbar-icon search-nav-item">
             <button class="nav-link search-toggle" id="search-toggle" aria-label="Search">
@@ -309,17 +319,7 @@ const Templates = {
             </button>
             <div class="search-bar-container" id="search-bar-container">
                 <div class="search-input-wrapper">
-                    <input 
-                        type="search" 
-                        id="search-input" 
-                        class="search-input" 
-                        placeholder="${placeholder}"
-                        autocomplete="off"
-                        aria-label="Search"
-                    />
-                    <button class="search-clear" id="search-clear" aria-label="Clear search">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    ${Templates.searchInput("search-input", "search-input", placeholder)}
                 </div>
             </div>
             <div class="search-results-dropdown" id="search-results"></div>
@@ -332,17 +332,7 @@ const Templates = {
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <div class="mobile-search-input-wrapper">
-                    <input 
-                        type="search" 
-                        id="mobile-search-input" 
-                        class="mobile-search-input" 
-                        placeholder="${placeholder}"
-                        autocomplete="off"
-                        aria-label="Search"
-                    />
-                    <button class="mobile-search-clear" id="mobile-search-clear" aria-label="Clear search">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    ${Templates.searchInput("mobile-search-input", "mobile-search-input", placeholder)}
                 </div>
             </div>
             <div class="mobile-search-content">
@@ -351,22 +341,16 @@ const Templates = {
         </div>`,
 
 	searchResult: (item, query) => {
-		const typeIcon =
-			item.type === "project" ? "fas fa-folder" : "far fa-file-alt";
-		const typeBadge =
-			item.type === "project"
-				? '<span class="result-type">Project</span>'
-				: '<span class="result-type result-type-blog">Blog</span>';
-
+		const isProject = item.type === "project";
 		return `
             <a href="${item.url}" class="search-result-item" data-spa-route="${item.type}">
-                <div class="result-icon"><i class="${typeIcon}"></i></div>
+                <div class="result-icon"><i class="${isProject ? "fas fa-folder" : "far fa-file-alt"}"></i></div>
                 <div class="result-content">
                     <div class="result-title">${Search.highlight(item.title, query)}</div>
                     <div class="result-description">${Search.highlight(item.description, query)}</div>
                     ${item.tags.length ? `<div class="result-tags">${item.tags.map((tag) => `<span class="result-tag">${tag}</span>`).join("")}</div>` : ""}
                 </div>
-                ${typeBadge}
+                <span class="result-type${isProject ? "" : " result-type-blog"}">${isProject ? "Project" : "Blog"}</span>
             </a>`;
 	},
 
@@ -717,13 +701,10 @@ const preloadGitHubReadmes = async () => {
  * @param {string} containerId - Container element ID
  */
 export const loadGitHubReadme = async (repoName, containerId) => {
-	try {
-		const container = document.getElementById(containerId);
-		if (!container) {
-			console.warn(`Container with ID '${containerId}' not found`);
-			return;
-		}
+	const container = document.getElementById(containerId);
+	if (!container) return;
 
+	try {
 		const content = await fetchGitHubReadme(repoName);
 		const themeName =
 			projectsData?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
@@ -734,10 +715,7 @@ export const loadGitHubReadme = async (repoName, containerId) => {
 			: Templates.githubReadmeError();
 	} catch (error) {
 		console.error(`Error loading GitHub README for ${repoName}:`, error);
-		const container = document.getElementById(containerId);
-		if (container) {
-			container.innerHTML = Templates.githubReadmeError();
-		}
+		container.innerHTML = Templates.githubReadmeError();
 	}
 };
 
@@ -1393,29 +1371,22 @@ export const getProject = async (projectId) => {
  * @param {string} containerId - Container element ID
  */
 export const loadProjectLinks = async (projectId, containerId) => {
-	try {
-		const container = document.getElementById(containerId);
-		if (!container) {
-			console.warn(`Container with ID '${containerId}' not found`);
-			return;
-		}
+	const container = document.getElementById(containerId);
+	if (!container) return;
 
+	try {
 		const project = await getProject(projectId);
 		if (!project?.links) {
 			container.style.display = "none";
 			return;
 		}
 
-		const linksHtml = project.links
-			.map((link) => Templates.projectLink(link))
-			.join("");
-		container.innerHTML = Templates.projectLinksSection(linksHtml);
+		container.innerHTML = Templates.projectLinksSection(
+			project.links.map((link) => Templates.projectLink(link)).join(""),
+		);
 	} catch (error) {
 		console.error(`Error loading project links for ${projectId}:`, error);
-		const container = document.getElementById(containerId);
-		if (container) {
-			container.style.display = "none";
-		}
+		container.style.display = "none";
 	}
 };
 
@@ -1462,22 +1433,24 @@ export const loadProjectPage = async (projectId) => {
 
 	setPageTitle(projectsData);
 
-	const parts = [
+	DOMCache.main.innerHTML = [
 		Templates.projectHeader(project.title, project.description, project.tags),
-	];
-
-	if (project.github_repo)
-		parts.push(Templates.githubReadme(project.github_repo));
-	if (project.youtube_videos?.length) {
-		const videos = project.youtube_videos
-			.map((id) => Templates.youtubeVideo(id))
-			.join("");
-		parts.push(Templates.mediaSection(videos));
-	}
-	if (project.demo_url) parts.push(Templates.demoIframe(project.demo_url));
-
-	parts.push(Templates.projectLinks(project.id));
-	DOMCache.main.innerHTML = parts.join("");
+		project.github_repo &&
+			Templates.dynamicContainer(
+				"github-readme",
+				"repo",
+				project.github_repo,
+				"Loading README from GitHub...",
+			),
+		project.youtube_videos?.length &&
+			Templates.mediaSection(
+				project.youtube_videos.map((id) => Templates.youtubeVideo(id)).join(""),
+			),
+		project.demo_url && Templates.demoIframe(project.demo_url),
+		Templates.dynamicContainer("project-links", "project", project.id, ""),
+	]
+		.filter(Boolean)
+		.join("");
 };
 
 /**
@@ -1502,13 +1475,14 @@ export const loadProjectsDropdown = async () => {
  * Load additional content like GitHub READMEs and project links
  */
 export const loadAdditionalContent = () => {
-	const readme = document.getElementById("github-readme");
-	const links = document.getElementById("project-links");
-
-	if (readme?.dataset.repo)
-		loadGitHubReadme(readme.dataset.repo, "github-readme");
-	if (links?.dataset.project)
-		loadProjectLinks(links.dataset.project, "project-links");
+	["github-readme", "project-links"].forEach((id) => {
+		const el = document.getElementById(id);
+		if (!el) return;
+		const repo = el.dataset.repo;
+		const project = el.dataset.project;
+		if (repo) loadGitHubReadme(repo, id);
+		if (project) loadProjectLinks(project, id);
+	});
 };
 
 // ===========================
@@ -1533,28 +1507,20 @@ const handleRoute = async () => {
 		const data = projectsData || (await loadProjectsData());
 
 		if (blogParam !== null) {
-			// blog parameter exists
-			if (blogParam === "") {
-				// /?blog or /?blog&p=2 - Blog listing
-				const page = blogPageNum ? parseInt(blogPageNum, 10) : 1;
-				await loadBlogPage(page);
-			} else {
-				// /?blog=slug - Individual blog post
-				await loadBlogPost(blogParam);
-			}
+			blogParam === ""
+				? await loadBlogPage(blogPageNum ? parseInt(blogPageNum, 10) : 1)
+				: await loadBlogPost(blogParam);
 		} else if (projectId) {
 			await loadProjectPage(projectId);
 			loadAdditionalContent();
-		} else if (pageId) {
-			await loadPage(pageId);
 		} else {
-			const defaultPage =
+			const targetPage =
+				pageId ||
 				Object.keys(data.pages).find((id) => data.pages[id].default) ||
 				Object.keys(data.pages)[0];
-			await loadPage(defaultPage);
+			await loadPage(targetPage);
 		}
 
-		// Update active nav link after route loads
 		updateActiveNavLink();
 	} catch (error) {
 		console.error("Error loading page:", error);
