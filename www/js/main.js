@@ -179,15 +179,16 @@ const Templates = {
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
 		`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
 
-	// Helper for rendering tags (clickable to search by tag)
+	// Helper for rendering tags (clickable to search by tag if search is enabled)
 	tagList: (tags) =>
 		tags?.length
 			? tags
 					.map((tag) => {
-						const isClickable = Search.isInitialized;
-						const clickableClass = isClickable ? " clickable-tag" : "";
-						const onclickAttr = isClickable
-							? ` onclick="event.stopPropagation(); searchByTag(\'${tag}\')"`
+						// Check if search is enabled in the loaded data
+						const searchEnabled = projectsData?.site?.search?.enabled !== false;
+						const clickableClass = searchEnabled ? " clickable-tag" : "";
+						const onclickAttr = searchEnabled
+							? ` onclick="event.stopPropagation(); searchByTag('${tag}\')"`
 							: "";
 						return `<span class="item-tag${clickableClass}"${onclickAttr}>${tag}</span>`;
 					})
