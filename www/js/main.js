@@ -502,7 +502,6 @@ const Email = async (event) => {
 		console.error("Error handling email click:", error);
 		window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
 	}
-	return false;
 };
 
 // Make globally available for onclick handlers
@@ -574,6 +573,21 @@ const updateMetaTags = (siteData) => {
 		{
 			selector: 'meta[name="msapplication-TileColor"]',
 			value: siteData.colors?.primary,
+		},
+		// Open Graph tags
+		{ selector: 'meta[property="og:title"]', value: siteData.title },
+		{
+			selector: 'meta[property="og:description"]',
+			value: siteData.description,
+		},
+		// Twitter Card tags
+		{
+			selector: 'meta[property="twitter:title"]',
+			value: siteData.title,
+		},
+		{
+			selector: 'meta[property="twitter:description"]',
+			value: siteData.description,
 		},
 	];
 
