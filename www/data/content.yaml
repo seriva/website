@@ -18,15 +18,15 @@ site:
     name: "luukvanvenrooij84"
     domain: "gmail.com"
   
-  # Color scheme and theming
+  # Color scheme and theming - Matrix/Terminal Dark Green
   colors:
-    primary: "#F59E0B"
-    secondary: "#1C1917"
-    background: "#0C0A09"
-    text: "#FAFAF9"
-    textLight: "#D6D3D1"
-    border: "#44403C"
-    hover: "#451A03"
+    primary: "#10B981"       # Vibrant emerald green - fresh and tech-inspired
+    secondary: "#111827"     # Deep slate gray - clean header/navbar
+    background: "#0D1117"    # GitHub-style dark background - professional
+    text: "#E6EDF3"          # Bright off-white - excellent contrast
+    textLight: "#7D8590"     # Muted slate gray - subtle secondary text
+    border: "#21262D"        # Soft gray border - gentle definition
+    hover: "#1A2332"         # Cool dark hover state with hint of blue
     code:
       theme: "monokai"
   
