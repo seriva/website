@@ -57,12 +57,13 @@
    RESET & BASE STYLES
    =========================== */
 
-html,
-body {
+html {
 	height: 100%;
 }
 
 body {
+	min-height: 100vh;
+	margin: 0;
 	padding-top: 56px;
 	display: flex;
 	text-align: center;
@@ -75,6 +76,7 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
+	box-sizing: border-box;
 }
 
 main {
@@ -214,12 +216,12 @@ a.icon:hover {
    =========================== */
 
 .navbar-icon {
-	font-size: 1.25rem;
+	font-size: 1.35rem;
 	display: inline-block;
 }
 
 .navbar-menu .custom-nav-link {
-	font-size: 1.15rem;
+	font-size: 1.35rem;
 	font-weight: 700;
 }
 
@@ -1351,7 +1353,7 @@ textarea:focus {
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	align-items: center;
+	align-items: stretch;
 }
 
 .custom-navbar-nav.left {
@@ -1365,16 +1367,21 @@ textarea:focus {
 /* Navbar items */
 .custom-nav-item {
 	position: relative;
+	display: flex;
+	align-items: stretch;
 }
 
 /* Navbar links */
 .custom-nav-link {
-	display: block;
-	padding: 15px 20px;
+	display: flex;
+	align-items: center;
+	padding: 11px 20px;
 	color: var(--header-font-color);
 	text-decoration: none;
 	transition: all var(--transition-fast);
 	line-height: 1.2;
+	font-size: 1.25em;
+	font-weight: 700;
 }
 
 /* Reset button styling for button.custom-nav-link */
@@ -1492,8 +1499,10 @@ button.custom-nav-link {
 
 .custom-footer {
 	margin-top: auto;
+	margin-bottom: 0;
 	padding: 1rem 0;
 	background-color: transparent;
+	flex-shrink: 0;
 }
 
 .custom-footer-container {
