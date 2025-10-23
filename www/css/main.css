@@ -320,23 +320,7 @@ a.icon:hover {
 	align-items: center;
 }
 
-/* Search toggle button - styled like navbar icons */
-.search-toggle {
-	background: none;
-	border: none;
-	color: var(--text-color);
-	cursor: pointer;
-	padding: 15px 20px;
-	display: block;
-	transition: all var(--transition-fast);
-	flex-shrink: 0;
-}
-
-.search-toggle:hover,
-.search-toggle:focus {
-	color: var(--accent);
-	background-color: rgba(255, 255, 255, 0.1);
-}
+/* Search toggle button inherits styling from .custom-nav-link */
 
 /* Search functionality - unified search page for all devices */
 
@@ -1393,6 +1377,16 @@ textarea:focus {
 	line-height: 1.2;
 }
 
+/* Reset button styling for button.custom-nav-link */
+button.custom-nav-link {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	width: auto;
+}
+
 .custom-nav-link:hover,
 .custom-nav-link:focus,
 .custom-nav-link:active {
@@ -1573,11 +1567,6 @@ textarea:focus {
 	}
 
 	.custom-navbar-nav.right .custom-nav-link {
-		padding: 10px 15px;
-		height: auto;
-	}
-
-	.custom-navbar-nav.right .search-toggle {
 		padding: 10px 15px;
 		height: auto;
 	}
