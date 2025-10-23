@@ -80,19 +80,19 @@ const Templates = {
 		searchBar,
 		siteTitle,
 	) => html`
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand d-md-none" href="#">${siteTitle}</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+    <nav class="custom-navbar">
+        <div class="custom-navbar-container">
+            <a class="custom-navbar-brand" href="#">${siteTitle}</a>
+            <button class="custom-navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="custom-navbar-toggle-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+            <div class="custom-navbar-collapse" id="navbarNav">
+                <ul class="custom-navbar-nav left">
                     ${safe(blogLink)}
                     ${safe(projectsDropdown)}
                     ${safe(pageLinks)}
                 </ul>
-                <ul class="navbar-nav ms-auto">
+                <ul class="custom-navbar-nav right">
                     ${safe(searchBar)}
                     ${safe(socialLinksHtml)}
                 </ul>
@@ -103,7 +103,7 @@ const Templates = {
 
 	pageLink: (pageId, pageTitle) => {
 		const href = pageId === "blog" ? "/?blog" : `/?page=${pageId}`;
-		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
+		return html`<li class="custom-nav-item navbar-menu"><a class="custom-nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
 	},
 
 	socialLink: ({
@@ -122,19 +122,19 @@ const Templates = {
 		]
 			.filter(Boolean)
 			.join(" ");
-		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${attrs}><i class="${icon}"></i></a></li>`;
+		return html`<li class="custom-nav-item navbar-icon"><a class="custom-nav-link" href="${href}" ${attrs}><i class="${icon}"></i></a></li>`;
 	},
 
 	projectDropdownItem: (projectId, projectTitle) =>
-		html`<li><a class="dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
+		html`<li><a class="custom-dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
 
 	projectsDropdown: () => html`
-		<li class="nav-item navbar-menu dropdown">
-			<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+		<li class="custom-nav-item navbar-menu custom-dropdown">
+			<a class="custom-nav-link custom-dropdown-toggle" href="#" role="button" aria-expanded="false">
 				Projects
 			</a>
-			<ul class="dropdown-menu" id="projects-dropdown">
-				<li><a class="dropdown-item" href="#">Loading projects...</a></li>
+			<ul class="custom-dropdown-menu" id="projects-dropdown">
+				<li><a class="custom-dropdown-item" href="#">Loading projects...</a></li>
 			</ul>
 		</li>
 	`,
@@ -294,9 +294,9 @@ const Templates = {
         </div>`,
 
 	footer: (authorName, currentYear) => html`
-        <footer class="footer mt-auto py-3">
-            <div class="container-fluid" style="max-width: 1000px;">
-                <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.9em;">
+        <footer class="custom-footer">
+            <div class="custom-footer-container">
+                <p class="custom-footer-text">
                     &copy; ${currentYear} ${authorName}. ${i18n.t("footer.rights")}.
                 </p>
             </div>
@@ -309,8 +309,8 @@ const Templates = {
         </button>`,
 
 	searchBar: () => html`
-        <li class="nav-item navbar-icon">
-            <button class="nav-link search-toggle" id="search-toggle" aria-label="Search">
+        <li class="custom-nav-item navbar-icon">
+            <button class="custom-nav-link search-toggle" id="search-toggle" aria-label="Search">
                 <i class="fas fa-search"></i>
             </button>
         </li>`,
@@ -460,17 +460,71 @@ const fullscreen = () => {
 window.fullscreen = fullscreen;
 
 const closeMobileMenu = () => {
-	const collapseElement = document.querySelector(".navbar-collapse");
-	const navbarToggle = document.querySelector(".navbar-toggler");
+	const collapseElement = document.querySelector(".custom-navbar-collapse");
+	const navbarToggle = document.querySelector(".custom-navbar-toggle");
 
 	if (collapseElement) {
-		const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
-		bsCollapse ? bsCollapse.hide() : collapseElement.classList.remove("show");
+		collapseElement.classList.remove("show");
 	}
 
 	if (navbarToggle) {
-		navbarToggle.classList.add("collapsed");
+		navbarToggle.classList.remove("active");
 		navbarToggle.setAttribute("aria-expanded", "false");
+	}
+};
+
+// Custom dropdown toggle handler
+const initCustomDropdowns = () => {
+	document.querySelectorAll(".custom-dropdown-toggle").forEach((toggle) => {
+		toggle.addEventListener("click", (e) => {
+			e.preventDefault();
+			const dropdown = toggle.closest(".custom-dropdown");
+			const isOpen = dropdown.classList.contains("show");
+
+			// Close all other dropdowns
+			document.querySelectorAll(".custom-dropdown.show").forEach((d) => {
+				if (d !== dropdown) d.classList.remove("show");
+			});
+
+			// Toggle current dropdown
+			dropdown.classList.toggle("show", !isOpen);
+			toggle.setAttribute("aria-expanded", !isOpen);
+		});
+	});
+
+	// Close dropdowns when clicking on dropdown items (use event delegation)
+	document.addEventListener("click", (e) => {
+		// Check if a dropdown item was clicked
+		if (e.target.closest(".custom-dropdown-item")) {
+			document.querySelectorAll(".custom-dropdown.show").forEach((d) => {
+				d.classList.remove("show");
+				const toggle = d.querySelector(".custom-dropdown-toggle");
+				if (toggle) toggle.setAttribute("aria-expanded", "false");
+			});
+		}
+		// Close dropdowns when clicking outside
+		else if (!e.target.closest(".custom-dropdown")) {
+			document.querySelectorAll(".custom-dropdown.show").forEach((d) => {
+				d.classList.remove("show");
+				const toggle = d.querySelector(".custom-dropdown-toggle");
+				if (toggle) toggle.setAttribute("aria-expanded", "false");
+			});
+		}
+	});
+};
+
+// Mobile menu toggle handler
+const initMobileMenuToggle = () => {
+	const navbarToggle = document.getElementById("navbar-toggle");
+	const navbarCollapse = document.getElementById("navbarNav");
+
+	if (navbarToggle && navbarCollapse) {
+		navbarToggle.addEventListener("click", () => {
+			const isExpanded = navbarToggle.getAttribute("aria-expanded") === "true";
+			navbarToggle.classList.toggle("active", !isExpanded);
+			navbarToggle.setAttribute("aria-expanded", !isExpanded);
+			navbarCollapse.classList.toggle("show", !isExpanded);
+		});
 	}
 };
 
@@ -840,10 +894,9 @@ const injectNavbar = async () => {
 	// Clear cached navbar elements after rebuild
 	DOMCache.clearNavbarCache();
 
-	// Initialize Bootstrap dropdowns
-	document.querySelectorAll(".dropdown-toggle").forEach((el) => {
-		new bootstrap.Dropdown(el);
-	});
+	// Initialize custom dropdowns and mobile menu
+	initCustomDropdowns();
+	initMobileMenuToggle();
 
 	// Add mobile menu click handlers and blur on click
 	// Note: SPA routing is handled by global event delegation in setupSpaRouting()
@@ -852,7 +905,7 @@ const injectNavbar = async () => {
 	)) {
 		link.addEventListener("click", () => {
 			if (
-				!link.classList.contains("dropdown-toggle") &&
+				!link.classList.contains("custom-dropdown-toggle") &&
 				!link.hasAttribute("data-keep-menu")
 			) {
 				closeMobileMenu();
@@ -862,7 +915,7 @@ const injectNavbar = async () => {
 	}
 
 	// Handle mobile menu button blur
-	const toggleBtn = DOMCache.navbar.querySelector(".navbar-toggler");
+	const toggleBtn = DOMCache.navbar.querySelector(".custom-navbar-toggle");
 	if (toggleBtn) {
 		toggleBtn.addEventListener("click", () =>
 			requestAnimationFrame(() => toggleBtn.blur()),
@@ -1382,7 +1435,6 @@ const loadProjectsDropdown = async () => {
 		for (const link of dropdown.querySelectorAll("a")) {
 			link.addEventListener("click", () => {
 				closeMobileMenu();
-				requestAnimationFrame(() => link.blur());
 			});
 		}
 	} catch (error) {
@@ -1459,7 +1511,10 @@ const handleRoute = async () => {
 		// Scroll to top of page instantly (no animation)
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 
-		updateActiveNavLink();
+		// Use requestAnimationFrame to ensure DOM is fully updated before highlighting
+		requestAnimationFrame(() => {
+			updateActiveNavLink();
+		});
 	} catch (error) {
 		console.error("Error loading page:", error);
 		if (DOMCache.main) {
@@ -1514,31 +1569,54 @@ const updateActiveNavLink = () => {
 	const projectId = params.get("project");
 	const blogParam = params.get("blog");
 
-	// Cache navbar links to avoid multiple DOM queries
-	if (!DOMCache.navbarLinks) {
-		DOMCache.navbarLinks = document.querySelectorAll(".navbar-nav a");
-	}
+	// Get all navbar links and dropdown items
+	const navbarLinks = document.querySelectorAll(
+		".custom-navbar-nav .custom-nav-link",
+	);
+	const dropdownItems = document.querySelectorAll(".custom-dropdown-item");
 
-	// Remove all active states
-	DOMCache.navbarLinks.forEach((l) => {
-		l.classList.remove("active");
-	});
+	// Find which link should be active first
+	let targetLink = null;
+	let targetDropdownItem = null;
+	let targetDropdownToggle = null;
 
-	// Build selector based on current route and query once
-	let activeSelector = null;
 	if (blogParam !== null) {
-		activeSelector = 'a[href="/?blog"]';
-	} else if (pageId) {
-		activeSelector = `a[href="/?page=${pageId}"]`;
+		// Blog page or specific blog post
+		targetLink = document.querySelector('.custom-nav-link[href="/?blog"]');
 	} else if (projectId) {
-		activeSelector = `a[href="/?project=${projectId}"]`;
+		// Project page - highlight both the Projects dropdown toggle AND the specific project item
+		const projectDropdown = document.querySelector(".custom-dropdown");
+		if (projectDropdown) {
+			targetDropdownToggle = projectDropdown.querySelector(
+				".custom-dropdown-toggle",
+			);
+		}
+		targetDropdownItem = document.querySelector(
+			`.custom-dropdown-item[href="/?project=${projectId}"]`,
+		);
+	} else if (pageId) {
+		// Regular page
+		targetLink = document.querySelector(
+			`.custom-nav-link[href="/?page=${pageId}"]`,
+		);
 	}
 
-	// Set active state if we have a matching route
-	if (activeSelector) {
-		const activeLink = document.querySelector(activeSelector);
-		if (activeLink) activeLink.classList.add("active");
-	}
+	// Add active class to target(s) first to maintain visual continuity
+	if (targetLink) targetLink.classList.add("active");
+	if (targetDropdownToggle) targetDropdownToggle.classList.add("active");
+	if (targetDropdownItem) targetDropdownItem.classList.add("active");
+
+	// Then remove active from all others
+	navbarLinks.forEach((l) => {
+		if (l !== targetLink && l !== targetDropdownToggle) {
+			l.classList.remove("active");
+		}
+	});
+	dropdownItems.forEach((item) => {
+		if (item !== targetDropdownItem) {
+			item.classList.remove("active");
+		}
+	});
 };
 
 const handleSpaLinkClick = (e) => {
@@ -1546,6 +1624,34 @@ const handleSpaLinkClick = (e) => {
 	if (!link) return;
 
 	e.preventDefault();
+
+	// Immediately apply active class to clicked link for visual continuity
+	const allNavLinks = document.querySelectorAll(
+		".custom-navbar-nav .custom-nav-link",
+	);
+	const allDropdownItems = document.querySelectorAll(".custom-dropdown-item");
+
+	// Remove active from all first
+	allNavLinks.forEach((l) => {
+		l.classList.remove("active");
+	});
+	allDropdownItems.forEach((item) => {
+		item.classList.remove("active");
+	});
+
+	// Add active to clicked link
+	if (link.classList.contains("custom-nav-link")) {
+		link.classList.add("active");
+	} else if (link.classList.contains("custom-dropdown-item")) {
+		link.classList.add("active");
+		// Also activate the dropdown toggle if clicking a dropdown item
+		const dropdown = link.closest(".custom-dropdown");
+		if (dropdown) {
+			const toggle = dropdown.querySelector(".custom-dropdown-toggle");
+			if (toggle) toggle.classList.add("active");
+		}
+	}
+
 	closeMobileMenu();
 	window.history.pushState({}, "", link.getAttribute("href"));
 	handleRoute();
