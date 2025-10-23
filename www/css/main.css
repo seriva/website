@@ -84,7 +84,7 @@ main {
 	max-width: 750px;
 	width: 100%;
 	box-sizing: border-box;
-	animation: fadeIn 0.3s ease-in-out;
+	animation: fadeIn 0.2s ease-in-out;
 }
 
 /* Page transition animation */
@@ -100,7 +100,7 @@ main {
 }
 
 main.page-transition-out {
-	animation: fadeOut 0.3s ease-in-out forwards;
+	animation: fadeOut 0.2s ease-in-out forwards;
 }
 
 @keyframes fadeOut {

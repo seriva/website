@@ -9,10 +9,9 @@ const CONSTANTS = {
 	DEFAULT_EMAIL: "contact@example.com",
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
 	MOBILE_BREAKPOINT: 767,
-	PRELOAD_DELAY: 100,
 	THEME_APPLY_DELAY: 200,
 	SEARCH_DEBOUNCE_MS: 300,
-	PAGE_TRANSITION_DELAY: 300,
+	PAGE_TRANSITION_DELAY: 200, // Reduced from 300ms for snappier transitions
 	SEARCH_PAGE_CLOSE_DELAY: 200,
 	SEARCH_MIN_CHARS: 2,
 	SEARCH_MAX_RESULTS: 8,
@@ -22,21 +21,12 @@ const CONSTANTS = {
 // UTILITY FUNCTIONS
 // ===========================
 
-const debounce = (func, wait) => {
-	let timeout;
-	return (...args) => {
-		clearTimeout(timeout);
-		timeout = setTimeout(() => func(...args), wait);
-	};
-};
-
 const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
 	return div.innerHTML;
 };
 
-// Template literal helper - escapes values unless marked with safe()
 const html = (strings, ...values) => {
 	return strings.reduce((result, str, i) => {
 		const value = values[i];
@@ -75,18 +65,6 @@ const i18n = {
 		}
 
 		return typeof value === "string" ? value : key;
-	},
-
-	getCurrentLanguage() {
-		return this.currentLanguage;
-	},
-
-	setLanguage(lang) {
-		if (this.translations[lang]) {
-			this.currentLanguage = lang;
-			return true;
-		}
-		return false;
 	},
 };
 
@@ -154,7 +132,7 @@ const Templates = {
 	`,
 
 	projectLink: (link) => html`
-        <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn" onclick="closeMobileMenu()">
+        <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn">
             <i class="${link.icon}"></i>
             <span>${link.title}</span>
         </a>`,
@@ -165,18 +143,16 @@ const Templates = {
         </div></div>`,
 
 	demoIframe: (demoUrl) => html`
-        <div class="markdown-body"><h2>${i18n.t("project.demo")}</h2>
-            <p>${i18n.t("project.demoInstructions")}</p>
+        <div class="markdown-body"><h2>Play!</h2>
+            <p>On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls.</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>${i18n.t("project.fullscreen")}</span></button></center>
+            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
         </div>`,
 
-	// Simple data-attribute containers for dynamic loading
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
 		html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
 
-	// Helper for rendering tags (clickable to search by tag if search is enabled)
 	tagList: (tags) =>
 		safe(
 			tags?.length
@@ -384,7 +360,6 @@ const Templates = {
             </div>
         </footer>`,
 
-	// Helper for creating search input components
 	searchInput: (id, cssClass, placeholder) => html`
         <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="Search"/>
         <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="Clear search">
@@ -506,32 +481,18 @@ const updateMetaTags = (siteData) => {
 	if (!siteData) return;
 	if (siteData.title) document.title = siteData.title;
 
-	const metaUpdates = [
-		{ selector: 'meta[name="description"]', value: siteData.description },
-		{ selector: 'meta[name="author"]', value: siteData.author },
-		{ selector: 'meta[name="theme-color"]', value: siteData.colors?.primary },
-		{
-			selector: 'meta[name="msapplication-TileColor"]',
-			value: siteData.colors?.primary,
-		},
-		{ selector: 'meta[property="og:title"]', value: siteData.title },
-		{
-			selector: 'meta[property="og:description"]',
-			value: siteData.description,
-		},
-		{
-			selector: 'meta[property="twitter:title"]',
-			value: siteData.title,
-		},
-		{
-			selector: 'meta[property="twitter:description"]',
-			value: siteData.description,
-		},
-	];
-
-	metaUpdates.forEach(({ selector, value }) => {
+	const updateMeta = (selector, value) => {
 		if (value) document.querySelector(selector)?.setAttribute("content", value);
-	});
+	};
+
+	updateMeta('meta[name="description"]', siteData.description);
+	updateMeta('meta[name="author"]', siteData.author);
+	updateMeta('meta[name="theme-color"]', siteData.colors?.primary);
+	updateMeta('meta[name="msapplication-TileColor"]', siteData.colors?.primary);
+	updateMeta('meta[property="og:title"]', siteData.title);
+	updateMeta('meta[property="og:description"]', siteData.description);
+	updateMeta('meta[property="twitter:title"]', siteData.title);
+	updateMeta('meta[property="twitter:description"]', siteData.description);
 };
 
 const fullscreen = () => {
@@ -553,36 +514,20 @@ const fullscreen = () => {
 
 window.fullscreen = fullscreen;
 
-const MobileMenu = {
-	close() {
-		const collapseElement = document.querySelector(".navbar-collapse");
-		const navbarToggle = document.querySelector(".navbar-toggler");
+const closeMobileMenu = () => {
+	const collapseElement = document.querySelector(".navbar-collapse");
+	const navbarToggle = document.querySelector(".navbar-toggler");
 
-		if (collapseElement) {
-			const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
-			bsCollapse ? bsCollapse.hide() : collapseElement.classList.remove("show");
-		}
+	if (collapseElement) {
+		const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
+		bsCollapse ? bsCollapse.hide() : collapseElement.classList.remove("show");
+	}
 
-		if (navbarToggle) {
-			navbarToggle.classList.add("collapsed");
-			navbarToggle.setAttribute("aria-expanded", "false");
-		}
-	},
-
-	addClickHandler(element) {
-		element.addEventListener("click", () => {
-			if (
-				!element.classList.contains("dropdown-toggle") &&
-				!element.hasAttribute("data-keep-menu")
-			) {
-				MobileMenu.close();
-			}
-			requestAnimationFrame(() => element.blur());
-		});
-	},
+	if (navbarToggle) {
+		navbarToggle.classList.add("collapsed");
+		navbarToggle.setAttribute("aria-expanded", "false");
+	}
 };
-
-window.closeMobileMenu = () => MobileMenu.close();
 
 // ===========================
 // SEARCH FUNCTIONALITY
@@ -753,7 +698,7 @@ const fetchGitHubReadme = async (repoName) => {
 	}
 };
 
-export const loadGitHubReadme = async (repoName, containerId) => {
+const loadGitHubReadme = async (repoName, containerId) => {
 	if (!repoName || !containerId) return;
 
 	const container = document.getElementById(containerId);
@@ -900,10 +845,7 @@ const createNavbar = (
 };
 
 const injectFooter = async () => {
-	if (!DOMCache.footer) {
-		console.warn("Footer container not found");
-		return;
-	}
+	if (!DOMCache.footer) return;
 
 	try {
 		const data = await getData();
@@ -917,10 +859,7 @@ const injectFooter = async () => {
 };
 
 const injectNavbar = async () => {
-	if (!DOMCache.navbar) {
-		console.warn("Navbar container not found");
-		return;
-	}
+	if (!DOMCache.navbar) return;
 
 	const data = await getData();
 	const pages = data?.pages
@@ -964,9 +903,17 @@ const injectNavbar = async () => {
 		new bootstrap.Dropdown(el);
 	});
 
-	// Add mobile menu click handlers
+	// Add mobile menu click handlers and blur on click
 	for (const link of DOMCache.navbar.querySelectorAll("a")) {
-		MobileMenu.addClickHandler(link);
+		link.addEventListener("click", () => {
+			if (
+				!link.classList.contains("dropdown-toggle") &&
+				!link.hasAttribute("data-keep-menu")
+			) {
+				closeMobileMenu();
+			}
+			requestAnimationFrame(() => link.blur());
+		});
 	}
 
 	// Handle mobile menu button blur
@@ -1076,12 +1023,8 @@ const initializeSearchPage = (searchConfig) => {
 
 	searchPageBack.addEventListener("click", closeSearchPage);
 
-	// Create debounced search handler
-	const performSearch = debounce((query) => {
-		handleSearchQuery(query, searchPageResults, closeSearchPage);
-	}, CONSTANTS.SEARCH_DEBOUNCE_MS);
-
-	// Handle search input
+	// Handle search input with inline debouncing
+	let searchTimeout;
 	searchPageInput.addEventListener("input", (e) => {
 		const query = e.target.value.trim();
 
@@ -1090,7 +1033,10 @@ const initializeSearchPage = (searchConfig) => {
 			return;
 		}
 
-		performSearch(query);
+		clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(() => {
+			handleSearchQuery(query, searchPageResults, closeSearchPage);
+		}, CONSTANTS.SEARCH_DEBOUNCE_MS);
 	});
 
 	// Handle clear button
@@ -1126,7 +1072,7 @@ const getData = async () => projectsData || (await loadProjectsData());
 const getTheme = (data) =>
 	data?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
 
-export const loadProjectsData = async () => {
+const loadProjectsData = async () => {
 	if (projectsData) return projectsData;
 	if (dataLoadPromise) return dataLoadPromise;
 
@@ -1225,10 +1171,7 @@ const loadBlogPosts = async () => {
 		const data = await getData();
 		const postFiles = data?.blog?.posts || [];
 
-		if (postFiles.length === 0) {
-			console.info("No blog posts configured in content.yaml");
-			return [];
-		}
+		if (postFiles.length === 0) return [];
 
 		// Use Promise.allSettled for better error resilience
 		const results = await Promise.allSettled(
@@ -1271,18 +1214,9 @@ const loadBlogPosts = async () => {
 			}),
 		);
 
-		// Extract successful results and log failures
+		// Extract successful results
 		const posts = results
-			.map((result, index) => {
-				if (result.status === "fulfilled") {
-					return result.value;
-				}
-				console.warn(
-					`Failed to load blog post ${postFiles[index]}:`,
-					result.reason,
-				);
-				return null;
-			})
+			.map((result) => (result.status === "fulfilled" ? result.value : null))
 			.filter((post) => post !== null);
 
 		// Sort by date (newest first)
@@ -1293,11 +1227,11 @@ const loadBlogPosts = async () => {
 	}
 };
 
-export const loadBlogPage = async (page = 1) => {
+const loadBlogPage = async (page = 1) => {
 	if (!DOMCache.main) return;
 
 	const data = await getData();
-	setPageTitle(data);
+	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
 	DOMCache.main.innerHTML = Templates.loadingSpinner();
 
@@ -1349,11 +1283,11 @@ export const loadBlogPage = async (page = 1) => {
 	// SPA routing handled via event delegation
 };
 
-export const loadBlogPost = async (slug) => {
+const loadBlogPost = async (slug) => {
 	if (!DOMCache.main) return;
 
 	const data = await getData();
-	setPageTitle(data);
+	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
 	DOMCache.main.innerHTML = Templates.loadingSpinner();
 
@@ -1399,25 +1333,15 @@ export const loadBlogPost = async (slug) => {
 // PROJECT MANAGEMENT FUNCTIONS
 // ===========================
 
-export const getProject = async (projectId) => {
-	const data = await loadProjectsData();
-	return data?.projects?.find((project) => project.id === projectId) || null;
-};
-
-export const loadProjectLinks = async (projectId, containerId) => {
-	if (!projectId || !containerId) {
-		console.warn("loadProjectLinks called with missing parameters");
-		return;
-	}
+const loadProjectLinks = async (projectId, containerId) => {
+	if (!projectId || !containerId) return;
 
 	const container = document.getElementById(containerId);
-	if (!container) {
-		console.warn(`Container ${containerId} not found`);
-		return;
-	}
+	if (!container) return;
 
 	try {
-		const project = await getProject(projectId);
+		const data = await loadProjectsData();
+		const project = data?.projects?.find((p) => p.id === projectId);
 		if (!project?.links) {
 			container.style.display = "none";
 			return;
@@ -1432,19 +1356,12 @@ export const loadProjectLinks = async (projectId, containerId) => {
 	}
 };
 
-const setPageTitle = (data) => {
-	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
-};
-
-export const loadPage = async (pageId) => {
-	if (!DOMCache.main) {
-		console.warn("Main content container not found");
-		return;
-	}
+const loadPage = async (pageId) => {
+	if (!DOMCache.main) return;
 
 	try {
 		const data = await getData();
-		setPageTitle(data);
+		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 		DOMCache.main.innerHTML =
 			data?.pages?.[pageId]?.content ||
 			Templates.errorMessage(
@@ -1460,14 +1377,13 @@ export const loadPage = async (pageId) => {
 	}
 };
 
-export const loadProjectPage = async (projectId) => {
-	if (!DOMCache.main) {
-		console.warn("Main content container not found");
-		return;
-	}
+const loadProjectPage = async (projectId) => {
+	if (!DOMCache.main) return;
 
 	try {
-		const project = await getProject(projectId);
+		const data = await loadProjectsData();
+		const project = data?.projects?.find((p) => p.id === projectId);
+
 		if (!project) {
 			DOMCache.main.innerHTML = Templates.errorMessage(
 				i18n.t("general.projectNotFound"),
@@ -1476,7 +1392,7 @@ export const loadProjectPage = async (projectId) => {
 			return;
 		}
 
-		setPageTitle(projectsData);
+		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
 		DOMCache.main.innerHTML = [
 			Templates.projectHeader(project.title, project.description, project.tags),
@@ -1507,19 +1423,13 @@ export const loadProjectPage = async (projectId) => {
 	}
 };
 
-export const loadProjectsDropdown = async () => {
+const loadProjectsDropdown = async () => {
 	const dropdown = DOMCache.getDropdown();
-	if (!dropdown) {
-		console.warn("Projects dropdown not found");
-		return;
-	}
+	if (!dropdown) return;
 
 	try {
 		const data = await getData();
-		if (!data?.projects) {
-			console.warn("No projects data available");
-			return;
-		}
+		if (!data?.projects) return;
 
 		dropdown.innerHTML = data.projects
 			.sort((a, b) => a.order - b.order)
@@ -1527,23 +1437,28 @@ export const loadProjectsDropdown = async () => {
 			.join("");
 
 		for (const link of dropdown.querySelectorAll("a")) {
-			MobileMenu.addClickHandler(link);
+			link.addEventListener("click", () => {
+				closeMobileMenu();
+				requestAnimationFrame(() => link.blur());
+			});
 		}
 	} catch (error) {
 		console.error("Error loading projects dropdown:", error);
 	}
 };
 
-export const loadAdditionalContent = () => {
+const loadAdditionalContent = async () => {
 	try {
+		const promises = [];
 		["github-readme", "project-links"].forEach((id) => {
 			const el = document.getElementById(id);
 			if (!el) return;
 			const repo = el.dataset.repo;
 			const project = el.dataset.project;
-			if (repo) loadGitHubReadme(repo, id);
-			if (project) loadProjectLinks(project, id);
+			if (repo) promises.push(loadGitHubReadme(repo, id));
+			if (project) promises.push(loadProjectLinks(project, id));
 		});
+		await Promise.all(promises);
 	} catch (error) {
 		console.error("Error loading additional content:", error);
 	}
@@ -1553,8 +1468,38 @@ export const loadAdditionalContent = () => {
 // ROUTING & PAGE MANAGEMENT
 // ===========================
 
+/**
+ * Wait for all zero-md elements to finish rendering
+ * @param {Element} container - Container element to search for zero-md elements
+ * @param {number} timeout - Fallback timeout in ms
+ * @returns {Promise<void>}
+ */
+const waitForZeroMdRendering = async (
+	container = DOMCache.main,
+	timeout = 150,
+) => {
+	if (!container) return;
+
+	const zeroMdElements = container.querySelectorAll("zero-md");
+	if (zeroMdElements.length === 0) return;
+
+	await Promise.all(
+		Array.from(zeroMdElements).map(
+			(el) =>
+				new Promise((resolve) => {
+					// Use zero-md's built-in rendered event
+					el.addEventListener("zero-md-rendered", () => resolve(), {
+						once: true,
+					});
+					// Fallback timeout in case event doesn't fire
+					setTimeout(resolve, timeout);
+				}),
+		),
+	);
+};
+
 const handleRoute = async () => {
-	MobileMenu.close();
+	closeMobileMenu();
 
 	// Add fade out animation
 	if (DOMCache.main) {
@@ -1582,7 +1527,7 @@ const handleRoute = async () => {
 				: await loadBlogPost(blogParam);
 		} else if (projectId) {
 			await loadProjectPage(projectId);
-			loadAdditionalContent();
+			await loadAdditionalContent();
 		} else if (pageId) {
 			await loadPage(pageId);
 		} else {
@@ -1594,7 +1539,9 @@ const handleRoute = async () => {
 			return; // Exit early since handleRoute will call updateActiveNavLink
 		}
 
-		// Remove transition class and trigger fade in
+		// Wait for zero-md elements to render, then trigger fade-in
+		await waitForZeroMdRendering();
+
 		if (DOMCache.main) {
 			DOMCache.main.classList.remove("page-transition-out");
 			// Force reflow to restart animation
@@ -1611,7 +1558,7 @@ const handleRoute = async () => {
 				i18n.t("general.errorMessage"),
 			);
 		}
-		setPageTitle(projectsData);
+		document.title = projectsData?.site?.title || CONSTANTS.DEFAULT_TITLE;
 	}
 };
 
@@ -1685,7 +1632,7 @@ const handleSpaLinkClick = (e) => {
 	if (!link) return;
 
 	e.preventDefault();
-	MobileMenu.close();
+	closeMobileMenu();
 	window.history.pushState({}, "", link.getAttribute("href"));
 	handleRoute();
 };
@@ -1701,7 +1648,7 @@ const addMobileMenuOutsideClickHandler = () => {
 			DOMCache.navbar &&
 			!DOMCache.navbar.contains(event.target)
 		) {
-			MobileMenu.close();
+			closeMobileMenu();
 		}
 	});
 };

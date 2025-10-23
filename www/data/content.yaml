@@ -271,7 +271,6 @@ translations:
     
     # Blog
     blog:
-      readMore: "Read more →"
       backToBlog: "← Back to Blog"
       noPosts: "No blog posts yet. Check back soon!"
       previous: "Previous"
