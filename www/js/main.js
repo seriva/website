@@ -9,7 +9,6 @@ const CONSTANTS = {
 	DEFAULT_EMAIL: "contact@example.com",
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
 	MOBILE_BREAKPOINT: 767,
-	THEME_APPLY_DELAY: 200,
 	SEARCH_DEBOUNCE_MS: 300,
 	PAGE_TRANSITION_DELAY: 200, // Reduced from 300ms for snappier transitions
 	SEARCH_PAGE_CLOSE_DELAY: 200,
@@ -359,51 +358,26 @@ const getHljsThemeUrl = (themeName) =>
 
 // Initialize marked with highlight.js (will be called after scripts load)
 const initializeMarked = () => {
-	if (typeof marked !== "undefined" && typeof hljs !== "undefined") {
-		// Use marked.use() for newer API or setOptions for legacy
-		const config = {
-			breaks: true,
-			gfm: true,
-		};
-
-		// Try newer API first
-		if (marked.use) {
-			marked.use({
-				...config,
-				renderer: {
-					code(code, language) {
-						if (language && hljs.getLanguage(language)) {
-							try {
-								return `<pre><code class="hljs language-${language}">${hljs.highlight(code, { language }).value}</code></pre>`;
-							} catch (err) {
-								console.error("Highlight.js error:", err);
-							}
-						}
-						const highlighted = hljs.highlightAuto(code);
-						return `<pre><code class="hljs">${highlighted.value}</code></pre>`;
-					},
-				},
-			});
-		} else if (marked.setOptions) {
-			// Fallback to legacy API
-			marked.setOptions({
-				...config,
-				highlight: (code, lang) => {
-					if (lang && hljs.getLanguage(lang)) {
-						try {
-							return hljs.highlight(code, { language: lang }).value;
-						} catch (err) {
-							console.error("Highlight.js error:", err);
-						}
-					}
-					return hljs.highlightAuto(code).value;
-				},
-			});
-		}
-		console.log("Marked.js initialized with syntax highlighting");
-	} else {
-		console.warn("Marked or highlight.js not available");
+	if (typeof marked === "undefined" || typeof hljs === "undefined") {
+		console.error("Marked or highlight.js not loaded");
+		return;
 	}
+
+	marked.use({
+		breaks: true,
+		gfm: true,
+		renderer: {
+			code(code, language) {
+				const validLanguage = language && hljs.getLanguage(language);
+				const highlighted = validLanguage
+					? hljs.highlight(code, { language })
+					: hljs.highlightAuto(code);
+
+				const langClass = validLanguage ? ` language-${language}` : "";
+				return `<pre><code class="hljs${langClass}">${highlighted.value}</code></pre>`;
+			},
+		},
+	});
 };
 
 const Email = async (event) => {

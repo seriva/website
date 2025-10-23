@@ -21,7 +21,8 @@ Key features:
 - Font Awesome 6.6.0 for icons
 - Fuse.js 7.0.0 for fuzzy search
 - YAML configuration with js-yaml parser
-- Zero-md v3 for markdown rendering with Highlight.js syntax highlighting
+- Marked.js v11.1.1 for markdown parsing
+- Highlight.js v11.9.0 for syntax highlighting
 - jsDelivr CDN for external dependencies
 - Tagged template literals for secure HTML templating
 
@@ -143,7 +144,8 @@ blog:
 ```
 
 **Features:**
-- Markdown with syntax highlighting (Highlight.js)
+- Markdown parsing with Marked.js (supports GFM - GitHub Flavored Markdown)
+- Syntax highlighting via Highlight.js with theme support
 - Automatic date sorting (newest first)
 - Pagination support
 - Tags and excerpts
@@ -202,9 +204,11 @@ colors:
   background: "#0C0A09" 
   text: "#FAFAF9"
   # ... etc
+  code:
+    theme: "monokai"  # Highlight.js theme for syntax highlighting
 ```
 
-**Available code themes:** `okaidia`, `tomorrow`, `vs-dark`, `dark`
+**Available Highlight.js themes:** `monokai`, `github-dark`, `atom-one-dark`, `vs2015`, `dracula`, `nord`, and [many more](https://highlightjs.org/demo)
 
 ### Internationalization (i18n)
 
