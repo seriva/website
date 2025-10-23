@@ -113,8 +113,17 @@ const Templates = {
 		rel = "",
 		"aria-label": ariaLabel = "",
 		icon,
-	}) =>
-		html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${onclick && `onclick="${onclick}"`} ${target && `target="${target}"`} ${rel && `rel="${rel}"`} ${ariaLabel && `aria-label="${ariaLabel}"`}><i class="${icon}"></i></a></li>`,
+	}) => {
+		const attrs = [
+			onclick && `onclick="${onclick}"`,
+			target && `target="${target}"`,
+			rel && `rel="${rel}"`,
+			ariaLabel && `aria-label="${ariaLabel}"`,
+		]
+			.filter(Boolean)
+			.join(" ");
+		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${attrs}><i class="${icon}"></i></a></li>`;
+	},
 
 	projectDropdownItem: (projectId, projectTitle) =>
 		html`<li><a class="dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
@@ -476,8 +485,8 @@ const Search = {
 	initPromise: null,
 
 	async init(includeReadmes = false) {
-		if (this.isInitialized) return;
 		if (this.initPromise) return this.initPromise;
+		if (this.isInitialized) return;
 
 		this.initPromise = (async () => {
 			try {
@@ -837,7 +846,10 @@ const injectNavbar = async () => {
 	});
 
 	// Add mobile menu click handlers and blur on click
-	for (const link of DOMCache.navbar.querySelectorAll("a")) {
+	// Note: SPA routing is handled by global event delegation in setupSpaRouting()
+	for (const link of DOMCache.navbar.querySelectorAll(
+		"a:not([data-spa-route])",
+	)) {
 		link.addEventListener("click", () => {
 			if (
 				!link.classList.contains("dropdown-toggle") &&
@@ -957,8 +969,8 @@ const initializeSearchPage = (searchConfig) => {
 	searchPageBack.addEventListener("click", closeSearchPage);
 
 	// Handle search input with inline debouncing
-	let searchTimeout;
-	searchPageInput.addEventListener("input", (e) => {
+	let searchTimeout = null;
+	const handleSearchInput = (e) => {
 		const query = e.target.value.trim();
 
 		if (query.length < minChars) {
@@ -966,11 +978,13 @@ const initializeSearchPage = (searchConfig) => {
 			return;
 		}
 
-		clearTimeout(searchTimeout);
+		if (searchTimeout) clearTimeout(searchTimeout);
 		searchTimeout = setTimeout(() => {
 			handleSearchQuery(query, searchPageResults, closeSearchPage);
 		}, CONSTANTS.SEARCH_DEBOUNCE_MS);
-	});
+	};
+
+	searchPageInput.addEventListener("input", handleSearchInput);
 
 	// Handle clear button
 	if (searchPageClear) {
@@ -1085,7 +1099,15 @@ const parseBlogPost = (markdown) => {
 			const value = valueParts.join(":").trim();
 			// Handle arrays in frontmatter
 			if (value.startsWith("[") && value.endsWith("]")) {
-				metadata[key.trim()] = JSON.parse(value.replace(/'/g, '"'));
+				try {
+					metadata[key.trim()] = JSON.parse(value.replace(/'/g, '"'));
+				} catch (e) {
+					console.warn(
+						`Failed to parse array in frontmatter for key: ${key}`,
+						e,
+					);
+					metadata[key.trim()] = value;
+				}
 			} else {
 				metadata[key.trim()] = value.replace(/^["']|["']$/g, "");
 			}
@@ -1145,8 +1167,8 @@ const loadBlogPosts = async () => {
 
 		// Extract successful results
 		const posts = results
-			.map((result) => (result.status === "fulfilled" ? result.value : null))
-			.filter((post) => post !== null);
+			.filter((result) => result.status === "fulfilled")
+			.map((result) => result.value);
 
 		// Sort by date (newest first)
 		return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1432,8 +1454,6 @@ const handleRoute = async () => {
 
 		if (DOMCache.main) {
 			DOMCache.main.classList.remove("page-transition-out");
-			// Force reflow to restart animation
-			void DOMCache.main.offsetWidth;
 		}
 
 		// Scroll to top of page instantly (no animation)
