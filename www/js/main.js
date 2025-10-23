@@ -231,13 +231,13 @@ const Templates = {
         </ul></nav>`;
 	},
 
-	blogPost: (post, content, themeUrl, colors) => html`
+	blogPost: (post, content) => html`
         <article class="blog-post-full">
             <h1 class="project-title">${post.title}</h1>
             <p class="project-description">${post.date}</p>
             ${post.tags?.length ? safe(`<div class="project-tags">${Templates.tagList(post.tags).content}</div>`) : ""}
             <div class="blog-post-content">
-                ${safe(Templates.zeroMd(content, themeUrl, colors))}
+                ${safe(Templates.markdown(content).content)}
             </div>
             <footer class="blog-post-footer">
                 <a href="/?blog" class="blog-back-link" data-spa-route="page">${i18n.t("blog.backToBlog")}</a>
@@ -253,84 +253,18 @@ const Templates = {
             <p>${message}</p>
         </div>`,
 
-	zeroMd: (content, themeUrl, colors) => html`
-        <zero-md>
-            <script type="text/markdown">${content}</script>
-            <template data-append>
-                <link rel="stylesheet" href="${themeUrl}">
-                <style>
-                    /* Essential shadow DOM styles - matches main.css .markdown-body */
-                    :host {
-                        display: block;
-                        width: 100%;
-                        background-color: transparent;
-                    }
-                    
-                    /* Base markdown-body styling */
-                    .markdown-body {
-                        font-family: "Raleway", sans-serif;
-                        font-size: 1em;
-                        line-height: 1.6;
-                        color: ${colors.textLight};
-                        text-align: left;
-                        background-color: transparent;
-                    }
-                    
-                    /* Heading styles - remove default borders and set colors */
-                    .markdown-body h1,
-                    .markdown-body h2,
-                    .markdown-body h3,
-                    .markdown-body h4,
-                    .markdown-body h5,
-                    .markdown-body h6 {
-                        color: ${colors.text};
-                        margin: 1em 0 0.5em;
-                        font-weight: bold;
-                        line-height: 1.25;
-                        border-bottom: none !important;
-                        text-decoration: none;
-                        background-color: transparent;
-                    }
-                    
-                    .markdown-body h1 { font-size: 1.8em; margin-top: 0; }
-                    .markdown-body h2 { font-size: 1.4em; }
-                    .markdown-body h3 { font-size: 1.2em; }
-                    .markdown-body h4 { font-size: 1.1em; }
-                    
-                    /* Paragraph and list text */
-                    .markdown-body p,
-                    .markdown-body li {
-                        margin: 0.5em 0;
-                        line-height: 1.6;
-                        font-size: 1.1em;
-                        color: ${colors.textLight};
-                    }
-                    
-                    .markdown-body ul,
-                    .markdown-body ol {
-                        margin: 0.5em 0;
-                        padding-left: 2em;
-                    }
-                    
-                    .markdown-body li {
-                        margin: 0.25em 0;
-                    }
-                    
-                    /* Links */
-                    .markdown-body a {
-                        color: ${colors.primary};
-                        text-decoration: none;
-                        display: inline-block;
-                        transition: transform 0.2s ease;
-                    }
-                    
-                    .markdown-body a:hover {
-                        text-decoration: none;
-                        transform: translateY(-2px);
-                    }
-                </style>
-            </template>
-        </zero-md>`,
+	markdown: (content) => {
+		if (typeof marked === "undefined") {
+			return html`<div class="markdown-body"><p>Markdown renderer not available</p></div>`;
+		}
+		try {
+			const htmlContent = marked.parse(content);
+			return safe(`<div class="markdown-body">${htmlContent}</div>`);
+		} catch (error) {
+			console.error("Error rendering markdown:", error);
+			return html`<div class="markdown-body"><p>Error rendering markdown</p></div>`;
+		}
+	},
 
 	githubReadmeError: () => html`<p>${i18n.t("project.readmeError")}</p>`,
 
@@ -423,6 +357,55 @@ const Templates = {
 const getHljsThemeUrl = (themeName) =>
 	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
 
+// Initialize marked with highlight.js (will be called after scripts load)
+const initializeMarked = () => {
+	if (typeof marked !== "undefined" && typeof hljs !== "undefined") {
+		// Use marked.use() for newer API or setOptions for legacy
+		const config = {
+			breaks: true,
+			gfm: true,
+		};
+
+		// Try newer API first
+		if (marked.use) {
+			marked.use({
+				...config,
+				renderer: {
+					code(code, language) {
+						if (language && hljs.getLanguage(language)) {
+							try {
+								return `<pre><code class="hljs language-${language}">${hljs.highlight(code, { language }).value}</code></pre>`;
+							} catch (err) {
+								console.error("Highlight.js error:", err);
+							}
+						}
+						const highlighted = hljs.highlightAuto(code);
+						return `<pre><code class="hljs">${highlighted.value}</code></pre>`;
+					},
+				},
+			});
+		} else if (marked.setOptions) {
+			// Fallback to legacy API
+			marked.setOptions({
+				...config,
+				highlight: (code, lang) => {
+					if (lang && hljs.getLanguage(lang)) {
+						try {
+							return hljs.highlight(code, { language: lang }).value;
+						} catch (err) {
+							console.error("Highlight.js error:", err);
+						}
+					}
+					return hljs.highlightAuto(code).value;
+				},
+			});
+		}
+		console.log("Marked.js initialized with syntax highlighting");
+	} else {
+		console.warn("Marked or highlight.js not available");
+	}
+};
+
 const Email = async (event) => {
 	try {
 		event?.preventDefault?.();
@@ -440,40 +423,19 @@ const Email = async (event) => {
 
 window.Email = Email;
 
-const applyThemeToZeroMd = (
+const applyHljsTheme = (
 	themeName = projectsData?.site?.colors?.code?.theme ||
 		CONSTANTS.DEFAULT_THEME,
 ) => {
 	try {
 		if (!themeName) return;
 		const themeUrl = getHljsThemeUrl(themeName);
-		const zeroMdElements = document.querySelectorAll("zero-md");
-
-		zeroMdElements.forEach((el) => {
-			const template = el.querySelector("template[data-append]");
-			if (!template) return;
-
-			const existingLinks = template.content.querySelectorAll(
-				'link[href*="highlight.js"], link[href*="hljs"]',
-			);
-
-			if (existingLinks.length > 0) {
-				existingLinks.forEach((link) => {
-					link.href = themeUrl;
-				});
-			} else {
-				const link = document.createElement("link");
-				link.rel = "stylesheet";
-				link.href = themeUrl;
-				template.content.appendChild(link);
-			}
-
-			if (typeof el.render === "function") {
-				el.render();
-			}
-		});
+		const themeLink = document.getElementById("hljs-theme");
+		if (themeLink) {
+			themeLink.href = themeUrl;
+		}
 	} catch (error) {
-		console.error("Error applying theme to zero-md elements:", error);
+		console.error("Error applying highlight.js theme:", error);
 	}
 };
 
@@ -706,12 +668,9 @@ const loadGitHubReadme = async (repoName, containerId) => {
 
 	try {
 		const content = await fetchGitHubReadme(repoName);
-		const data = await getData();
-		const themeName = getTheme(data);
-		const colors = data?.site?.colors || {};
 
 		container.innerHTML = content
-			? Templates.zeroMd(content, getHljsThemeUrl(themeName), colors)
+			? Templates.markdown(content).content
 			: Templates.githubReadmeError();
 	} catch (error) {
 		console.error(`Error loading GitHub README for ${repoName}:`, error);
@@ -1069,9 +1028,6 @@ const initializeSearchPage = (searchConfig) => {
 
 const getData = async () => projectsData || (await loadProjectsData());
 
-const getTheme = (data) =>
-	data?.site?.colors?.code?.theme || CONSTANTS.DEFAULT_THEME;
-
 const loadProjectsData = async () => {
 	if (projectsData) return projectsData;
 	if (dataLoadPromise) return dataLoadPromise;
@@ -1092,7 +1048,6 @@ const loadProjectsData = async () => {
 
 			if (projectsData?.site?.colors) {
 				applyColorScheme(projectsData.site.colors);
-				setTimeout(() => applyThemeToZeroMd(), CONSTANTS.THEME_APPLY_DELAY);
 			}
 
 			// Initialize i18n
@@ -1132,7 +1087,7 @@ const applyColorScheme = (colors) => {
 		if (value) root.style.setProperty(property, value);
 	});
 
-	if (colors.code?.theme) applyThemeToZeroMd(colors.code.theme);
+	if (colors.code?.theme) applyHljsTheme(colors.code.theme);
 };
 
 // ===========================
@@ -1317,15 +1272,7 @@ const loadBlogPost = async (slug) => {
 		}
 	}
 
-	const themeName = getTheme(data);
-	const colors = data?.site?.colors || {};
-
-	DOMCache.main.innerHTML = Templates.blogPost(
-		post,
-		content,
-		getHljsThemeUrl(themeName),
-		colors,
-	);
+	DOMCache.main.innerHTML = Templates.blogPost(post, content);
 	// SPA routing handled via event delegation
 };
 
@@ -1468,36 +1415,6 @@ const loadAdditionalContent = async () => {
 // ROUTING & PAGE MANAGEMENT
 // ===========================
 
-/**
- * Wait for all zero-md elements to finish rendering
- * @param {Element} container - Container element to search for zero-md elements
- * @param {number} timeout - Fallback timeout in ms
- * @returns {Promise<void>}
- */
-const waitForZeroMdRendering = async (
-	container = DOMCache.main,
-	timeout = 150,
-) => {
-	if (!container) return;
-
-	const zeroMdElements = container.querySelectorAll("zero-md");
-	if (zeroMdElements.length === 0) return;
-
-	await Promise.all(
-		Array.from(zeroMdElements).map(
-			(el) =>
-				new Promise((resolve) => {
-					// Use zero-md's built-in rendered event
-					el.addEventListener("zero-md-rendered", () => resolve(), {
-						once: true,
-					});
-					// Fallback timeout in case event doesn't fire
-					setTimeout(resolve, timeout);
-				}),
-		),
-	);
-};
-
 const handleRoute = async () => {
 	closeMobileMenu();
 
@@ -1539,9 +1456,6 @@ const handleRoute = async () => {
 			return; // Exit early since handleRoute will call updateActiveNavLink
 		}
 
-		// Wait for zero-md elements to render, then trigger fade-in
-		await waitForZeroMdRendering();
-
 		if (DOMCache.main) {
 			DOMCache.main.classList.remove("page-transition-out");
 			// Force reflow to restart animation
@@ -1572,6 +1486,9 @@ const handleRoute = async () => {
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		DOMCache.init();
+
+		// Initialize marked.js with highlight.js
+		initializeMarked();
 
 		const data = await loadProjectsData();
 		if (data?.site) updateMetaTags(data.site);
