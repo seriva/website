@@ -1548,6 +1548,9 @@ const handleRoute = async () => {
 			void DOMCache.main.offsetWidth;
 		}
 
+		// Scroll to top of page instantly (no animation)
+		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
 		updateActiveNavLink();
 	} catch (error) {
 		console.error("Error loading page:", error);
