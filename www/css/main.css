@@ -518,13 +518,14 @@ a.icon:hover {
 	color: var(--text-light);
 }
 
-.search-no-results > i {
+.search-no-results i {
 	font-size: 2em;
 	margin-bottom: var(--spacing-md);
 	opacity: 0.5;
+	display: block;
 }
 
-.search-no-results > p {
+.search-no-results p {
 	margin: 0;
 	font-size: 0.9em;
 }
@@ -870,7 +871,7 @@ a.icon:hover {
 }
 
 /* Child element styles (0,1,1) */
-.download-btn > i {
+.download-btn i {
 	font-size: 1.5em;
 	color: var(--text-color);
 	transition:
@@ -880,7 +881,7 @@ a.icon:hover {
 	align-items: center;
 }
 
-.download-btn > span {
+.download-btn span {
 	color: var(--text-color);
 	transition: color var(--transition-normal);
 	display: inline-flex;
@@ -914,13 +915,13 @@ a.icon:hover {
 }
 
 /* Pseudo-class with child elements (0,2,1) - highest specificity */
-.download-btn:hover > i {
+.download-btn:hover i {
 	transform: scale(1.1);
 	color: var(--accent);
 }
 
-.download-btn:hover > span,
-.download-btn:focus > span {
+.download-btn:hover span,
+.download-btn:focus span {
 	color: var(--accent);
 }
 
