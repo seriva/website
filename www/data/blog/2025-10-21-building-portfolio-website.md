@@ -51,7 +51,7 @@ const stack = {
     'Bootstrap 5',     // Because I'm not styling everything from scratch
     'Font Awesome',    // Icons are hard
     'js-yaml',         // YAML is nicer than JSON
-    'zero-md',         // Markdown rendering
+    'marked',          // Markdown rendering
     'Fuse.js'          // Search functionality
   ],
   dev_server: 'darkhttpd', // Or any static server
