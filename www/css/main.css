@@ -1211,10 +1211,19 @@ textarea:focus {
 	line-height: 1.4;
 }
 
-/* Highlight.js code styling */
-.markdown-body pre[class*="language-"] code,
-.markdown-body pre code[class*="hljs"] {
+/* Highlight.js code styling - let hljs theme control all styling */
+.markdown-body pre code.hljs {
 	font-family: inherit;
+	padding: 1em;
+	display: block;
+	border-radius: 3px;
+}
+
+.markdown-body pre:has(> code.hljs) {
+	padding: 0;
+	background-color: transparent;
+	border: none;
+	overflow: hidden;
 }
 
 .markdown-body a {

@@ -29,7 +29,7 @@ site:
     border: "#21262D"        # Soft gray border - gentle definition
     hover: "#1A2332"         # Cool dark hover state with hint of blue
     code:
-      theme: "monokai"
+      theme: "atom-one-dark"
   
   # Search configuration
   search:
