@@ -295,40 +295,6 @@ a.icon:hover {
 	transform: scale(1.05);
 }
 
-.about-content {
-	text-align: center;
-	max-width: 750px;
-	margin: 0 auto;
-	line-height: 1.6;
-	color: var(--text-light);
-}
-
-.about-content h1 {
-	color: var(--accent);
-	margin-bottom: 1.5rem;
-}
-
-.about-content p {
-	margin-bottom: 1.5rem;
-	font-size: 1.1em;
-	color: var(--text-light);
-}
-
-.about-content strong {
-	color: var(--accent);
-	font-weight: 600;
-}
-
-.about-content a {
-	display: inline-block;
-	text-decoration: none;
-	transition: transform var(--transition-fast);
-}
-
-.about-content a:hover {
-	text-decoration: none;
-	transform: translateY(-2px);
-}
 
 /* Navigation */
 
@@ -1397,9 +1363,6 @@ button.nav-link {
 		height: 12vh;
 	}
 
-	.about-content h1 {
-		font-size: 1.5em;
-	}
 }
 
 /* Desktop */
