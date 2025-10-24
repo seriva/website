@@ -1,7 +1,4 @@
-// ===========================
-// CONSTANTS
-// ===========================
-
+// Constants
 const CONSTANTS = {
 	HLJS_CDN_BASE: "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/",
 	DEFAULT_THEME: "github-dark", // Highlight.js theme
@@ -16,10 +13,7 @@ const CONSTANTS = {
 	SEARCH_MAX_RESULTS: 8,
 };
 
-// ===========================
-// UTILITY FUNCTIONS
-// ===========================
-
+// Utility Functions
 const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
@@ -37,10 +31,7 @@ const html = (strings, ...values) => {
 
 const safe = (content) => ({ __safe: true, content });
 
-// ===========================
-// INTERNATIONALIZATION (i18n)
-// ===========================
-
+// Internationalization (i18n)
 const i18n = {
 	currentLanguage: null,
 	translations: {},
@@ -67,10 +58,7 @@ const i18n = {
 	},
 };
 
-// ===========================
-// HTML TEMPLATES
-// ===========================
-
+// HTML Templates
 const Templates = {
 	navbar: (
 		blogLink,
@@ -80,19 +68,19 @@ const Templates = {
 		searchBar,
 		siteTitle,
 	) => html`
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand d-md-none" href="#">${siteTitle}</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a class="navbar-brand" href="#">${siteTitle}</a>
+            <button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggle-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+            <div class="navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav left">
                     ${safe(blogLink)}
                     ${safe(projectsDropdown)}
                     ${safe(pageLinks)}
                 </ul>
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav right">
                     ${safe(searchBar)}
                     ${safe(socialLinksHtml)}
                 </ul>
@@ -122,7 +110,7 @@ const Templates = {
 		]
 			.filter(Boolean)
 			.join(" ");
-		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${attrs}><i class="${icon}"></i></a></li>`;
+		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${safe(attrs)}><i class="${icon}"></i></a></li>`;
 	},
 
 	projectDropdownItem: (projectId, projectTitle) =>
@@ -130,7 +118,7 @@ const Templates = {
 
 	projectsDropdown: () => html`
 		<li class="nav-item navbar-menu dropdown">
-			<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false">
 				Projects
 			</a>
 			<ul class="dropdown-menu" id="projects-dropdown">
@@ -155,7 +143,7 @@ const Templates = {
             <p>On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls.</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
+            </div><br><center><button id="fullscreen" class="download-btn" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
         </div>`,
 
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
@@ -171,9 +159,9 @@ const Templates = {
 								projectsData?.site?.search?.enabled !== false;
 							const clickableClass = searchEnabled ? " clickable-tag" : "";
 							const onclickAttr = searchEnabled
-								? ` onclick="event.stopPropagation(); searchByTag('${tag}')"`
+								? ` onclick="event.stopPropagation(); searchByTag('${escapeHtml(tag)}')"`
 								: "";
-							return html`<span class="item-tag${clickableClass}"${onclickAttr}>${tag}</span>`;
+							return html`<span class="item-tag${clickableClass}"${safe(onclickAttr)}>${tag}</span>`;
 						})
 						.join(" ")
 				: "",
@@ -215,7 +203,7 @@ const Templates = {
 
 				const activeClass = i === currentPage ? " active" : "";
 				pageNumbers.push(
-					`<li class="page-item${activeClass}"><a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
+					html`<li class="page-item${activeClass}"><a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
 				);
 				lastAdded = i;
 			}
@@ -224,13 +212,13 @@ const Templates = {
 		const prevDisabled = currentPage === 1 ? " disabled" : "";
 		const nextDisabled = currentPage === totalPages ? " disabled" : "";
 
-		return `<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
+		return html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
             <li class="page-item${prevDisabled}">
                 <a class="page-link" href="/?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            ${pageNumbers.join("")}
+            ${safe(pageNumbers.join(""))}
             <li class="page-item${nextDisabled}">
                 <a class="page-link" href="/?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
@@ -294,9 +282,9 @@ const Templates = {
         </div>`,
 
 	footer: (authorName, currentYear) => html`
-        <footer class="footer mt-auto py-3">
-            <div class="container-fluid" style="max-width: 1000px;">
-                <p class="text-center mb-0" style="color: var(--text-light); font-size: 0.9em;">
+        <footer class="footer">
+            <div class="footer-container">
+                <p class="footer-text">
                     &copy; ${currentYear} ${authorName}. ${i18n.t("footer.rights")}.
                 </p>
             </div>
@@ -345,7 +333,7 @@ const Templates = {
                     <a href="${item.url}" data-spa-route="${item.type}">${safe(Search.highlight(item.title, query))}</a>
                 </h2>
                 <div class="blog-post-meta">
-                    ${allTags.length ? safe(`<span class="blog-post-tags">${allTags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")}</span>`) : ""}
+                    ${allTags.length ? safe(html`<span class="blog-post-tags">${safe(allTags.map((tag) => html`<span class="item-tag">${tag}</span>`).join(" "))}</span>`) : ""}
                 </div>
                 <p class="blog-post-excerpt">${safe(Search.highlight(item.description, query))}</p>
             </article>`;
@@ -358,10 +346,7 @@ const Templates = {
         </div>`,
 };
 
-// ===========================
-// APPLICATION CODE
-// ===========================
-
+// Application Code
 const getHljsThemeUrl = (themeName) =>
 	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
 
@@ -390,9 +375,9 @@ const initializeMarked = () => {
 };
 
 const Email = async (event) => {
+	event?.preventDefault?.();
+	event?.stopPropagation?.();
 	try {
-		event?.preventDefault?.();
-		event?.stopPropagation?.();
 		const data = projectsData || (await loadProjectsData());
 		const email = data?.site?.email;
 		window.location.href = email
@@ -461,23 +446,59 @@ window.fullscreen = fullscreen;
 
 const closeMobileMenu = () => {
 	const collapseElement = document.querySelector(".navbar-collapse");
-	const navbarToggle = document.querySelector(".navbar-toggler");
+	const navbarToggle = document.querySelector(".navbar-toggle");
 
 	if (collapseElement) {
-		const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
-		bsCollapse ? bsCollapse.hide() : collapseElement.classList.remove("show");
+		collapseElement.classList.remove("show");
 	}
 
 	if (navbarToggle) {
-		navbarToggle.classList.add("collapsed");
+		navbarToggle.classList.remove("active");
 		navbarToggle.setAttribute("aria-expanded", "false");
 	}
 };
 
-// ===========================
-// SEARCH FUNCTIONALITY
-// ===========================
+const initCustomDropdowns = () => {
+	document.querySelectorAll(".dropdown-toggle").forEach((toggle) => {
+		toggle.addEventListener("click", (e) => {
+			e.preventDefault();
+			const dropdown = toggle.closest(".dropdown");
+			const isOpen = dropdown.classList.contains("show");
 
+			document.querySelectorAll(".dropdown.show").forEach((d) => {
+				if (d !== dropdown) d.classList.remove("show");
+			});
+
+			dropdown.classList.toggle("show", !isOpen);
+			toggle.setAttribute("aria-expanded", !isOpen);
+		});
+	});
+
+	document.addEventListener("click", (e) => {
+		if (e.target.closest(".dropdown-item") || !e.target.closest(".dropdown")) {
+			document.querySelectorAll(".dropdown.show").forEach((d) => {
+				d.classList.remove("show");
+				const toggle = d.querySelector(".dropdown-toggle");
+				if (toggle) toggle.setAttribute("aria-expanded", "false");
+			});
+		}
+	});
+};
+const initMobileMenuToggle = () => {
+	const navbarToggle = document.getElementById("navbar-toggle");
+	const navbarCollapse = document.getElementById("navbarNav");
+
+	if (navbarToggle && navbarCollapse) {
+		navbarToggle.addEventListener("click", () => {
+			const isExpanded = navbarToggle.getAttribute("aria-expanded") === "true";
+			navbarToggle.classList.toggle("active", !isExpanded);
+			navbarToggle.setAttribute("aria-expanded", !isExpanded);
+			navbarCollapse.classList.toggle("show", !isExpanded);
+		});
+	}
+};
+
+// Search Functionality
 const Search = {
 	data: [],
 	fuse: null,
@@ -550,21 +571,19 @@ const Search = {
 				// Index all searchable content
 				this.data = [...projectsWithContent, ...blogPostsIndexed];
 
-				const fuseOptions = {
-					keys: [
-						{ name: "title", weight: 2 },
-						{ name: "description", weight: 1.5 },
-						{ name: "tags", weight: 1.2 },
-						{ name: "content", weight: 0.5 },
-					],
-					threshold: 0.4,
-					distance: 100,
-					minMatchCharLength: CONSTANTS.SEARCH_MIN_CHARS,
-					includeScore: true,
-					includeMatches: true,
-				};
+				// Initialize MiniSearch
+				this.miniSearch = new MiniSearch({
+					fields: ["title", "description", "tags", "content"],
+					storeFields: ["id", "title", "description", "tags", "type", "url"],
+					searchOptions: {
+						boost: { title: 2, description: 1.5, tags: 1.2, content: 0.5 },
+						fuzzy: 0.2,
+						prefix: true,
+					},
+				});
 
-				this.fuse = new Fuse(this.data, fuseOptions);
+				// Add all documents to the index
+				this.miniSearch.addAll(this.data);
 				this.isInitialized = true;
 			} catch (error) {
 				console.error("Error initializing search:", error);
@@ -576,18 +595,24 @@ const Search = {
 	},
 
 	search(query) {
-		if (!query || query.length < CONSTANTS.SEARCH_MIN_CHARS || !this.fuse)
+		if (!query || query.length < CONSTANTS.SEARCH_MIN_CHARS || !this.miniSearch)
 			return [];
 
-		const results = this.fuse.search(query, {
-			limit: CONSTANTS.SEARCH_MAX_RESULTS,
+		const results = this.miniSearch.search(query, {
+			boost: { title: 2, description: 1.5, tags: 1.2, content: 0.5 },
+			fuzzy: 0.2,
+			prefix: true,
 		});
-		return results.map((result) => result.item);
+
+		// Return top results, MiniSearch returns documents directly
+		return results.slice(0, CONSTANTS.SEARCH_MAX_RESULTS);
 	},
 
 	highlight(text, query) {
 		if (!query) return text;
-		const regex = new RegExp(`(${query})`, "gi");
+		// Escape special regex characters to prevent injection
+		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const regex = new RegExp(`(${escapedQuery})`, "gi");
 		return text.replace(regex, "<mark>$1</mark>");
 	},
 };
@@ -608,17 +633,20 @@ const searchByTag = (tag) => {
 
 window.searchByTag = searchByTag;
 
-// ===========================
-// GITHUB API INTEGRATION
-// ===========================
-
+// GitHub API Integration
 const fetchGitHubReadme = async (repoName) => {
 	if (!repoName) return null;
 	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
 
 	try {
 		const data = await getData();
-		const username = data?.site?.github_username || "seriva";
+		const username = data?.site?.github_username;
+		if (!username) {
+			console.warn("No GitHub username configured in content.yaml");
+			readmeCache.set(repoName, null);
+			return null;
+		}
+
 		const branches = ["master", "main"];
 
 		for (const branch of branches) {
@@ -639,6 +667,7 @@ const fetchGitHubReadme = async (repoName) => {
 		return null;
 	} catch (error) {
 		console.error(`Error fetching README for ${repoName}:`, error);
+		readmeCache.set(repoName, null);
 		return null;
 	}
 };
@@ -661,19 +690,12 @@ const loadGitHubReadme = async (repoName, containerId) => {
 	}
 };
 
-// ===========================
-// STATE MANAGEMENT
-// ===========================
-
-// Global state variables for application data
+// State Management
 let projectsData = null;
 let dataLoadPromise = null;
 const readmeCache = new Map();
 
-// ===========================
-// DOM MANAGEMENT
-// ===========================
-
+// DOM Management
 const DOMCache = {
 	navbar: null,
 	main: null,
@@ -740,42 +762,28 @@ const DOMCache = {
 	},
 };
 
-// ===========================
-// NAVIGATION & UI FUNCTIONS
-// ===========================
-
+// Navigation & UI Functions
 const createNavbar = (
 	pages = [],
 	socialLinks = [],
 	searchConfig = {},
 	siteTitle = "portfolio.example.com",
 ) => {
-	// Separate blog from other pages
 	const blogPage = pages.find((page) => page.id === "blog");
 	const otherPages = pages.filter((page) => page.id !== "blog");
-
-	// Create blog link if it exists
 	const blogLink = blogPage
 		? Templates.pageLink(blogPage.id, blogPage.title)
 		: "";
-
-	// Create projects dropdown (always present)
 	const projectsDropdown = Templates.projectsDropdown();
-
-	// Create page links (sorted by order)
 	const pageLinks = otherPages
 		.filter((page) => page.showInNav)
 		.sort((a, b) => a.order - b.order)
 		.map((page) => Templates.pageLink(page.id, page.title))
 		.join("");
-
 	const socialLinksHtml = socialLinks
 		.map((link) => Templates.socialLink(link))
 		.join("");
-
-	// Create search bar if enabled
 	const searchBar = searchConfig?.enabled ? Templates.searchBar() : "";
-
 	return Templates.navbar(
 		blogLink,
 		projectsDropdown,
@@ -840,36 +848,10 @@ const injectNavbar = async () => {
 	// Clear cached navbar elements after rebuild
 	DOMCache.clearNavbarCache();
 
-	// Initialize Bootstrap dropdowns
-	document.querySelectorAll(".dropdown-toggle").forEach((el) => {
-		new bootstrap.Dropdown(el);
-	});
+	// Initialize custom dropdowns and mobile menu
+	initCustomDropdowns();
+	initMobileMenuToggle();
 
-	// Add mobile menu click handlers and blur on click
-	// Note: SPA routing is handled by global event delegation in setupSpaRouting()
-	for (const link of DOMCache.navbar.querySelectorAll(
-		"a:not([data-spa-route])",
-	)) {
-		link.addEventListener("click", () => {
-			if (
-				!link.classList.contains("dropdown-toggle") &&
-				!link.hasAttribute("data-keep-menu")
-			) {
-				closeMobileMenu();
-			}
-			requestAnimationFrame(() => link.blur());
-		});
-	}
-
-	// Handle mobile menu button blur
-	const toggleBtn = DOMCache.navbar.querySelector(".navbar-toggler");
-	if (toggleBtn) {
-		toggleBtn.addEventListener("click", () =>
-			requestAnimationFrame(() => toggleBtn.blur()),
-		);
-	}
-
-	// Initialize search if enabled
 	if (data?.site?.search?.enabled) {
 		initializeSearch(data.site.search);
 		initializeSearchPage(data.site.search);
@@ -885,12 +867,9 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 			.join("");
 		resultsContainer.classList.add("show");
 
-		// Make entire search result cards clickable
 		resultsContainer.querySelectorAll(".search-result-item").forEach((card) => {
 			card.addEventListener("click", (e) => {
-				// Don't trigger if clicking on a link or tag
 				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
-
 				const link = card.querySelector(".blog-post-title a");
 				if (link) {
 					e.preventDefault();
@@ -901,7 +880,6 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 			});
 		});
 
-		// Add SPA routing to result links (for direct link clicks)
 		resultsContainer.querySelectorAll("[data-spa-route]").forEach((link) => {
 			link.addEventListener("click", (e) => {
 				e.preventDefault();
@@ -918,11 +896,8 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 
 const initializeSearch = () => {
 	const searchToggle = DOMCache.getSearchToggle();
-
-	// Initialize search data lazily (without fetching READMEs initially)
 	Search.init(false);
 
-	// Function to open search page
 	const openSearchPage = () => {
 		const searchPage = DOMCache.getSearchPage();
 		const searchInput = DOMCache.getSearchInput();
@@ -955,9 +930,13 @@ const initializeSearchPage = (searchConfig) => {
 		return;
 
 	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
+	let searchTimeout = null;
 
-	// Close search page with animation
 	const closeSearchPage = () => {
+		if (searchTimeout) {
+			clearTimeout(searchTimeout);
+			searchTimeout = null;
+		}
 		searchPage.classList.add("closing");
 		setTimeout(() => {
 			searchPage.classList.remove("show", "closing");
@@ -968,8 +947,6 @@ const initializeSearchPage = (searchConfig) => {
 
 	searchPageBack.addEventListener("click", closeSearchPage);
 
-	// Handle search input with inline debouncing
-	let searchTimeout = null;
 	const handleSearchInput = (e) => {
 		const query = e.target.value.trim();
 
@@ -1010,10 +987,7 @@ const initializeSearchPage = (searchConfig) => {
 	});
 };
 
-// ===========================
-// DATA LOADING & MANAGEMENT
-// ===========================
-
+// Data Loading & Management
 const getData = async () => projectsData || (await loadProjectsData());
 
 const loadProjectsData = async () => {
@@ -1032,7 +1006,7 @@ const loadProjectsData = async () => {
 			}
 
 			const yamlText = await response.text();
-			projectsData = jsyaml.load(yamlText);
+			projectsData = YAML.parse(yamlText);
 
 			if (projectsData?.site?.colors) {
 				applyColorScheme(projectsData.site.colors);
@@ -1078,10 +1052,7 @@ const applyColorScheme = (colors) => {
 	if (colors.code?.theme) applyHljsTheme(colors.code.theme);
 };
 
-// ===========================
-// BLOG MANAGEMENT FUNCTIONS
-// ===========================
-
+// Blog Management
 const parseBlogPost = (markdown) => {
 	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 	const match = markdown.match(frontmatterRegex);
@@ -1272,10 +1243,7 @@ const loadBlogPost = async (slug) => {
 	// SPA routing handled via event delegation
 };
 
-// ===========================
-// PROJECT MANAGEMENT FUNCTIONS
-// ===========================
-
+// Project Management
 const loadProjectLinks = async (projectId, containerId) => {
 	if (!projectId || !containerId) return;
 
@@ -1379,12 +1347,7 @@ const loadProjectsDropdown = async () => {
 			.map((p) => Templates.projectDropdownItem(p.id, p.title))
 			.join("");
 
-		for (const link of dropdown.querySelectorAll("a")) {
-			link.addEventListener("click", () => {
-				closeMobileMenu();
-				requestAnimationFrame(() => link.blur());
-			});
-		}
+		// Mobile menu closing is now handled via global event delegation
 	} catch (error) {
 		console.error("Error loading projects dropdown:", error);
 	}
@@ -1407,10 +1370,7 @@ const loadAdditionalContent = async () => {
 	}
 };
 
-// ===========================
-// ROUTING & PAGE MANAGEMENT
-// ===========================
-
+// Routing & Page Management
 const handleRoute = async () => {
 	closeMobileMenu();
 
@@ -1459,7 +1419,10 @@ const handleRoute = async () => {
 		// Scroll to top of page instantly (no animation)
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 
-		updateActiveNavLink();
+		// Use requestAnimationFrame to ensure DOM is fully updated before highlighting
+		requestAnimationFrame(() => {
+			updateActiveNavLink();
+		});
 	} catch (error) {
 		console.error("Error loading page:", error);
 		if (DOMCache.main) {
@@ -1473,10 +1436,7 @@ const handleRoute = async () => {
 	}
 };
 
-// ===========================
-// APPLICATION INITIALIZATION
-// ===========================
-
+// Application Initialization
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		DOMCache.init();
@@ -1514,31 +1474,57 @@ const updateActiveNavLink = () => {
 	const projectId = params.get("project");
 	const blogParam = params.get("blog");
 
-	// Cache navbar links to avoid multiple DOM queries
-	if (!DOMCache.navbarLinks) {
-		DOMCache.navbarLinks = document.querySelectorAll(".navbar-nav a");
+	// Cache navbar element if not already cached
+	if (!DOMCache.navbar) {
+		DOMCache.navbar = document.getElementById("navbar-container");
 	}
 
-	// Remove all active states
-	DOMCache.navbarLinks.forEach((l) => {
-		l.classList.remove("active");
-	});
+	if (!DOMCache.navbar) return;
 
-	// Build selector based on current route and query once
-	let activeSelector = null;
+	// Get all navbar links and dropdown items (scoped to navbar for performance)
+	const navbarLinks = DOMCache.navbar.querySelectorAll(".navbar-nav .nav-link");
+	const dropdownItems = DOMCache.navbar.querySelectorAll(".dropdown-item");
+
+	// Find which link should be active first
+	let targetLink = null;
+	let targetDropdownItem = null;
+	let targetDropdownToggle = null;
+
 	if (blogParam !== null) {
-		activeSelector = 'a[href="/?blog"]';
-	} else if (pageId) {
-		activeSelector = `a[href="/?page=${pageId}"]`;
+		// Blog page or specific blog post
+		targetLink = DOMCache.navbar.querySelector('.nav-link[href="/?blog"]');
 	} else if (projectId) {
-		activeSelector = `a[href="/?project=${projectId}"]`;
+		// Project page - highlight both the Projects dropdown toggle AND the specific project item
+		const projectDropdown = DOMCache.navbar.querySelector(".dropdown");
+		if (projectDropdown) {
+			targetDropdownToggle = projectDropdown.querySelector(".dropdown-toggle");
+		}
+		targetDropdownItem = DOMCache.navbar.querySelector(
+			`.dropdown-item[href="/?project=${projectId}"]`,
+		);
+	} else if (pageId) {
+		// Regular page
+		targetLink = DOMCache.navbar.querySelector(
+			`.nav-link[href="/?page=${pageId}"]`,
+		);
 	}
 
-	// Set active state if we have a matching route
-	if (activeSelector) {
-		const activeLink = document.querySelector(activeSelector);
-		if (activeLink) activeLink.classList.add("active");
-	}
+	// Add active class to target(s) first to maintain visual continuity
+	if (targetLink) targetLink.classList.add("active");
+	if (targetDropdownToggle) targetDropdownToggle.classList.add("active");
+	if (targetDropdownItem) targetDropdownItem.classList.add("active");
+
+	// Then remove active from all others
+	navbarLinks.forEach((l) => {
+		if (l !== targetLink && l !== targetDropdownToggle) {
+			l.classList.remove("active");
+		}
+	});
+	dropdownItems.forEach((item) => {
+		if (item !== targetDropdownItem) {
+			item.classList.remove("active");
+		}
+	});
 };
 
 const handleSpaLinkClick = (e) => {
@@ -1546,6 +1532,39 @@ const handleSpaLinkClick = (e) => {
 	if (!link) return;
 
 	e.preventDefault();
+
+	// Cache navbar if not already cached
+	if (!DOMCache.navbar) {
+		DOMCache.navbar = document.getElementById("navbar-container");
+	}
+
+	// Immediately apply active class to clicked link for visual continuity
+	const allNavLinks =
+		DOMCache.navbar?.querySelectorAll(".navbar-nav .nav-link") || [];
+	const allDropdownItems =
+		DOMCache.navbar?.querySelectorAll(".dropdown-item") || [];
+
+	// Remove active from all first
+	allNavLinks.forEach((l) => {
+		l.classList.remove("active");
+	});
+	allDropdownItems.forEach((item) => {
+		item.classList.remove("active");
+	});
+
+	// Add active to clicked link
+	if (link.classList.contains("nav-link")) {
+		link.classList.add("active");
+	} else if (link.classList.contains("dropdown-item")) {
+		link.classList.add("active");
+		// Also activate the dropdown toggle if clicking a dropdown item
+		const dropdown = link.closest(".dropdown");
+		if (dropdown) {
+			const toggle = dropdown.querySelector(".dropdown-toggle");
+			if (toggle) toggle.classList.add("active");
+		}
+	}
+
 	closeMobileMenu();
 	window.history.pushState({}, "", link.getAttribute("href"));
 	handleRoute();
@@ -1557,12 +1576,31 @@ const setupSpaRouting = () => {
 
 const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
+		// Handle mobile menu outside clicks
 		if (
 			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
 			DOMCache.navbar &&
 			!DOMCache.navbar.contains(event.target)
 		) {
 			closeMobileMenu();
+		}
+
+		// Handle navbar link clicks and blur (event delegation)
+		const link = event.target.closest(".navbar a:not([data-spa-route])");
+		if (link) {
+			if (
+				!link.classList.contains("dropdown-toggle") &&
+				!link.hasAttribute("data-keep-menu")
+			) {
+				closeMobileMenu();
+			}
+			requestAnimationFrame(() => link.blur());
+		}
+
+		// Handle navbar toggle button blur
+		const toggleBtn = event.target.closest(".navbar-toggle");
+		if (toggleBtn) {
+			requestAnimationFrame(() => toggleBtn.blur());
 		}
 	});
 };
