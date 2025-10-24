@@ -28,7 +28,7 @@ QUnit.module('Templates', function() {
     QUnit.test('pageLink template should handle blog pages', function(assert) {
         const result = Templates.pageLink('blog', 'Blog');
         
-        assert.ok(result.includes('href="/?blog"'), 'Should include blog href');
+        assert.ok(result.includes('href="?blog"'), 'Should include blog href');
         assert.ok(result.includes('Blog'), 'Should include page title');
         assert.ok(result.includes('data-spa-route="page"'), 'Should include page route attribute');
     });

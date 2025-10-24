@@ -94,7 +94,7 @@ const Templates = {
     `,
 
 	pageLink: (pageId, pageTitle) => {
-		const href = pageId === "blog" ? "/?blog" : `/?page=${pageId}`;
+		const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
 		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
 	},
 
@@ -174,7 +174,7 @@ const Templates = {
 	blogPostCard: (post, index) => html`
         <article class="blog-post-card" data-index="${index}">
             <h2 class="blog-post-title">
-                <a href="/?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
+                <a href="?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
             </h2>
             <div class="blog-post-meta">
                 <span class="blog-post-date"><i class="far fa-calendar"></i> ${post.date}</span>
@@ -207,7 +207,7 @@ const Templates = {
 
 				const activeClass = i === currentPage ? " active" : "";
 				pageNumbers.push(
-					html`<li class="page-item${activeClass}"><a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
+					html`<li class="page-item${activeClass}"><a class="page-link" href="?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
 				);
 				lastAdded = i;
 			}
@@ -218,13 +218,13 @@ const Templates = {
 
 		return html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
             <li class="page-item${prevDisabled}">
-                <a class="page-link" href="/?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
+                <a class="page-link" href="?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
             ${safe(pageNumbers.join(""))}
             <li class="page-item${nextDisabled}">
-                <a class="page-link" href="/?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
+                <a class="page-link" href="?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -240,7 +240,7 @@ const Templates = {
                 ${safe(Templates.markdown(content).content)}
             </div>
             <footer class="blog-post-footer">
-                <a href="/?blog" class="blog-back-link" data-spa-route="page">${i18n.t("blog.backToBlog")}</a>
+                <a href="?blog" class="blog-back-link" data-spa-route="page">${i18n.t("blog.backToBlog")}</a>
             </footer>
         </article>`,
 
@@ -1517,7 +1517,7 @@ const updateActiveNavLink = () => {
 
 	if (blogParam !== null) {
 		// Blog page or specific blog post
-		targetLink = DOMCache.navbar.querySelector('.nav-link[href="/?blog"]');
+		targetLink = DOMCache.navbar.querySelector('.nav-link[href="?blog"]');
 	} else if (projectId) {
 		// Project page - highlight both the Projects dropdown toggle AND the specific project item
 		const projectDropdown = DOMCache.navbar.querySelector(".dropdown");
