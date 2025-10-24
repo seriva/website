@@ -45,7 +45,6 @@
 	--hover-color: #2a3a4a;
 	--border-color: #3a4a5a;
 	--font-color: #ffffff;
-	--header-font-color: #ffffff;
 	--text-light: #cccccc;
 	--error-color: #ff6b6b;
 	--border-width: 2px;
@@ -62,13 +61,10 @@
 	--font-size-sm: 0.9em;
 	--font-size-lg: 1.1em;
 	--line-height-base: 1.6;
-	--line-height-compact: 1.25;
 	--transition-fast: 0.2s ease;
 	--transition-normal: 0.3s ease;
-	--transition-slow: 0.5s ease;
 	--z-navbar: 1030;
 	--z-dropdown: 1000;
-	--z-modal: 1050;
 }
 
 /* Reset & Base Styles */
@@ -298,13 +294,12 @@ a.icon:hover {
 
 /* Navigation */
 
-.navbar-icon {
+.navbar-menu .nav-link,
+.navbar-icon .nav-link {
 	font-size: 1.35rem;
-	display: inline-block;
 }
 
 .navbar-menu .nav-link {
-	font-size: 1.35rem;
 	font-weight: 700;
 }
 
@@ -1108,7 +1103,7 @@ textarea:focus {
 }
 
 .navbar-brand {
-	color: var(--header-font-color);
+	color: var(--font-color);
 	font-weight: bold;
 	text-decoration: none;
 	font-size: 1.25em;
@@ -1216,7 +1211,7 @@ textarea:focus {
 	display: flex;
 	align-items: center;
 	padding: 11px 20px;
-	color: var(--header-font-color);
+	color: var(--font-color);
 	text-decoration: none;
 	transition: all var(--transition-fast);
 	line-height: 1.2;
@@ -1252,7 +1247,7 @@ button.nav-link {
 
 .nav-link:focus:not(:focus-visible):not(.active) {
 	background-color: transparent;
-	color: var(--header-font-color);
+	color: var(--font-color);
 	outline: none;
 }
 
@@ -1304,7 +1299,7 @@ button.nav-link {
 .dropdown-item {
 	display: block;
 	padding: 10px 20px;
-	color: var(--header-font-color);
+	color: var(--font-color);
 	text-decoration: none;
 	font-size: 16px;
 	font-weight: bold;
