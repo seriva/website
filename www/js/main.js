@@ -155,7 +155,7 @@ const Templates = {
             <p>On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls.</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
+            </div><br><center><button id="fullscreen" class="download-btn" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
         </div>`,
 
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
