@@ -20,6 +20,10 @@ const escapeHtml = (str) => {
 	return div.innerHTML;
 };
 
+const setDocumentTitle = (data) => {
+	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
+};
+
 const html = (strings, ...values) => {
 	return strings.reduce((result, str, i) => {
 		const value = values[i];
