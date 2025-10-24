@@ -1004,7 +1004,7 @@ const loadProjectsData = async () => {
 			}
 
 			const yamlText = await response.text();
-			projectsData = jsyaml.load(yamlText);
+			projectsData = YAML.parse(yamlText);
 
 			if (projectsData?.site?.colors) {
 				applyColorScheme(projectsData.site.colors);
