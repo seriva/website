@@ -214,45 +214,7 @@ pages:
     title: "About"
     showInNav: true
     order: 1
-    # Multiline HTML content using YAML literal block syntax
-    content: |
-      <div style="text-align: center; color: var(--text-light);">
-        <img class="about-pic" 
-             src="https://avatars.githubusercontent.com/u/11056665?s=400&u=4bdf1d069962e53c5b3dd7b73e01e977854e8800&v=4" 
-             alt="Luuk van Venrooij profile picture" 
-             loading="eager">
-        
-        <div class="about-content">
-          <p>
-            Hey there! Welcome to my little corner of the web. I'm Luuk van Venrooij, 
-            and I live and breathe code—both at work and in my spare time.
-          </p>
-          
-          <p>
-            Over the years, I've had my hands in everything from building game engines 
-            and mobile apps (Android & iOS) to developing large-scale industrial asset 
-            management systems. I spent some great years as a full-time open-source 
-            developer working on the 
-            <a href="https://github.com/hitachienergy/epiphany" rel="noopener noreferrer">Epiphany Platform</a>—an 
-            industrialized automation platform for Kubernetes and its ecosystem. These days, 
-            I'm in a senior architecture role where I design and build cloud infrastructure 
-            across AWS, Azure, and GCP.
-          </p>
-          
-          <p>
-            When I'm not working, you'll find me tinkering with graphics and game development 
-            using OpenGL and WebGL. This site showcases some of those passion projects. 
-            I'm also a bit of a hardware enthusiast, so who knows—maybe I'll dive into 
-            electronics and IoT projects down the road!
-          </p>
-          
-          <p>
-            Got questions, ideas, or just want to chat? Feel free to 
-            <a href="#" onclick="javascript:Email()" aria-label="Contact Luuk via email">reach out</a>—I'd 
-            love to hear from you.
-          </p>
-        </div>
-      </div>
+    # Content is now loaded from /data/pages/about.md
 
 # Translations
 # To add a new language, copy the 'en' section and translate the values

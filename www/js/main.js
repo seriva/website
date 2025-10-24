@@ -1273,12 +1273,27 @@ const loadPage = async (pageId) => {
 	try {
 		const data = await getData();
 		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
-		DOMCache.main.innerHTML =
-			data?.pages?.[pageId]?.content ||
-			Templates.errorMessage(
-				i18n.t("general.notFound"),
-				i18n.t("general.notFoundMessage"),
-			);
+		
+		// First try to load from YAML content
+		let content = data?.pages?.[pageId]?.content;
+		
+		// If no content in YAML, try to load from markdown file
+		if (!content) {
+			try {
+				const response = await fetch(`data/pages/${pageId}.md`);
+				if (response.ok) {
+					const markdown = await response.text();
+					content = Templates.markdown(markdown).content;
+				}
+			} catch (error) {
+				console.error(`Error loading markdown page ${pageId}:`, error);
+			}
+		}
+		
+		DOMCache.main.innerHTML = content || Templates.errorMessage(
+			i18n.t("general.notFound"),
+			i18n.t("general.notFoundMessage"),
+		);
 	} catch (error) {
 		console.error(`Error loading page ${pageId}:`, error);
 		DOMCache.main.innerHTML = Templates.errorMessage(
