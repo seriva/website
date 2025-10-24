@@ -48,13 +48,14 @@ const stack = {
   build_process: 'none', // 🎉
   framework: 'none',     // 🎉🎉
   dependencies: [
-    'Bootstrap 5',     // Because I'm not styling everything from scratch
-    'Font Awesome',    // Icons are hard
-    'js-yaml',         // YAML is nicer than JSON
+    'Custom CSS',      // Lightweight and tailored
+    'Font Awesome subset', // Only the icons I use
+    'yamljs',          // YAML parser
     'marked',          // Markdown rendering
-    'Fuse.js'          // Search functionality
+    'MiniSearch'       // Fast fuzzy search
   ],
   dev_server: 'darkhttpd', // Or any static server
+  bundle_size: 'tiny',
   happiness_level: 'maximum'
 };
 ```
