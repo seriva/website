@@ -1425,8 +1425,10 @@ button.nav-link {
 	}
 
 	.about-pic {
-		width: 10vh;
-		height: 10vh;
+		width: 18vh;
+		height: 18vh;
+		margin-top: 20px;
+		margin-bottom: 15px;
 	}
 
 	.download-buttons {
