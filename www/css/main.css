@@ -1,23 +1,53 @@
-/* ===========================
-   CSS CUSTOM PROPERTIES
-   =========================== */
+/* Fonts - Raleway from jsDelivr (weights: 400, 600, 700, 900) */
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-400-normal.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-600-normal.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-700-normal.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-900-normal.woff2")
+		format("woff2");
+}
+
+/* CSS Custom Properties */
 
 :root {
-	/* Color Palette */
 	--accent: #429bee;
 	--background-color: #292f33;
 	--header-color: #1f2429;
 	--hover-color: #2a3a4a;
 	--border-color: #3a4a5a;
-
-	/* Text Colors */
 	--font-color: #ffffff;
 	--header-font-color: #ffffff;
-	--text-color: var(--font-color);
 	--text-light: #cccccc;
 	--error-color: #ff6b6b;
-
-	/* Layout & Spacing */
 	--border-width: 2px;
 	--border-radius: 4px;
 	--border-radius-large: 8px;
@@ -26,43 +56,37 @@
 	--spacing-md: 15px;
 	--spacing-lg: 24px;
 	--spacing-xl: 2rem;
-
-	/* Typography */
-	--font-family-primary: "Raleway", sans-serif;
-	--font-family-mono:
-		"Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
+	--font-family-primary: Raleway, sans-serif;
+	--font-family-mono: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
 	--font-size-base: 16px;
 	--font-size-sm: 0.9em;
 	--font-size-lg: 1.1em;
 	--line-height-base: 1.6;
 	--line-height-compact: 1.25;
-
-	/* Transitions & Animations */
 	--transition-fast: 0.2s ease;
 	--transition-normal: 0.3s ease;
 	--transition-slow: 0.5s ease;
-
-	/* Z-index Scale */
 	--z-navbar: 1030;
 	--z-dropdown: 1000;
 	--z-modal: 1050;
-
-	/* Breakpoints (for reference in media queries) */
-	--breakpoint-mobile: 767px;
-	--breakpoint-tablet: 768px;
-	--breakpoint-desktop: 1024px;
 }
 
-/* ===========================
-   RESET & BASE STYLES
-   =========================== */
+/* Reset & Base Styles */
 
-html,
-body {
+html {
 	height: 100%;
+	overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
 }
 
 body {
+	min-height: 100vh;
+	margin: 0;
 	padding-top: 56px;
 	display: flex;
 	text-align: center;
@@ -75,6 +99,8 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
+	overflow-x: hidden;
+	width: 100%;
 }
 
 main {
@@ -83,7 +109,6 @@ main {
 	flex: 1 0 auto;
 	max-width: 750px;
 	width: 100%;
-	box-sizing: border-box;
 	animation: fadeIn 0.2s ease-in-out;
 }
 
@@ -118,9 +143,7 @@ img {
 	max-width: 100%;
 }
 
-/* ===========================
-   TYPOGRAPHY & LINKS
-   =========================== */
+/* Typography & Links */
 
 a {
 	color: var(--accent);
@@ -131,9 +154,109 @@ a.icon:hover {
 	text-decoration: none;
 }
 
-/* ===========================
-   COMPONENTS
-   =========================== */
+/* Icons - Font Awesome Subset */
+/* Only includes the 11 icons used in this project (~15KB vs ~800KB) */
+
+@font-face {
+	font-family: "Font Awesome 6 Free";
+	font-style: normal;
+	font-weight: 400;
+	font-display: block;
+	src: url("https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/webfonts/fa-regular-400.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: "Font Awesome 6 Free";
+	font-style: normal;
+	font-weight: 900;
+	font-display: block;
+	src: url("https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/webfonts/fa-solid-900.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: "Font Awesome 6 Brands";
+	font-style: normal;
+	font-weight: 400;
+	font-display: block;
+	src: url("https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/webfonts/fa-brands-400.woff2")
+		format("woff2");
+}
+
+.fas,
+.far,
+.fab {
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font-style: normal;
+	font-variant: normal;
+	line-height: 1;
+	text-rendering: auto;
+}
+
+.fas,
+.far {
+	font-family: "Font Awesome 6 Free";
+}
+
+.fas {
+	font-weight: 900;
+}
+
+.far {
+	font-weight: 400;
+}
+
+.fab {
+	font-family: "Font Awesome 6 Brands";
+	font-weight: 400;
+}
+
+/* Solid Icons (fas) */
+.fa-expand::before {
+	content: "\f065";
+}
+.fa-times::before {
+	content: "\f00d";
+}
+.fa-search::before {
+	content: "\f002";
+}
+.fa-arrow-left::before {
+	content: "\f060";
+}
+.fa-envelope::before {
+	content: "\f0e0";
+}
+.fa-download::before {
+	content: "\f019";
+}
+.fa-cube::before {
+	content: "\f1b2";
+}
+.fa-external-link-alt::before {
+	content: "\f35d";
+}
+
+/* Regular Icons (far) */
+.fa-calendar::before {
+	content: "\f133";
+}
+
+/* Brand Icons (fab) */
+.fa-github::before {
+	content: "\f09b";
+}
+.fa-youtube::before {
+	content: "\f167";
+}
+.fa-linkedin::before {
+	content: "\f08c";
+}
+
+/* Components */
 
 /* Tags */
 .item-tag {
@@ -158,11 +281,7 @@ a.icon:hover {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* ===========================
-   PAGE-SPECIFIC STYLES
-   =========================== */
-
-/* About page */
+/* About Page */
 .about-pic {
 	width: 15vh;
 	height: 15vh;
@@ -209,299 +328,29 @@ a.icon:hover {
 	transform: translateY(-2px);
 }
 
-/* ===========================
-   NAVIGATION
-   =========================== */
+/* Navigation */
 
 .navbar-icon {
-	font-size: 140%;
+	font-size: 1.35rem;
 	display: inline-block;
 }
 
-.navbar-menu,
 .navbar-menu .nav-link {
-	font-size: 115%;
-	font-weight: bold;
+	font-size: 1.35rem;
+	font-weight: 700;
 }
 
-/* Navbar link hover/focus states */
-.navbar-menu .nav-link:hover,
-.navbar-menu .nav-link:focus {
-	background-color: rgba(255, 255, 255, 0.1);
-	color: var(--accent);
-}
-
-/* Mobile navbar brand */
-.navbar-brand {
-	color: var(--header-font-color);
-	font-weight: bold;
-}
-
-/* Mobile menu button styling */
-.navbar-toggler {
-	background-color: transparent;
-	border: none;
-	outline: none;
-	transition: transform var(--transition-fast);
-}
-
-.navbar-toggler:focus {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
-}
-
-.navbar-toggler:focus:not(:focus-visible) {
-	outline: none;
-}
-
-.navbar-toggler-icon {
-	transition: all var(--transition-normal);
-}
-
-.navbar-toggler:hover .navbar-toggler-icon,
-.navbar-toggler:focus .navbar-toggler-icon {
-	filter: brightness(1.2);
-}
-
-.navbar-toggler:focus:not(:focus-visible) .navbar-toggler-icon {
-	filter: none;
-}
-
-/* Hamburger menu press effect */
-.navbar-toggler:active {
-	transform: scale(0.9);
-}
-
-.navbar-toggler:active .navbar-toggler-icon {
-	filter: brightness(0.8);
-}
-
-/* Dropdown menu styling */
-.navbar-nav .dropdown-menu {
-	background-color: var(--header-color);
-	border: var(--border-width) solid var(--accent);
-	padding: 0;
-	box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
-}
-
-.navbar-nav .dropdown-menu .dropdown-item {
-	color: var(--header-font-color);
-	padding: 10px 20px;
-	font-size: 16px;
-	font-weight: bold;
-	background-color: var(--header-color);
-	transition:
-		background-color var(--transition-fast),
-		color var(--transition-fast);
-}
-
-/* All navbar link states - consolidated */
-.navbar-nav .nav-link:hover,
-.navbar-nav .nav-link:focus,
-.navbar-nav .dropdown .nav-link.show,
-.navbar-nav .dropdown-menu .dropdown-item:hover,
-.navbar-nav .dropdown-menu .dropdown-item:focus,
-.navbar-nav .dropdown-menu .dropdown-item:active,
-.navbar-nav .dropdown-menu .dropdown-item.active {
-	background-color: rgba(255, 255, 255, 0.1);
-	color: var(--accent);
-}
-
-.navbar-nav .dropdown-menu .dropdown-divider {
-	background-color: var(--hover-color);
-	height: 1px;
-	margin: 5px 0;
-}
-
-.navbar-nav .nav-link:focus {
-	outline: 2px solid var(--accent);
-	outline-offset: -2px;
-}
-
-.navbar-nav .nav-link:focus:not(:focus-visible) {
-	background-color: transparent;
-	color: var(--header-font-color);
-	outline: none;
-}
-
-/* Navbar icon specific */
-.navbar-nav .navbar-icon .nav-link:hover i,
-.navbar-nav .navbar-icon .nav-link:focus i {
-	color: var(--accent);
-}
-
-/* ===========================
-   RESPONSIVE DESIGN
-   =========================== */
-
-/* Mobile styles (max-width: 767px) */
-@media (max-width: 767px) {
-	body {
-		padding-top: 50px;
-	}
-
-	main {
-		padding: 10px;
-	}
-
-	.about-pic {
-		width: 10vh;
-		height: 10vh;
-	}
-
-	.navbar-brand {
-		color: var(--text);
-	}
-
-	/* Mobile menu scrolling */
-	.navbar-collapse.show,
-	.navbar-collapse.collapsing {
-		max-height: 70vh;
-		overflow-y: auto;
-		position: absolute;
-		top: 100%;
-		left: 0;
-		right: 0;
-		background-color: var(--header-color);
-		border-bottom: var(--border-width) solid var(--accent);
-	}
-
-	.navbar-nav .dropdown-menu {
-		max-height: none;
-		overflow-y: visible;
-		border: none;
-		box-shadow: none;
-	}
-
-	/* Indent dropdown items on mobile */
-	.navbar-nav .dropdown-menu .dropdown-item {
-		padding-left: 40px;
-	}
-
-	/* Mobile navbar link states inherit from desktop */
-
-	/* Social media links horizontal on mobile */
-	.navbar-nav.ms-auto {
-		flex-direction: row;
-		justify-content: center;
-		padding: 10px 0;
-		margin-top: 10px;
-	}
-
-	.navbar-nav.ms-auto .navbar-icon {
-		display: inline-flex;
-	}
-
-	.navbar-nav.ms-auto .nav-link {
-		padding: 10px 15px;
-		height: auto;
-	}
-
-	/* Download buttons responsive */
-	.download-buttons {
-		flex-direction: column;
-	}
-
-	.download-btn {
-		width: 100%;
-		justify-content: center;
-	}
-
-	/* Search - consolidated from multiple media queries */
-	/* Search toggle button visible on mobile */
-	.search-nav-item {
-		display: flex;
-	}
-
-	/* Blog - consolidated */
-	.blog-post-card {
-		padding: 1rem;
-		margin: 0.25rem;
-		text-align: center;
-	}
-
-	.blog-posts {
-		gap: 0.5rem;
-	}
-
-	.blog-post-title {
-		font-size: 1.25em;
-	}
-
-	.blog-post-meta {
-		flex-direction: column;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.95em;
-		justify-content: center;
-	}
-
-	.blog-post-excerpt {
-		font-size: 1em;
-	}
-
-	.blog-pagination .page-link {
-		padding: 0.4rem 0.6rem;
-		font-size: 0.9em;
-		min-width: 35px;
-	}
-}
-
-/* Tablet styles (481px - 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-	main {
-		padding: var(--spacing-md);
-		max-width: 100%;
-	}
-
-	.about-pic {
-		width: 12vh;
-		height: 12vh;
-	}
-
-	.about-content h1 {
-		font-size: 1.5em;
-	}
-}
-
-/* ===========================
-   SEARCH FUNCTIONALITY
-   =========================== */
-
-/* Search nav item - matches other navbar icons */
+/* Search */
 .search-nav-item {
 	position: relative;
 	display: flex;
 	align-items: center;
 }
 
-/* Search toggle button - styled like navbar icons (mobile only) */
-.search-toggle {
-	background: none;
-	border: none;
-	color: var(--text-color);
-	cursor: pointer;
-	padding: 0.5rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: color var(--transition-fast);
-	flex-shrink: 0;
-}
-
-.search-toggle:hover,
-.search-toggle:focus {
-	color: var(--accent);
-}
-
-/* Search functionality - unified search page for all devices */
-
-/* Search results use blog-post-card styling for consistency */
 .search-result-item {
 	cursor: pointer;
 }
 
-/* Highlight matched text in search results */
 .search-result-item mark,
 .blog-post-card mark {
 	background-color: var(--accent);
@@ -511,7 +360,6 @@ a.icon:hover {
 	font-weight: bold;
 }
 
-/* No results message */
 .search-no-results {
 	padding: var(--spacing-xl);
 	text-align: center;
@@ -530,12 +378,7 @@ a.icon:hover {
 	font-size: 0.9em;
 }
 
-/* Mobile-specific search result styling - consolidated in main mobile media query below */
-
-/* ===========================
-   SEARCH PAGE (UNIFIED)
-   =========================== */
-/* Full screen search overlay - used for both mobile and desktop */
+/* Search Page */
 .search-page {
 	display: none;
 	position: fixed;
@@ -560,7 +403,6 @@ a.icon:hover {
 	animation: searchFadeOut 0.2s ease-in forwards;
 }
 
-/* Search page animations */
 @keyframes searchFadeIn {
 	from {
 		opacity: 0;
@@ -602,7 +444,6 @@ a.icon:hover {
 	max-width: 750px;
 }
 
-/* Slide-down animation for search header */
 @keyframes slideDown {
 	from {
 		transform: translateY(-100%);
@@ -617,7 +458,7 @@ a.icon:hover {
 .search-page-back {
 	background: none;
 	border: none;
-	color: var(--text-color);
+	color: var(--font-color);
 	cursor: pointer;
 	padding: 0.5rem;
 	display: flex;
@@ -644,7 +485,7 @@ a.icon:hover {
 	background-color: var(--hover-color);
 	border: 1px solid var(--border-color);
 	border-radius: 20px;
-	color: var(--text-color);
+	color: var(--font-color);
 	font-size: 1em;
 }
 
@@ -692,7 +533,6 @@ a.icon:hover {
 	text-align: left;
 }
 
-/* Fade-in animation for search content */
 @keyframes fadeInContent {
 	from {
 		opacity: 0;
@@ -704,66 +544,7 @@ a.icon:hover {
 	}
 }
 
-/* Desktop styles (min-width: 768px) - consolidated */
-@media (min-width: 768px) {
-	.navbar-nav .dropdown-menu {
-		min-width: 200px;
-	}
-
-	.navbar .container-fluid {
-		padding-left: 20px;
-		padding-right: 20px;
-	}
-
-	.search-page-content {
-		padding: 2rem;
-	}
-}
-
-/* Bootstrap 5 navbar */
-.navbar.navbar-dark {
-	border-bottom: var(--border-width) solid var(--accent);
-	background-color: var(--header-color);
-	min-height: 50px;
-	padding: 0;
-	position: fixed;
-	top: 0;
-	width: 100%;
-	z-index: 1030;
-}
-
-.navbar .container-fluid {
-	padding-left: 15px;
-	padding-right: 15px;
-	max-width: 1000px;
-	margin: 0 auto;
-}
-
-.navbar .navbar-nav .nav-link {
-	color: var(--header-font-color);
-	padding: 15px 20px;
-	line-height: 1.2;
-	display: flex;
-	align-items: center;
-	height: 50px;
-}
-
-.navbar .navbar-nav .nav-link:hover {
-	color: var(--accent);
-	background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Active navigation state */
-.navbar-nav .nav-link.active {
-	color: var(--accent);
-	background-color: rgba(255, 255, 255, 0.1);
-}
-
-.navbar .dropdown-menu {
-	border-radius: 0;
-}
-
-/* Project and iframe styling */
+/* Project */
 .project-title {
 	color: var(--accent);
 	font-size: 1.5em;
@@ -803,7 +584,7 @@ a.icon:hover {
 	max-width: 100%;
 }
 
-/* Loading and Error States */
+/* Loading & Error */
 .loading-spinner {
 	text-align: center;
 	padding: 2rem;
@@ -840,7 +621,7 @@ a.icon:hover {
 	font-size: 1.1em;
 }
 
-/* Download buttons container */
+/* Download Buttons */
 .download-buttons {
 	display: flex;
 	flex-wrap: wrap;
@@ -849,46 +630,34 @@ a.icon:hover {
 	justify-content: flex-start;
 }
 
-/* Download buttons - ordered by ascending specificity */
-/* Base styles (0,1,0) */
 .download-btn {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 8px;
 	padding: 12px 24px;
 	background-color: #2a2a2a;
 	border: 2px solid var(--accent);
 	border-radius: 8px;
-	color: var(--text);
+	color: var(--font-color);
 	text-decoration: none;
-	font:
-		600 1em "Raleway",
-		sans-serif;
+	font: 600 1em var(--font-family-primary);
 	transition: all var(--transition-normal);
 	cursor: pointer;
-	outline: none;
 	appearance: none;
 }
 
-/* Child element styles (0,1,1) */
 .download-btn i {
 	font-size: 1.5em;
-	color: var(--text-color);
 	transition:
 		transform var(--transition-normal),
 		color var(--transition-normal);
-	display: inline-flex;
-	align-items: center;
 }
 
 .download-btn span {
-	color: var(--text-color);
 	transition: color var(--transition-normal);
-	display: inline-flex;
-	align-items: center;
 }
 
-/* Pseudo-class states (0,2,0) */
 .download-btn:link,
 .download-btn:visited {
 	text-decoration: none;
@@ -914,7 +683,6 @@ a.icon:hover {
 	outline-offset: 2px;
 }
 
-/* Pseudo-class with child elements (0,2,1) - highest specificity */
 .download-btn:hover i {
 	transform: scale(1.1);
 	color: var(--accent);
@@ -925,97 +693,23 @@ a.icon:hover {
 	color: var(--accent);
 }
 
-/* Complex pseudo-class (0,3,0) */
 .download-btn:focus:not(:focus-visible) {
 	background-color: var(--hover-color);
 	border-color: var(--border-color);
 	transform: none;
 	box-shadow: none;
-	color: var(--text-color);
+	color: var(--font-color);
 	outline: none;
 }
 
-/* Fullscreen button (ID selector - highest specificity) */
-#fullscreen {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 12px 24px;
-	background-color: #2a2a2a;
-	border: 2px solid var(--accent);
-	border-radius: 8px;
-	color: var(--text);
-	text-decoration: none;
-	font:
-		600 1em "Raleway",
-		sans-serif;
-	transition: all var(--transition-normal);
-	cursor: pointer;
-	outline: none;
-	appearance: none;
-}
-
-#fullscreen > i {
-	font-size: 1.5em;
-	color: var(--text-color);
-	transition:
-		transform var(--transition-normal),
-		color var(--transition-normal);
-	display: inline-flex;
-	align-items: center;
-}
-
-#fullscreen > span {
-	color: var(--text-color);
-	transition: color var(--transition-normal);
-	display: inline-flex;
-	align-items: center;
-}
-
-#fullscreen:hover,
-#fullscreen:focus {
-	background-color: var(--hover-color);
-	border-color: var(--accent);
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
-	color: var(--accent);
-	text-decoration: none;
-}
-
-#fullscreen:active {
-	transform: translateY(0);
-}
-
-#fullscreen:hover > i {
-	transform: scale(1.1);
-	color: var(--accent);
-}
-
-#fullscreen:hover > span,
-#fullscreen:focus > span {
-	color: var(--accent);
-}
-
-#fullscreen:focus {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
-}
-
-#fullscreen:focus:not(:focus-visible) {
-	background-color: var(--hover-color);
-	border-color: var(--border-color);
-	transform: none;
-	box-shadow: none;
-	color: var(--text-color);
-	outline: none;
-}
-
-/* Markdown body specific styles for download buttons */
 .markdown-body .download-btn,
 .markdown-body .download-btn:link,
 .markdown-body .download-btn:visited {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	text-decoration: none;
-	color: var(--text);
+	color: var(--font-color);
 }
 
 .markdown-body .download-btn:hover,
@@ -1023,11 +717,7 @@ a.icon:hover {
 	color: var(--accent);
 }
 
-/* ===========================
-   CODE STYLING
-   =========================== */
-
-/* Basic code styling (fallbacks) */
+/* Code */
 code {
 	padding: 2px 6px;
 	font-size: 0.9em;
@@ -1051,20 +741,12 @@ pre code {
 	padding: 0;
 }
 
-/* ===========================
-   ZERO-MD V3 STYLING
-   =========================== */
-
-/* External container styling - only styles that can reach outside shadow DOM */
 zero-md {
 	display: block;
 	text-align: left;
 	width: 100%;
 	background-color: var(--background-color);
 }
-
-/* Note: All internal zero-md styling is injected via template data-append
-   because shadow DOM isolates styles. See Templates.zeroMd() in main.js */
 
 zero-md pre code:not([class*="language-"]) {
 	background-color: transparent;
@@ -1074,17 +756,12 @@ zero-md pre code:not([class*="language-"]) {
 	color: var(--text-light);
 }
 
-/* ===========================
-   ACCESSIBILITY ENHANCEMENTS
-   =========================== */
-
-/* Improved focus indicators */
+/* Accessibility */
 *:focus {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
 
-/* Better focus for interactive elements */
 button:focus,
 a:focus,
 input:focus,
@@ -1094,12 +771,10 @@ textarea:focus {
 	outline-offset: 2px;
 }
 
-/* Remove focus outline for mouse users, keep for keyboard */
 *:focus:not(:focus-visible) {
 	outline: none;
 }
 
-/* Reduce motion for users with vestibular disorders */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
@@ -1111,7 +786,6 @@ textarea:focus {
 	}
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
 	:root {
 		--border-width: 3px;
@@ -1119,9 +793,7 @@ textarea:focus {
 	}
 }
 
-/* ===========================
-   MARKDOWN CONTENT
-   =========================== */
+/* Markdown */
 
 .markdown-body {
 	font-family: var(--font-family-primary);
@@ -1175,13 +847,12 @@ textarea:focus {
 	margin: 0.25em 0;
 }
 
-/* Code styling fallbacks for non-highlighted code */
 .markdown-body code:not([class*="language-"]) {
 	background-color: var(--hover-color);
-	color: var(--text-color);
+	color: var(--font-color);
 	padding: 2px 6px;
 	border-radius: 3px;
-	font-family: "Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
+	font-family: var(--font-family-mono);
 	font-size: 0.9em;
 }
 
@@ -1192,7 +863,7 @@ textarea:focus {
 	overflow-x: auto;
 	margin: 0.5em 0;
 	border: 1px solid var(--border-color);
-	font-family: "Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
+	font-family: var(--font-family-mono);
 	line-height: 1.4;
 }
 
@@ -1204,15 +875,13 @@ textarea:focus {
 	color: var(--text-light);
 }
 
-/* Language-specific code styling */
 .markdown-body pre[class*="language-"] {
 	margin: 0.5em 0;
 	overflow-x: auto;
-	font-family: "Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
+	font-family: var(--font-family-mono);
 	line-height: 1.4;
 }
 
-/* Highlight.js code styling - let hljs theme control all styling */
 .markdown-body pre code.hljs {
 	font-family: inherit;
 	padding: 1em;
@@ -1271,11 +940,7 @@ textarea:focus {
 	margin: 0.5em 0;
 }
 
-/* ===========================
-   BLOG STYLES
-   =========================== */
-
-/* Blog container */
+/* Blog */
 .blog-container {
 	max-width: 750px;
 	margin: 0 auto;
@@ -1296,7 +961,6 @@ textarea:focus {
 	padding: 2rem 0;
 }
 
-/* Blog post cards */
 .blog-posts {
 	display: flex;
 	flex-direction: column;
@@ -1366,7 +1030,6 @@ textarea:focus {
 	font-size: 1.05em;
 }
 
-/* Blog pagination */
 .blog-pagination {
 	margin: 2rem 0;
 	display: flex;
@@ -1390,7 +1053,7 @@ textarea:focus {
 	background-color: rgba(255, 255, 255, 0.02);
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius);
-	color: var(--text);
+	color: var(--font-color);
 	text-decoration: none;
 	transition: all var(--transition-fast);
 	cursor: pointer;
@@ -1417,7 +1080,6 @@ textarea:focus {
 	pointer-events: none;
 }
 
-/* Individual blog post */
 .blog-post-full {
 	max-width: 750px;
 	margin: 0 auto;
@@ -1452,8 +1114,468 @@ textarea:focus {
 }
 
 .blog-back-link:hover {
-	color: var(--text);
+	color: var(--font-color);
 	transform: translateX(-4px);
 }
 
-/* Responsive blog styles - consolidated in main mobile media query above */
+/* Navbar */
+.navbar {
+	background-color: var(--header-color);
+	border-bottom: var(--border-width) solid var(--accent);
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: var(--z-navbar);
+	font-family: var(--font-family-primary);
+}
+
+.navbar-container {
+	max-width: 1000px;
+	margin: 0 auto;
+	padding: 0 15px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.navbar-brand {
+	color: var(--header-font-color);
+	font-weight: bold;
+	text-decoration: none;
+	font-size: 1.25em;
+	display: none;
+	padding: 11px 0;
+}
+
+.navbar-toggle {
+	display: none;
+	background: transparent;
+	border: none;
+	color: var(--font-color);
+	font-size: 1.5em;
+	cursor: pointer;
+	padding: 11px 0.5rem;
+	transition: transform var(--transition-fast);
+}
+
+.navbar-toggle:focus {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.navbar-toggle:focus:not(:focus-visible) {
+	outline: none;
+}
+
+.navbar-toggle:active {
+	transform: scale(0.9);
+}
+
+.navbar-toggle-icon {
+	display: block;
+	width: 24px;
+	height: 2px;
+	background-color: currentColor;
+	position: relative;
+	transition: background-color var(--transition-normal);
+}
+
+.navbar-toggle-icon::before,
+.navbar-toggle-icon::after {
+	content: "";
+	display: block;
+	width: 24px;
+	height: 2px;
+	background-color: currentColor;
+	position: absolute;
+	left: 0;
+	transition: all var(--transition-normal);
+}
+
+.navbar-toggle-icon::before {
+	top: -8px;
+}
+
+.navbar-toggle-icon::after {
+	bottom: -8px;
+}
+
+.navbar-toggle.active .navbar-toggle-icon {
+	background-color: transparent;
+}
+
+.navbar-toggle.active .navbar-toggle-icon::before {
+	transform: rotate(45deg);
+	top: 0;
+}
+
+.navbar-toggle.active .navbar-toggle-icon::after {
+	transform: rotate(-45deg);
+	bottom: 0;
+}
+
+.navbar-collapse {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.navbar-nav {
+	display: flex;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	align-items: stretch;
+}
+
+.navbar-nav.left {
+	margin-right: auto;
+}
+
+.navbar-nav.right {
+	margin-left: auto;
+}
+
+.nav-item {
+	position: relative;
+	display: flex;
+	align-items: stretch;
+}
+
+.nav-link {
+	display: flex;
+	align-items: center;
+	padding: 11px 20px;
+	color: var(--header-font-color);
+	text-decoration: none;
+	transition: all var(--transition-fast);
+	line-height: 1.2;
+	font-size: 1.25em;
+	font-weight: 700;
+}
+
+button.nav-link {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	width: auto;
+}
+
+.nav-link:hover,
+.nav-link:focus,
+.nav-link:active {
+	color: var(--accent);
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+	color: var(--accent);
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link:focus:not(.active) {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+
+.nav-link:focus:not(:focus-visible):not(.active) {
+	background-color: transparent;
+	color: var(--header-font-color);
+	outline: none;
+}
+
+.nav-link.active:focus {
+	outline: none;
+}
+
+.dropdown {
+	position: relative;
+}
+
+.dropdown-toggle {
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.dropdown-toggle::after {
+	content: "\f107";
+	font-family: "Font Awesome 6 Free", sans-serif;
+	font-weight: 900;
+	font-size: 0.8em;
+	transition: transform var(--transition-fast);
+}
+
+.dropdown.show .dropdown-toggle::after {
+	transform: rotate(180deg);
+}
+
+.dropdown-menu {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	min-width: 200px;
+	background-color: var(--header-color);
+	border: var(--border-width) solid var(--accent);
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	display: none;
+	z-index: var(--z-dropdown);
+	box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
+}
+
+.dropdown.show .dropdown-menu {
+	display: block;
+}
+
+.dropdown-item {
+	display: block;
+	padding: 10px 20px;
+	color: var(--header-font-color);
+	text-decoration: none;
+	font-size: 16px;
+	font-weight: bold;
+	background-color: var(--header-color);
+	transition: all var(--transition-fast);
+	border: none;
+	width: 100%;
+	text-align: left;
+	white-space: nowrap;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:active,
+.dropdown-item.active {
+	background-color: rgba(255, 255, 255, 0.1);
+	color: var(--accent);
+}
+
+.dropdown-item.active:focus {
+	outline: none;
+}
+
+/* Footer */
+
+.footer {
+	margin-top: auto;
+	margin-bottom: 0;
+	padding: 1rem 0;
+	background-color: transparent;
+	flex-shrink: 0;
+}
+
+.footer-container {
+	max-width: 1000px;
+	margin: 0 auto;
+	padding: 0 15px;
+}
+
+.footer-text {
+	text-align: center;
+	margin: 0;
+	color: var(--text-light);
+	font-size: 0.9em;
+}
+
+/* Tablet */
+@media (min-width: 481px) and (max-width: 768px) {
+	main {
+		padding: var(--spacing-md);
+		max-width: 100%;
+	}
+
+	.about-pic {
+		width: 12vh;
+		height: 12vh;
+	}
+
+	.about-content h1 {
+		font-size: 1.5em;
+	}
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+	.navbar-container {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.search-page-content {
+		padding: 2rem;
+	}
+}
+
+/* Mobile - All consolidated */
+@media (max-width: 767px) {
+	body {
+		padding-top: 50px;
+	}
+
+	main {
+		padding: 10px;
+	}
+
+	.about-pic {
+		width: 10vh;
+		height: 10vh;
+	}
+
+	.download-buttons {
+		flex-direction: column;
+	}
+
+	.download-btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.search-nav-item {
+		display: flex;
+	}
+
+	.blog-post-card {
+		padding: 1rem;
+		margin: 0.25rem;
+		text-align: center;
+	}
+
+	.blog-posts {
+		gap: 0.5rem;
+	}
+
+	.blog-post-title {
+		font-size: 1.25em;
+	}
+
+	.blog-post-meta {
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.95em;
+		justify-content: center;
+	}
+
+	.blog-post-excerpt {
+		font-size: 1em;
+	}
+
+	.blog-pagination .page-link {
+		padding: 0.4rem 0.6rem;
+		font-size: 0.9em;
+		min-width: 35px;
+	}
+
+	.navbar-brand {
+		display: block;
+	}
+
+	.navbar-toggle {
+		display: block;
+	}
+
+	.navbar-collapse {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background-color: var(--header-color);
+		border-bottom: var(--border-width) solid var(--accent);
+		flex-direction: column;
+		align-items: stretch;
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.25s ease-in;
+	}
+
+	.navbar-collapse.show {
+		max-height: 800px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		transition: max-height 0.8s ease-out;
+	}
+
+	.navbar-nav {
+		flex-direction: column;
+		width: 100%;
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	.navbar-nav.left,
+	.navbar-nav.right {
+		margin: 0;
+	}
+
+	.navbar-nav.right {
+		flex-direction: row;
+		justify-content: center;
+		padding: 10px 0;
+		margin-top: 10px;
+	}
+
+	.navbar-nav.right .nav-item {
+		display: inline-flex;
+	}
+
+	.navbar-nav.right .nav-link {
+		padding: 10px 15px;
+		height: auto;
+	}
+
+	.navbar-nav.left .nav-item {
+		width: 100%;
+		height: auto;
+		overflow: hidden;
+	}
+
+	.navbar-nav.left .nav-link {
+		height: auto;
+		padding: 12px 20px;
+		width: 100%;
+		justify-content: flex-start;
+	}
+
+	.dropdown {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.dropdown-menu {
+		position: static;
+		border: none;
+		box-shadow: none;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.4s ease-out;
+		order: 2;
+	}
+
+	.dropdown-toggle {
+		order: 1;
+		width: 100%;
+	}
+
+	.dropdown.show .dropdown-menu {
+		max-height: 500px;
+		transition: max-height 0.5s ease-out;
+	}
+
+	.dropdown-item {
+		padding-left: 40px;
+		width: 100%;
+		text-align: left;
+		white-space: normal;
+		word-wrap: break-word;
+	}
+}

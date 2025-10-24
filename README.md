@@ -7,22 +7,24 @@ It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicate
 Key features:
 - YAML configuration for easy content management
 - Built-in blog with markdown posts and pagination
-- Fuzzy search with Fuse.js across projects and blog posts
+- Fuzzy search with MiniSearch across projects and blog posts
 - Dynamic color themes you can change in the config
-- Font Awesome icons and Bootstrap for styling
+- Custom Font Awesome icon subset (only icons you use)
+- Custom CSS without frameworks for minimal bundle size
 - Loads project READMEs directly from GitHub
 - Mobile-friendly responsive design with unified full-page search
-- Fast loading with optimized assets
+- Fast loading with optimized assets (~850KB smaller than original)
 
 ## Tech Stack
 
 - HTML, CSS, JavaScript (no build process)
-- Bootstrap 5.3.2 for styling
-- Font Awesome 6.6.0 for icons
-- Fuse.js 7.0.0 for fuzzy search
-- YAML configuration with js-yaml parser
+- Custom CSS
+- Font Awesome subset
+- MiniSearch 7.1.0 for fuzzy search
+- YAML configuration with yamljs parser
 - Marked.js v11.1.1 for markdown parsing
 - Highlight.js v11.9.0 for syntax highlighting
+- Raleway font (weights 400, 600, 700, 900 only)
 - jsDelivr CDN for external dependencies
 - Tagged template literals for secure HTML templating
 
@@ -153,7 +155,7 @@ blog:
 
 ### Search
 
-Powered by [Fuse.js](https://www.fusejs.io/) for fast, fuzzy search across all projects and blog posts:
+Powered by [MiniSearch](https://lucaong.github.io/minisearch/) for fast, fuzzy search across all projects and blog posts:
 
 ```yaml
 site:
