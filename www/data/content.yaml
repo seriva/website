@@ -216,7 +216,7 @@ pages:
     order: 1
     # Multiline HTML content using YAML literal block syntax
     content: |
-      <div style="text-align: center;">
+      <div style="text-align: center; color: var(--text-light);">
         <img class="about-pic" 
              src="https://avatars.githubusercontent.com/u/11056665?s=400&u=4bdf1d069962e53c5b3dd7b73e01e977854e8800&v=4" 
              alt="Luuk van Venrooij profile picture" 
