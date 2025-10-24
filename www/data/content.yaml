@@ -102,7 +102,7 @@ projects:
       - "ES6"
     order: 2
     github_repo: "simplefps"
-    demo_url: "https://www.luukvanvenrooij.nl/demo/simplefps"
+    demo_url: "https://seriva.github.io/simplefps"
     youtube_videos:
       - "UInnHqqX2OQ"
     links:
