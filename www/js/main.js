@@ -1,7 +1,4 @@
-// ===========================
-// CONSTANTS
-// ===========================
-
+// Constants
 const CONSTANTS = {
 	HLJS_CDN_BASE: "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/",
 	DEFAULT_THEME: "github-dark", // Highlight.js theme
@@ -16,10 +13,7 @@ const CONSTANTS = {
 	SEARCH_MAX_RESULTS: 8,
 };
 
-// ===========================
-// UTILITY FUNCTIONS
-// ===========================
-
+// Utility Functions
 const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
@@ -37,10 +31,7 @@ const html = (strings, ...values) => {
 
 const safe = (content) => ({ __safe: true, content });
 
-// ===========================
-// INTERNATIONALIZATION (i18n)
-// ===========================
-
+// Internationalization (i18n)
 const i18n = {
 	currentLanguage: null,
 	translations: {},
@@ -67,10 +58,7 @@ const i18n = {
 	},
 };
 
-// ===========================
-// HTML TEMPLATES
-// ===========================
-
+// HTML Templates
 const Templates = {
 	navbar: (
 		blogLink,
@@ -358,10 +346,7 @@ const Templates = {
         </div>`,
 };
 
-// ===========================
-// APPLICATION CODE
-// ===========================
-
+// Application Code
 const getHljsThemeUrl = (themeName) =>
 	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
 
@@ -473,7 +458,6 @@ const closeMobileMenu = () => {
 	}
 };
 
-// Custom dropdown toggle handler
 const initCustomDropdowns = () => {
 	document.querySelectorAll(".dropdown-toggle").forEach((toggle) => {
 		toggle.addEventListener("click", (e) => {
@@ -481,29 +465,17 @@ const initCustomDropdowns = () => {
 			const dropdown = toggle.closest(".dropdown");
 			const isOpen = dropdown.classList.contains("show");
 
-			// Close all other dropdowns
 			document.querySelectorAll(".dropdown.show").forEach((d) => {
 				if (d !== dropdown) d.classList.remove("show");
 			});
 
-			// Toggle current dropdown
 			dropdown.classList.toggle("show", !isOpen);
 			toggle.setAttribute("aria-expanded", !isOpen);
 		});
 	});
 
-	// Close dropdowns when clicking on dropdown items (use event delegation)
 	document.addEventListener("click", (e) => {
-		// Check if a dropdown item was clicked
-		if (e.target.closest(".dropdown-item")) {
-			document.querySelectorAll(".dropdown.show").forEach((d) => {
-				d.classList.remove("show");
-				const toggle = d.querySelector(".dropdown-toggle");
-				if (toggle) toggle.setAttribute("aria-expanded", "false");
-			});
-		}
-		// Close dropdowns when clicking outside
-		else if (!e.target.closest(".dropdown")) {
+		if (e.target.closest(".dropdown-item") || !e.target.closest(".dropdown")) {
 			document.querySelectorAll(".dropdown.show").forEach((d) => {
 				d.classList.remove("show");
 				const toggle = d.querySelector(".dropdown-toggle");
@@ -512,8 +484,6 @@ const initCustomDropdowns = () => {
 		}
 	});
 };
-
-// Mobile menu toggle handler
 const initMobileMenuToggle = () => {
 	const navbarToggle = document.getElementById("navbar-toggle");
 	const navbarCollapse = document.getElementById("navbarNav");
@@ -528,10 +498,7 @@ const initMobileMenuToggle = () => {
 	}
 };
 
-// ===========================
-// SEARCH FUNCTIONALITY
-// ===========================
-
+// Search Functionality
 const Search = {
 	data: [],
 	fuse: null,
@@ -664,10 +631,7 @@ const searchByTag = (tag) => {
 
 window.searchByTag = searchByTag;
 
-// ===========================
-// GITHUB API INTEGRATION
-// ===========================
-
+// GitHub API Integration
 const fetchGitHubReadme = async (repoName) => {
 	if (!repoName) return null;
 	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
@@ -724,19 +688,12 @@ const loadGitHubReadme = async (repoName, containerId) => {
 	}
 };
 
-// ===========================
-// STATE MANAGEMENT
-// ===========================
-
-// Global state variables for application data
+// State Management
 let projectsData = null;
 let dataLoadPromise = null;
 const readmeCache = new Map();
 
-// ===========================
-// DOM MANAGEMENT
-// ===========================
-
+// DOM Management
 const DOMCache = {
 	navbar: null,
 	main: null,
@@ -803,42 +760,28 @@ const DOMCache = {
 	},
 };
 
-// ===========================
-// NAVIGATION & UI FUNCTIONS
-// ===========================
-
+// Navigation & UI Functions
 const createNavbar = (
 	pages = [],
 	socialLinks = [],
 	searchConfig = {},
 	siteTitle = "portfolio.example.com",
 ) => {
-	// Separate blog from other pages
 	const blogPage = pages.find((page) => page.id === "blog");
 	const otherPages = pages.filter((page) => page.id !== "blog");
-
-	// Create blog link if it exists
 	const blogLink = blogPage
 		? Templates.pageLink(blogPage.id, blogPage.title)
 		: "";
-
-	// Create projects dropdown (always present)
 	const projectsDropdown = Templates.projectsDropdown();
-
-	// Create page links (sorted by order)
 	const pageLinks = otherPages
 		.filter((page) => page.showInNav)
 		.sort((a, b) => a.order - b.order)
 		.map((page) => Templates.pageLink(page.id, page.title))
 		.join("");
-
 	const socialLinksHtml = socialLinks
 		.map((link) => Templates.socialLink(link))
 		.join("");
-
-	// Create search bar if enabled
 	const searchBar = searchConfig?.enabled ? Templates.searchBar() : "";
-
 	return Templates.navbar(
 		blogLink,
 		projectsDropdown,
@@ -907,10 +850,6 @@ const injectNavbar = async () => {
 	initCustomDropdowns();
 	initMobileMenuToggle();
 
-	// Note: Mobile menu closing and blur on click are handled via event delegation below
-	// SPA routing is handled by global event delegation in setupSpaRouting()
-
-	// Initialize search if enabled
 	if (data?.site?.search?.enabled) {
 		initializeSearch(data.site.search);
 		initializeSearchPage(data.site.search);
@@ -926,12 +865,9 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 			.join("");
 		resultsContainer.classList.add("show");
 
-		// Make entire search result cards clickable
 		resultsContainer.querySelectorAll(".search-result-item").forEach((card) => {
 			card.addEventListener("click", (e) => {
-				// Don't trigger if clicking on a link or tag
 				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
-
 				const link = card.querySelector(".blog-post-title a");
 				if (link) {
 					e.preventDefault();
@@ -942,7 +878,6 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 			});
 		});
 
-		// Add SPA routing to result links (for direct link clicks)
 		resultsContainer.querySelectorAll("[data-spa-route]").forEach((link) => {
 			link.addEventListener("click", (e) => {
 				e.preventDefault();
@@ -959,11 +894,8 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 
 const initializeSearch = () => {
 	const searchToggle = DOMCache.getSearchToggle();
-
-	// Initialize search data lazily (without fetching READMEs initially)
 	Search.init(false);
 
-	// Function to open search page
 	const openSearchPage = () => {
 		const searchPage = DOMCache.getSearchPage();
 		const searchInput = DOMCache.getSearchInput();
@@ -998,9 +930,7 @@ const initializeSearchPage = (searchConfig) => {
 	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
 	let searchTimeout = null;
 
-	// Close search page with animation
 	const closeSearchPage = () => {
-		// Clear pending search timeout to prevent memory leaks
 		if (searchTimeout) {
 			clearTimeout(searchTimeout);
 			searchTimeout = null;
@@ -1015,7 +945,6 @@ const initializeSearchPage = (searchConfig) => {
 
 	searchPageBack.addEventListener("click", closeSearchPage);
 
-	// Handle search input with debouncing (searchTimeout moved to outer scope)
 	const handleSearchInput = (e) => {
 		const query = e.target.value.trim();
 
@@ -1056,10 +985,7 @@ const initializeSearchPage = (searchConfig) => {
 	});
 };
 
-// ===========================
-// DATA LOADING & MANAGEMENT
-// ===========================
-
+// Data Loading & Management
 const getData = async () => projectsData || (await loadProjectsData());
 
 const loadProjectsData = async () => {
@@ -1124,10 +1050,7 @@ const applyColorScheme = (colors) => {
 	if (colors.code?.theme) applyHljsTheme(colors.code.theme);
 };
 
-// ===========================
-// BLOG MANAGEMENT FUNCTIONS
-// ===========================
-
+// Blog Management
 const parseBlogPost = (markdown) => {
 	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 	const match = markdown.match(frontmatterRegex);
@@ -1318,10 +1241,7 @@ const loadBlogPost = async (slug) => {
 	// SPA routing handled via event delegation
 };
 
-// ===========================
-// PROJECT MANAGEMENT FUNCTIONS
-// ===========================
-
+// Project Management
 const loadProjectLinks = async (projectId, containerId) => {
 	if (!projectId || !containerId) return;
 
@@ -1448,10 +1368,7 @@ const loadAdditionalContent = async () => {
 	}
 };
 
-// ===========================
-// ROUTING & PAGE MANAGEMENT
-// ===========================
-
+// Routing & Page Management
 const handleRoute = async () => {
 	closeMobileMenu();
 
@@ -1517,10 +1434,7 @@ const handleRoute = async () => {
 	}
 };
 
-// ===========================
-// APPLICATION INITIALIZATION
-// ===========================
-
+// Application Initialization
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		DOMCache.init();

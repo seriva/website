@@ -566,6 +566,9 @@ a.icon:hover {
 .markdown-body .download-btn,
 .markdown-body .download-btn:link,
 .markdown-body .download-btn:visited {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	text-decoration: none;
 	color: var(--font-color);
 }
