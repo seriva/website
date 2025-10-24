@@ -993,9 +993,13 @@ const initializeSearchPage = (searchConfig) => {
 
 // Data Loading & Management
 const getBasePath = () => {
+	// Detect if we're in a subdirectory (not at root)
+	const pathname = window.location.pathname;
+	const isSubdirectory = pathname.split('/').length > 2; // More than just "/" and the subdirectory
+	
 	if (window.location.pathname.includes("/project/")) {
 		return "../";
-	} else if (window.location.pathname.includes("/website/")) {
+	} else if (isSubdirectory) {
 		return "./";
 	}
 	return "";
@@ -1429,9 +1433,9 @@ const handleRoute = async () => {
 		} else {
 			// Redirect to configured default route for proper nav highlighting
 			const defaultRoute = data.site?.defaultRoute || "?blog";
-			// Ensure relative path for subdirectory hosting
-			const relativeRoute = defaultRoute.startsWith("/") ? defaultRoute : `/${defaultRoute}`;
-			window.history.replaceState({}, "", relativeRoute);
+			// For subdirectory hosting, keep relative paths as-is
+			const route = defaultRoute.startsWith("/") ? defaultRoute : defaultRoute;
+			window.history.replaceState({}, "", route);
 			// Recursively handle the new route
 			await handleRoute();
 			return; // Exit early since handleRoute will call updateActiveNavLink
