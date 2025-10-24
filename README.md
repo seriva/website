@@ -2,32 +2,31 @@
 
 This is my personal portfolio website. I originally built it with [Hugo](https://gohugo.io/) and the [seriva/minimal](https://github.com/seriva/minimal-hugo-theme) theme, but wanted more control over the design and functionality, so I rewrote it as a simple single-page application.
 
-It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicated setup needed. The content is managed through a YAML file. This new setup was mostly vibe-coded together:)
+It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicated setup needed. Content is managed through YAML configuration and markdown files. This new setup was mostly vibe-coded together:)
 
 Key features:
-- YAML configuration for easy content management
-- Built-in blog with markdown posts and pagination
 - **Markdown page system** - Create pages as markdown files in `/data/pages/`
-- Fuzzy search with MiniSearch across projects and blog posts
-- Dynamic color themes you can change in the config
-- Custom Font Awesome icon subset (only icons you use)
-- Custom CSS without frameworks for minimal bundle size
-- Loads project READMEs directly from GitHub
-- Mobile-friendly responsive design with unified full-page search
-- Fast loading with optimized assets (~850KB smaller than original)
+- **Markdown blog system** - Blog posts with pagination and metadata
+- **YAML configuration** - Easy content management and site settings
+- **Fuzzy search** - MiniSearch across projects and blog posts
+- **Dynamic color themes** - Customizable color schemes
+- **GitHub integration** - Loads project READMEs directly from GitHub
+- **Mobile-friendly** - Responsive design with unified search
+- **Unit testing** - QUnit test suite for code quality
+- **No build tools** - Pure vanilla HTML, CSS, and JavaScript
 
 ## Tech Stack
 
-- HTML, CSS, JavaScript (no build process)
-- Custom CSS
-- Font Awesome subset
-- MiniSearch 7.1.0 for fuzzy search
-- YAML configuration with yamljs parser
-- Marked.js v11.1.1 for markdown parsing
-- Highlight.js v11.9.0 for syntax highlighting
-- Raleway font (weights 400, 600, 700, 900 only)
-- jsDelivr CDN for external dependencies
-- Tagged template literals for secure HTML templating
+- **Frontend**: HTML, CSS, JavaScript (no build process)
+- **Styling**: Custom CSS with CSS custom properties
+- **Icons**: Font Awesome subset (only used icons)
+- **Search**: MiniSearch 7.1.0 for fuzzy search
+- **Content**: YAML configuration + Markdown files
+- **Parsing**: yamljs parser, Marked.js v11.1.1, Highlight.js v11.9.0
+- **Fonts**: Raleway (weights 400, 600, 700, 900)
+- **CDN**: jsDelivr for external dependencies
+- **Templating**: Tagged template literals for secure HTML
+- **Testing**: QUnit for unit tests
 
 ## Development Environment
 
@@ -74,7 +73,7 @@ The devcontainer includes Biome for code formatting and linting:
 
 ### Testing
 
-The project includes essential unit tests using QUnit (no npm required):
+The project includes essential unit tests using QUnit:
 
 - **Run tests**: Open `tests.html` in your browser
 - **Test coverage**: Core utilities, templates, search, routing, and DOM functionality
@@ -178,7 +177,6 @@ Powered by [MiniSearch](https://lucaong.github.io/minisearch/) for fast, fuzzy s
 site:
   search:
     enabled: true
-    placeholder: "Search projects and blog posts..."
     minChars: 2
 ```
 
@@ -198,9 +196,7 @@ site:
 
 ### Pages & Styling
 
-**Two ways to create pages:**
-
-#### 1. **Markdown Pages (Recommended)**
+**Markdown Pages:**
 Create markdown files in `/data/pages/` for clean, maintainable content:
 
 **1. Create a markdown file** (e.g., `data/pages/about.md`):
@@ -222,35 +218,23 @@ Your content here in markdown...
 - React
 ```
 
+
 **2. Configure page metadata** in `data/content.yaml`:
+```yaml
+pages:
+  about:
+    title: "About"
+    showInNav: true
+    order: 1
+    # Content is loaded from /data/pages/about.md
+```
+
+**3. Configure site settings** in `data/content.yaml`:
 ```yaml
 site:
   title: "Your Portfolio"
   description: "Your description"
   defaultRoute: "/?blog"  # Options: "/?blog", "/?page=about", "project=projectId"
-  
-pages:
-  about:
-    title: "About"
-    showInNav: true
-    order: 1
-    # Content is now loaded from /data/pages/about.md
-```
-
-#### 2. **YAML HTML Pages (Legacy)**
-For complex layouts, you can still use HTML in YAML:
-
-```yaml
-pages:
-  about:
-    title: "About"
-    showInNav: true
-    order: 1
-    content: |
-      <div class="about-content">
-        <h1>Welcome!</h1>
-        <p>Your content here - no escaping needed!</p>
-      </div>
 
 social:
   - icon: "fas fa-envelope"
@@ -326,18 +310,3 @@ translations:
 - `badges.*` - Result type badges
 
 All UI strings are automatically translated using the `i18n.t()` function, making it easy to maintain consistency across languages.
-
-## How it works
-
-- `/` redirects to the configured default route (set via `site.defaultRoute` in `content.yaml`)
-  - Default: `/?blog` (blog listing as homepage)
-  - Can be changed to: `/?page=about`, `/?project=projectId`, etc.
-- `/?page=<page-id>` shows any page (e.g., `/?page=about`)
-- `/?blog` shows the blog listing
-- `/?blog&p=2` shows blog listing with pagination (page 2)
-- `/?blog=<slug>` shows individual blog posts (e.g., `/?blog=getting-started`)
-- `/?project=<project-id>` shows individual projects
-- Project READMEs are loaded from GitHub automatically
-- Search functionality uses a unified full-page overlay for both desktop and mobile
-- Everything is client-side routed (no page reloads)
-- Translations loaded from YAML and applied automatically

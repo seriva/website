@@ -992,15 +992,22 @@ const initializeSearchPage = (searchConfig) => {
 };
 
 // Data Loading & Management
+const getBasePath = () => {
+	if (window.location.pathname.includes("/project/")) {
+		return "../";
+	} else if (window.location.pathname.includes("/website/")) {
+		return "./";
+	}
+	return "";
+};
+
 const getData = async () => projectsData || (await loadProjectsData());
 
 const loadProjectsData = async () => {
 	if (projectsData) return projectsData;
 	if (dataLoadPromise) return dataLoadPromise;
 
-	const yamlPath = window.location.pathname.includes("/project/")
-		? "../data/content.yaml"
-		: "data/content.yaml";
+	const yamlPath = `${getBasePath()}data/content.yaml`;
 
 	dataLoadPromise = (async () => {
 		try {
@@ -1120,7 +1127,7 @@ const loadBlogPosts = async () => {
 				}
 
 				// Old format: fetch and parse markdown file for metadata
-				const response = await fetch(`data/blog/${filename}`);
+				const response = await fetch(`${getBasePath()}data/blog/${filename}`);
 				if (!response.ok) {
 					throw new Error(`Blog post not found: ${filename}`);
 				}
@@ -1232,7 +1239,7 @@ const loadBlogPost = async (slug) => {
 	let content = post.content;
 	if (!content && post.filename) {
 		try {
-			const response = await fetch(`data/blog/${post.filename}`);
+			const response = await fetch(`${getBasePath()}data/blog/${post.filename}`);
 			if (response.ok) {
 				const markdown = await response.text();
 				const parsed = parseBlogPost(markdown);
@@ -1276,22 +1283,19 @@ const loadPage = async (pageId) => {
 
 	try {
 		const data = await getData();
-		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
+		setDocumentTitle(data);
 		
-		// First try to load from YAML content
-		let content = data?.pages?.[pageId]?.content;
-		
-		// If no content in YAML, try to load from markdown file
-		if (!content) {
-			try {
-				const response = await fetch(`data/pages/${pageId}.md`);
-				if (response.ok) {
-					const markdown = await response.text();
-					content = Templates.markdown(markdown).content;
-				}
-			} catch (error) {
-				console.error(`Error loading markdown page ${pageId}:`, error);
+		// Load content from markdown file
+		let content = null;
+		try {
+			const response = await fetch(`${getBasePath()}data/pages/${pageId}.md`);
+			if (response.ok) {
+				const markdown = await response.text();
+				const markdownResult = Templates.markdown(markdown);
+				content = markdownResult.content || markdownResult;
 			}
+		} catch (error) {
+			console.error(`Error loading markdown page ${pageId}:`, error);
 		}
 		
 		DOMCache.main.innerHTML = content || Templates.errorMessage(
