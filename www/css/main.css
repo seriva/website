@@ -194,7 +194,7 @@ a.icon:hover {
 
 .fas,
 .far {
-	font-family: "Font Awesome 6 Free";
+	font-family: "Font Awesome 6 Free", sans-serif;
 }
 
 .fas {
@@ -206,7 +206,7 @@ a.icon:hover {
 }
 
 .fab {
-	font-family: "Font Awesome 6 Brands";
+	font-family: "Font Awesome 6 Brands", sans-serif;
 	font-weight: 400;
 }
 
@@ -291,8 +291,20 @@ a.icon:hover {
 	transform: scale(1.05);
 }
 
-
 /* Navigation */
+
+/* General nav-link styles - placed before specific selectors to fix specificity */
+.nav-link {
+	display: flex;
+	align-items: center;
+	padding: 11px 20px;
+	color: var(--font-color);
+	text-decoration: none;
+	transition: all var(--transition-fast);
+	line-height: 1.2;
+	font-size: 1.25em;
+	font-weight: 700;
+}
 
 .navbar-menu .nav-link,
 .navbar-icon .nav-link {
@@ -1207,18 +1219,6 @@ textarea:focus {
 	align-items: stretch;
 }
 
-.nav-link {
-	display: flex;
-	align-items: center;
-	padding: 11px 20px;
-	color: var(--font-color);
-	text-decoration: none;
-	transition: all var(--transition-fast);
-	line-height: 1.2;
-	font-size: 1.25em;
-	font-weight: 700;
-}
-
 button.nav-link {
 	background: none;
 	border: none;
@@ -1357,7 +1357,6 @@ button.nav-link {
 		width: 12vh;
 		height: 12vh;
 	}
-
 }
 
 /* Desktop */

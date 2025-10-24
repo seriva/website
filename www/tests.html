@@ -48,7 +48,7 @@
             return div.innerHTML;
         };
 
-        const setDocumentTitle = (data) => {
+        window.setDocumentTitle = (data) => {
             document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
         };
 
@@ -64,7 +64,7 @@
         const safe = (content) => ({ __safe: true, content });
 
         // Templates
-        const Templates = {
+        window.Templates = {
             navbar: (blogLink, projectsDropdown, pageLinks, socialLinksHtml, searchBar, siteTitle) => html`
                 <nav class="navbar">
                     <div class="navbar-container">
@@ -88,7 +88,7 @@
             `,
 
             pageLink: (pageId, pageTitle) => {
-                const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
+                const href = pageId === "blog" ? "?blog" : `/?page=${pageId}`;
                 return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
             },
 
@@ -127,7 +127,7 @@
         };
 
         // Search object (minimal)
-        const Search = {
+        window.Search = {
             data: [],
             isInitialized: false,
             init: function() { this.isInitialized = true; },
@@ -141,7 +141,7 @@
         };
 
         // DOMCache (complete)
-        const DOMCache = {
+        window.DOMCache = {
             navbar: null,
             main: null,
             footer: null,
