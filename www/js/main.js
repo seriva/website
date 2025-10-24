@@ -118,7 +118,7 @@ const Templates = {
 	},
 
 	projectDropdownItem: (projectId, projectTitle) =>
-		html`<li><a class="dropdown-item" href="/?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
+		html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
 
 	projectsDropdown: () => html`
 		<li class="nav-item navbar-menu dropdown">
@@ -527,7 +527,7 @@ const Search = {
 					tags: p.tags || [],
 					content: "", // Will be lazy loaded if needed
 					type: "project",
-					url: `/?project=${p.id}`,
+					url: `?project=${p.id}`,
 					github_repo: p.github_repo, // Store for lazy loading
 				}));
 
@@ -1529,12 +1529,12 @@ const updateActiveNavLink = () => {
 			targetDropdownToggle = projectDropdown.querySelector(".dropdown-toggle");
 		}
 		targetDropdownItem = DOMCache.navbar.querySelector(
-			`.dropdown-item[href="/?project=${projectId}"]`,
+			`.dropdown-item[href="?project=${projectId}"]`,
 		);
 	} else if (pageId) {
 		// Regular page
 		targetLink = DOMCache.navbar.querySelector(
-			`.nav-link[href="/?page=${pageId}"]`,
+			`.nav-link[href="?page=${pageId}"]`,
 		);
 	}
 
