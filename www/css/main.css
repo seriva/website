@@ -1,3 +1,41 @@
+/* Fonts - Raleway from jsDelivr (weights: 400, 600, 700, 900) */
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-400-normal.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-600-normal.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-700-normal.woff2")
+		format("woff2");
+}
+
+@font-face {
+	font-family: Raleway;
+	font-style: normal;
+	font-weight: 900;
+	font-display: swap;
+	src: url("https://cdn.jsdelivr.net/npm/@fontsource/raleway@5.0.19/files/raleway-latin-900-normal.woff2")
+		format("woff2");
+}
+
 /* CSS Custom Properties */
 
 :root {
@@ -18,9 +56,8 @@
 	--spacing-md: 15px;
 	--spacing-lg: 24px;
 	--spacing-xl: 2rem;
-	--font-family-primary: "Raleway", sans-serif;
-	--font-family-mono:
-		"Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
+	--font-family-primary: Raleway, sans-serif;
+	--font-family-mono: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
 	--font-size-base: 16px;
 	--font-size-sm: 0.9em;
 	--font-size-lg: 1.1em;
@@ -1090,6 +1127,7 @@ textarea:focus {
 	left: 0;
 	right: 0;
 	z-index: var(--z-navbar);
+	font-family: var(--font-family-primary);
 }
 
 .navbar-container {
