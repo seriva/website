@@ -995,8 +995,8 @@ const initializeSearchPage = (searchConfig) => {
 const getBasePath = () => {
 	// Detect if we're in a subdirectory (not at root)
 	const pathname = window.location.pathname;
-	const isSubdirectory = pathname.split('/').length > 2; // More than just "/" and the subdirectory
-	
+	const isSubdirectory = pathname.split("/").length > 2; // More than just "/" and the subdirectory
+
 	if (window.location.pathname.includes("/project/")) {
 		return "../";
 	} else if (isSubdirectory) {
@@ -1243,7 +1243,9 @@ const loadBlogPost = async (slug) => {
 	let content = post.content;
 	if (!content && post.filename) {
 		try {
-			const response = await fetch(`${getBasePath()}data/blog/${post.filename}`);
+			const response = await fetch(
+				`${getBasePath()}data/blog/${post.filename}`,
+			);
 			if (response.ok) {
 				const markdown = await response.text();
 				const parsed = parseBlogPost(markdown);
@@ -1288,7 +1290,7 @@ const loadPage = async (pageId) => {
 	try {
 		const data = await getData();
 		setDocumentTitle(data);
-		
+
 		// Load content from markdown file
 		let content = null;
 		try {
@@ -1301,11 +1303,13 @@ const loadPage = async (pageId) => {
 		} catch (error) {
 			console.error(`Error loading markdown page ${pageId}:`, error);
 		}
-		
-		DOMCache.main.innerHTML = content || Templates.errorMessage(
-			i18n.t("general.notFound"),
-			i18n.t("general.notFoundMessage"),
-		);
+
+		DOMCache.main.innerHTML =
+			content ||
+			Templates.errorMessage(
+				i18n.t("general.notFound"),
+				i18n.t("general.notFoundMessage"),
+			);
 	} catch (error) {
 		console.error(`Error loading page ${pageId}:`, error);
 		DOMCache.main.innerHTML = Templates.errorMessage(
