@@ -88,7 +88,7 @@
             `,
 
             pageLink: (pageId, pageTitle) => {
-                const href = pageId === "blog" ? "/?blog" : `/?page=${pageId}`;
+                const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
                 return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
             },
 
