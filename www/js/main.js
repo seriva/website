@@ -1428,8 +1428,10 @@ const handleRoute = async () => {
 			await loadPage(pageId);
 		} else {
 			// Redirect to configured default route for proper nav highlighting
-			const defaultRoute = data.site?.defaultRoute || "/?blog";
-			window.history.replaceState({}, "", defaultRoute);
+			const defaultRoute = data.site?.defaultRoute || "?blog";
+			// Ensure relative path for subdirectory hosting
+			const relativeRoute = defaultRoute.startsWith("/") ? defaultRoute : `/${defaultRoute}`;
+			window.history.replaceState({}, "", relativeRoute);
 			// Recursively handle the new route
 			await handleRoute();
 			return; // Exit early since handleRoute will call updateActiveNavLink

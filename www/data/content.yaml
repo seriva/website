@@ -7,7 +7,7 @@ site:
   description: "Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!"
   author: "Luuk van Venrooij"
   github_username: "seriva"
-  defaultRoute: "/?blog"  # Options: "/?blog", "/?page=about", "/?project=projectId"
+  defaultRoute: "?blog"  # Options: "?blog", "?page=about", "?project=projectId"
   
   # Internationalization
   i18n:
