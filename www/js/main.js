@@ -122,7 +122,7 @@ const Templates = {
 		]
 			.filter(Boolean)
 			.join(" ");
-		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${attrs}><i class="${icon}"></i></a></li>`;
+		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${safe(attrs)}><i class="${icon}"></i></a></li>`;
 	},
 
 	projectDropdownItem: (projectId, projectTitle) =>
@@ -171,9 +171,9 @@ const Templates = {
 								projectsData?.site?.search?.enabled !== false;
 							const clickableClass = searchEnabled ? " clickable-tag" : "";
 							const onclickAttr = searchEnabled
-								? ` onclick="event.stopPropagation(); searchByTag('${tag}')"`
+								? ` onclick="event.stopPropagation(); searchByTag('${escapeHtml(tag)}')"`
 								: "";
-							return html`<span class="item-tag${clickableClass}"${onclickAttr}>${tag}</span>`;
+							return html`<span class="item-tag${clickableClass}"${safe(onclickAttr)}>${tag}</span>`;
 						})
 						.join(" ")
 				: "",
@@ -215,7 +215,7 @@ const Templates = {
 
 				const activeClass = i === currentPage ? " active" : "";
 				pageNumbers.push(
-					`<li class="page-item${activeClass}"><a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
+					html`<li class="page-item${activeClass}"><a class="page-link" href="/?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
 				);
 				lastAdded = i;
 			}
@@ -224,13 +224,13 @@ const Templates = {
 		const prevDisabled = currentPage === 1 ? " disabled" : "";
 		const nextDisabled = currentPage === totalPages ? " disabled" : "";
 
-		return `<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
+		return html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
             <li class="page-item${prevDisabled}">
                 <a class="page-link" href="/?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            ${pageNumbers.join("")}
+            ${safe(pageNumbers.join(""))}
             <li class="page-item${nextDisabled}">
                 <a class="page-link" href="/?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
@@ -345,7 +345,7 @@ const Templates = {
                     <a href="${item.url}" data-spa-route="${item.type}">${safe(Search.highlight(item.title, query))}</a>
                 </h2>
                 <div class="blog-post-meta">
-                    ${allTags.length ? safe(`<span class="blog-post-tags">${allTags.map((tag) => `<span class="item-tag">${tag}</span>`).join(" ")}</span>`) : ""}
+                    ${allTags.length ? safe(html`<span class="blog-post-tags">${safe(allTags.map((tag) => html`<span class="item-tag">${tag}</span>`).join(" "))}</span>`) : ""}
                 </div>
                 <p class="blog-post-excerpt">${safe(Search.highlight(item.description, query))}</p>
             </article>`;
@@ -390,9 +390,9 @@ const initializeMarked = () => {
 };
 
 const Email = async (event) => {
+	event?.preventDefault?.();
+	event?.stopPropagation?.();
 	try {
-		event?.preventDefault?.();
-		event?.stopPropagation?.();
 		const data = projectsData || (await loadProjectsData());
 		const email = data?.site?.email;
 		window.location.href = email
@@ -641,7 +641,9 @@ const Search = {
 
 	highlight(text, query) {
 		if (!query) return text;
-		const regex = new RegExp(`(${query})`, "gi");
+		// Escape special regex characters to prevent injection
+		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const regex = new RegExp(`(${escapedQuery})`, "gi");
 		return text.replace(regex, "<mark>$1</mark>");
 	},
 };
@@ -672,7 +674,13 @@ const fetchGitHubReadme = async (repoName) => {
 
 	try {
 		const data = await getData();
-		const username = data?.site?.github_username || "seriva";
+		const username = data?.site?.github_username;
+		if (!username) {
+			console.warn("No GitHub username configured in content.yaml");
+			readmeCache.set(repoName, null);
+			return null;
+		}
+
 		const branches = ["master", "main"];
 
 		for (const branch of branches) {
@@ -693,6 +701,7 @@ const fetchGitHubReadme = async (repoName) => {
 		return null;
 	} catch (error) {
 		console.error(`Error fetching README for ${repoName}:`, error);
+		readmeCache.set(repoName, null);
 		return null;
 	}
 };
@@ -898,29 +907,8 @@ const injectNavbar = async () => {
 	initCustomDropdowns();
 	initMobileMenuToggle();
 
-	// Add mobile menu click handlers and blur on click
-	// Note: SPA routing is handled by global event delegation in setupSpaRouting()
-	for (const link of DOMCache.navbar.querySelectorAll(
-		"a:not([data-spa-route])",
-	)) {
-		link.addEventListener("click", () => {
-			if (
-				!link.classList.contains("dropdown-toggle") &&
-				!link.hasAttribute("data-keep-menu")
-			) {
-				closeMobileMenu();
-			}
-			requestAnimationFrame(() => link.blur());
-		});
-	}
-
-	// Handle mobile menu button blur
-	const toggleBtn = DOMCache.navbar.querySelector(".navbar-toggle");
-	if (toggleBtn) {
-		toggleBtn.addEventListener("click", () =>
-			requestAnimationFrame(() => toggleBtn.blur()),
-		);
-	}
+	// Note: Mobile menu closing and blur on click are handled via event delegation below
+	// SPA routing is handled by global event delegation in setupSpaRouting()
 
 	// Initialize search if enabled
 	if (data?.site?.search?.enabled) {
@@ -1008,9 +996,15 @@ const initializeSearchPage = (searchConfig) => {
 		return;
 
 	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
+	let searchTimeout = null;
 
 	// Close search page with animation
 	const closeSearchPage = () => {
+		// Clear pending search timeout to prevent memory leaks
+		if (searchTimeout) {
+			clearTimeout(searchTimeout);
+			searchTimeout = null;
+		}
 		searchPage.classList.add("closing");
 		setTimeout(() => {
 			searchPage.classList.remove("show", "closing");
@@ -1021,8 +1015,7 @@ const initializeSearchPage = (searchConfig) => {
 
 	searchPageBack.addEventListener("click", closeSearchPage);
 
-	// Handle search input with inline debouncing
-	let searchTimeout = null;
+	// Handle search input with debouncing (searchTimeout moved to outer scope)
 	const handleSearchInput = (e) => {
 		const query = e.target.value.trim();
 
@@ -1432,11 +1425,7 @@ const loadProjectsDropdown = async () => {
 			.map((p) => Templates.projectDropdownItem(p.id, p.title))
 			.join("");
 
-		for (const link of dropdown.querySelectorAll("a")) {
-			link.addEventListener("click", () => {
-				closeMobileMenu();
-			});
-		}
+		// Mobile menu closing is now handled via global event delegation
 	} catch (error) {
 		console.error("Error loading projects dropdown:", error);
 	}
@@ -1569,9 +1558,16 @@ const updateActiveNavLink = () => {
 	const projectId = params.get("project");
 	const blogParam = params.get("blog");
 
-	// Get all navbar links and dropdown items
-	const navbarLinks = document.querySelectorAll(".navbar-nav .nav-link");
-	const dropdownItems = document.querySelectorAll(".dropdown-item");
+	// Cache navbar element if not already cached
+	if (!DOMCache.navbar) {
+		DOMCache.navbar = document.getElementById("navbar-container");
+	}
+
+	if (!DOMCache.navbar) return;
+
+	// Get all navbar links and dropdown items (scoped to navbar for performance)
+	const navbarLinks = DOMCache.navbar.querySelectorAll(".navbar-nav .nav-link");
+	const dropdownItems = DOMCache.navbar.querySelectorAll(".dropdown-item");
 
 	// Find which link should be active first
 	let targetLink = null;
@@ -1580,19 +1576,21 @@ const updateActiveNavLink = () => {
 
 	if (blogParam !== null) {
 		// Blog page or specific blog post
-		targetLink = document.querySelector('.nav-link[href="/?blog"]');
+		targetLink = DOMCache.navbar.querySelector('.nav-link[href="/?blog"]');
 	} else if (projectId) {
 		// Project page - highlight both the Projects dropdown toggle AND the specific project item
-		const projectDropdown = document.querySelector(".dropdown");
+		const projectDropdown = DOMCache.navbar.querySelector(".dropdown");
 		if (projectDropdown) {
 			targetDropdownToggle = projectDropdown.querySelector(".dropdown-toggle");
 		}
-		targetDropdownItem = document.querySelector(
+		targetDropdownItem = DOMCache.navbar.querySelector(
 			`.dropdown-item[href="/?project=${projectId}"]`,
 		);
 	} else if (pageId) {
 		// Regular page
-		targetLink = document.querySelector(`.nav-link[href="/?page=${pageId}"]`);
+		targetLink = DOMCache.navbar.querySelector(
+			`.nav-link[href="/?page=${pageId}"]`,
+		);
 	}
 
 	// Add active class to target(s) first to maintain visual continuity
@@ -1619,9 +1617,16 @@ const handleSpaLinkClick = (e) => {
 
 	e.preventDefault();
 
+	// Cache navbar if not already cached
+	if (!DOMCache.navbar) {
+		DOMCache.navbar = document.getElementById("navbar-container");
+	}
+
 	// Immediately apply active class to clicked link for visual continuity
-	const allNavLinks = document.querySelectorAll(".navbar-nav .nav-link");
-	const allDropdownItems = document.querySelectorAll(".dropdown-item");
+	const allNavLinks =
+		DOMCache.navbar?.querySelectorAll(".navbar-nav .nav-link") || [];
+	const allDropdownItems =
+		DOMCache.navbar?.querySelectorAll(".dropdown-item") || [];
 
 	// Remove active from all first
 	allNavLinks.forEach((l) => {
@@ -1655,12 +1660,31 @@ const setupSpaRouting = () => {
 
 const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
+		// Handle mobile menu outside clicks
 		if (
 			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
 			DOMCache.navbar &&
 			!DOMCache.navbar.contains(event.target)
 		) {
 			closeMobileMenu();
+		}
+
+		// Handle navbar link clicks and blur (event delegation)
+		const link = event.target.closest(".navbar a:not([data-spa-route])");
+		if (link) {
+			if (
+				!link.classList.contains("dropdown-toggle") &&
+				!link.hasAttribute("data-keep-menu")
+			) {
+				closeMobileMenu();
+			}
+			requestAnimationFrame(() => link.blur());
+		}
+
+		// Handle navbar toggle button blur
+		const toggleBtn = event.target.closest(".navbar-toggle");
+		if (toggleBtn) {
+			requestAnimationFrame(() => toggleBtn.blur());
 		}
 	});
 };
