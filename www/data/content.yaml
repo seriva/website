@@ -198,7 +198,7 @@ projects:
       - "Cordova"
     order: 7
     github_repo: "astrohunter"
-    demo_url: "https://www.luukvanvenrooij.nl/demo/astrohunter"
+    demo_url: "https://seriva.github.io/astrohunter/"
     links:
       - title: "Github"
         icon: "fab fa-github"
