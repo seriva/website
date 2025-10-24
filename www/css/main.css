@@ -1,22 +1,15 @@
-/* ===========================
-   CSS CUSTOM PROPERTIES
-   =========================== */
+/* CSS Custom Properties */
 
 :root {
-	/* Color Palette */
 	--accent: #429bee;
 	--background-color: #292f33;
 	--header-color: #1f2429;
 	--hover-color: #2a3a4a;
 	--border-color: #3a4a5a;
-
-	/* Text Colors */
 	--font-color: #ffffff;
 	--header-font-color: #ffffff;
 	--text-light: #cccccc;
 	--error-color: #ff6b6b;
-
-	/* Layout & Spacing */
 	--border-width: 2px;
 	--border-radius: 4px;
 	--border-radius-large: 8px;
@@ -25,8 +18,6 @@
 	--spacing-md: 15px;
 	--spacing-lg: 24px;
 	--spacing-xl: 2rem;
-
-	/* Typography */
 	--font-family-primary: "Raleway", sans-serif;
 	--font-family-mono:
 		"Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
@@ -35,26 +26,15 @@
 	--font-size-lg: 1.1em;
 	--line-height-base: 1.6;
 	--line-height-compact: 1.25;
-
-	/* Transitions & Animations */
 	--transition-fast: 0.2s ease;
 	--transition-normal: 0.3s ease;
 	--transition-slow: 0.5s ease;
-
-	/* Z-index Scale */
 	--z-navbar: 1030;
 	--z-dropdown: 1000;
 	--z-modal: 1050;
-
-	/* Breakpoints (for reference in media queries) */
-	--breakpoint-mobile: 767px;
-	--breakpoint-tablet: 768px;
-	--breakpoint-desktop: 1024px;
 }
 
-/* ===========================
-   RESET & BASE STYLES
-   =========================== */
+/* Reset & Base Styles */
 
 html {
 	height: 100%;
@@ -126,9 +106,7 @@ img {
 	max-width: 100%;
 }
 
-/* ===========================
-   TYPOGRAPHY & LINKS
-   =========================== */
+/* Typography & Links */
 
 a {
 	color: var(--accent);
@@ -139,9 +117,7 @@ a.icon:hover {
 	text-decoration: none;
 }
 
-/* ===========================
-   COMPONENTS
-   =========================== */
+/* Components */
 
 /* Tags */
 .item-tag {
@@ -166,11 +142,7 @@ a.icon:hover {
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* ===========================
-   PAGE-SPECIFIC STYLES
-   =========================== */
-
-/* About page */
+/* About Page */
 .about-pic {
 	width: 15vh;
 	height: 15vh;
@@ -217,9 +189,7 @@ a.icon:hover {
 	transform: translateY(-2px);
 }
 
-/* ===========================
-   NAVIGATION (Custom - non-Bootstrap)
-   =========================== */
+/* Navigation */
 
 .navbar-icon {
 	font-size: 1.35rem;
@@ -231,113 +201,17 @@ a.icon:hover {
 	font-weight: 700;
 }
 
-/* ===========================
-   RESPONSIVE DESIGN
-   =========================== */
-
-/* Mobile styles (max-width: 767px) */
-@media (max-width: 767px) {
-	body {
-		padding-top: 50px;
-	}
-
-	main {
-		padding: 10px;
-	}
-
-	.about-pic {
-		width: 10vh;
-		height: 10vh;
-	}
-
-	/* Download buttons responsive */
-	.download-buttons {
-		flex-direction: column;
-	}
-
-	.download-btn {
-		width: 100%;
-		justify-content: center;
-	}
-
-	/* Search - consolidated from multiple media queries */
-	/* Search toggle button visible on mobile */
-	.search-nav-item {
-		display: flex;
-	}
-
-	/* Blog - consolidated */
-	.blog-post-card {
-		padding: 1rem;
-		margin: 0.25rem;
-		text-align: center;
-	}
-
-	.blog-posts {
-		gap: 0.5rem;
-	}
-
-	.blog-post-title {
-		font-size: 1.25em;
-	}
-
-	.blog-post-meta {
-		flex-direction: column;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.95em;
-		justify-content: center;
-	}
-
-	.blog-post-excerpt {
-		font-size: 1em;
-	}
-
-	.blog-pagination .page-link {
-		padding: 0.4rem 0.6rem;
-		font-size: 0.9em;
-		min-width: 35px;
-	}
-}
-
-/* Tablet styles (481px - 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-	main {
-		padding: var(--spacing-md);
-		max-width: 100%;
-	}
-
-	.about-pic {
-		width: 12vh;
-		height: 12vh;
-	}
-
-	.about-content h1 {
-		font-size: 1.5em;
-	}
-}
-
-/* ===========================
-   SEARCH FUNCTIONALITY
-   =========================== */
-
-/* Search nav item - matches other navbar icons */
+/* Search */
 .search-nav-item {
 	position: relative;
 	display: flex;
 	align-items: center;
 }
 
-/* Search toggle button inherits styling from .nav-link */
-
-/* Search functionality - unified search page for all devices */
-
-/* Search results use blog-post-card styling for consistency */
 .search-result-item {
 	cursor: pointer;
 }
 
-/* Highlight matched text in search results */
 .search-result-item mark,
 .blog-post-card mark {
 	background-color: var(--accent);
@@ -347,7 +221,6 @@ a.icon:hover {
 	font-weight: bold;
 }
 
-/* No results message */
 .search-no-results {
 	padding: var(--spacing-xl);
 	text-align: center;
@@ -366,12 +239,7 @@ a.icon:hover {
 	font-size: 0.9em;
 }
 
-/* Mobile-specific search result styling - consolidated in main mobile media query below */
-
-/* ===========================
-   SEARCH PAGE (UNIFIED)
-   =========================== */
-/* Full screen search overlay - used for both mobile and desktop */
+/* Search Page */
 .search-page {
 	display: none;
 	position: fixed;
@@ -396,7 +264,6 @@ a.icon:hover {
 	animation: searchFadeOut 0.2s ease-in forwards;
 }
 
-/* Search page animations */
 @keyframes searchFadeIn {
 	from {
 		opacity: 0;
@@ -438,7 +305,6 @@ a.icon:hover {
 	max-width: 750px;
 }
 
-/* Slide-down animation for search header */
 @keyframes slideDown {
 	from {
 		transform: translateY(-100%);
@@ -528,7 +394,6 @@ a.icon:hover {
 	text-align: left;
 }
 
-/* Fade-in animation for search content */
 @keyframes fadeInContent {
 	from {
 		opacity: 0;
@@ -540,14 +405,7 @@ a.icon:hover {
 	}
 }
 
-/* Desktop styles (min-width: 768px) - consolidated */
-@media (min-width: 768px) {
-	.search-page-content {
-		padding: 2rem;
-	}
-}
-
-/* Project and iframe styling */
+/* Project */
 .project-title {
 	color: var(--accent);
 	font-size: 1.5em;
@@ -587,7 +445,7 @@ a.icon:hover {
 	max-width: 100%;
 }
 
-/* Loading and Error States */
+/* Loading & Error */
 .loading-spinner {
 	text-align: center;
 	padding: 2rem;
@@ -624,7 +482,7 @@ a.icon:hover {
 	font-size: 1.1em;
 }
 
-/* Download buttons container */
+/* Download Buttons */
 .download-buttons {
 	display: flex;
 	flex-wrap: wrap;
@@ -633,11 +491,10 @@ a.icon:hover {
 	justify-content: flex-start;
 }
 
-/* Download buttons - ordered by ascending specificity */
-/* Base styles (0,1,0) */
 .download-btn {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 8px;
 	padding: 12px 24px;
 	background-color: #2a2a2a;
@@ -651,7 +508,6 @@ a.icon:hover {
 	appearance: none;
 }
 
-/* Child element styles (0,1,1) */
 .download-btn i {
 	font-size: 1.5em;
 	transition:
@@ -663,7 +519,6 @@ a.icon:hover {
 	transition: color var(--transition-normal);
 }
 
-/* Pseudo-class states (0,2,0) */
 .download-btn:link,
 .download-btn:visited {
 	text-decoration: none;
@@ -689,7 +544,6 @@ a.icon:hover {
 	outline-offset: 2px;
 }
 
-/* Pseudo-class with child elements (0,2,1) - highest specificity */
 .download-btn:hover i {
 	transform: scale(1.1);
 	color: var(--accent);
@@ -700,7 +554,6 @@ a.icon:hover {
 	color: var(--accent);
 }
 
-/* Complex pseudo-class (0,3,0) */
 .download-btn:focus:not(:focus-visible) {
 	background-color: var(--hover-color);
 	border-color: var(--border-color);
@@ -710,7 +563,6 @@ a.icon:hover {
 	outline: none;
 }
 
-/* Markdown body specific styles for download buttons */
 .markdown-body .download-btn,
 .markdown-body .download-btn:link,
 .markdown-body .download-btn:visited {
@@ -723,11 +575,7 @@ a.icon:hover {
 	color: var(--accent);
 }
 
-/* ===========================
-   CODE STYLING
-   =========================== */
-
-/* Basic code styling (fallbacks) */
+/* Code */
 code {
 	padding: 2px 6px;
 	font-size: 0.9em;
@@ -751,20 +599,12 @@ pre code {
 	padding: 0;
 }
 
-/* ===========================
-   ZERO-MD V3 STYLING
-   =========================== */
-
-/* External container styling - only styles that can reach outside shadow DOM */
 zero-md {
 	display: block;
 	text-align: left;
 	width: 100%;
 	background-color: var(--background-color);
 }
-
-/* Note: All internal zero-md styling is injected via template data-append
-   because shadow DOM isolates styles. See Templates.zeroMd() in main.js */
 
 zero-md pre code:not([class*="language-"]) {
 	background-color: transparent;
@@ -774,17 +614,12 @@ zero-md pre code:not([class*="language-"]) {
 	color: var(--text-light);
 }
 
-/* ===========================
-   ACCESSIBILITY ENHANCEMENTS
-   =========================== */
-
-/* Improved focus indicators */
+/* Accessibility */
 *:focus {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
 
-/* Better focus for interactive elements */
 button:focus,
 a:focus,
 input:focus,
@@ -794,12 +629,10 @@ textarea:focus {
 	outline-offset: 2px;
 }
 
-/* Remove focus outline for mouse users, keep for keyboard */
 *:focus:not(:focus-visible) {
 	outline: none;
 }
 
-/* Reduce motion for users with vestibular disorders */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
@@ -811,7 +644,6 @@ textarea:focus {
 	}
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
 	:root {
 		--border-width: 3px;
@@ -819,9 +651,7 @@ textarea:focus {
 	}
 }
 
-/* ===========================
-   MARKDOWN CONTENT
-   =========================== */
+/* Markdown */
 
 .markdown-body {
 	font-family: var(--font-family-primary);
@@ -875,7 +705,6 @@ textarea:focus {
 	margin: 0.25em 0;
 }
 
-/* Code styling fallbacks for non-highlighted code */
 .markdown-body code:not([class*="language-"]) {
 	background-color: var(--hover-color);
 	color: var(--font-color);
@@ -904,7 +733,6 @@ textarea:focus {
 	color: var(--text-light);
 }
 
-/* Language-specific code styling */
 .markdown-body pre[class*="language-"] {
 	margin: 0.5em 0;
 	overflow-x: auto;
@@ -912,7 +740,6 @@ textarea:focus {
 	line-height: 1.4;
 }
 
-/* Highlight.js code styling - let hljs theme control all styling */
 .markdown-body pre code.hljs {
 	font-family: inherit;
 	padding: 1em;
@@ -971,11 +798,7 @@ textarea:focus {
 	margin: 0.5em 0;
 }
 
-/* ===========================
-   BLOG STYLES
-   =========================== */
-
-/* Blog container */
+/* Blog */
 .blog-container {
 	max-width: 750px;
 	margin: 0 auto;
@@ -996,7 +819,6 @@ textarea:focus {
 	padding: 2rem 0;
 }
 
-/* Blog post cards */
 .blog-posts {
 	display: flex;
 	flex-direction: column;
@@ -1066,7 +888,6 @@ textarea:focus {
 	font-size: 1.05em;
 }
 
-/* Blog pagination */
 .blog-pagination {
 	margin: 2rem 0;
 	display: flex;
@@ -1117,7 +938,6 @@ textarea:focus {
 	pointer-events: none;
 }
 
-/* Individual blog post */
 .blog-post-full {
 	max-width: 750px;
 	margin: 0 auto;
@@ -1156,13 +976,7 @@ textarea:focus {
 	transform: translateX(-4px);
 }
 
-/* Responsive blog styles - consolidated in main mobile media query above */
-
-/* ===========================
-   CUSTOM NAVBAR (Bootstrap Replacement)
-   =========================== */
-
-/* Navbar container */
+/* Navbar */
 .navbar {
 	background-color: var(--header-color);
 	border-bottom: var(--border-width) solid var(--accent);
@@ -1182,7 +996,6 @@ textarea:focus {
 	justify-content: space-between;
 }
 
-/* Navbar brand (mobile only) */
 .navbar-brand {
 	color: var(--header-font-color);
 	font-weight: bold;
@@ -1192,7 +1005,6 @@ textarea:focus {
 	padding: 11px 0;
 }
 
-/* Navbar toggle button (mobile only) */
 .navbar-toggle {
 	display: none;
 	background: transparent;
@@ -1217,7 +1029,6 @@ textarea:focus {
 	transform: scale(0.9);
 }
 
-/* Hamburger icon */
 .navbar-toggle-icon {
 	display: block;
 	width: 24px;
@@ -1247,7 +1058,6 @@ textarea:focus {
 	bottom: -8px;
 }
 
-/* Animated hamburger when menu is open */
 .navbar-toggle.active .navbar-toggle-icon {
 	background-color: transparent;
 }
@@ -1262,7 +1072,6 @@ textarea:focus {
 	bottom: 0;
 }
 
-/* Navbar collapse container */
 .navbar-collapse {
 	display: flex;
 	align-items: center;
@@ -1270,7 +1079,6 @@ textarea:focus {
 	width: 100%;
 }
 
-/* Navbar navigation */
 .navbar-nav {
 	display: flex;
 	list-style: none;
@@ -1287,14 +1095,12 @@ textarea:focus {
 	margin-left: auto;
 }
 
-/* Navbar items */
 .nav-item {
 	position: relative;
 	display: flex;
 	align-items: stretch;
 }
 
-/* Navbar links */
 .nav-link {
 	display: flex;
 	align-items: center;
@@ -1307,7 +1113,6 @@ textarea:focus {
 	font-weight: 700;
 }
 
-/* Reset button styling for button.nav-link */
 button.nav-link {
 	background: none;
 	border: none;
@@ -1344,7 +1149,6 @@ button.nav-link {
 	outline: none;
 }
 
-/* Dropdown */
 .dropdown {
 	position: relative;
 }
@@ -1367,7 +1171,6 @@ button.nav-link {
 	transform: rotate(180deg);
 }
 
-/* Dropdown menu */
 .dropdown-menu {
 	position: absolute;
 	top: 100%;
@@ -1414,9 +1217,7 @@ button.nav-link {
 	outline: none;
 }
 
-/* ===========================
-   CUSTOM FOOTER (Bootstrap Replacement)
-   =========================== */
+/* Footer */
 
 .footer {
 	margin-top: auto;
@@ -1439,12 +1240,95 @@ button.nav-link {
 	font-size: 0.9em;
 }
 
-/* ===========================
-   MOBILE STYLES (Custom Navbar)
-   =========================== */
+/* Tablet */
+@media (min-width: 481px) and (max-width: 768px) {
+	main {
+		padding: var(--spacing-md);
+		max-width: 100%;
+	}
 
+	.about-pic {
+		width: 12vh;
+		height: 12vh;
+	}
+
+	.about-content h1 {
+		font-size: 1.5em;
+	}
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+	.navbar-container {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.search-page-content {
+		padding: 2rem;
+	}
+}
+
+/* Mobile - All consolidated */
 @media (max-width: 767px) {
-	/* Show mobile brand and toggle */
+	body {
+		padding-top: 50px;
+	}
+
+	main {
+		padding: 10px;
+	}
+
+	.about-pic {
+		width: 10vh;
+		height: 10vh;
+	}
+
+	.download-buttons {
+		flex-direction: column;
+	}
+
+	.download-btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.search-nav-item {
+		display: flex;
+	}
+
+	.blog-post-card {
+		padding: 1rem;
+		margin: 0.25rem;
+		text-align: center;
+	}
+
+	.blog-posts {
+		gap: 0.5rem;
+	}
+
+	.blog-post-title {
+		font-size: 1.25em;
+	}
+
+	.blog-post-meta {
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.95em;
+		justify-content: center;
+	}
+
+	.blog-post-excerpt {
+		font-size: 1em;
+	}
+
+	.blog-pagination .page-link {
+		padding: 0.4rem 0.6rem;
+		font-size: 0.9em;
+		min-width: 35px;
+	}
+
 	.navbar-brand {
 		display: block;
 	}
@@ -1453,7 +1337,6 @@ button.nav-link {
 		display: block;
 	}
 
-	/* Mobile collapse behavior */
 	.navbar-collapse {
 		position: absolute;
 		top: 100%;
@@ -1475,7 +1358,6 @@ button.nav-link {
 		transition: max-height 0.8s ease-out;
 	}
 
-	/* Mobile nav layout */
 	.navbar-nav {
 		flex-direction: column;
 		width: 100%;
@@ -1488,7 +1370,6 @@ button.nav-link {
 		margin: 0;
 	}
 
-	/* Social icons horizontal on mobile */
 	.navbar-nav.right {
 		flex-direction: row;
 		justify-content: center;
@@ -1505,7 +1386,6 @@ button.nav-link {
 		height: auto;
 	}
 
-	/* Mobile nav items */
 	.navbar-nav.left .nav-item {
 		width: 100%;
 		height: auto;
@@ -1519,7 +1399,6 @@ button.nav-link {
 		justify-content: flex-start;
 	}
 
-	/* Mobile dropdown */
 	.dropdown {
 		display: flex;
 		flex-direction: column;
@@ -1555,13 +1434,5 @@ button.nav-link {
 		text-align: left;
 		white-space: normal;
 		word-wrap: break-word;
-	}
-}
-
-/* Desktop styles (min-width: 768px) */
-@media (min-width: 768px) {
-	.navbar-container {
-		padding-left: 20px;
-		padding-right: 20px;
 	}
 }
