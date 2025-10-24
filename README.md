@@ -7,6 +7,7 @@ It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicate
 Key features:
 - YAML configuration for easy content management
 - Built-in blog with markdown posts and pagination
+- **Markdown page system** - Create pages as markdown files in `/data/pages/`
 - Fuzzy search with MiniSearch across projects and blog posts
 - Dynamic color themes you can change in the config
 - Custom Font Awesome icon subset (only icons you use)
@@ -181,6 +182,31 @@ site:
 
 ### Pages & Styling
 
+**Two ways to create pages:**
+
+#### 1. **Markdown Pages (Recommended)**
+Create markdown files in `/data/pages/` for clean, maintainable content:
+
+**1. Create a markdown file** (e.g., `data/pages/about.md`):
+```markdown
+# About
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <img class="about-pic" 
+       src="https://example.com/your-photo.jpg" 
+       alt="Your name" 
+       loading="eager">
+</div>
+
+Your content here in markdown...
+
+## Skills
+- JavaScript
+- Python
+- React
+```
+
+**2. Configure page metadata** in `data/content.yaml`:
 ```yaml
 site:
   title: "Your Portfolio"
@@ -189,6 +215,21 @@ site:
   
 pages:
   about:
+    title: "About"
+    showInNav: true
+    order: 1
+    # Content is now loaded from /data/pages/about.md
+```
+
+#### 2. **YAML HTML Pages (Legacy)**
+For complex layouts, you can still use HTML in YAML:
+
+```yaml
+pages:
+  about:
+    title: "About"
+    showInNav: true
+    order: 1
     content: |
       <div class="about-content">
         <h1>Welcome!</h1>
