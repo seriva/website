@@ -72,6 +72,22 @@ The devcontainer includes Biome for code formatting and linting:
 - **Check code quality**: `Ctrl+Shift+P` → "Tasks: Run Task" → "Check Code Quality"
 - **Auto-format**: Enabled on save in VS Code
 
+### Testing
+
+The project includes essential unit tests using QUnit (no npm required):
+
+- **Run tests**: Open `tests.html` in your browser
+- **Test coverage**: Core utilities, templates, search, routing, and DOM functionality
+- **Mobile testing**: Responsive design validation
+
+**Test files:**
+- `tests.html` - Main test page with QUnit interface
+- `tests/test-utils.js` - Utility function tests (HTML escaping, title setting)
+- `tests/test-templates.js` - Template generation tests (navbar, pageLink, socialLink)
+- `tests/test-search.js` - Search functionality tests
+- `tests/test-routing.js` - SPA routing and URL parsing tests
+- `tests/test-dom.js` - DOM elements and responsive design tests
+
 ## Features & Configuration
 
 All content is managed through `data/content.yaml`. The configuration file supports:
