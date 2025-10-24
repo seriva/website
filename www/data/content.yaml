@@ -119,8 +119,7 @@ projects:
     description: "Frontend framework for web applications development using Node.js."
     tags:
       - "Node.js"
-      - "Javascript"
-      - "Microservices"
+      - "Javascript
     order: 3
     github_repo: "microtastic"
     links:
