@@ -300,6 +300,7 @@ a.icon:hover {
 	max-width: 750px;
 	margin: 0 auto;
 	line-height: 1.6;
+	color: var(--text-light);
 }
 
 .about-content h1 {
@@ -310,6 +311,7 @@ a.icon:hover {
 .about-content p {
 	margin-bottom: 1.5rem;
 	font-size: 1.1em;
+	color: var(--text-light);
 }
 
 .about-content strong {
