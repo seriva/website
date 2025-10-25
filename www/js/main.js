@@ -382,7 +382,7 @@ const Email = async (event) => {
 	event?.preventDefault?.();
 	event?.stopPropagation?.();
 	try {
-		const data = projectsData || (await loadProjectsData());
+		const data = projectsData || (await loadContent());
 		const email = data?.site?.email;
 		window.location.href = email
 			? `mailto:${email.name}@${email.domain}`
@@ -1005,9 +1005,8 @@ const getBasePath = () => {
 	return "";
 };
 
-const getData = async () => projectsData || (await loadProjectsData());
-
-const loadProjectsData = async () => {
+// Simplified content loading
+const loadContent = async () => {
 	if (projectsData) return projectsData;
 	if (dataLoadPromise) return dataLoadPromise;
 
@@ -1016,25 +1015,21 @@ const loadProjectsData = async () => {
 	dataLoadPromise = (async () => {
 		try {
 			const response = await fetch(yamlPath);
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
+			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
 			const yamlText = await response.text();
 			projectsData = YAML.parse(yamlText);
 
-			if (projectsData?.site?.colors) {
+			// Apply theming and i18n
+			if (projectsData?.site?.colors)
 				applyColorScheme(projectsData.site.colors);
-			}
-
-			// Initialize i18n
 			if (projectsData?.site?.i18n && projectsData?.translations) {
 				i18n.init(projectsData.site.i18n, projectsData.translations);
 			}
 
 			return projectsData;
 		} catch (error) {
-			console.error("Failed to load YAML content data:", error);
+			console.error("Failed to load content:", error);
 			projectsData = null;
 			dataLoadPromise = null;
 			return null;
@@ -1044,27 +1039,33 @@ const loadProjectsData = async () => {
 	return dataLoadPromise;
 };
 
+// Alias for backward compatibility
+const getData = loadContent;
+
 const applyColorScheme = (colors) => {
 	if (!colors) return;
 
-	const colorMappings = {
+	const root = document.documentElement;
+
+	// Direct mapping - cleaner and more maintainable
+	const mappings = {
 		"--accent": colors.primary,
 		"--font-color": colors.text,
 		"--background-color": colors.background,
 		"--header-color": colors.secondary,
-		"--header-font-color": colors.text,
-		"--text-color": colors.text,
 		"--text-light": colors.textLight,
 		"--border-color": colors.border,
 		"--hover-color": colors.hover,
 	};
 
-	const root = document.documentElement;
-	Object.entries(colorMappings).forEach(([property, value]) => {
-		if (value) root.style.setProperty(property, value);
+	Object.entries(mappings).forEach(([prop, value]) => {
+		if (value) root.style.setProperty(prop, value);
 	});
 
-	if (colors.code?.theme) applyHljsTheme(colors.code.theme);
+	// Apply syntax highlighting theme
+	if (colors.code?.theme) {
+		applyHljsTheme(colors.code.theme);
+	}
 };
 
 // Blog Management
@@ -1268,7 +1269,7 @@ const loadProjectLinks = async (projectId, containerId) => {
 	if (!container) return;
 
 	try {
-		const data = await loadProjectsData();
+		const data = await loadContent();
 		const project = data?.projects?.find((p) => p.id === projectId);
 		if (!project?.links) {
 			container.style.display = "none";
@@ -1323,7 +1324,7 @@ const loadProjectPage = async (projectId) => {
 	if (!DOMCache.main) return;
 
 	try {
-		const data = await loadProjectsData();
+		const data = await loadContent();
 		const project = data?.projects?.find((p) => p.id === projectId);
 
 		if (!project) {
@@ -1477,7 +1478,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Initialize marked.js with highlight.js
 		initializeMarked();
 
-		const data = await loadProjectsData();
+		const data = await loadContent();
 		if (data?.site) updateMetaTags(data.site);
 
 		await injectNavbar();
