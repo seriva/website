@@ -1105,43 +1105,89 @@ const applyColorScheme = (colors) => {
 };
 
 // ===========================================
-// BLOG MANAGEMENT
+// UNIFIED MARKDOWN SYSTEM
 // ===========================================
 
-const parseBlogPost = (markdown) => {
-	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
-	const match = markdown.match(frontmatterRegex);
-
-	if (!match) {
-		return { metadata: {}, content: markdown };
-	}
-
-	const [, frontmatter, content] = match;
-	const metadata = {};
-
-	frontmatter.split("\n").forEach((line) => {
-		const [key, ...valueParts] = line.split(":");
-		if (key && valueParts.length) {
-			const value = valueParts.join(":").trim();
-			// Handle arrays in frontmatter
-			if (value.startsWith("[") && value.endsWith("]")) {
-				try {
-					metadata[key.trim()] = JSON.parse(value.replace(/'/g, '"'));
-				} catch (e) {
-					console.warn(
-						`Failed to parse array in frontmatter for key: ${key}`,
-						e,
-					);
-					metadata[key.trim()] = value;
-				}
-			} else {
-				metadata[key.trim()] = value.replace(/^["']|["']$/g, "");
-			}
+const MarkdownLoader = {
+	// Load markdown file from any path
+	async loadFile(path) {
+		try {
+			const response = await fetch(`${getBasePath()}${path}`);
+			if (!response.ok) return null;
+			return response.text();
+		} catch (error) {
+			console.error(`Error loading markdown file: ${path}`, error);
+			return null;
 		}
-	});
+	},
 
-	return { metadata, content: content.trim() };
+	// Parse frontmatter from markdown content
+	parseFrontmatter(markdown) {
+		const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+		const match = markdown.match(frontmatterRegex);
+
+		if (!match) {
+			return { metadata: {}, content: markdown };
+		}
+
+		const [, frontmatter, content] = match;
+		const metadata = {};
+
+		frontmatter.split("\n").forEach((line) => {
+			const [key, ...valueParts] = line.split(":");
+			if (key && valueParts.length) {
+				const value = valueParts.join(":").trim();
+				// Handle arrays in frontmatter
+				if (value.startsWith("[") && value.endsWith("]")) {
+					try {
+						metadata[key.trim()] = JSON.parse(value.replace(/'/g, '"'));
+					} catch (e) {
+						console.warn(
+							`Failed to parse array in frontmatter for key: ${key}`,
+							e,
+						);
+						metadata[key.trim()] = value;
+					}
+				} else {
+					metadata[key.trim()] = value.replace(/^["']|["']$/g, "");
+				}
+			}
+		});
+
+		return { metadata, content: content.trim() };
+	},
+
+	// Load and parse markdown with frontmatter
+	async loadWithFrontmatter(path) {
+		const markdown = await this.loadFile(path);
+		if (!markdown) return null;
+		return this.parseFrontmatter(markdown);
+	},
+
+	// Load markdown and render to HTML
+	async loadAsHtml(path) {
+		const markdown = await this.loadFile(path);
+		if (!markdown) return null;
+		return Templates.markdown(markdown).content || Templates.markdown(markdown);
+	},
+
+	// Load markdown with frontmatter and render content to HTML
+	async loadWithFrontmatterAsHtml(path) {
+		const result = await this.loadWithFrontmatter(path);
+		if (!result) return null;
+		return {
+			metadata: result.metadata,
+			html:
+				Templates.markdown(result.content).content ||
+				Templates.markdown(result.content),
+			content: result.content,
+		};
+	},
 };
+
+// ===========================================
+// BLOG MANAGEMENT
+// ===========================================
 
 const loadBlogPosts = async () => {
 	try {
@@ -1171,10 +1217,14 @@ const processBlogPost = async (post) => {
 	}
 
 	// Parse markdown file for metadata
-	const markdown = await fetchMarkdownFile(filename);
-	const { metadata, content } = parseBlogPost(markdown);
+	const result = await MarkdownLoader.loadWithFrontmatter(
+		`data/blog/${filename}`,
+	);
+	if (!result) {
+		throw new Error(`Blog post not found: ${filename}`);
+	}
 
-	return createPostObject(slug, metadata, filename, content);
+	return createPostObject(slug, result.metadata, filename, result.content);
 };
 
 const createPostObject = (slug, data, filename, content = null) => ({
@@ -1186,14 +1236,6 @@ const createPostObject = (slug, data, filename, content = null) => ({
 	content,
 	filename,
 });
-
-const fetchMarkdownFile = async (filename) => {
-	const response = await fetch(`${getBasePath()}data/blog/${filename}`);
-	if (!response.ok) {
-		throw new Error(`Blog post not found: ${filename}`);
-	}
-	return response.text();
-};
 
 const loadBlogPage = async (page = 1) => {
 	if (!DOMCache.main) return;
@@ -1285,17 +1327,10 @@ const loadBlogPostContent = async (post) => {
 	if (post.content) return post.content;
 	if (!post.filename) return null;
 
-	try {
-		const response = await fetch(`${getBasePath()}data/blog/${post.filename}`);
-		if (!response.ok) return null;
-
-		const markdown = await response.text();
-		const parsed = parseBlogPost(markdown);
-		return parsed.content;
-	} catch (error) {
-		console.error(`Error loading blog post content: ${post.filename}`, error);
-		return null;
-	}
+	const result = await MarkdownLoader.loadWithFrontmatter(
+		`data/blog/${post.filename}`,
+	);
+	return result?.content || null;
 };
 
 // ===========================================
@@ -1352,17 +1387,7 @@ const loadPage = async (pageId) => {
 };
 
 const loadMarkdownContent = async (pageId) => {
-	try {
-		const response = await fetch(`${getBasePath()}data/pages/${pageId}.md`);
-		if (!response.ok) return null;
-
-		const markdown = await response.text();
-		const result = Templates.markdown(markdown);
-		return result.content || result;
-	} catch (error) {
-		console.error(`Error loading markdown page ${pageId}:`, error);
-		return null;
-	}
+	return await MarkdownLoader.loadAsHtml(`data/pages/${pageId}.md`);
 };
 
 const loadProjectPage = async (projectId) => {
