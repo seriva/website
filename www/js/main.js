@@ -1,19 +1,25 @@
-// Constants
+// ===========================================
+// CONSTANTS & CONFIGURATION
+// ===========================================
+
 const CONSTANTS = {
 	HLJS_CDN_BASE: "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/",
-	DEFAULT_THEME: "github-dark", // Highlight.js theme
+	DEFAULT_THEME: "github-dark",
 	DEFAULT_TITLE: "portfolio.example.com",
 	DEFAULT_EMAIL: "contact@example.com",
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
 	MOBILE_BREAKPOINT: 767,
 	SEARCH_DEBOUNCE_MS: 300,
-	PAGE_TRANSITION_DELAY: 200, // Reduced from 300ms for snappier transitions
+	PAGE_TRANSITION_DELAY: 200,
 	SEARCH_PAGE_CLOSE_DELAY: 200,
 	SEARCH_MIN_CHARS: 2,
 	SEARCH_MAX_RESULTS: 8,
 };
 
-// Utility Functions
+// ===========================================
+// UTILITY FUNCTIONS
+// ===========================================
+
 const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
@@ -35,7 +41,10 @@ const html = (strings, ...values) => {
 
 const safe = (content) => ({ __safe: true, content });
 
-// Internationalization (i18n)
+// ===========================================
+// INTERNATIONALIZATION (i18n)
+// ===========================================
+
 const i18n = {
 	currentLanguage: null,
 	translations: {},
@@ -62,7 +71,10 @@ const i18n = {
 	},
 };
 
-// HTML Templates
+// ===========================================
+// HTML TEMPLATES
+// ===========================================
+
 const Templates = {
 	navbar: (
 		blogLink,
@@ -348,9 +360,25 @@ const Templates = {
             <i class="fas fa-search"></i>
             <p>${i18n.t("search.noResults")}</p>
         </div>`,
+
+	blogEmpty: () => html`
+        <div class="blog-container">
+            <p class="blog-empty">${i18n.t("blog.noPosts")}</p>
+        </div>`,
+
+	blogContainer: (postsHtml, paginationHtml) => html`
+        <div class="blog-container">
+            <div class="blog-posts">
+                ${safe(postsHtml)}
+            </div>
+            ${safe(paginationHtml)}
+        </div>`,
 };
 
-// Application Code
+// ===========================================
+// MARKDOWN & SYNTAX HIGHLIGHTING
+// ===========================================
+
 const getHljsThemeUrl = (themeName) =>
 	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
 
@@ -502,7 +530,10 @@ const initMobileMenuToggle = () => {
 	}
 };
 
-// Search Functionality
+// ===========================================
+// SEARCH FUNCTIONALITY
+// ===========================================
+
 const Search = {
 	data: [],
 	fuse: null,
@@ -637,7 +668,10 @@ const searchByTag = (tag) => {
 
 window.searchByTag = searchByTag;
 
-// GitHub API Integration
+// ===========================================
+// GITHUB API INTEGRATION
+// ===========================================
+
 const fetchGitHubReadme = async (repoName) => {
 	if (!repoName) return null;
 	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
@@ -694,12 +728,18 @@ const loadGitHubReadme = async (repoName, containerId) => {
 	}
 };
 
-// State Management
+// ===========================================
+// STATE MANAGEMENT
+// ===========================================
+
 let projectsData = null;
 let dataLoadPromise = null;
 const readmeCache = new Map();
 
-// DOM Management
+// ===========================================
+// DOM MANAGEMENT
+// ===========================================
+
 const DOMCache = {
 	navbar: null,
 	main: null,
@@ -766,7 +806,10 @@ const DOMCache = {
 	},
 };
 
-// Navigation & UI Functions
+// ===========================================
+// NAVIGATION & UI FUNCTIONS
+// ===========================================
+
 const createNavbar = (
 	pages = [],
 	socialLinks = [],
@@ -991,7 +1034,10 @@ const initializeSearchPage = (searchConfig) => {
 	});
 };
 
-// Data Loading & Management
+// ===========================================
+// DATA LOADING & MANAGEMENT
+// ===========================================
+
 const getBasePath = () => {
 	// Detect if we're in a subdirectory (not at root)
 	const pathname = window.location.pathname;
@@ -1068,7 +1114,10 @@ const applyColorScheme = (colors) => {
 	}
 };
 
-// Blog Management
+// ===========================================
+// BLOG MANAGEMENT
+// ===========================================
+
 const parseBlogPost = (markdown) => {
 	const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 	const match = markdown.match(frontmatterRegex);
@@ -1183,10 +1232,7 @@ const loadBlogPage = async (page = 1) => {
 	const pagePosts = posts.slice(startIndex, endIndex);
 
 	if (pagePosts.length === 0) {
-		DOMCache.main.innerHTML = `
-			<div class="blog-container">
-				<p class="blog-empty">No blog posts yet. Check back soon!</p>
-			</div>`;
+		DOMCache.main.innerHTML = Templates.blogEmpty();
 		return;
 	}
 
@@ -1196,13 +1242,7 @@ const loadBlogPage = async (page = 1) => {
 
 	const paginationHtml = Templates.blogPagination(currentPage, totalPages);
 
-	DOMCache.main.innerHTML = `
-		<div class="blog-container">
-			<div class="blog-posts">
-				${postsHtml}
-			</div>
-			${paginationHtml}
-		</div>`;
+	DOMCache.main.innerHTML = Templates.blogContainer(postsHtml, paginationHtml);
 
 	// Make entire blog cards clickable
 	document.querySelectorAll(".blog-post-card").forEach((card) => {
@@ -1261,7 +1301,10 @@ const loadBlogPost = async (slug) => {
 	// SPA routing handled via event delegation
 };
 
-// Project Management
+// ===========================================
+// PROJECT MANAGEMENT
+// ===========================================
+
 const loadProjectLinks = async (projectId, containerId) => {
 	if (!projectId || !containerId) return;
 
@@ -1402,7 +1445,10 @@ const loadAdditionalContent = async () => {
 	}
 };
 
-// Routing & Page Management
+// ===========================================
+// ROUTING & PAGE MANAGEMENT
+// ===========================================
+
 const handleRoute = async () => {
 	closeMobileMenu();
 
@@ -1470,7 +1516,10 @@ const handleRoute = async () => {
 	}
 };
 
-// Application Initialization
+// ===========================================
+// APPLICATION INITIALIZATION
+// ===========================================
+
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		DOMCache.init();
