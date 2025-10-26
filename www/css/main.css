@@ -64,6 +64,20 @@
 html {
 	height: 100%;
 	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+/* Ensure scrollbar space is always reserved */
+html::after {
+	content: "";
+	display: block;
+	height: 101vh;
+	width: 1px;
+	position: absolute;
+	top: 0;
+	left: -1px;
+	pointer-events: none;
+	visibility: hidden;
 }
 
 *,
