@@ -750,7 +750,7 @@ const DOM = {
 
 	// Clear specific cache entries
 	clear(...ids) {
-		ids.forEach((id) => this.cache.delete(id));
+		ids.forEach((id) => void this.cache.delete(id));
 	},
 
 	// Clear all cache
