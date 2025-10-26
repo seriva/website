@@ -424,7 +424,7 @@ const Email = async (event) => {
 	event?.preventDefault?.();
 	event?.stopPropagation?.();
 	try {
-		const data = projectsData || (await loadContent());
+		const data = projectsData || (await getData());
 		const email = data?.site?.email;
 		window.location.href = email
 			? `mailto:${email.name}@${email.domain}`
@@ -590,22 +590,8 @@ const Search = {
 					);
 				}
 
-				// Index blog posts using metadata from YAML (no need to load markdown files)
+				// Index blog posts using metadata from YAML
 				const blogPostsIndexed = blogPosts.map((p) => {
-					// Support both old format (string) and new format (object with metadata)
-					if (typeof p === "string") {
-						// Old format: just filename, derive slug
-						const slug = p.replace(/\.md$/, "");
-						return {
-							id: slug,
-							title: slug,
-							description: "",
-							tags: [],
-							type: "blog",
-							url: `/?blog=${slug}`,
-						};
-					}
-					// New format: object with metadata
 					const slug = p.filename.replace(/\.md$/, "");
 					return {
 						id: slug,
@@ -1022,7 +1008,7 @@ const getBasePath = () => {
 };
 
 // Simplified content loading
-const loadContent = async () => {
+const getData = async () => {
 	if (projectsData) return projectsData;
 	if (dataLoadPromise) return dataLoadPromise;
 
@@ -1054,9 +1040,6 @@ const loadContent = async () => {
 
 	return dataLoadPromise;
 };
-
-// Alias for backward compatibility
-const getData = loadContent;
 
 const applyColorScheme = (colors) => {
 	if (!colors) return;
@@ -1188,23 +1171,11 @@ const loadBlogPosts = async () => {
 };
 
 const processBlogPost = async (post) => {
-	const filename = typeof post === "string" ? post : post.filename;
+	const filename = post.filename;
 	const slug = filename.replace(/\.md$/, "");
 
-	// Use YAML metadata if available
-	if (typeof post === "object" && post.title) {
-		return createPostObject(slug, post, filename);
-	}
-
-	// Parse markdown file for metadata
-	const result = await MarkdownLoader.loadWithFrontmatter(
-		`data/blog/${filename}`,
-	);
-	if (!result) {
-		throw new Error(`Blog post not found: ${filename}`);
-	}
-
-	return createPostObject(slug, result.metadata, filename, result.content);
+	// Use YAML metadata
+	return createPostObject(slug, post, filename);
 };
 
 const createPostObject = (slug, data, filename, content = null) => ({
@@ -1324,7 +1295,7 @@ const loadProjectLinks = async (projectId, containerId) => {
 	if (!container) return;
 
 	const data = await safeAsync(
-		() => loadContent(),
+		() => getData(),
 		null,
 		`Error loading content for project ${projectId}`,
 	);
@@ -1378,7 +1349,7 @@ const loadProjectPage = async (projectId) => {
 	if (!DOM.get("main-content")) return;
 
 	try {
-		const data = await loadContent();
+		const data = await getData();
 		const project = data?.projects?.find((p) => p.id === projectId);
 
 		if (!project) {
@@ -1557,7 +1528,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Initialize marked.js with highlight.js
 		initializeMarked();
 
-		const data = await loadContent();
+		const data = await getData();
 		if (data?.site) updateMetaTags(data.site);
 
 		await injectNavbar();
