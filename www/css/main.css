@@ -100,7 +100,7 @@ main {
 	animation: fadeIn 0.2s ease-in-out;
 }
 
-/* Page transition animation */
+/* Page transition animations */
 @keyframes fadeIn {
 	from {
 		opacity: 0;
@@ -175,13 +175,10 @@ a.icon:hover {
 .fas,
 .far,
 .fab {
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
 	display: inline-block;
 	font-style: normal;
 	font-variant: normal;
 	line-height: 1;
-	text-rendering: auto;
 }
 
 .fas,
@@ -359,7 +356,7 @@ a.icon:hover {
 	overflow: hidden;
 	opacity: 0;
 	transform: scale(0.95);
-	animation: searchFadeIn 0.25s ease-out forwards;
+	animation: scaleFadeIn 0.25s ease-out forwards;
 }
 
 .search-page.show {
@@ -367,10 +364,10 @@ a.icon:hover {
 }
 
 .search-page.closing {
-	animation: searchFadeOut 0.2s ease-in forwards;
+	animation: scaleFadeOut 0.2s ease-in forwards;
 }
 
-@keyframes searchFadeIn {
+@keyframes scaleFadeIn {
 	from {
 		opacity: 0;
 		transform: scale(0.95);
@@ -381,7 +378,7 @@ a.icon:hover {
 	}
 }
 
-@keyframes searchFadeOut {
+@keyframes scaleFadeOut {
 	from {
 		opacity: 1;
 		transform: scale(1);
@@ -488,7 +485,7 @@ a.icon:hover {
 	padding: 1rem;
 	display: flex;
 	justify-content: center;
-	animation: fadeInContent 0.4s ease-out 0.1s both;
+	animation: fadeIn 0.4s ease-out 0.1s both;
 }
 
 .search-page-results {
@@ -498,17 +495,6 @@ a.icon:hover {
 	width: 100%;
 	max-width: 750px;
 	text-align: left;
-}
-
-@keyframes fadeInContent {
-	from {
-		opacity: 0;
-		transform: translateY(10px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
 }
 
 /* Project */
@@ -724,11 +710,6 @@ zero-md pre code:not([class*="language-"]) {
 }
 
 /* Accessibility */
-*:focus {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
-}
-
 button:focus,
 a:focus,
 input:focus,
@@ -1225,6 +1206,7 @@ button.nav-link {
 .nav-link:active {
 	color: var(--accent);
 	background-color: rgba(255, 255, 255, 0.1);
+	transform: scale(1.05);
 }
 
 .nav-link.active {
@@ -1338,7 +1320,7 @@ button.nav-link {
 	font-size: 0.9em;
 }
 
-/* Tablet */
+/* Responsive Design */
 @media (min-width: 481px) and (max-width: 768px) {
 	main {
 		padding: var(--spacing-md);
@@ -1351,7 +1333,6 @@ button.nav-link {
 	}
 }
 
-/* Desktop */
 @media (min-width: 768px) {
 	.navbar-container {
 		padding-left: 20px;
@@ -1363,7 +1344,7 @@ button.nav-link {
 	}
 }
 
-/* Mobile - All consolidated */
+/* Mobile */
 @media (max-width: 767px) {
 	body {
 		padding-top: 50px;
