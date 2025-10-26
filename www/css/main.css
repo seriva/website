@@ -65,6 +65,7 @@ html {
 	height: 100%;
 	overflow-x: hidden;
 	overflow-y: scroll;
+	scroll-behavior: smooth;
 }
 
 /* Ensure scrollbar space is always reserved */
@@ -143,6 +144,8 @@ main.page-transition-out {
 
 img {
 	max-width: 100%;
+	opacity: 0;
+	animation: imageLoad 0.3s ease-in-out forwards;
 }
 
 /* Typography & Links */
@@ -193,6 +196,13 @@ a.icon:hover {
 	font-style: normal;
 	font-variant: normal;
 	line-height: 1;
+	transition: transform var(--transition-fast);
+}
+
+.fas:hover,
+.far:hover,
+.fab:hover {
+	transform: rotate(5deg) scale(1.1);
 }
 
 .fas,
@@ -403,6 +413,17 @@ a.icon:hover {
 	}
 }
 
+@keyframes imageLoad {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
 .search-page-header {
 	display: flex;
 	align-items: center;
@@ -471,6 +492,9 @@ a.icon:hover {
 	outline: none;
 	border-color: var(--accent);
 	background-color: var(--background-color);
+	transform: scale(1.02);
+	box-shadow: 0 0 0 3px rgba(66, 155, 238, 0.1);
+	transition: all var(--transition-fast);
 }
 
 .search-page-clear {
@@ -641,7 +665,7 @@ a.icon:hover {
 }
 
 .download-btn:active {
-	transform: translateY(0);
+	transform: translateY(0) scale(0.95);
 	text-decoration: none;
 }
 
@@ -942,8 +966,8 @@ textarea:focus {
 .blog-post-card:hover {
 	background-color: rgba(255, 255, 255, 0.05);
 	border-color: var(--accent);
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.2);
+	transform: translateY(-4px) scale(1.01);
+	box-shadow: 0 8px 25px rgba(66, 155, 238, 0.15);
 }
 
 .blog-post-title {
@@ -1213,6 +1237,11 @@ button.nav-link {
 	font-family: inherit;
 	font-size: inherit;
 	width: auto;
+	transition: transform 0.1s ease;
+}
+
+button.nav-link:active {
+	transform: scale(0.95);
 }
 
 .nav-link:hover,
@@ -1258,6 +1287,7 @@ button.nav-link {
 	font-weight: 900;
 	font-size: 0.8em;
 	transition: transform var(--transition-fast);
+	transform-origin: center;
 }
 
 .dropdown.show .dropdown-toggle::after {
@@ -1274,13 +1304,18 @@ button.nav-link {
 	padding: 0;
 	margin: 0;
 	list-style: none;
-	display: none;
 	z-index: var(--z-dropdown);
 	box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-5px);
+	transition: all 0.2s ease;
 }
 
 .dropdown.show .dropdown-menu {
-	display: block;
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
 }
 
 .dropdown-item {
