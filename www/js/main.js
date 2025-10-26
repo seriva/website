@@ -1465,6 +1465,9 @@ const loadAdditionalContent = async () => {
 // ROUTING & PAGE MANAGEMENT
 // ===========================================
 
+// Track current route to prevent unnecessary reloads
+let currentRoute = null;
+
 const handleRoute = async () => {
 	closeMobileMenu();
 
@@ -1494,6 +1497,13 @@ const handleRoute = async () => {
 		blog: params.get("blog"),
 		blogPage: params.get("p") ? parseInt(params.get("p"), 10) : 1,
 	};
+
+	// Check if we're navigating to the same route
+	const routeString = JSON.stringify(route);
+	if (currentRoute === routeString) {
+		return;
+	}
+	currentRoute = routeString;
 
 	await startTransition();
 
