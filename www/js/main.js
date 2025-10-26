@@ -676,38 +676,34 @@ const fetchGitHubReadme = async (repoName) => {
 	if (!repoName) return null;
 	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
 
-	try {
-		const data = await getData();
-		const username = data?.site?.github_username;
-		if (!username) {
-			console.warn("No GitHub username configured in content.yaml");
-			readmeCache.set(repoName, null);
-			return null;
-		}
-
-		const branches = ["master", "main"];
-
-		for (const branch of branches) {
-			try {
-				const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
-				const response = await fetch(url);
-				if (response.ok) {
-					const content = await response.text();
-					readmeCache.set(repoName, content);
-					return content;
-				}
-			} catch {
-				// Try next branch
-			}
-		}
-
-		readmeCache.set(repoName, null);
-		return null;
-	} catch (error) {
-		console.error(`Error fetching README for ${repoName}:`, error);
+	const data = await getData();
+	const username = data?.site?.github_username;
+	if (!username) {
+		console.warn("No GitHub username configured in content.yaml");
 		readmeCache.set(repoName, null);
 		return null;
 	}
+
+	const branches = ["master", "main"];
+	for (const branch of branches) {
+		try {
+			const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
+			const response = await fetch(url);
+			if (response.ok) {
+				const content = await response.text();
+				readmeCache.set(repoName, content);
+				return content;
+			}
+		} catch (error) {
+			console.warn(
+				`Failed to fetch README from ${branch} branch for ${repoName}:`,
+				error,
+			);
+		}
+	}
+
+	readmeCache.set(repoName, null);
+	return null;
 };
 
 const loadGitHubReadme = async (repoName, containerId) => {
@@ -716,16 +712,10 @@ const loadGitHubReadme = async (repoName, containerId) => {
 	const container = document.getElementById(containerId);
 	if (!container) return;
 
-	try {
-		const content = await fetchGitHubReadme(repoName);
-
-		container.innerHTML = content
-			? Templates.markdown(content).content
-			: Templates.githubReadmeError();
-	} catch (error) {
-		console.error(`Error loading GitHub README for ${repoName}:`, error);
-		container.innerHTML = Templates.githubReadmeError();
-	}
+	const content = await fetchGitHubReadme(repoName);
+	container.innerHTML = content
+		? Templates.markdown(content).content
+		: Templates.githubReadmeError();
 };
 
 // ===========================================
@@ -1157,61 +1147,52 @@ const loadBlogPosts = async () => {
 	try {
 		const data = await getData();
 		const postFiles = data?.blog?.posts || [];
-
 		if (postFiles.length === 0) return [];
 
-		// Use Promise.allSettled for better error resilience
-		const results = await Promise.allSettled(
-			postFiles.map(async (post) => {
-				// Support both old format (string) and new format (object with metadata)
-				const filename = typeof post === "string" ? post : post.filename;
-				const slug = filename.replace(/\.md$/, "");
-
-				// If we have metadata in YAML, use it to avoid parsing markdown
-				if (typeof post === "object" && post.title) {
-					return {
-						slug,
-						title: post.title,
-						date: post.date || "",
-						excerpt: post.excerpt || "",
-						tags: post.tags || [],
-						content: null, // Don't load content for listing page
-						filename,
-					};
-				}
-
-				// Old format: fetch and parse markdown file for metadata
-				const response = await fetch(`${getBasePath()}data/blog/${filename}`);
-				if (!response.ok) {
-					throw new Error(`Blog post not found: ${filename}`);
-				}
-
-				const markdown = await response.text();
-				const { metadata, content } = parseBlogPost(markdown);
-
-				return {
-					slug,
-					title: metadata.title || "Untitled",
-					date: metadata.date || "",
-					excerpt: metadata.excerpt || "",
-					tags: metadata.tags || [],
-					content,
-					filename,
-				};
-			}),
-		);
-
-		// Extract successful results
+		const results = await Promise.allSettled(postFiles.map(processBlogPost));
 		const posts = results
 			.filter((result) => result.status === "fulfilled")
 			.map((result) => result.value);
 
-		// Sort by date (newest first)
 		return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 	} catch (error) {
 		console.error("Error loading blog posts:", error);
 		return [];
 	}
+};
+
+const processBlogPost = async (post) => {
+	const filename = typeof post === "string" ? post : post.filename;
+	const slug = filename.replace(/\.md$/, "");
+
+	// Use YAML metadata if available
+	if (typeof post === "object" && post.title) {
+		return createPostObject(slug, post, filename);
+	}
+
+	// Parse markdown file for metadata
+	const markdown = await fetchMarkdownFile(filename);
+	const { metadata, content } = parseBlogPost(markdown);
+
+	return createPostObject(slug, metadata, filename, content);
+};
+
+const createPostObject = (slug, data, filename, content = null) => ({
+	slug,
+	title: data.title || "Untitled",
+	date: data.date || "",
+	excerpt: data.excerpt || "",
+	tags: data.tags || [],
+	content,
+	filename,
+});
+
+const fetchMarkdownFile = async (filename) => {
+	const response = await fetch(`${getBasePath()}data/blog/${filename}`);
+	if (!response.ok) {
+		throw new Error(`Blog post not found: ${filename}`);
+	}
+	return response.text();
 };
 
 const loadBlogPage = async (page = 1) => {
@@ -1223,31 +1204,48 @@ const loadBlogPage = async (page = 1) => {
 	DOMCache.main.innerHTML = Templates.loadingSpinner();
 
 	const posts = await loadBlogPosts();
-	const postsPerPage = data?.blog?.postsPerPage || 5;
-	const totalPages = Math.ceil(posts.length / postsPerPage);
-	const currentPage = Math.max(1, Math.min(page, totalPages));
+	const pagination = calculatePagination(
+		posts,
+		page,
+		data?.blog?.postsPerPage || 5,
+	);
 
-	const startIndex = (currentPage - 1) * postsPerPage;
-	const endIndex = startIndex + postsPerPage;
-	const pagePosts = posts.slice(startIndex, endIndex);
-
-	if (pagePosts.length === 0) {
+	if (pagination.pagePosts.length === 0) {
 		DOMCache.main.innerHTML = Templates.blogEmpty();
 		return;
 	}
 
-	const postsHtml = pagePosts
-		.map((post, index) => Templates.blogPostCard(post, startIndex + index))
+	const postsHtml = pagination.pagePosts
+		.map((post, index) =>
+			Templates.blogPostCard(post, pagination.startIndex + index),
+		)
 		.join("");
 
-	const paginationHtml = Templates.blogPagination(currentPage, totalPages);
+	DOMCache.main.innerHTML = Templates.blogContainer(
+		postsHtml,
+		Templates.blogPagination(pagination.currentPage, pagination.totalPages),
+	);
 
-	DOMCache.main.innerHTML = Templates.blogContainer(postsHtml, paginationHtml);
+	setupBlogCardClicks();
+};
 
-	// Make entire blog cards clickable
+const calculatePagination = (posts, page, postsPerPage) => {
+	const totalPages = Math.ceil(posts.length / postsPerPage);
+	const currentPage = Math.max(1, Math.min(page, totalPages));
+	const startIndex = (currentPage - 1) * postsPerPage;
+	const endIndex = startIndex + postsPerPage;
+
+	return {
+		totalPages,
+		currentPage,
+		startIndex,
+		pagePosts: posts.slice(startIndex, endIndex),
+	};
+};
+
+const setupBlogCardClicks = () => {
 	document.querySelectorAll(".blog-post-card").forEach((card) => {
 		card.addEventListener("click", (e) => {
-			// Don't trigger if clicking on a link or tag
 			if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
 
 			const link = card.querySelector(".blog-post-title a");
@@ -1258,7 +1256,6 @@ const loadBlogPage = async (page = 1) => {
 			}
 		});
 	});
-	// SPA routing handled via event delegation
 };
 
 const loadBlogPost = async (slug) => {
@@ -1280,25 +1277,25 @@ const loadBlogPost = async (slug) => {
 		return;
 	}
 
-	// Load content if not already loaded (for YAML metadata posts)
-	let content = post.content;
-	if (!content && post.filename) {
-		try {
-			const response = await fetch(
-				`${getBasePath()}data/blog/${post.filename}`,
-			);
-			if (response.ok) {
-				const markdown = await response.text();
-				const parsed = parseBlogPost(markdown);
-				content = parsed.content;
-			}
-		} catch (error) {
-			console.error(`Error loading blog post content: ${post.filename}`, error);
-		}
-	}
-
+	const content = await loadBlogPostContent(post);
 	DOMCache.main.innerHTML = Templates.blogPost(post, content);
-	// SPA routing handled via event delegation
+};
+
+const loadBlogPostContent = async (post) => {
+	if (post.content) return post.content;
+	if (!post.filename) return null;
+
+	try {
+		const response = await fetch(`${getBasePath()}data/blog/${post.filename}`);
+		if (!response.ok) return null;
+
+		const markdown = await response.text();
+		const parsed = parseBlogPost(markdown);
+		return parsed.content;
+	} catch (error) {
+		console.error(`Error loading blog post content: ${post.filename}`, error);
+		return null;
+	}
 };
 
 // ===========================================
@@ -1314,13 +1311,14 @@ const loadProjectLinks = async (projectId, containerId) => {
 	try {
 		const data = await loadContent();
 		const project = data?.projects?.find((p) => p.id === projectId);
+
 		if (!project?.links) {
 			container.style.display = "none";
 			return;
 		}
 
 		container.innerHTML = Templates.projectLinksSection(
-			project.links.map((link) => Templates.projectLink(link)).join(""),
+			project.links.map(Templates.projectLink).join(""),
 		);
 	} catch (error) {
 		console.error(`Error loading project links for ${projectId}:`, error);
@@ -1335,18 +1333,8 @@ const loadPage = async (pageId) => {
 		const data = await getData();
 		setDocumentTitle(data);
 
-		// Load content from markdown file
-		let content = null;
-		try {
-			const response = await fetch(`${getBasePath()}data/pages/${pageId}.md`);
-			if (response.ok) {
-				const markdown = await response.text();
-				const markdownResult = Templates.markdown(markdown);
-				content = markdownResult.content || markdownResult;
-			}
-		} catch (error) {
-			console.error(`Error loading markdown page ${pageId}:`, error);
-		}
+		// Load markdown content
+		const content = await loadMarkdownContent(pageId);
 
 		DOMCache.main.innerHTML =
 			content ||
@@ -1360,6 +1348,20 @@ const loadPage = async (pageId) => {
 			i18n.t("general.error"),
 			i18n.t("general.errorMessage"),
 		);
+	}
+};
+
+const loadMarkdownContent = async (pageId) => {
+	try {
+		const response = await fetch(`${getBasePath()}data/pages/${pageId}.md`);
+		if (!response.ok) return null;
+
+		const markdown = await response.text();
+		const result = Templates.markdown(markdown);
+		return result.content || result;
+	} catch (error) {
+		console.error(`Error loading markdown page ${pageId}:`, error);
+		return null;
 	}
 };
 
@@ -1380,7 +1382,8 @@ const loadProjectPage = async (projectId) => {
 
 		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
-		DOMCache.main.innerHTML = [
+		// Build project content sections
+		const sections = [
 			Templates.projectHeader(project.title, project.description, project.tags),
 			project.github_repo &&
 				Templates.dynamicContainer(
@@ -1391,15 +1394,13 @@ const loadProjectPage = async (projectId) => {
 				),
 			project.youtube_videos?.length &&
 				Templates.mediaSection(
-					project.youtube_videos
-						.map((id) => Templates.youtubeVideo(id))
-						.join(""),
+					project.youtube_videos.map(Templates.youtubeVideo).join(""),
 				),
 			project.demo_url && Templates.demoIframe(project.demo_url),
 			Templates.dynamicContainer("project-links", "project", project.id, ""),
-		]
-			.filter(Boolean)
-			.join("");
+		];
+
+		DOMCache.main.innerHTML = sections.filter(Boolean).join("");
 	} catch (error) {
 		console.error(`Error loading project page ${projectId}:`, error);
 		DOMCache.main.innerHTML = Templates.errorMessage(
@@ -1421,8 +1422,6 @@ const loadProjectsDropdown = async () => {
 			.sort((a, b) => a.order - b.order)
 			.map((p) => Templates.projectDropdownItem(p.id, p.title))
 			.join("");
-
-		// Mobile menu closing is now handled via global event delegation
 	} catch (error) {
 		console.error("Error loading projects dropdown:", error);
 	}
@@ -1431,14 +1430,17 @@ const loadProjectsDropdown = async () => {
 const loadAdditionalContent = async () => {
 	try {
 		const promises = [];
-		["github-readme", "project-links"].forEach((id) => {
-			const el = document.getElementById(id);
-			if (!el) return;
-			const repo = el.dataset.repo;
-			const project = el.dataset.project;
-			if (repo) promises.push(loadGitHubReadme(repo, id));
-			if (project) promises.push(loadProjectLinks(project, id));
+		const elements = ["github-readme", "project-links"]
+			.map((id) => document.getElementById(id))
+			.filter(Boolean);
+
+		elements.forEach((el) => {
+			if (el.dataset.repo)
+				promises.push(loadGitHubReadme(el.dataset.repo, el.id));
+			if (el.dataset.project)
+				promises.push(loadProjectLinks(el.dataset.project, el.id));
 		});
+
 		await Promise.all(promises);
 	} catch (error) {
 		console.error("Error loading additional content:", error);
@@ -1452,61 +1454,61 @@ const loadAdditionalContent = async () => {
 const handleRoute = async () => {
 	closeMobileMenu();
 
-	// Add fade out animation
-	if (DOMCache.main) {
+	// Helper function for page transitions
+	const startTransition = async () => {
+		if (!DOMCache.main) return;
 		DOMCache.main.classList.add("page-transition-out");
-		// Wait for fade out animation
 		await new Promise((resolve) =>
 			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
 		);
-	}
+		DOMCache.main.innerHTML = Templates.loadingSpinner();
+	};
 
-	if (DOMCache.main) DOMCache.main.innerHTML = Templates.loadingSpinner();
+	const endTransition = () => {
+		if (DOMCache.main) {
+			DOMCache.main.classList.remove("page-transition-out");
+		}
+		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+		requestAnimationFrame(updateActiveNavLink);
+	};
 
+	// Extract route parameters
 	const params = new URLSearchParams(window.location.search);
-	const projectId = params.get("project");
-	const pageId = params.get("page");
-	const blogParam = params.get("blog");
-	const blogPageNum = params.get("p");
+	const route = {
+		project: params.get("project"),
+		page: params.get("page"),
+		blog: params.get("blog"),
+		blogPage: params.get("p") ? parseInt(params.get("p"), 10) : 1,
+	};
+
+	await startTransition();
 
 	try {
 		const data = await getData();
 
-		if (blogParam !== null) {
-			blogParam === ""
-				? await loadBlogPage(blogPageNum ? parseInt(blogPageNum, 10) : 1)
-				: await loadBlogPost(blogParam);
-		} else if (projectId) {
-			await loadProjectPage(projectId);
+		// Route handling
+		if (route.blog !== null) {
+			await (route.blog === ""
+				? loadBlogPage(route.blogPage)
+				: loadBlogPost(route.blog));
+		} else if (route.project) {
+			await loadProjectPage(route.project);
 			await loadAdditionalContent();
-		} else if (pageId) {
-			await loadPage(pageId);
+		} else if (route.page) {
+			await loadPage(route.page);
 		} else {
-			// Redirect to configured default route for proper nav highlighting
+			// Redirect to default route
 			const defaultRoute = data.site?.defaultRoute || "?blog";
-			// For subdirectory hosting, keep relative paths as-is
-			const route = defaultRoute.startsWith("/") ? defaultRoute : defaultRoute;
-			window.history.replaceState({}, "", route);
-			// Recursively handle the new route
+			window.history.replaceState({}, "", defaultRoute);
 			await handleRoute();
-			return; // Exit early since handleRoute will call updateActiveNavLink
+			return;
 		}
 
-		if (DOMCache.main) {
-			DOMCache.main.classList.remove("page-transition-out");
-		}
-
-		// Scroll to top of page instantly (no animation)
-		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-
-		// Use requestAnimationFrame to ensure DOM is fully updated before highlighting
-		requestAnimationFrame(() => {
-			updateActiveNavLink();
-		});
+		endTransition();
 	} catch (error) {
 		console.error("Error loading page:", error);
+		endTransition();
 		if (DOMCache.main) {
-			DOMCache.main.classList.remove("page-transition-out");
 			DOMCache.main.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
@@ -1561,52 +1563,47 @@ const updateActiveNavLink = () => {
 	if (!DOMCache.navbar) {
 		DOMCache.navbar = document.getElementById("navbar-container");
 	}
-
 	if (!DOMCache.navbar) return;
 
-	// Get all navbar links and dropdown items (scoped to navbar for performance)
-	const navbarLinks = DOMCache.navbar.querySelectorAll(".navbar-nav .nav-link");
-	const dropdownItems = DOMCache.navbar.querySelectorAll(".dropdown-item");
+	// Cache selectors if not already cached
+	if (!DOMCache.navbarLinks) {
+		DOMCache.navbarLinks = DOMCache.navbar.querySelectorAll(
+			".navbar-nav .nav-link",
+		);
+		DOMCache.dropdownItems = DOMCache.navbar.querySelectorAll(".dropdown-item");
+		DOMCache.projectDropdown = DOMCache.navbar.querySelector(".dropdown");
+	}
 
-	// Find which link should be active first
-	let targetLink = null;
-	let targetDropdownItem = null;
-	let targetDropdownToggle = null;
+	// Helper function to toggle active class
+	const toggleActive = (element, shouldBeActive) => {
+		element?.classList.toggle("active", shouldBeActive);
+	};
 
+	// Determine target elements based on current route
+	const targets = {};
 	if (blogParam !== null) {
-		// Blog page or specific blog post
-		targetLink = DOMCache.navbar.querySelector('.nav-link[href="?blog"]');
+		targets.link = DOMCache.navbar.querySelector('.nav-link[href="?blog"]');
 	} else if (projectId) {
-		// Project page - highlight both the Projects dropdown toggle AND the specific project item
-		const projectDropdown = DOMCache.navbar.querySelector(".dropdown");
-		if (projectDropdown) {
-			targetDropdownToggle = projectDropdown.querySelector(".dropdown-toggle");
-		}
-		targetDropdownItem = DOMCache.navbar.querySelector(
+		targets.dropdownToggle =
+			DOMCache.projectDropdown?.querySelector(".dropdown-toggle");
+		targets.dropdownItem = DOMCache.navbar.querySelector(
 			`.dropdown-item[href="?project=${projectId}"]`,
 		);
 	} else if (pageId) {
-		// Regular page
-		targetLink = DOMCache.navbar.querySelector(
+		targets.link = DOMCache.navbar.querySelector(
 			`.nav-link[href="?page=${pageId}"]`,
 		);
 	}
 
-	// Add active class to target(s) first to maintain visual continuity
-	if (targetLink) targetLink.classList.add("active");
-	if (targetDropdownToggle) targetDropdownToggle.classList.add("active");
-	if (targetDropdownItem) targetDropdownItem.classList.add("active");
-
-	// Then remove active from all others
-	navbarLinks.forEach((l) => {
-		if (l !== targetLink && l !== targetDropdownToggle) {
-			l.classList.remove("active");
-		}
+	// Update all elements in one pass
+	DOMCache.navbarLinks.forEach((link) => {
+		toggleActive(
+			link,
+			link === targets.link || link === targets.dropdownToggle,
+		);
 	});
-	dropdownItems.forEach((item) => {
-		if (item !== targetDropdownItem) {
-			item.classList.remove("active");
-		}
+	DOMCache.dropdownItems.forEach((item) => {
+		toggleActive(item, item === targets.dropdownItem);
 	});
 };
 
@@ -1620,33 +1617,35 @@ const handleSpaLinkClick = (e) => {
 	if (!DOMCache.navbar) {
 		DOMCache.navbar = document.getElementById("navbar-container");
 	}
+	if (!DOMCache.navbar) return;
 
-	// Immediately apply active class to clicked link for visual continuity
-	const allNavLinks =
-		DOMCache.navbar?.querySelectorAll(".navbar-nav .nav-link") || [];
-	const allDropdownItems =
-		DOMCache.navbar?.querySelectorAll(".dropdown-item") || [];
-
-	// Remove active from all first
-	allNavLinks.forEach((l) => {
-		l.classList.remove("active");
-	});
-	allDropdownItems.forEach((item) => {
-		item.classList.remove("active");
-	});
-
-	// Add active to clicked link
-	if (link.classList.contains("nav-link")) {
-		link.classList.add("active");
-	} else if (link.classList.contains("dropdown-item")) {
-		link.classList.add("active");
-		// Also activate the dropdown toggle if clicking a dropdown item
-		const dropdown = link.closest(".dropdown");
-		if (dropdown) {
-			const toggle = dropdown.querySelector(".dropdown-toggle");
-			if (toggle) toggle.classList.add("active");
-		}
+	// Cache selectors if not already cached
+	if (!DOMCache.navbarLinks) {
+		DOMCache.navbarLinks = DOMCache.navbar.querySelectorAll(
+			".navbar-nav .nav-link",
+		);
+		DOMCache.dropdownItems = DOMCache.navbar.querySelectorAll(".dropdown-item");
 	}
+
+	// Helper function to toggle active class
+	const toggleActive = (element, shouldBeActive) => {
+		element?.classList.toggle("active", shouldBeActive);
+	};
+
+	// Determine which elements should be active
+	const _isNavLink = link.classList.contains("nav-link");
+	const isDropdownItem = link.classList.contains("dropdown-item");
+	const dropdownToggle = isDropdownItem
+		? link.closest(".dropdown")?.querySelector(".dropdown-toggle")
+		: null;
+
+	// Update all elements in one pass
+	DOMCache.navbarLinks.forEach((navLink) => {
+		toggleActive(navLink, navLink === link || navLink === dropdownToggle);
+	});
+	DOMCache.dropdownItems.forEach((item) => {
+		toggleActive(item, item === link);
+	});
 
 	closeMobileMenu();
 	window.history.pushState({}, "", link.getAttribute("href"));
@@ -1659,31 +1658,39 @@ const setupSpaRouting = () => {
 
 const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
+		const { target } = event;
+
+		// Early return if navbar not cached
+		if (!DOMCache.navbar) return;
+
 		// Handle mobile menu outside clicks
 		if (
 			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
-			DOMCache.navbar &&
-			!DOMCache.navbar.contains(event.target)
+			!DOMCache.navbar.contains(target)
 		) {
 			closeMobileMenu();
+			return;
 		}
 
-		// Handle navbar link clicks and blur (event delegation)
-		const link = event.target.closest(".navbar a:not([data-spa-route])");
-		if (link) {
+		// Handle navbar elements with single closest query
+		const navbarElement = target.closest(
+			".navbar a:not([data-spa-route]), .navbar-toggle",
+		);
+		if (!navbarElement) return;
+
+		// Handle navbar links
+		if (navbarElement.tagName === "A") {
 			if (
-				!link.classList.contains("dropdown-toggle") &&
-				!link.hasAttribute("data-keep-menu")
+				!navbarElement.classList.contains("dropdown-toggle") &&
+				!navbarElement.hasAttribute("data-keep-menu")
 			) {
 				closeMobileMenu();
 			}
-			requestAnimationFrame(() => link.blur());
+			requestAnimationFrame(() => navbarElement.blur());
 		}
-
-		// Handle navbar toggle button blur
-		const toggleBtn = event.target.closest(".navbar-toggle");
-		if (toggleBtn) {
-			requestAnimationFrame(() => toggleBtn.blur());
+		// Handle toggle button
+		else if (navbarElement.classList.contains("navbar-toggle")) {
+			requestAnimationFrame(() => navbarElement.blur());
 		}
 	});
 };
