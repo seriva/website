@@ -335,10 +335,6 @@ a.icon:hover {
 	align-items: center;
 }
 
-.search-result-item {
-	cursor: pointer;
-}
-
 .search-result-item mark,
 .blog-post-card mark {
 	background-color: var(--accent);
