@@ -41,6 +41,20 @@ const html = (strings, ...values) => {
 
 const safe = (content) => ({ __safe: true, content });
 
+// Unified async error handling
+const safeAsync = async (
+	asyncFn,
+	fallback = null,
+	errorMessage = "Operation failed",
+) => {
+	try {
+		return await asyncFn();
+	} catch (error) {
+		console.error(errorMessage, error);
+		return fallback;
+	}
+};
+
 // ===========================================
 // INTERNATIONALIZATION (i18n)
 // ===========================================
@@ -517,8 +531,8 @@ const initCustomDropdowns = () => {
 	});
 };
 const initMobileMenuToggle = () => {
-	const navbarToggle = document.getElementById("navbar-toggle");
-	const navbarCollapse = document.getElementById("navbarNav");
+	const navbarToggle = DOM.get("navbar-toggle");
+	const navbarCollapse = DOM.get("navbarNav");
 
 	if (navbarToggle && navbarCollapse) {
 		navbarToggle.addEventListener("click", () => {
@@ -653,8 +667,8 @@ const Search = {
 };
 
 const searchByTag = (tag) => {
-	const searchPage = DOMCache.getSearchPage();
-	const searchInput = DOMCache.getSearchInput();
+	const searchPage = DOM.get("search-page");
+	const searchInput = DOM.get("search-page-input");
 
 	if (searchPage && searchInput) {
 		searchPage.classList.add("show");
@@ -685,6 +699,8 @@ const fetchGitHubReadme = async (repoName) => {
 	}
 
 	const branches = ["master", "main"];
+
+	// Try direct fetch to GitHub raw URLs
 	for (const branch of branches) {
 		try {
 			const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
@@ -695,10 +711,7 @@ const fetchGitHubReadme = async (repoName) => {
 				return content;
 			}
 		} catch (error) {
-			console.warn(
-				`Failed to fetch README from ${branch} branch for ${repoName}:`,
-				error,
-			);
+			console.warn(`Failed to fetch README from ${repoName}/${branch}:`, error);
 		}
 	}
 
@@ -709,10 +722,18 @@ const fetchGitHubReadme = async (repoName) => {
 const loadGitHubReadme = async (repoName, containerId) => {
 	if (!repoName || !containerId) return;
 
-	const container = document.getElementById(containerId);
+	const container = DOM.get(containerId);
 	if (!container) return;
 
-	const content = await fetchGitHubReadme(repoName);
+	// Clear any existing content and show loading state
+	container.innerHTML = `<p>${i18n.t("project.loadingReadme")}</p>`;
+
+	const content = await safeAsync(
+		() => fetchGitHubReadme(repoName),
+		null,
+		`Error loading GitHub README for ${repoName}`,
+	);
+
 	container.innerHTML = content
 		? Templates.markdown(content).content
 		: Templates.githubReadmeError();
@@ -730,69 +751,25 @@ const readmeCache = new Map();
 // DOM MANAGEMENT
 // ===========================================
 
-const DOMCache = {
-	navbar: null,
-	main: null,
-	footer: null,
-	dropdownMenu: null,
-	navbarLinks: null,
-	searchPage: null,
-	searchPageInput: null,
-	searchPageResults: null,
-	searchToggle: null,
+const DOM = {
+	cache: new Map(),
 
-	init() {
-		this.navbar = document.getElementById("navbar-container");
-		this.main = document.getElementById("main-content");
-		this.footer = document.getElementById("footer-container");
-	},
-
-	clearNavbarCache() {
-		this.dropdownMenu = null;
-		this.navbarLinks = null;
-		this.searchToggle = null;
-	},
-
-	clearSearchCache() {
-		this.searchPage = null;
-		this.searchPageInput = null;
-		this.searchPageResults = null;
-		this.searchToggle = null;
-	},
-
-	getDropdown() {
-		if (!this.dropdownMenu) {
-			this.dropdownMenu = document.getElementById("projects-dropdown");
+	// Unified element getter with caching
+	get(id) {
+		if (!this.cache.has(id)) {
+			this.cache.set(id, document.getElementById(id));
 		}
-		return this.dropdownMenu;
+		return this.cache.get(id);
 	},
 
-	getSearchPage() {
-		if (!this.searchPage) {
-			this.searchPage = document.getElementById("search-page");
-		}
-		return this.searchPage;
+	// Clear specific cache entries
+	clear(...ids) {
+		ids.forEach((id) => this.cache.delete(id));
 	},
 
-	getSearchInput() {
-		if (!this.searchPageInput) {
-			this.searchPageInput = document.getElementById("search-page-input");
-		}
-		return this.searchPageInput;
-	},
-
-	getSearchResults() {
-		if (!this.searchPageResults) {
-			this.searchPageResults = document.getElementById("search-page-results");
-		}
-		return this.searchPageResults;
-	},
-
-	getSearchToggle() {
-		if (!this.searchToggle) {
-			this.searchToggle = document.getElementById("search-toggle");
-		}
-		return this.searchToggle;
+	// Clear all cache
+	clearAll() {
+		this.cache.clear();
 	},
 };
 
@@ -832,21 +809,24 @@ const createNavbar = (
 };
 
 const injectFooter = async () => {
-	if (!DOMCache.footer) return;
+	if (!DOM.get("footer-container")) return;
 
 	try {
 		const data = await getData();
 		const authorName = data?.site?.author || "Portfolio Owner";
 		const currentYear = new Date().getFullYear();
 
-		DOMCache.footer.innerHTML = Templates.footer(authorName, currentYear);
+		DOM.get("footer-container").innerHTML = Templates.footer(
+			authorName,
+			currentYear,
+		);
 	} catch (error) {
 		console.error("Error injecting footer:", error);
 	}
 };
 
 const injectNavbar = async () => {
-	if (!DOMCache.navbar) return;
+	if (!DOM.get("navbar-container")) return;
 
 	const data = await getData();
 	const pages = data?.pages
@@ -862,7 +842,7 @@ const injectNavbar = async () => {
 		});
 	}
 
-	DOMCache.navbar.innerHTML = createNavbar(
+	DOM.get("navbar-container").innerHTML = createNavbar(
 		pages,
 		data?.site?.social || [],
 		data?.site?.search || {},
@@ -883,7 +863,7 @@ const injectNavbar = async () => {
 	}
 
 	// Clear cached navbar elements after rebuild
-	DOMCache.clearNavbarCache();
+	DOM.clear("projects-dropdown", "navbar-toggle");
 
 	// Initialize custom dropdowns and mobile menu
 	initCustomDropdowns();
@@ -932,12 +912,12 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 };
 
 const initializeSearch = () => {
-	const searchToggle = DOMCache.getSearchToggle();
+	const searchToggle = DOM.get("search-toggle");
 	Search.init(false);
 
 	const openSearchPage = () => {
-		const searchPage = DOMCache.getSearchPage();
-		const searchInput = DOMCache.getSearchInput();
+		const searchPage = DOM.get("search-page");
+		const searchInput = DOM.get("search-page-input");
 
 		if (searchPage) {
 			searchPage.classList.add("show");
@@ -957,10 +937,10 @@ const initializeSearch = () => {
 };
 
 const initializeSearchPage = (searchConfig) => {
-	const searchPage = DOMCache.getSearchPage();
+	const searchPage = DOM.get("search-page");
 	const searchPageBack = document.getElementById("search-page-back");
-	const searchPageInput = DOMCache.getSearchInput();
-	const searchPageResults = DOMCache.getSearchResults();
+	const searchPageInput = DOM.get("search-page-input");
+	const searchPageResults = DOM.get("search-page-results");
 	const searchPageClear = document.getElementById("search-page-clear");
 
 	if (!searchPage || !searchPageBack || !searchPageInput || !searchPageResults)
@@ -1238,12 +1218,12 @@ const createPostObject = (slug, data, filename, content = null) => ({
 });
 
 const loadBlogPage = async (page = 1) => {
-	if (!DOMCache.main) return;
+	if (!DOM.get("main-content")) return;
 
 	const data = await getData();
 	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
-	DOMCache.main.innerHTML = Templates.loadingSpinner();
+	DOM.get("main-content").innerHTML = Templates.loadingSpinner();
 
 	const posts = await loadBlogPosts();
 	const pagination = calculatePagination(
@@ -1253,7 +1233,7 @@ const loadBlogPage = async (page = 1) => {
 	);
 
 	if (pagination.pagePosts.length === 0) {
-		DOMCache.main.innerHTML = Templates.blogEmpty();
+		DOM.get("main-content").innerHTML = Templates.blogEmpty();
 		return;
 	}
 
@@ -1263,7 +1243,7 @@ const loadBlogPage = async (page = 1) => {
 		)
 		.join("");
 
-	DOMCache.main.innerHTML = Templates.blogContainer(
+	DOM.get("main-content").innerHTML = Templates.blogContainer(
 		postsHtml,
 		Templates.blogPagination(pagination.currentPage, pagination.totalPages),
 	);
@@ -1301,18 +1281,18 @@ const setupBlogCardClicks = () => {
 };
 
 const loadBlogPost = async (slug) => {
-	if (!DOMCache.main) return;
+	if (!DOM.get("main-content")) return;
 
 	const data = await getData();
 	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
-	DOMCache.main.innerHTML = Templates.loadingSpinner();
+	DOM.get("main-content").innerHTML = Templates.loadingSpinner();
 
 	const posts = await loadBlogPosts();
 	const post = posts.find((p) => p.slug === slug);
 
 	if (!post) {
-		DOMCache.main.innerHTML = Templates.errorMessage(
+		DOM.get("main-content").innerHTML = Templates.errorMessage(
 			i18n.t("general.blogNotFound"),
 			i18n.t("general.blogNotFoundMessage"),
 		);
@@ -1320,7 +1300,7 @@ const loadBlogPost = async (slug) => {
 	}
 
 	const content = await loadBlogPostContent(post);
-	DOMCache.main.innerHTML = Templates.blogPost(post, content);
+	DOM.get("main-content").innerHTML = Templates.blogPost(post, content);
 };
 
 const loadBlogPostContent = async (post) => {
@@ -1340,29 +1320,33 @@ const loadBlogPostContent = async (post) => {
 const loadProjectLinks = async (projectId, containerId) => {
 	if (!projectId || !containerId) return;
 
-	const container = document.getElementById(containerId);
+	const container = DOM.get(containerId);
 	if (!container) return;
 
-	try {
-		const data = await loadContent();
-		const project = data?.projects?.find((p) => p.id === projectId);
+	const data = await safeAsync(
+		() => loadContent(),
+		null,
+		`Error loading content for project ${projectId}`,
+	);
 
-		if (!project?.links) {
-			container.style.display = "none";
-			return;
-		}
-
-		container.innerHTML = Templates.projectLinksSection(
-			project.links.map(Templates.projectLink).join(""),
-		);
-	} catch (error) {
-		console.error(`Error loading project links for ${projectId}:`, error);
+	if (!data) {
 		container.style.display = "none";
+		return;
 	}
+
+	const project = data.projects?.find((p) => p.id === projectId);
+	if (!project?.links) {
+		container.style.display = "none";
+		return;
+	}
+
+	container.innerHTML = Templates.projectLinksSection(
+		project.links.map(Templates.projectLink).join(""),
+	);
 };
 
 const loadPage = async (pageId) => {
-	if (!DOMCache.main) return;
+	if (!DOM.get("main-content")) return;
 
 	try {
 		const data = await getData();
@@ -1371,7 +1355,7 @@ const loadPage = async (pageId) => {
 		// Load markdown content
 		const content = await loadMarkdownContent(pageId);
 
-		DOMCache.main.innerHTML =
+		DOM.get("main-content").innerHTML =
 			content ||
 			Templates.errorMessage(
 				i18n.t("general.notFound"),
@@ -1379,7 +1363,7 @@ const loadPage = async (pageId) => {
 			);
 	} catch (error) {
 		console.error(`Error loading page ${pageId}:`, error);
-		DOMCache.main.innerHTML = Templates.errorMessage(
+		DOM.get("main-content").innerHTML = Templates.errorMessage(
 			i18n.t("general.error"),
 			i18n.t("general.errorMessage"),
 		);
@@ -1391,14 +1375,14 @@ const loadMarkdownContent = async (pageId) => {
 };
 
 const loadProjectPage = async (projectId) => {
-	if (!DOMCache.main) return;
+	if (!DOM.get("main-content")) return;
 
 	try {
 		const data = await loadContent();
 		const project = data?.projects?.find((p) => p.id === projectId);
 
 		if (!project) {
-			DOMCache.main.innerHTML = Templates.errorMessage(
+			DOM.get("main-content").innerHTML = Templates.errorMessage(
 				i18n.t("general.projectNotFound"),
 				i18n.t("general.projectNotFoundMessage"),
 			);
@@ -1425,10 +1409,10 @@ const loadProjectPage = async (projectId) => {
 			Templates.dynamicContainer("project-links", "project", project.id, ""),
 		];
 
-		DOMCache.main.innerHTML = sections.filter(Boolean).join("");
+		DOM.get("main-content").innerHTML = sections.filter(Boolean).join("");
 	} catch (error) {
 		console.error(`Error loading project page ${projectId}:`, error);
-		DOMCache.main.innerHTML = Templates.errorMessage(
+		DOM.get("main-content").innerHTML = Templates.errorMessage(
 			i18n.t("general.error"),
 			i18n.t("general.errorMessage"),
 		);
@@ -1436,7 +1420,7 @@ const loadProjectPage = async (projectId) => {
 };
 
 const loadProjectsDropdown = async () => {
-	const dropdown = DOMCache.getDropdown();
+	const dropdown = DOM.get("projects-dropdown");
 	if (!dropdown) return;
 
 	try {
@@ -1453,23 +1437,28 @@ const loadProjectsDropdown = async () => {
 };
 
 const loadAdditionalContent = async () => {
-	try {
-		const promises = [];
-		const elements = ["github-readme", "project-links"]
-			.map((id) => document.getElementById(id))
-			.filter(Boolean);
+	const promises = [];
+	const elements = ["github-readme", "project-links"]
+		.map((id) => document.getElementById(id))
+		.filter(Boolean);
 
-		elements.forEach((el) => {
-			if (el.dataset.repo)
+	elements.forEach((el) => {
+		if (el.dataset.repo) {
+			// Use fresh element reference (no caching)
+			if (el.parentElement) {
 				promises.push(loadGitHubReadme(el.dataset.repo, el.id));
-			if (el.dataset.project)
-				promises.push(loadProjectLinks(el.dataset.project, el.id));
-		});
+			}
+		}
+		if (el.dataset.project) {
+			promises.push(loadProjectLinks(el.dataset.project, el.id));
+		}
+	});
 
-		await Promise.all(promises);
-	} catch (error) {
-		console.error("Error loading additional content:", error);
-	}
+	await safeAsync(
+		() => Promise.all(promises),
+		null,
+		"Error loading additional content",
+	);
 };
 
 // ===========================================
@@ -1481,17 +1470,17 @@ const handleRoute = async () => {
 
 	// Helper function for page transitions
 	const startTransition = async () => {
-		if (!DOMCache.main) return;
-		DOMCache.main.classList.add("page-transition-out");
+		if (!DOM.get("main-content")) return;
+		DOM.get("main-content").classList.add("page-transition-out");
 		await new Promise((resolve) =>
 			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
 		);
-		DOMCache.main.innerHTML = Templates.loadingSpinner();
+		DOM.get("main-content").innerHTML = Templates.loadingSpinner();
 	};
 
 	const endTransition = () => {
-		if (DOMCache.main) {
-			DOMCache.main.classList.remove("page-transition-out");
+		if (DOM.get("main-content")) {
+			DOM.get("main-content").classList.remove("page-transition-out");
 		}
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 		requestAnimationFrame(updateActiveNavLink);
@@ -1518,6 +1507,10 @@ const handleRoute = async () => {
 				: loadBlogPost(route.blog));
 		} else if (route.project) {
 			await loadProjectPage(route.project);
+			// Clear DOM cache to ensure fresh element references
+			DOM.clear("github-readme", "project-links");
+			// Ensure DOM is updated before loading additional content
+			await new Promise((resolve) => requestAnimationFrame(resolve));
 			await loadAdditionalContent();
 		} else if (route.page) {
 			await loadPage(route.page);
@@ -1533,8 +1526,8 @@ const handleRoute = async () => {
 	} catch (error) {
 		console.error("Error loading page:", error);
 		endTransition();
-		if (DOMCache.main) {
-			DOMCache.main.innerHTML = Templates.errorMessage(
+		if (DOM.get("main-content")) {
+			DOM.get("main-content").innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
 			);
@@ -1549,7 +1542,7 @@ const handleRoute = async () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
-		DOMCache.init();
+		// DOM system auto-initializes
 
 		// Initialize marked.js with highlight.js
 		initializeMarked();
@@ -1569,8 +1562,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Note: GitHub READMEs are preloaded during Search.init() if search is enabled
 	} catch (error) {
 		console.error("Error initializing page:", error);
-		if (DOMCache.main) {
-			DOMCache.main.innerHTML = Templates.errorMessage(
+		if (DOM.get("main-content")) {
+			DOM.get("main-content").innerHTML = Templates.errorMessage(
 				"Something went wrong",
 				"Please refresh the page to try again.",
 			);
@@ -1585,18 +1578,17 @@ const updateActiveNavLink = () => {
 	const blogParam = params.get("blog");
 
 	// Cache navbar element if not already cached
-	if (!DOMCache.navbar) {
-		DOMCache.navbar = document.getElementById("navbar-container");
-	}
-	if (!DOMCache.navbar) return;
+	if (!DOM.get("navbar-container")) return;
 
 	// Cache selectors if not already cached
-	if (!DOMCache.navbarLinks) {
-		DOMCache.navbarLinks = DOMCache.navbar.querySelectorAll(
-			".navbar-nav .nav-link",
-		);
-		DOMCache.dropdownItems = DOMCache.navbar.querySelectorAll(".dropdown-item");
-		DOMCache.projectDropdown = DOMCache.navbar.querySelector(".dropdown");
+	if (!updateActiveNavLink.navbarLinks) {
+		updateActiveNavLink.navbarLinks = DOM.get(
+			"navbar-container",
+		).querySelectorAll(".navbar-nav .nav-link");
+		updateActiveNavLink.dropdownItems =
+			DOM.get("navbar-container").querySelectorAll(".dropdown-item");
+		updateActiveNavLink.projectDropdown =
+			DOM.get("navbar-container").querySelector(".dropdown");
 	}
 
 	// Helper function to toggle active class
@@ -1607,27 +1599,29 @@ const updateActiveNavLink = () => {
 	// Determine target elements based on current route
 	const targets = {};
 	if (blogParam !== null) {
-		targets.link = DOMCache.navbar.querySelector('.nav-link[href="?blog"]');
+		targets.link = DOM.get("navbar-container").querySelector(
+			'.nav-link[href="?blog"]',
+		);
 	} else if (projectId) {
 		targets.dropdownToggle =
-			DOMCache.projectDropdown?.querySelector(".dropdown-toggle");
-		targets.dropdownItem = DOMCache.navbar.querySelector(
+			updateActiveNavLink.projectDropdown?.querySelector(".dropdown-toggle");
+		targets.dropdownItem = DOM.get("navbar-container").querySelector(
 			`.dropdown-item[href="?project=${projectId}"]`,
 		);
 	} else if (pageId) {
-		targets.link = DOMCache.navbar.querySelector(
+		targets.link = DOM.get("navbar-container").querySelector(
 			`.nav-link[href="?page=${pageId}"]`,
 		);
 	}
 
 	// Update all elements in one pass
-	DOMCache.navbarLinks.forEach((link) => {
+	updateActiveNavLink.navbarLinks.forEach((link) => {
 		toggleActive(
 			link,
 			link === targets.link || link === targets.dropdownToggle,
 		);
 	});
-	DOMCache.dropdownItems.forEach((item) => {
+	updateActiveNavLink.dropdownItems.forEach((item) => {
 		toggleActive(item, item === targets.dropdownItem);
 	});
 };
@@ -1639,17 +1633,15 @@ const handleSpaLinkClick = (e) => {
 	e.preventDefault();
 
 	// Cache navbar if not already cached
-	if (!DOMCache.navbar) {
-		DOMCache.navbar = document.getElementById("navbar-container");
-	}
-	if (!DOMCache.navbar) return;
+	if (!DOM.get("navbar-container")) return;
 
 	// Cache selectors if not already cached
-	if (!DOMCache.navbarLinks) {
-		DOMCache.navbarLinks = DOMCache.navbar.querySelectorAll(
-			".navbar-nav .nav-link",
-		);
-		DOMCache.dropdownItems = DOMCache.navbar.querySelectorAll(".dropdown-item");
+	if (!handleSpaLinkClick.navbarLinks) {
+		handleSpaLinkClick.navbarLinks = DOM.get(
+			"navbar-container",
+		).querySelectorAll(".navbar-nav .nav-link");
+		handleSpaLinkClick.dropdownItems =
+			DOM.get("navbar-container").querySelectorAll(".dropdown-item");
 	}
 
 	// Helper function to toggle active class
@@ -1665,10 +1657,10 @@ const handleSpaLinkClick = (e) => {
 		: null;
 
 	// Update all elements in one pass
-	DOMCache.navbarLinks.forEach((navLink) => {
+	handleSpaLinkClick.navbarLinks.forEach((navLink) => {
 		toggleActive(navLink, navLink === link || navLink === dropdownToggle);
 	});
-	DOMCache.dropdownItems.forEach((item) => {
+	handleSpaLinkClick.dropdownItems.forEach((item) => {
 		toggleActive(item, item === link);
 	});
 
@@ -1686,12 +1678,12 @@ const addMobileMenuOutsideClickHandler = () => {
 		const { target } = event;
 
 		// Early return if navbar not cached
-		if (!DOMCache.navbar) return;
+		if (!DOM.get("navbar-container")) return;
 
 		// Handle mobile menu outside clicks
 		if (
 			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
-			!DOMCache.navbar.contains(target)
+			!DOM.get("navbar-container").contains(target)
 		) {
 			closeMobileMenu();
 			return;
