@@ -68,6 +68,19 @@ html {
 	scroll-behavior: smooth;
 }
 
+/* Ensure scrollbar space is always reserved */
+html::after {
+	content: "";
+	display: block;
+	height: 101vh;
+	width: 1px;
+	position: absolute;
+	top: 0;
+	left: -1px;
+	pointer-events: none;
+	visibility: hidden;
+}
+
 *,
 *::before,
 *::after {
@@ -86,6 +99,8 @@ body {
 	background-color: var(--background-color);
 	color: var(--font-color);
 	line-height: var(--line-height-base);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
 	overflow-x: hidden;
 	width: 100%;
@@ -182,6 +197,11 @@ a.icon:hover {
 .fas {
 	font-family: "Font Awesome 6 Free", sans-serif;
 	font-weight: 900;
+}
+
+.fab {
+	font-family: "Font Awesome 6 Brands", sans-serif;
+	font-weight: 400;
 }
 
 .fab {
@@ -609,6 +629,11 @@ a.icon:hover {
 	transition: color var(--transition-normal);
 }
 
+.download-btn:link,
+.download-btn:visited {
+	text-decoration: none;
+}
+
 .download-btn:hover,
 .download-btn:focus {
 	background-color: var(--hover-color);
@@ -616,10 +641,12 @@ a.icon:hover {
 	transform: translateY(-2px);
 	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
 	color: var(--accent);
+	text-decoration: none;
 }
 
 .download-btn:active {
 	transform: translateY(0) scale(0.95);
+	text-decoration: none;
 }
 
 .download-btn:focus {
@@ -646,10 +673,13 @@ a.icon:hover {
 	outline: none;
 }
 
-.markdown-body .download-btn {
+.markdown-body .download-btn,
+.markdown-body .download-btn:link,
+.markdown-body .download-btn:visited {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	text-decoration: none;
 	color: var(--font-color);
 }
 
@@ -698,7 +728,11 @@ zero-md pre code:not([class*="language-"]) {
 }
 
 /* Accessibility */
-:is(button, a, input, select, textarea):focus {
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
@@ -708,8 +742,11 @@ zero-md pre code:not([class*="language-"]) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	* {
+	*,
+	*::before,
+	*::after {
 		animation-duration: 0.01ms;
+		animation-iteration-count: 1;
 		transition-duration: 0.01ms;
 		scroll-behavior: auto;
 	}
@@ -1180,14 +1217,18 @@ button.nav-link {
 	font-family: inherit;
 	font-size: inherit;
 	width: auto;
+	transition: transform 0.1s ease;
+}
+
+button.nav-link:active {
+	transform: scale(0.95);
 }
 
 .nav-link:hover,
 .nav-link:focus,
-button.nav-link:active {
+.nav-link:active {
 	color: var(--accent);
 	background-color: rgba(255, 255, 255, 0.1);
-	transform: scale(0.95);
 }
 
 .nav-link.active {
@@ -1278,6 +1319,9 @@ button.nav-link:active {
 .dropdown-item.active {
 	background-color: rgba(255, 255, 255, 0.1);
 	color: var(--accent);
+}
+
+.dropdown-item.active:focus {
 	outline: none;
 }
 
