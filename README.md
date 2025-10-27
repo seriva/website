@@ -265,15 +265,17 @@ site:
 
 translations:
   en:
-    nav:
-      projects: "Projects"
-      blog: "Blog"
-    search:
-      placeholder: "Search projects and blog posts..."
-      noResults: "No results found"
-    blog:
-      readMore: "Read more →"
-      backToBlog: "← Back to Blog"
+    "nav.projects": "Projects"
+    "nav.blog": "Blog"
+    "search.placeholder": "Search..."
+    "search.noResults": "No results found"
+    "blog.backToBlog": "← Back to Blog"
+    "blog.noPosts": "No blog posts yet. Check back soon!"
+    "project.links": "Links"
+    "project.media": "Media"
+    "general.loading": "Loading..."
+    "general.error": "Error loading page"
+    "footer.rights": "All rights reserved"
     # ... more translations
 ```
 
@@ -284,18 +286,18 @@ translations:
    availableLanguages: ["en", "nl", "es"]
    ```
 
-2. Copy the `en` translations section and translate:
+2. Copy the `en` translations and translate the values:
    ```yaml
    translations:
      en:
-       nav:
-         projects: "Projects"
+       "nav.projects": "Projects"
+       "nav.blog": "Blog"
      nl:
-       nav:
-         projects: "Projecten"
+       "nav.projects": "Projecten"
+       "nav.blog": "Blog"
      es:
-       nav:
-         projects: "Proyectos"
+       "nav.projects": "Proyectos"
+       "nav.blog": "Blog"
    ```
 
 3. Implement language switcher in UI (optional - framework supports it via `i18n.setLanguage('nl')`)
@@ -308,5 +310,3 @@ translations:
 - `general.*` - Error messages and common text
 - `footer.*` - Footer text
 - `badges.*` - Result type badges
-
-All UI strings are automatically translated using the `i18n.t()` function, making it easy to maintain consistency across languages.
