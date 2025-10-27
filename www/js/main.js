@@ -41,12 +41,7 @@ const html = (strings, ...values) => {
 
 const safe = (content) => ({ __safe: true, content });
 
-// Unified async error handling
-const safeAsync = async (
-	asyncFn,
-	fallback = null,
-	errorMessage = "Operation failed",
-) => {
+const safeAsync = async (asyncFn, fallback = null, errorMessage = "Operation failed") => {
 	try {
 		return await asyncFn();
 	} catch (error) {
@@ -213,16 +208,13 @@ const Templates = {
 		const pageNumbers = [];
 		let lastAdded = 0;
 
-		// Build page numbers array more efficiently
 		for (let i = 1; i <= totalPages; i++) {
-			// Always show: first, last, current, and adjacent pages
 			const shouldShow =
 				i === 1 ||
 				i === totalPages ||
 				(i >= currentPage - 1 && i <= currentPage + 1);
 
 			if (shouldShow) {
-				// Add ellipsis if there's a gap
 				if (lastAdded > 0 && i - lastAdded > 1) {
 					pageNumbers.push(
 						'<li class="page-item disabled"><span class="page-link">...</span></li>',
@@ -394,7 +386,6 @@ const Templates = {
 const getHljsThemeUrl = (themeName) =>
 	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
 
-// Initialize marked with highlight.js (will be called after scripts load)
 const initializeMarked = () => {
 	if (typeof marked === "undefined" || typeof hljs === "undefined") {
 		console.error("Marked or highlight.js not loaded");
@@ -531,6 +522,7 @@ const initCustomDropdowns = () => {
 		}
 	});
 };
+
 const initMobileMenuToggle = () => {
 	const navbarToggle = DOM.get("navbar-toggle");
 	const navbarCollapse = DOM.get("navbarNav");
@@ -634,19 +626,17 @@ const Search = {
 		if (!query || query.length < CONSTANTS.SEARCH_MIN_CHARS || !this.miniSearch)
 			return [];
 
-		const results = this.miniSearch.search(query, {
-			boost: { title: 2, description: 1.5, tags: 1.2, content: 0.5 },
-			fuzzy: 0.2,
-			prefix: true,
-		});
-
-		// Return top results, MiniSearch returns documents directly
-		return results.slice(0, CONSTANTS.SEARCH_MAX_RESULTS);
+		return this.miniSearch
+			.search(query, {
+				boost: { title: 2, description: 1.5, tags: 1.2, content: 0.5 },
+				fuzzy: 0.2,
+				prefix: true,
+			})
+			.slice(0, CONSTANTS.SEARCH_MAX_RESULTS);
 	},
 
 	highlight(text, query) {
 		if (!query) return text;
-		// Escape special regex characters to prevent injection
 		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 		const regex = new RegExp(`(${escapedQuery})`, "gi");
 		return text.replace(regex, "<mark>$1</mark>");
@@ -687,7 +677,6 @@ const fetchGitHubReadme = async (repoName) => {
 
 	const branches = ["master", "main"];
 
-	// Try direct fetch to GitHub raw URLs
 	for (const branch of branches) {
 		try {
 			const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
@@ -712,7 +701,6 @@ const loadGitHubReadme = async (repoName, containerId) => {
 	const container = DOM.get(containerId);
 	if (!container) return;
 
-	// Clear any existing content and show loading state
 	container.innerHTML = `<p>${i18n.t("project.loadingReadme")}</p>`;
 
 	const content = await safeAsync(
@@ -741,7 +729,6 @@ const readmeCache = new Map();
 const DOM = {
 	cache: new Map(),
 
-	// Unified element getter with caching
 	get(id) {
 		if (!this.cache.has(id)) {
 			this.cache.set(id, document.getElementById(id));
@@ -749,12 +736,10 @@ const DOM = {
 		return this.cache.get(id);
 	},
 
-	// Clear specific cache entries
 	clear(...ids) {
 		ids.forEach((id) => void this.cache.delete(id));
 	},
 
-	// Clear all cache
 	clearAll() {
 		this.cache.clear();
 	},
@@ -818,7 +803,6 @@ const injectNavbar = async () => {
 		? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
 		: [];
 
-	// Add blog as a navigation item if configured
 	if (data?.blog?.showInNav) {
 		pages.push({
 			id: "blog",
@@ -834,7 +818,6 @@ const injectNavbar = async () => {
 		data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 	);
 
-	// Inject search page if enabled
 	if (data?.site?.search?.enabled) {
 		const existingSearchPage = DOM.get("search-page");
 		if (!existingSearchPage) {
@@ -844,15 +827,11 @@ const injectNavbar = async () => {
 					data.site.search.placeholder || i18n.t("search.placeholder"),
 				),
 			);
-			// Clear cache to ensure new element is retrieved
 			DOM.clear("search-page");
 		}
 	}
 
-	// Clear cached navbar elements after rebuild
 	DOM.clear("projects-dropdown", "navbar-toggle");
-
-	// Initialize custom dropdowns and mobile menu
 	initCustomDropdowns();
 	initMobileMenuToggle();
 
@@ -1457,7 +1436,6 @@ const handleRoute = async () => {
 		requestAnimationFrame(updateActiveNavLink);
 	};
 
-	// Extract route parameters
 	const params = new URLSearchParams(window.location.search);
 	const route = {
 		project: params.get("project"),
@@ -1466,7 +1444,6 @@ const handleRoute = async () => {
 		blogPage: params.get("p") ? parseInt(params.get("p"), 10) : 1,
 	};
 
-	// Check if we're navigating to the same route
 	const routeString = JSON.stringify(route);
 	if (currentRoute === routeString) {
 		return;
@@ -1478,22 +1455,18 @@ const handleRoute = async () => {
 	try {
 		const data = await getData();
 
-		// Route handling
 		if (route.blog !== null) {
 			await (route.blog === ""
 				? loadBlogPage(route.blogPage)
 				: loadBlogPost(route.blog));
 		} else if (route.project) {
 			await loadProjectPage(route.project);
-			// Clear DOM cache to ensure fresh element references
 			DOM.clear("github-readme", "project-links");
-			// Ensure DOM is updated before loading additional content
 			await new Promise((resolve) => requestAnimationFrame(resolve));
 			await loadAdditionalContent();
 		} else if (route.page) {
 			await loadPage(route.page);
 		} else {
-			// Redirect to default route
 			const defaultRoute = data.site?.defaultRoute || "?blog";
 			window.history.replaceState({}, "", defaultRoute);
 			await handleRoute();
@@ -1550,7 +1523,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 });
 
-// Helper function to toggle active class (shared utility)
 const toggleActive = (element, shouldBeActive) => {
 	element?.classList.toggle("active", shouldBeActive);
 };
@@ -1559,7 +1531,6 @@ const updateActiveNavLink = () => {
 	const navbar = DOM.get("navbar-container");
 	if (!navbar) return;
 
-	// Cache selectors if not already cached
 	if (!updateActiveNavLink.navbarLinks) {
 		updateActiveNavLink.navbarLinks = navbar.querySelectorAll(
 			".navbar-nav .nav-link",
@@ -1574,7 +1545,6 @@ const updateActiveNavLink = () => {
 	const projectId = params.get("project");
 	const blogParam = params.get("blog");
 
-	// Determine target elements based on current route
 	const targets = {};
 	if (blogParam !== null) {
 		targets.link = navbar.querySelector('.nav-link[href="?blog"]');
@@ -1588,7 +1558,6 @@ const updateActiveNavLink = () => {
 		targets.link = navbar.querySelector(`.nav-link[href="?page=${pageId}"]`);
 	}
 
-	// Update all elements in one pass
 	updateActiveNavLink.navbarLinks.forEach((link) => {
 		toggleActive(
 			link,
@@ -1609,7 +1578,6 @@ const handleSpaLinkClick = (e) => {
 	const navbar = DOM.get("navbar-container");
 	if (!navbar) return;
 
-	// Cache selectors if not already cached
 	if (!handleSpaLinkClick.navbarLinks) {
 		handleSpaLinkClick.navbarLinks = navbar.querySelectorAll(
 			".navbar-nav .nav-link",
@@ -1618,13 +1586,11 @@ const handleSpaLinkClick = (e) => {
 			navbar.querySelectorAll(".dropdown-item");
 	}
 
-	// Determine which elements should be active
 	const isDropdownItem = link.classList.contains("dropdown-item");
 	const dropdownToggle = isDropdownItem
 		? link.closest(".dropdown")?.querySelector(".dropdown-toggle")
 		: null;
 
-	// Update all elements in one pass
 	handleSpaLinkClick.navbarLinks.forEach((navLink) => {
 		toggleActive(navLink, navLink === link || navLink === dropdownToggle);
 	});
@@ -1648,7 +1614,6 @@ const addMobileMenuOutsideClickHandler = () => {
 
 		const { target } = event;
 
-		// Handle mobile menu outside clicks
 		if (
 			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
 			!navbar.contains(target)
@@ -1657,13 +1622,11 @@ const addMobileMenuOutsideClickHandler = () => {
 			return;
 		}
 
-		// Handle navbar elements with single closest query
 		const navbarElement = target.closest(
 			".navbar a:not([data-spa-route]), .navbar-toggle",
 		);
 		if (!navbarElement) return;
 
-		// Handle navbar links
 		if (navbarElement.tagName === "A") {
 			if (
 				!navbarElement.classList.contains("dropdown-toggle") &&
@@ -1672,9 +1635,7 @@ const addMobileMenuOutsideClickHandler = () => {
 				closeMobileMenu();
 			}
 			requestAnimationFrame(() => navbarElement.blur());
-		}
-		// Handle toggle button
-		else if (navbarElement.classList.contains("navbar-toggle")) {
+		} else if (navbarElement.classList.contains("navbar-toggle")) {
 			requestAnimationFrame(() => navbarElement.blur());
 		}
 	});
