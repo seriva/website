@@ -19,11 +19,11 @@ Key features:
 
 - **Frontend**: HTML, CSS, JavaScript (no build process)
 - **Styling**: Custom CSS with CSS custom properties
-- **Icons**: Font Awesome subset (only used icons)
+- **Icons**: Font Awesome subset (solid + brands only)
 - **Search**: MiniSearch 7.1.0 for fuzzy search
 - **Content**: YAML configuration + Markdown files
 - **Parsing**: yamljs parser, Marked.js v11.1.1, Highlight.js v11.9.0
-- **Fonts**: Raleway (weights 400, 600, 700, 900)
+- **Fonts**: Raleway (weights 400, 700)
 - **CDN**: jsDelivr for external dependencies
 - **Templating**: Tagged template literals for secure HTML
 - **Testing**: QUnit for unit tests

@@ -160,16 +160,7 @@ a.icon:hover {
 }
 
 /* Icons - Font Awesome Subset */
-/* Only includes the 11 icons used in this project (~15KB vs ~800KB) */
-
-@font-face {
-	font-family: "Font Awesome 6 Free";
-	font-style: normal;
-	font-weight: 400;
-	font-display: block;
-	src: url("https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/webfonts/fa-regular-400.woff2")
-		format("woff2");
-}
+/* Only includes the icons used in this project */
 
 @font-face {
 	font-family: "Font Awesome 6 Free";
@@ -190,7 +181,6 @@ a.icon:hover {
 }
 
 .fas,
-.far,
 .fab {
 	display: inline-block;
 	font-style: normal;
@@ -200,21 +190,17 @@ a.icon:hover {
 }
 
 .fas:hover,
-.far:hover,
 .fab:hover {
 	transform: rotate(5deg) scale(1.1);
 }
 
-.fas,
-.far {
-	font-family: "Font Awesome 6 Free", sans-serif;
-}
-
 .fas {
+	font-family: "Font Awesome 6 Free", sans-serif;
 	font-weight: 900;
 }
 
-.far {
+.fab {
+	font-family: "Font Awesome 6 Brands", sans-serif;
 	font-weight: 400;
 }
 
@@ -248,8 +234,6 @@ a.icon:hover {
 .fa-external-link-alt::before {
 	content: "\f35d";
 }
-
-/* Regular Icons (far) */
 .fa-calendar::before {
 	content: "\f133";
 }
