@@ -196,7 +196,7 @@ const Templates = {
                 <a href="?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
             </h2>
             <div class="blog-post-meta">
-                <span class="blog-post-date"><i class="far fa-calendar"></i> ${post.date}</span>
+                <span class="blog-post-date"><i class="fas fa-calendar"></i> ${post.date}</span>
                 ${post.tags?.length ? safe(`<span class="blog-post-tags">${Templates.tagList(post.tags).content}</span>`) : ""}
             </div>
             <p class="blog-post-excerpt">${post.excerpt}</p>
