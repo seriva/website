@@ -69,18 +69,14 @@ const i18n = {
 
 	t(key, lang = null) {
 		const language = lang || this.currentLanguage;
-		const keys = key.split(".");
-		let value = this.translations[language];
+		const languageTranslations = this.translations[language];
 
-		for (const k of keys) {
-			if (value && typeof value === "object") {
-				value = value[k];
-			} else {
-				return key;
-			}
+		if (!languageTranslations) {
+			return key;
 		}
 
-		return typeof value === "string" ? value : key;
+		// Direct lookup for flat translation keys
+		return languageTranslations[key] || key;
 	},
 };
 

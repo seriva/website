@@ -216,54 +216,34 @@ pages:
     # Content is now loaded from /data/pages/about.md
 
 # Translations
-# To add a new language, copy the 'en' section and translate the values
+# Flat translation keys for easy access
 translations:
   en:
-    # Navigation
-    nav:
-      projects: "Projects"
-      blog: "Blog"
-    
-    # Search
-    search:
-      placeholder: "Search..."
-      noResults: "No results found"
-      loading: "Loading..."
-    
-    # Blog
-    blog:
-      backToBlog: "← Back to Blog"
-      noPosts: "No blog posts yet. Check back soon!"
-      previous: "Previous"
-      next: "Next"
-    
-    # Project
-    project:
-      links: "Links"
-      media: "Media"
-      demo: "Play!"
-      demoInstructions: "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls."
-      fullscreen: "Go Fullscreen"
-      loadingReadme: "Loading README from GitHub..."
-      readmeError: "Error loading README from GitHub."
-    
-    # General
-    general:
-      loading: "Loading..."
-      error: "Error loading page"
-      errorMessage: "Please try refreshing the page."
-      notFound: "Page Not Found"
-      notFoundMessage: "The requested page could not be found."
-      projectNotFound: "Project not found"
-      projectNotFoundMessage: "The requested project could not be found."
-      blogNotFound: "Blog Post Not Found"
-      blogNotFoundMessage: "The requested blog post could not be found."
-    
-    # Footer
-    footer:
-      rights: "All rights reserved"
-    
-    # Badges
-    badges:
-      project: "Project"
-      blog: "Blog"
+    "nav.projects": "Projects"
+    "nav.blog": "Blog"
+    "search.placeholder": "Search..."
+    "search.noResults": "No results found"
+    "search.loading": "Loading..."
+    "blog.backToBlog": "← Back to Blog"
+    "blog.noPosts": "No blog posts yet. Check back soon!"
+    "blog.previous": "Previous"
+    "blog.next": "Next"
+    "project.links": "Links"
+    "project.media": "Media"
+    "project.demo": "Play!"
+    "project.demoInstructions": "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls."
+    "project.fullscreen": "Go Fullscreen"
+    "project.loadingReadme": "Loading README from GitHub..."
+    "project.readmeError": "Error loading README from GitHub."
+    "general.loading": "Loading..."
+    "general.error": "Error loading page"
+    "general.errorMessage": "Please try refreshing the page."
+    "general.notFound": "Page Not Found"
+    "general.notFoundMessage": "The requested page could not be found."
+    "general.projectNotFound": "Project not found"
+    "general.projectNotFoundMessage": "The requested project could not be found."
+    "general.blogNotFound": "Blog Post Not Found"
+    "general.blogNotFoundMessage": "The requested blog post could not be found."
+    "footer.rights": "All rights reserved"
+    "badges.project": "Project"
+    "badges.blog": "Blog"
