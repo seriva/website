@@ -27,7 +27,3 @@ RUN adduser -D -s /bin/bash vscode && \
 # Switch to non-root user
 USER vscode
 WORKDIR /home/vscode
-
-# Set up git config for the user
-RUN git config --global user.name "Dev Container" && \
-    git config --global user.email "dev@container.local"

@@ -179,23 +179,21 @@ const Templates = {
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
 		html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
 
-	tagList: (tags) =>
-		safe(
-			tags?.length
-				? tags
-						.map((tag) => {
-							// Check if search is enabled in the loaded data
-							const searchEnabled =
-								projectsData?.site?.search?.enabled !== false;
-							const clickableClass = searchEnabled ? " clickable-tag" : "";
-							const onclickAttr = searchEnabled
-								? ` onclick="event.stopPropagation(); searchByTag('${escapeHtml(tag)}')"`
-								: "";
-							return html`<span class="item-tag${clickableClass}"${safe(onclickAttr)}>${tag}</span>`;
-						})
-						.join(" ")
-				: "",
-		),
+	tagList: (tags) => {
+		if (!tags?.length) return safe("");
+		const searchEnabled = projectsData?.site?.search?.enabled !== false;
+		const clickableClass = searchEnabled ? " clickable-tag" : "";
+		return safe(
+			tags
+				.map((tag) => {
+					const onclickAttr = searchEnabled
+						? ` onclick="event.stopPropagation(); searchByTag('${escapeHtml(tag)}')"`
+						: "";
+					return html`<span class="item-tag${clickableClass}"${safe(onclickAttr)}>${tag}</span>`;
+				})
+				.join(" "),
+		);
+	},
 
 	blogPostCard: (post, index) => html`
         <article class="blog-post-card" data-index="${index}">
@@ -444,7 +442,7 @@ const applyHljsTheme = (
 	try {
 		if (!themeName) return;
 		const themeUrl = getHljsThemeUrl(themeName);
-		const themeLink = document.getElementById("hljs-theme");
+		const themeLink = DOM.get("hljs-theme");
 		if (themeLink) {
 			themeLink.href = themeUrl;
 		}
@@ -473,7 +471,7 @@ const updateMetaTags = (siteData) => {
 
 const fullscreen = () => {
 	try {
-		const iframe = document.getElementById("demo");
+		const iframe = DOM.get("demo");
 		if (!iframe) return;
 
 		const request =
@@ -491,8 +489,8 @@ const fullscreen = () => {
 window.fullscreen = fullscreen;
 
 const closeMobileMenu = () => {
-	const collapseElement = document.querySelector(".navbar-collapse");
-	const navbarToggle = document.querySelector(".navbar-toggle");
+	const collapseElement = DOM.get("navbarNav");
+	const navbarToggle = DOM.get("navbar-toggle");
 
 	if (collapseElement) {
 		collapseElement.classList.remove("show");
@@ -504,6 +502,16 @@ const closeMobileMenu = () => {
 	}
 };
 
+const closeAllDropdowns = (except = null) => {
+	document.querySelectorAll(".dropdown.show").forEach((d) => {
+		if (d !== except) {
+			d.classList.remove("show");
+			const toggle = d.querySelector(".dropdown-toggle");
+			if (toggle) toggle.setAttribute("aria-expanded", "false");
+		}
+	});
+};
+
 const initCustomDropdowns = () => {
 	document.querySelectorAll(".dropdown-toggle").forEach((toggle) => {
 		toggle.addEventListener("click", (e) => {
@@ -511,10 +519,7 @@ const initCustomDropdowns = () => {
 			const dropdown = toggle.closest(".dropdown");
 			const isOpen = dropdown.classList.contains("show");
 
-			document.querySelectorAll(".dropdown.show").forEach((d) => {
-				if (d !== dropdown) d.classList.remove("show");
-			});
-
+			closeAllDropdowns(dropdown);
 			dropdown.classList.toggle("show", !isOpen);
 			toggle.setAttribute("aria-expanded", !isOpen);
 		});
@@ -522,11 +527,7 @@ const initCustomDropdowns = () => {
 
 	document.addEventListener("click", (e) => {
 		if (e.target.closest(".dropdown-item") || !e.target.closest(".dropdown")) {
-			document.querySelectorAll(".dropdown.show").forEach((d) => {
-				d.classList.remove("show");
-				const toggle = d.querySelector(".dropdown-toggle");
-				if (toggle) toggle.setAttribute("aria-expanded", "false");
-			});
+			closeAllDropdowns();
 		}
 	});
 };
@@ -770,13 +771,11 @@ const createNavbar = (
 	siteTitle = "portfolio.example.com",
 ) => {
 	const blogPage = pages.find((page) => page.id === "blog");
-	const otherPages = pages.filter((page) => page.id !== "blog");
 	const blogLink = blogPage
 		? Templates.pageLink(blogPage.id, blogPage.title)
 		: "";
-	const projectsDropdown = Templates.projectsDropdown();
-	const pageLinks = otherPages
-		.filter((page) => page.showInNav)
+	const pageLinks = pages
+		.filter((page) => page.id !== "blog" && page.showInNav)
 		.sort((a, b) => a.order - b.order)
 		.map((page) => Templates.pageLink(page.id, page.title))
 		.join("");
@@ -786,7 +785,7 @@ const createNavbar = (
 	const searchBar = searchConfig?.enabled ? Templates.searchBar() : "";
 	return Templates.navbar(
 		blogLink,
-		projectsDropdown,
+		Templates.projectsDropdown(),
 		pageLinks,
 		socialLinksHtml,
 		searchBar,
@@ -837,7 +836,7 @@ const injectNavbar = async () => {
 
 	// Inject search page if enabled
 	if (data?.site?.search?.enabled) {
-		const existingSearchPage = document.getElementById("search-page");
+		const existingSearchPage = DOM.get("search-page");
 		if (!existingSearchPage) {
 			document.body.insertAdjacentHTML(
 				"beforeend",
@@ -845,6 +844,8 @@ const injectNavbar = async () => {
 					data.site.search.placeholder || i18n.t("search.placeholder"),
 				),
 			);
+			// Clear cache to ensure new element is retrieved
+			DOM.clear("search-page");
 		}
 	}
 
@@ -924,13 +925,13 @@ const initializeSearch = () => {
 
 const initializeSearchPage = (searchConfig) => {
 	const searchPage = DOM.get("search-page");
-	const searchPageBack = document.getElementById("search-page-back");
 	const searchPageInput = DOM.get("search-page-input");
 	const searchPageResults = DOM.get("search-page-results");
-	const searchPageClear = document.getElementById("search-page-clear");
 
-	if (!searchPage || !searchPageBack || !searchPageInput || !searchPageResults)
-		return;
+	if (!searchPage || !searchPageInput || !searchPageResults) return;
+
+	const searchPageBack = DOM.get("search-page-back");
+	const searchPageClear = DOM.get("search-page-clear");
 
 	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
 	let searchTimeout = null;
@@ -1057,9 +1058,9 @@ const applyColorScheme = (colors) => {
 		"--hover-color": colors.hover,
 	};
 
-	Object.entries(mappings).forEach(([prop, value]) => {
+	for (const [prop, value] of Object.entries(mappings)) {
 		if (value) root.style.setProperty(prop, value);
-	});
+	}
 
 	// Apply syntax highlighting theme
 	if (colors.code?.theme) {
@@ -1096,26 +1097,30 @@ const MarkdownLoader = {
 		const [, frontmatter, content] = match;
 		const metadata = {};
 
-		frontmatter.split("\n").forEach((line) => {
-			const [key, ...valueParts] = line.split(":");
-			if (key && valueParts.length) {
-				const value = valueParts.join(":").trim();
-				// Handle arrays in frontmatter
-				if (value.startsWith("[") && value.endsWith("]")) {
-					try {
-						metadata[key.trim()] = JSON.parse(value.replace(/'/g, '"'));
-					} catch (e) {
-						console.warn(
-							`Failed to parse array in frontmatter for key: ${key}`,
-							e,
-						);
-						metadata[key.trim()] = value;
-					}
-				} else {
-					metadata[key.trim()] = value.replace(/^["']|["']$/g, "");
+		for (const line of frontmatter.split("\n")) {
+			const colonIndex = line.indexOf(":");
+			if (colonIndex === -1) continue;
+
+			const key = line.slice(0, colonIndex).trim();
+			const value = line.slice(colonIndex + 1).trim();
+
+			if (!key || !value) continue;
+
+			// Handle arrays in frontmatter
+			if (value.startsWith("[") && value.endsWith("]")) {
+				try {
+					metadata[key] = JSON.parse(value.replace(/'/g, '"'));
+				} catch (e) {
+					console.warn(
+						`Failed to parse array in frontmatter for key: ${key}`,
+						e,
+					);
+					metadata[key] = value;
 				}
+			} else {
+				metadata[key] = value.replace(/^["']|["']$/g, "");
 			}
-		});
+		}
 
 		return { metadata, content: content.trim() };
 	},
@@ -1171,11 +1176,9 @@ const loadBlogPosts = async () => {
 };
 
 const processBlogPost = async (post) => {
-	const filename = post.filename;
-	const slug = filename.replace(/\.md$/, "");
-
+	const slug = post.filename.replace(/\.md$/, "");
 	// Use YAML metadata
-	return createPostObject(slug, post, filename);
+	return createPostObject(slug, post, post.filename);
 };
 
 const createPostObject = (slug, data, filename, content = null) => ({
@@ -1189,12 +1192,13 @@ const createPostObject = (slug, data, filename, content = null) => ({
 });
 
 const loadBlogPage = async (page = 1) => {
-	if (!DOM.get("main-content")) return;
+	const mainContent = DOM.get("main-content");
+	if (!mainContent) return;
 
 	const data = await getData();
 	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
-	DOM.get("main-content").innerHTML = Templates.loadingSpinner();
+	mainContent.innerHTML = Templates.loadingSpinner();
 
 	const posts = await loadBlogPosts();
 	const pagination = calculatePagination(
@@ -1204,7 +1208,7 @@ const loadBlogPage = async (page = 1) => {
 	);
 
 	if (pagination.pagePosts.length === 0) {
-		DOM.get("main-content").innerHTML = Templates.blogEmpty();
+		mainContent.innerHTML = Templates.blogEmpty();
 		return;
 	}
 
@@ -1214,7 +1218,7 @@ const loadBlogPage = async (page = 1) => {
 		)
 		.join("");
 
-	DOM.get("main-content").innerHTML = Templates.blogContainer(
+	mainContent.innerHTML = Templates.blogContainer(
 		postsHtml,
 		Templates.blogPagination(pagination.currentPage, pagination.totalPages),
 	);
@@ -1252,18 +1256,19 @@ const setupBlogCardClicks = () => {
 };
 
 const loadBlogPost = async (slug) => {
-	if (!DOM.get("main-content")) return;
+	const mainContent = DOM.get("main-content");
+	if (!mainContent) return;
 
 	const data = await getData();
 	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
-	DOM.get("main-content").innerHTML = Templates.loadingSpinner();
+	mainContent.innerHTML = Templates.loadingSpinner();
 
 	const posts = await loadBlogPosts();
 	const post = posts.find((p) => p.slug === slug);
 
 	if (!post) {
-		DOM.get("main-content").innerHTML = Templates.errorMessage(
+		mainContent.innerHTML = Templates.errorMessage(
 			i18n.t("general.blogNotFound"),
 			i18n.t("general.blogNotFoundMessage"),
 		);
@@ -1271,7 +1276,7 @@ const loadBlogPost = async (slug) => {
 	}
 
 	const content = await loadBlogPostContent(post);
-	DOM.get("main-content").innerHTML = Templates.blogPost(post, content);
+	mainContent.innerHTML = Templates.blogPost(post, content);
 };
 
 const loadBlogPostContent = async (post) => {
@@ -1300,13 +1305,8 @@ const loadProjectLinks = async (projectId, containerId) => {
 		`Error loading content for project ${projectId}`,
 	);
 
-	if (!data) {
-		container.style.display = "none";
-		return;
-	}
-
-	const project = data.projects?.find((p) => p.id === projectId);
-	if (!project?.links) {
+	const project = data?.projects?.find((p) => p.id === projectId);
+	if (!data || !project?.links) {
 		container.style.display = "none";
 		return;
 	}
@@ -1317,16 +1317,17 @@ const loadProjectLinks = async (projectId, containerId) => {
 };
 
 const loadPage = async (pageId) => {
-	if (!DOM.get("main-content")) return;
+	const mainContent = DOM.get("main-content");
+	if (!mainContent) return;
 
 	try {
 		const data = await getData();
 		setDocumentTitle(data);
 
 		// Load markdown content
-		const content = await loadMarkdownContent(pageId);
+		const content = await MarkdownLoader.loadAsHtml(`data/pages/${pageId}.md`);
 
-		DOM.get("main-content").innerHTML =
+		mainContent.innerHTML =
 			content ||
 			Templates.errorMessage(
 				i18n.t("general.notFound"),
@@ -1334,26 +1335,23 @@ const loadPage = async (pageId) => {
 			);
 	} catch (error) {
 		console.error(`Error loading page ${pageId}:`, error);
-		DOM.get("main-content").innerHTML = Templates.errorMessage(
+		mainContent.innerHTML = Templates.errorMessage(
 			i18n.t("general.error"),
 			i18n.t("general.errorMessage"),
 		);
 	}
 };
 
-const loadMarkdownContent = async (pageId) => {
-	return await MarkdownLoader.loadAsHtml(`data/pages/${pageId}.md`);
-};
-
 const loadProjectPage = async (projectId) => {
-	if (!DOM.get("main-content")) return;
+	const mainContent = DOM.get("main-content");
+	if (!mainContent) return;
 
 	try {
 		const data = await getData();
 		const project = data?.projects?.find((p) => p.id === projectId);
 
 		if (!project) {
-			DOM.get("main-content").innerHTML = Templates.errorMessage(
+			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.projectNotFound"),
 				i18n.t("general.projectNotFoundMessage"),
 			);
@@ -1380,10 +1378,10 @@ const loadProjectPage = async (projectId) => {
 			Templates.dynamicContainer("project-links", "project", project.id, ""),
 		];
 
-		DOM.get("main-content").innerHTML = sections.filter(Boolean).join("");
+		mainContent.innerHTML = sections.filter(Boolean).join("");
 	} catch (error) {
 		console.error(`Error loading project page ${projectId}:`, error);
-		DOM.get("main-content").innerHTML = Templates.errorMessage(
+		mainContent.innerHTML = Templates.errorMessage(
 			i18n.t("general.error"),
 			i18n.t("general.errorMessage"),
 		);
@@ -1409,21 +1407,18 @@ const loadProjectsDropdown = async () => {
 
 const loadAdditionalContent = async () => {
 	const promises = [];
-	const elements = ["github-readme", "project-links"]
-		.map((id) => document.getElementById(id))
-		.filter(Boolean);
 
-	elements.forEach((el) => {
-		if (el.dataset.repo) {
-			// Use fresh element reference (no caching)
-			if (el.parentElement) {
-				promises.push(loadGitHubReadme(el.dataset.repo, el.id));
-			}
+	for (const id of ["github-readme", "project-links"]) {
+		const el = DOM.get(id);
+		if (!el) continue;
+
+		if (el.dataset.repo && el.parentElement) {
+			promises.push(loadGitHubReadme(el.dataset.repo, el.id));
 		}
 		if (el.dataset.project) {
 			promises.push(loadProjectLinks(el.dataset.project, el.id));
 		}
-	});
+	}
 
 	await safeAsync(
 		() => Promise.all(promises),
@@ -1444,17 +1439,19 @@ const handleRoute = async () => {
 
 	// Helper function for page transitions
 	const startTransition = async () => {
-		if (!DOM.get("main-content")) return;
-		DOM.get("main-content").classList.add("page-transition-out");
+		const mainContent = DOM.get("main-content");
+		if (!mainContent) return;
+		mainContent.classList.add("page-transition-out");
 		await new Promise((resolve) =>
 			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
 		);
-		DOM.get("main-content").innerHTML = Templates.loadingSpinner();
+		mainContent.innerHTML = Templates.loadingSpinner();
 	};
 
 	const endTransition = () => {
-		if (DOM.get("main-content")) {
-			DOM.get("main-content").classList.remove("page-transition-out");
+		const mainContent = DOM.get("main-content");
+		if (mainContent) {
+			mainContent.classList.remove("page-transition-out");
 		}
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 		requestAnimationFrame(updateActiveNavLink);
@@ -1507,8 +1504,9 @@ const handleRoute = async () => {
 	} catch (error) {
 		console.error("Error loading page:", error);
 		endTransition();
-		if (DOM.get("main-content")) {
-			DOM.get("main-content").innerHTML = Templates.errorMessage(
+		const mainContent = DOM.get("main-content");
+		if (mainContent) {
+			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
 			);
@@ -1552,47 +1550,42 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 });
 
+// Helper function to toggle active class (shared utility)
+const toggleActive = (element, shouldBeActive) => {
+	element?.classList.toggle("active", shouldBeActive);
+};
+
 const updateActiveNavLink = () => {
+	const navbar = DOM.get("navbar-container");
+	if (!navbar) return;
+
+	// Cache selectors if not already cached
+	if (!updateActiveNavLink.navbarLinks) {
+		updateActiveNavLink.navbarLinks = navbar.querySelectorAll(
+			".navbar-nav .nav-link",
+		);
+		updateActiveNavLink.dropdownItems =
+			navbar.querySelectorAll(".dropdown-item");
+		updateActiveNavLink.projectDropdown = navbar.querySelector(".dropdown");
+	}
+
 	const params = new URLSearchParams(window.location.search);
 	const pageId = params.get("page");
 	const projectId = params.get("project");
 	const blogParam = params.get("blog");
 
-	// Cache navbar element if not already cached
-	if (!DOM.get("navbar-container")) return;
-
-	// Cache selectors if not already cached
-	if (!updateActiveNavLink.navbarLinks) {
-		updateActiveNavLink.navbarLinks = DOM.get(
-			"navbar-container",
-		).querySelectorAll(".navbar-nav .nav-link");
-		updateActiveNavLink.dropdownItems =
-			DOM.get("navbar-container").querySelectorAll(".dropdown-item");
-		updateActiveNavLink.projectDropdown =
-			DOM.get("navbar-container").querySelector(".dropdown");
-	}
-
-	// Helper function to toggle active class
-	const toggleActive = (element, shouldBeActive) => {
-		element?.classList.toggle("active", shouldBeActive);
-	};
-
 	// Determine target elements based on current route
 	const targets = {};
 	if (blogParam !== null) {
-		targets.link = DOM.get("navbar-container").querySelector(
-			'.nav-link[href="?blog"]',
-		);
+		targets.link = navbar.querySelector('.nav-link[href="?blog"]');
 	} else if (projectId) {
 		targets.dropdownToggle =
 			updateActiveNavLink.projectDropdown?.querySelector(".dropdown-toggle");
-		targets.dropdownItem = DOM.get("navbar-container").querySelector(
+		targets.dropdownItem = navbar.querySelector(
 			`.dropdown-item[href="?project=${projectId}"]`,
 		);
 	} else if (pageId) {
-		targets.link = DOM.get("navbar-container").querySelector(
-			`.nav-link[href="?page=${pageId}"]`,
-		);
+		targets.link = navbar.querySelector(`.nav-link[href="?page=${pageId}"]`);
 	}
 
 	// Update all elements in one pass
@@ -1613,25 +1606,19 @@ const handleSpaLinkClick = (e) => {
 
 	e.preventDefault();
 
-	// Cache navbar if not already cached
-	if (!DOM.get("navbar-container")) return;
+	const navbar = DOM.get("navbar-container");
+	if (!navbar) return;
 
 	// Cache selectors if not already cached
 	if (!handleSpaLinkClick.navbarLinks) {
-		handleSpaLinkClick.navbarLinks = DOM.get(
-			"navbar-container",
-		).querySelectorAll(".navbar-nav .nav-link");
+		handleSpaLinkClick.navbarLinks = navbar.querySelectorAll(
+			".navbar-nav .nav-link",
+		);
 		handleSpaLinkClick.dropdownItems =
-			DOM.get("navbar-container").querySelectorAll(".dropdown-item");
+			navbar.querySelectorAll(".dropdown-item");
 	}
 
-	// Helper function to toggle active class
-	const toggleActive = (element, shouldBeActive) => {
-		element?.classList.toggle("active", shouldBeActive);
-	};
-
 	// Determine which elements should be active
-	const _isNavLink = link.classList.contains("nav-link");
 	const isDropdownItem = link.classList.contains("dropdown-item");
 	const dropdownToggle = isDropdownItem
 		? link.closest(".dropdown")?.querySelector(".dropdown-toggle")
@@ -1656,15 +1643,15 @@ const setupSpaRouting = () => {
 
 const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
-		const { target } = event;
+		const navbar = DOM.get("navbar-container");
+		if (!navbar) return;
 
-		// Early return if navbar not cached
-		if (!DOM.get("navbar-container")) return;
+		const { target } = event;
 
 		// Handle mobile menu outside clicks
 		if (
 			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
-			!DOM.get("navbar-container").contains(target)
+			!navbar.contains(target)
 		) {
 			closeMobileMenu();
 			return;
