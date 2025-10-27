@@ -909,20 +909,11 @@ const initializeSearchPage = (searchConfig) => {
 // DATA LOADING & MANAGEMENT
 // ===========================================
 
-const getBasePath = () => {
-	const pathname = window.location.pathname;
-	const isSubdirectory = pathname.split("/").filter(Boolean).length > 1;
-
-	if (pathname.includes("/project/")) return "../";
-	if (isSubdirectory) return "./";
-	return "";
-};
-
 // Simplified content loading
 const getData = async () => {
 	if (projectsData) return projectsData;
 
-	const yamlPath = `${getBasePath()}data/content.yaml`;
+	const yamlPath = "data/content.yaml";
 
 	try {
 		const response = await fetch(yamlPath);
@@ -979,7 +970,7 @@ const MarkdownLoader = {
 	// Load markdown file from any path
 	async loadFile(path) {
 		try {
-			const response = await fetch(`${getBasePath()}${path}`);
+			const response = await fetch(path);
 			if (!response.ok) return null;
 			return response.text();
 		} catch (error) {
