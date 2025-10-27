@@ -26,10 +26,6 @@ const escapeHtml = (str) => {
 	return div.innerHTML;
 };
 
-const setDocumentTitle = (data) => {
-	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
-};
-
 const html = (strings, ...values) => {
 	return strings.reduce((result, str, i) => {
 		const value = values[i];
@@ -40,19 +36,6 @@ const html = (strings, ...values) => {
 };
 
 const safe = (content) => ({ __safe: true, content });
-
-const safeAsync = async (
-	asyncFn,
-	fallback = null,
-	errorMessage = "Operation failed",
-) => {
-	try {
-		return await asyncFn();
-	} catch (error) {
-		console.error(errorMessage, error);
-		return fallback;
-	}
-};
 
 // ===========================================
 // INTERNATIONALIZATION (i18n)
@@ -383,9 +366,6 @@ const Templates = {
 // MARKDOWN & SYNTAX HIGHLIGHTING
 // ===========================================
 
-const getHljsThemeUrl = (themeName) =>
-	`${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
-
 const initializeMarked = () => {
 	if (typeof marked === "undefined" || typeof hljs === "undefined") {
 		console.error("Marked or highlight.js not loaded");
@@ -432,10 +412,9 @@ const applyHljsTheme = (
 ) => {
 	try {
 		if (!themeName) return;
-		const themeUrl = getHljsThemeUrl(themeName);
-		const themeLink = DOM.get("hljs-theme");
+		const themeLink = document.getElementById("hljs-theme");
 		if (themeLink) {
-			themeLink.href = themeUrl;
+			themeLink.href = `${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
 		}
 	} catch (error) {
 		console.error("Error applying highlight.js theme:", error);
@@ -462,7 +441,7 @@ const updateMetaTags = (siteData) => {
 
 const fullscreen = () => {
 	try {
-		const iframe = DOM.get("demo");
+		const iframe = document.getElementById("demo");
 		if (!iframe) return;
 
 		const request =
@@ -480,8 +459,8 @@ const fullscreen = () => {
 window.fullscreen = fullscreen;
 
 const closeMobileMenu = () => {
-	const collapseElement = DOM.get("navbarNav");
-	const navbarToggle = DOM.get("navbar-toggle");
+	const collapseElement = document.getElementById("navbarNav");
+	const navbarToggle = document.getElementById("navbar-toggle");
 
 	if (collapseElement) {
 		collapseElement.classList.remove("show");
@@ -493,16 +472,6 @@ const closeMobileMenu = () => {
 	}
 };
 
-const closeAllDropdowns = (except = null) => {
-	document.querySelectorAll(".dropdown.show").forEach((d) => {
-		if (d !== except) {
-			d.classList.remove("show");
-			const toggle = d.querySelector(".dropdown-toggle");
-			if (toggle) toggle.setAttribute("aria-expanded", "false");
-		}
-	});
-};
-
 const initCustomDropdowns = () => {
 	document.querySelectorAll(".dropdown-toggle").forEach((toggle) => {
 		toggle.addEventListener("click", (e) => {
@@ -510,7 +479,15 @@ const initCustomDropdowns = () => {
 			const dropdown = toggle.closest(".dropdown");
 			const isOpen = dropdown.classList.contains("show");
 
-			closeAllDropdowns(dropdown);
+			// Close all other dropdowns
+			document.querySelectorAll(".dropdown.show").forEach((d) => {
+				if (d !== dropdown) {
+					d.classList.remove("show");
+					const t = d.querySelector(".dropdown-toggle");
+					if (t) t.setAttribute("aria-expanded", "false");
+				}
+			});
+
 			dropdown.classList.toggle("show", !isOpen);
 			toggle.setAttribute("aria-expanded", !isOpen);
 		});
@@ -518,14 +495,18 @@ const initCustomDropdowns = () => {
 
 	document.addEventListener("click", (e) => {
 		if (e.target.closest(".dropdown-item") || !e.target.closest(".dropdown")) {
-			closeAllDropdowns();
+			document.querySelectorAll(".dropdown.show").forEach((d) => {
+				d.classList.remove("show");
+				const toggle = d.querySelector(".dropdown-toggle");
+				if (toggle) toggle.setAttribute("aria-expanded", "false");
+			});
 		}
 	});
 };
 
 const initMobileMenuToggle = () => {
-	const navbarToggle = DOM.get("navbar-toggle");
-	const navbarCollapse = DOM.get("navbarNav");
+	const navbarToggle = document.getElementById("navbar-toggle");
+	const navbarCollapse = document.getElementById("navbarNav");
 
 	if (navbarToggle && navbarCollapse) {
 		navbarToggle.addEventListener("click", () => {
@@ -543,7 +524,6 @@ const initMobileMenuToggle = () => {
 
 const Search = {
 	data: [],
-	fuse: null,
 	isInitialized: false,
 	initPromise: null,
 
@@ -644,8 +624,8 @@ const Search = {
 };
 
 const searchByTag = (tag) => {
-	const searchPage = DOM.get("search-page");
-	const searchInput = DOM.get("search-page-input");
+	const searchPage = document.getElementById("search-page");
+	const searchInput = document.getElementById("search-page-input");
 
 	if (searchPage && searchInput) {
 		searchPage.classList.add("show");
@@ -665,13 +645,11 @@ window.searchByTag = searchByTag;
 
 const fetchGitHubReadme = async (repoName) => {
 	if (!repoName) return null;
-	if (readmeCache.has(repoName)) return readmeCache.get(repoName);
 
 	const data = await getData();
 	const username = data?.site?.github_username;
 	if (!username) {
 		console.warn("No GitHub username configured in content.yaml");
-		readmeCache.set(repoName, null);
 		return null;
 	}
 
@@ -682,36 +660,33 @@ const fetchGitHubReadme = async (repoName) => {
 			const url = `${CONSTANTS.GITHUB_RAW_BASE}/${username}/${repoName}/${branch}/README.md`;
 			const response = await fetch(url);
 			if (response.ok) {
-				const content = await response.text();
-				readmeCache.set(repoName, content);
-				return content;
+				return response.text();
 			}
 		} catch (error) {
 			console.warn(`Failed to fetch README from ${repoName}/${branch}:`, error);
 		}
 	}
 
-	readmeCache.set(repoName, null);
 	return null;
 };
 
 const loadGitHubReadme = async (repoName, containerId) => {
 	if (!repoName || !containerId) return;
 
-	const container = DOM.get(containerId);
+	const container = document.getElementById(containerId);
 	if (!container) return;
 
 	container.innerHTML = `<p>${i18n.t("project.loadingReadme")}</p>`;
 
-	const content = await safeAsync(
-		() => fetchGitHubReadme(repoName),
-		null,
-		`Error loading GitHub README for ${repoName}`,
-	);
-
-	container.innerHTML = content
-		? Templates.markdown(content).content
-		: Templates.githubReadmeError();
+	try {
+		const content = await fetchGitHubReadme(repoName);
+		container.innerHTML = content
+			? Templates.markdown(content).content
+			: Templates.githubReadmeError();
+	} catch (error) {
+		console.error(`Error loading GitHub README for ${repoName}`, error);
+		container.innerHTML = Templates.githubReadmeError();
+	}
 };
 
 // ===========================================
@@ -719,84 +694,29 @@ const loadGitHubReadme = async (repoName, containerId) => {
 // ===========================================
 
 let projectsData = null;
-let dataLoadPromise = null;
-const readmeCache = new Map();
-
-// ===========================================
-// DOM MANAGEMENT
-// ===========================================
-
-const DOM = {
-	cache: new Map(),
-
-	get(id) {
-		if (!this.cache.has(id)) {
-			this.cache.set(id, document.getElementById(id));
-		}
-		return this.cache.get(id);
-	},
-
-	clear(...ids) {
-		ids.forEach((id) => void this.cache.delete(id));
-	},
-
-	clearAll() {
-		this.cache.clear();
-	},
-};
 
 // ===========================================
 // NAVIGATION & UI FUNCTIONS
 // ===========================================
 
-const createNavbar = (
-	pages = [],
-	socialLinks = [],
-	searchConfig = {},
-	siteTitle = "portfolio.example.com",
-) => {
-	const blogPage = pages.find((page) => page.id === "blog");
-	const blogLink = blogPage
-		? Templates.pageLink(blogPage.id, blogPage.title)
-		: "";
-	const pageLinks = pages
-		.filter((page) => page.id !== "blog" && page.showInNav)
-		.sort((a, b) => a.order - b.order)
-		.map((page) => Templates.pageLink(page.id, page.title))
-		.join("");
-	const socialLinksHtml = socialLinks
-		.map((link) => Templates.socialLink(link))
-		.join("");
-	const searchBar = searchConfig?.enabled ? Templates.searchBar() : "";
-	return Templates.navbar(
-		blogLink,
-		Templates.projectsDropdown(),
-		pageLinks,
-		socialLinksHtml,
-		searchBar,
-		siteTitle,
-	);
-};
-
 const injectFooter = async () => {
-	if (!DOM.get("footer-container")) return;
+	const footerContainer = document.getElementById("footer-container");
+	if (!footerContainer) return;
 
 	try {
 		const data = await getData();
 		const authorName = data?.site?.author || "Portfolio Owner";
 		const currentYear = new Date().getFullYear();
 
-		DOM.get("footer-container").innerHTML = Templates.footer(
-			authorName,
-			currentYear,
-		);
+		footerContainer.innerHTML = Templates.footer(authorName, currentYear);
 	} catch (error) {
 		console.error("Error injecting footer:", error);
 	}
 };
 
 const injectNavbar = async () => {
-	if (!DOM.get("navbar-container")) return;
+	const navbarContainer = document.getElementById("navbar-container");
+	if (!navbarContainer) return;
 
 	const data = await getData();
 	const pages = data?.pages
@@ -811,15 +731,32 @@ const injectNavbar = async () => {
 		});
 	}
 
-	DOM.get("navbar-container").innerHTML = createNavbar(
-		pages,
-		data?.site?.social || [],
-		data?.site?.search || {},
+	// Build navbar inline
+	const blogPage = pages.find((page) => page.id === "blog");
+	const blogLink = blogPage
+		? Templates.pageLink(blogPage.id, blogPage.title)
+		: "";
+	const pageLinks = pages
+		.filter((page) => page.id !== "blog" && page.showInNav)
+		.sort((a, b) => a.order - b.order)
+		.map((page) => Templates.pageLink(page.id, page.title))
+		.join("");
+	const socialLinksHtml = (data?.site?.social || [])
+		.map((link) => Templates.socialLink(link))
+		.join("");
+	const searchBar = data?.site?.search?.enabled ? Templates.searchBar() : "";
+
+	navbarContainer.innerHTML = Templates.navbar(
+		blogLink,
+		Templates.projectsDropdown(),
+		pageLinks,
+		socialLinksHtml,
+		searchBar,
 		data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 	);
 
 	if (data?.site?.search?.enabled) {
-		const existingSearchPage = DOM.get("search-page");
+		const existingSearchPage = document.getElementById("search-page");
 		if (!existingSearchPage) {
 			document.body.insertAdjacentHTML(
 				"beforeend",
@@ -827,11 +764,9 @@ const injectNavbar = async () => {
 					data.site.search.placeholder || i18n.t("search.placeholder"),
 				),
 			);
-			DOM.clear("search-page");
 		}
 	}
 
-	DOM.clear("projects-dropdown", "navbar-toggle");
 	initCustomDropdowns();
 	initMobileMenuToggle();
 
@@ -878,12 +813,12 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 };
 
 const initializeSearch = () => {
-	const searchToggle = DOM.get("search-toggle");
+	const searchToggle = document.getElementById("search-toggle");
 	Search.init(false);
 
 	const openSearchPage = () => {
-		const searchPage = DOM.get("search-page");
-		const searchInput = DOM.get("search-page-input");
+		const searchPage = document.getElementById("search-page");
+		const searchInput = document.getElementById("search-page-input");
 
 		if (searchPage) {
 			searchPage.classList.add("show");
@@ -903,14 +838,14 @@ const initializeSearch = () => {
 };
 
 const initializeSearchPage = (searchConfig) => {
-	const searchPage = DOM.get("search-page");
-	const searchPageInput = DOM.get("search-page-input");
-	const searchPageResults = DOM.get("search-page-results");
+	const searchPage = document.getElementById("search-page");
+	const searchPageInput = document.getElementById("search-page-input");
+	const searchPageResults = document.getElementById("search-page-results");
 
 	if (!searchPage || !searchPageInput || !searchPageResults) return;
 
-	const searchPageBack = DOM.get("search-page-back");
-	const searchPageClear = DOM.get("search-page-clear");
+	const searchPageBack = document.getElementById("search-page-back");
+	const searchPageClear = document.getElementById("search-page-clear");
 
 	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
 	let searchTimeout = null;
@@ -975,50 +910,39 @@ const initializeSearchPage = (searchConfig) => {
 // ===========================================
 
 const getBasePath = () => {
-	// Detect if we're in a subdirectory (not at root)
 	const pathname = window.location.pathname;
-	const isSubdirectory = pathname.split("/").length > 2; // More than just "/" and the subdirectory
+	const isSubdirectory = pathname.split("/").filter(Boolean).length > 1;
 
-	if (window.location.pathname.includes("/project/")) {
-		return "../";
-	} else if (isSubdirectory) {
-		return "./";
-	}
+	if (pathname.includes("/project/")) return "../";
+	if (isSubdirectory) return "./";
 	return "";
 };
 
 // Simplified content loading
 const getData = async () => {
 	if (projectsData) return projectsData;
-	if (dataLoadPromise) return dataLoadPromise;
 
 	const yamlPath = `${getBasePath()}data/content.yaml`;
 
-	dataLoadPromise = (async () => {
-		try {
-			const response = await fetch(yamlPath);
-			if (!response.ok) throw new Error(`HTTP ${response.status}`);
+	try {
+		const response = await fetch(yamlPath);
+		if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-			const yamlText = await response.text();
-			projectsData = YAML.parse(yamlText);
+		const yamlText = await response.text();
+		projectsData = YAML.parse(yamlText);
 
-			// Apply theming and i18n
-			if (projectsData?.site?.colors)
-				applyColorScheme(projectsData.site.colors);
-			if (projectsData?.site?.i18n && projectsData?.translations) {
-				i18n.init(projectsData.site.i18n, projectsData.translations);
-			}
-
-			return projectsData;
-		} catch (error) {
-			console.error("Failed to load content:", error);
-			projectsData = null;
-			dataLoadPromise = null;
-			return null;
+		// Apply theming and i18n
+		if (projectsData?.site?.colors) applyColorScheme(projectsData.site.colors);
+		if (projectsData?.site?.i18n && projectsData?.translations) {
+			i18n.init(projectsData.site.i18n, projectsData.translations);
 		}
-	})();
 
-	return dataLoadPromise;
+		return projectsData;
+	} catch (error) {
+		console.error("Failed to load content:", error);
+		projectsData = null;
+		return null;
+	}
 };
 
 const applyColorScheme = (colors) => {
@@ -1171,7 +1095,7 @@ const createPostObject = (slug, data, filename, content = null) => ({
 });
 
 const loadBlogPage = async (page = 1) => {
-	const mainContent = DOM.get("main-content");
+	const mainContent = document.getElementById("main-content");
 	if (!mainContent) return;
 
 	const data = await getData();
@@ -1235,7 +1159,7 @@ const setupBlogCardClicks = () => {
 };
 
 const loadBlogPost = async (slug) => {
-	const mainContent = DOM.get("main-content");
+	const mainContent = document.getElementById("main-content");
 	if (!mainContent) return;
 
 	const data = await getData();
@@ -1275,33 +1199,32 @@ const loadBlogPostContent = async (post) => {
 const loadProjectLinks = async (projectId, containerId) => {
 	if (!projectId || !containerId) return;
 
-	const container = DOM.get(containerId);
+	const container = document.getElementById(containerId);
 	if (!container) return;
 
-	const data = await safeAsync(
-		() => getData(),
-		null,
-		`Error loading content for project ${projectId}`,
-	);
+	try {
+		const data = await getData();
+		const project = data?.projects?.find((p) => p.id === projectId);
+		if (!data || !project?.links) {
+			container.style.display = "none";
+			return;
+		}
 
-	const project = data?.projects?.find((p) => p.id === projectId);
-	if (!data || !project?.links) {
-		container.style.display = "none";
-		return;
+		container.innerHTML = Templates.projectLinksSection(
+			project.links.map(Templates.projectLink).join(""),
+		);
+	} catch (error) {
+		console.error(`Error loading content for project ${projectId}`, error);
 	}
-
-	container.innerHTML = Templates.projectLinksSection(
-		project.links.map(Templates.projectLink).join(""),
-	);
 };
 
 const loadPage = async (pageId) => {
-	const mainContent = DOM.get("main-content");
+	const mainContent = document.getElementById("main-content");
 	if (!mainContent) return;
 
 	try {
 		const data = await getData();
-		setDocumentTitle(data);
+		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
 		// Load markdown content
 		const content = await MarkdownLoader.loadAsHtml(`data/pages/${pageId}.md`);
@@ -1322,7 +1245,7 @@ const loadPage = async (pageId) => {
 };
 
 const loadProjectPage = async (projectId) => {
-	const mainContent = DOM.get("main-content");
+	const mainContent = document.getElementById("main-content");
 	if (!mainContent) return;
 
 	try {
@@ -1368,7 +1291,7 @@ const loadProjectPage = async (projectId) => {
 };
 
 const loadProjectsDropdown = async () => {
-	const dropdown = DOM.get("projects-dropdown");
+	const dropdown = document.getElementById("projects-dropdown");
 	if (!dropdown) return;
 
 	try {
@@ -1388,7 +1311,7 @@ const loadAdditionalContent = async () => {
 	const promises = [];
 
 	for (const id of ["github-readme", "project-links"]) {
-		const el = DOM.get(id);
+		const el = document.getElementById(id);
 		if (!el) continue;
 
 		if (el.dataset.repo && el.parentElement) {
@@ -1399,26 +1322,23 @@ const loadAdditionalContent = async () => {
 		}
 	}
 
-	await safeAsync(
-		() => Promise.all(promises),
-		null,
-		"Error loading additional content",
-	);
+	try {
+		await Promise.all(promises);
+	} catch (error) {
+		console.error("Error loading additional content", error);
+	}
 };
 
 // ===========================================
 // ROUTING & PAGE MANAGEMENT
 // ===========================================
 
-// Track current route to prevent unnecessary reloads
-let currentRoute = null;
-
 const handleRoute = async () => {
 	closeMobileMenu();
 
 	// Helper function for page transitions
 	const startTransition = async () => {
-		const mainContent = DOM.get("main-content");
+		const mainContent = document.getElementById("main-content");
 		if (!mainContent) return;
 		mainContent.classList.add("page-transition-out");
 		await new Promise((resolve) =>
@@ -1428,7 +1348,7 @@ const handleRoute = async () => {
 	};
 
 	const endTransition = () => {
-		const mainContent = DOM.get("main-content");
+		const mainContent = document.getElementById("main-content");
 		if (mainContent) {
 			mainContent.classList.remove("page-transition-out");
 		}
@@ -1444,12 +1364,6 @@ const handleRoute = async () => {
 		blogPage: params.get("p") ? parseInt(params.get("p"), 10) : 1,
 	};
 
-	const routeString = JSON.stringify(route);
-	if (currentRoute === routeString) {
-		return;
-	}
-	currentRoute = routeString;
-
 	await startTransition();
 
 	try {
@@ -1461,7 +1375,6 @@ const handleRoute = async () => {
 				: loadBlogPost(route.blog));
 		} else if (route.project) {
 			await loadProjectPage(route.project);
-			DOM.clear("github-readme", "project-links");
 			await new Promise((resolve) => requestAnimationFrame(resolve));
 			await loadAdditionalContent();
 		} else if (route.page) {
@@ -1477,7 +1390,7 @@ const handleRoute = async () => {
 	} catch (error) {
 		console.error("Error loading page:", error);
 		endTransition();
-		const mainContent = DOM.get("main-content");
+		const mainContent = document.getElementById("main-content");
 		if (mainContent) {
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
@@ -1494,9 +1407,6 @@ const handleRoute = async () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
-		// DOM system auto-initializes
-
-		// Initialize marked.js with highlight.js
 		initializeMarked();
 
 		const data = await getData();
@@ -1508,14 +1418,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 		await handleRoute();
 
 		window.addEventListener("popstate", handleRoute);
-		setupSpaRouting(); // Set up event delegation for SPA links (once)
+		setupSpaRouting();
 		addMobileMenuOutsideClickHandler();
-
-		// Note: GitHub READMEs are preloaded during Search.init() if search is enabled
 	} catch (error) {
 		console.error("Error initializing page:", error);
-		if (DOM.get("main-content")) {
-			DOM.get("main-content").innerHTML = Templates.errorMessage(
+		const mainContent = document.getElementById("main-content");
+		if (mainContent) {
+			mainContent.innerHTML = Templates.errorMessage(
 				"Something went wrong",
 				"Please refresh the page to try again.",
 			);
@@ -1523,22 +1432,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 });
 
-const toggleActive = (element, shouldBeActive) => {
-	element?.classList.toggle("active", shouldBeActive);
-};
-
 const updateActiveNavLink = () => {
-	const navbar = DOM.get("navbar-container");
+	const navbar = document.getElementById("navbar-container");
 	if (!navbar) return;
 
-	if (!updateActiveNavLink.navbarLinks) {
-		updateActiveNavLink.navbarLinks = navbar.querySelectorAll(
-			".navbar-nav .nav-link",
-		);
-		updateActiveNavLink.dropdownItems =
-			navbar.querySelectorAll(".dropdown-item");
-		updateActiveNavLink.projectDropdown = navbar.querySelector(".dropdown");
-	}
+	const navbarLinks = navbar.querySelectorAll(".navbar-nav .nav-link");
+	const dropdownItems = navbar.querySelectorAll(".dropdown-item");
+	const projectDropdown = navbar.querySelector(".dropdown");
 
 	const params = new URLSearchParams(window.location.search);
 	const pageId = params.get("page");
@@ -1549,8 +1449,7 @@ const updateActiveNavLink = () => {
 	if (blogParam !== null) {
 		targets.link = navbar.querySelector('.nav-link[href="?blog"]');
 	} else if (projectId) {
-		targets.dropdownToggle =
-			updateActiveNavLink.projectDropdown?.querySelector(".dropdown-toggle");
+		targets.dropdownToggle = projectDropdown?.querySelector(".dropdown-toggle");
 		targets.dropdownItem = navbar.querySelector(
 			`.dropdown-item[href="?project=${projectId}"]`,
 		);
@@ -1558,14 +1457,14 @@ const updateActiveNavLink = () => {
 		targets.link = navbar.querySelector(`.nav-link[href="?page=${pageId}"]`);
 	}
 
-	updateActiveNavLink.navbarLinks.forEach((link) => {
-		toggleActive(
-			link,
+	navbarLinks.forEach((link) => {
+		link?.classList.toggle(
+			"active",
 			link === targets.link || link === targets.dropdownToggle,
 		);
 	});
-	updateActiveNavLink.dropdownItems.forEach((item) => {
-		toggleActive(item, item === targets.dropdownItem);
+	dropdownItems.forEach((item) => {
+		item?.classList.toggle("active", item === targets.dropdownItem);
 	});
 };
 
@@ -1575,27 +1474,25 @@ const handleSpaLinkClick = (e) => {
 
 	e.preventDefault();
 
-	const navbar = DOM.get("navbar-container");
+	const navbar = document.getElementById("navbar-container");
 	if (!navbar) return;
 
-	if (!handleSpaLinkClick.navbarLinks) {
-		handleSpaLinkClick.navbarLinks = navbar.querySelectorAll(
-			".navbar-nav .nav-link",
-		);
-		handleSpaLinkClick.dropdownItems =
-			navbar.querySelectorAll(".dropdown-item");
-	}
+	const navbarLinks = navbar.querySelectorAll(".navbar-nav .nav-link");
+	const dropdownItems = navbar.querySelectorAll(".dropdown-item");
 
 	const isDropdownItem = link.classList.contains("dropdown-item");
 	const dropdownToggle = isDropdownItem
 		? link.closest(".dropdown")?.querySelector(".dropdown-toggle")
 		: null;
 
-	handleSpaLinkClick.navbarLinks.forEach((navLink) => {
-		toggleActive(navLink, navLink === link || navLink === dropdownToggle);
+	navbarLinks.forEach((navLink) => {
+		navLink?.classList.toggle(
+			"active",
+			navLink === link || navLink === dropdownToggle,
+		);
 	});
-	handleSpaLinkClick.dropdownItems.forEach((item) => {
-		toggleActive(item, item === link);
+	dropdownItems.forEach((item) => {
+		item?.classList.toggle("active", item === link);
 	});
 
 	closeMobileMenu();
@@ -1609,34 +1506,14 @@ const setupSpaRouting = () => {
 
 const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
-		const navbar = DOM.get("navbar-container");
+		const navbar = document.getElementById("navbar-container");
 		if (!navbar) return;
-
-		const { target } = event;
 
 		if (
 			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
-			!navbar.contains(target)
+			!navbar.contains(event.target)
 		) {
 			closeMobileMenu();
-			return;
-		}
-
-		const navbarElement = target.closest(
-			".navbar a:not([data-spa-route]), .navbar-toggle",
-		);
-		if (!navbarElement) return;
-
-		if (navbarElement.tagName === "A") {
-			if (
-				!navbarElement.classList.contains("dropdown-toggle") &&
-				!navbarElement.hasAttribute("data-keep-menu")
-			) {
-				closeMobileMenu();
-			}
-			requestAnimationFrame(() => navbarElement.blur());
-		} else if (navbarElement.classList.contains("navbar-toggle")) {
-			requestAnimationFrame(() => navbarElement.blur());
 		}
 	});
 };
