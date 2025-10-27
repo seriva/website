@@ -41,7 +41,11 @@ const html = (strings, ...values) => {
 
 const safe = (content) => ({ __safe: true, content });
 
-const safeAsync = async (asyncFn, fallback = null, errorMessage = "Operation failed") => {
+const safeAsync = async (
+	asyncFn,
+	fallback = null,
+	errorMessage = "Operation failed",
+) => {
 	try {
 		return await asyncFn();
 	} catch (error) {
