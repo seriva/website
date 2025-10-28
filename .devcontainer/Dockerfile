@@ -5,14 +5,15 @@ RUN apk add --no-cache \
     bash \
     curl \
     git \
-    darkhttpd \
-    nodejs \
-    npm
+    darkhttpd
 
 # Install Biome
 RUN curl -fsSL https://github.com/biomejs/biome/releases/latest/download/biome-linux-x64-musl -o /tmp/biome && \
     chmod 755 /tmp/biome && \
     mv /tmp/biome /usr/local/bin/biome
+
+# Verify installation
+RUN /usr/local/bin/biome --version
 
 # Verify installation
 RUN /usr/local/bin/biome --version
