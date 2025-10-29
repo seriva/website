@@ -66,6 +66,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2025-10-29-from-homelab-to-github-pages.md"
+      title: "From Homelab to GitHub Pages: A Journey in Self-Hosting (and Letting Go)"
+      date: "2025-10-29"
+      excerpt: "How I went from running my own nginx server with Let's Encrypt in my homelab, building with TeamCity, to embracing the simplicity of GitHub Pages and Actions."
+      tags: ["DevOps", "Self-Hosting", "Homelab", "GitHub Pages", "CI/CD"]
     - filename: "2025-10-21-building-portfolio-website.md"
       title: "Building a Portfolio Website: A Journey Through Time (and Many Rewrites)"
       date: "2025-10-21"
