@@ -53,7 +53,7 @@ const stack = {
     'yamljs',          // YAML parser
     'marked.js',       // Markdown rendering
     'Prism.js',        // Syntax highlighting (~2KB!)
-    'MiniSearch'       // Fast fuzzy search
+    'Fuse.js Basic'    // Lightweight fuzzy search
   ],
   dev_server: 'darkhttpd', // Or any static server
   bundle_size: 'tiny',

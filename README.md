@@ -8,7 +8,7 @@ Key features:
 - **Markdown page system** - Create pages as markdown files in `/data/pages/`
 - **Markdown blog system** - Blog posts with pagination and metadata
 - **YAML configuration** - Easy content management and site settings
-- **Fuzzy search** - MiniSearch across projects and blog posts
+- **Fuzzy search** - Fuse.js across projects and blog posts
 - **Dynamic color themes** - Customizable color schemes
 - **GitHub integration** - Loads project READMEs directly from GitHub
 - **Mobile-friendly** - Responsive design with unified search
@@ -20,7 +20,7 @@ Key features:
 - **Frontend**: HTML, CSS, JavaScript (no build process)
 - **Styling**: Custom CSS with CSS custom properties
 - **Icons**: Font Awesome subset (solid + brands only)
-- **Search**: MiniSearch 7.1.0 for fuzzy search
+- **Search**: Fuse.js Basic 7.0.0 for fuzzy search
 - **Content**: YAML configuration + Markdown files
 - **Parsing**: yamljs parser, Marked.js v11.1.1, Prism.js v1.30.0
 - **Fonts**: Raleway (weights 400, 700)
@@ -171,7 +171,7 @@ blog:
 
 ### Search
 
-Powered by [MiniSearch](https://lucaong.github.io/minisearch/) for fast, fuzzy search across all projects and blog posts:
+Powered by [Fuse.js](https://www.fusejs.io/) for lightweight, fuzzy search across all projects and blog posts:
 
 ```yaml
 site:

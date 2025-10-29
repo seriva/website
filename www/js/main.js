@@ -581,19 +581,20 @@ const Search = {
 				// Index all searchable content
 				this.data = [...projectsWithContent, ...blogPostsIndexed];
 
-				// Initialize MiniSearch
-				this.miniSearch = new MiniSearch({
-					fields: ["title", "description", "tags", "content"],
-					storeFields: ["id", "title", "description", "tags", "type", "url"],
-					searchOptions: {
-						boost: { title: 2, description: 1.5, tags: 1.2, content: 0.5 },
-						fuzzy: 0.2,
-						prefix: true,
-					},
+				// Initialize Fuse.js
+				this.fuse = new Fuse(this.data, {
+					keys: [
+						{ name: "title", weight: 0.4 },
+						{ name: "description", weight: 0.3 },
+						{ name: "tags", weight: 0.2 },
+						{ name: "content", weight: 0.1 },
+					],
+					includeScore: true,
+					threshold: 0.4,
+					ignoreLocation: true,
+					minMatchCharLength: 2,
 				});
 
-				// Add all documents to the index
-				this.miniSearch.addAll(this.data);
 				this.isInitialized = true;
 			} catch (error) {
 				console.error("Error initializing search:", error);
@@ -605,16 +606,13 @@ const Search = {
 	},
 
 	search(query) {
-		if (!query || query.length < CONSTANTS.SEARCH_MIN_CHARS || !this.miniSearch)
+		if (!query || query.length < CONSTANTS.SEARCH_MIN_CHARS || !this.fuse)
 			return [];
 
-		return this.miniSearch
-			.search(query, {
-				boost: { title: 2, description: 1.5, tags: 1.2, content: 0.5 },
-				fuzzy: 0.2,
-				prefix: true,
-			})
-			.slice(0, CONSTANTS.SEARCH_MAX_RESULTS);
+		const results = this.fuse.search(query);
+		return results
+			.slice(0, CONSTANTS.SEARCH_MAX_RESULTS)
+			.map((result) => result.item);
 	},
 
 	highlight(text, query) {
