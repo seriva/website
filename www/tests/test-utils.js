@@ -64,4 +64,26 @@ QUnit.module("Utility Functions", () => {
 			"Should not escape safe content",
 		);
 	});
+
+	QUnit.test("Prism theme link should be configured correctly", (assert) => {
+		const themeLink = document.getElementById("prism-theme");
+		assert.ok(themeLink, "Prism theme link should exist in document");
+
+		if (themeLink) {
+			assert.ok(
+				themeLink.href.includes("prismjs"),
+				"Theme link should reference Prism.js CDN",
+			);
+			assert.ok(
+				themeLink.href.includes(".min.css"),
+				"Theme link should reference a CSS file",
+			);
+			assert.equal(
+				themeLink.tagName.toLowerCase(),
+				"link",
+				"Should be a link element",
+			);
+			assert.equal(themeLink.rel, "stylesheet", "Should have rel='stylesheet'");
+		}
+	});
 });

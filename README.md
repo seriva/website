@@ -22,7 +22,7 @@ Key features:
 - **Icons**: Font Awesome subset (solid + brands only)
 - **Search**: MiniSearch 7.1.0 for fuzzy search
 - **Content**: YAML configuration + Markdown files
-- **Parsing**: yamljs parser, Marked.js v11.1.1, Highlight.js v11.9.0
+- **Parsing**: yamljs parser, Marked.js v11.1.1, Prism.js v1.30.0
 - **Fonts**: Raleway (weights 400, 700)
 - **CDN**: jsDelivr for external dependencies
 - **Templating**: Tagged template literals for secure HTML
@@ -248,10 +248,10 @@ colors:
   text: "#FAFAF9"
   # ... etc
   code:
-    theme: "monokai"  # Highlight.js theme for syntax highlighting
+    theme: "prism-tomorrow"  # Prism.js theme for syntax highlighting
 ```
 
-**Available Highlight.js themes:** `monokai`, `github-dark`, `atom-one-dark`, `vs2015`, `dracula`, `nord`, and [many more](https://highlightjs.org/demo)
+**Available Prism.js themes:** `prism`, `prism-dark`, `prism-tomorrow`, `prism-okaidia`, `prism-twilight`, `prism-coy`, `prism-funky`, `prism-solarizedlight`, and [many more](https://prismjs.com/)
 
 ### Internationalization (i18n)
 

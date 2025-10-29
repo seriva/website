@@ -51,7 +51,8 @@ const stack = {
     'Custom CSS',      // Lightweight and tailored
     'Font Awesome subset', // Only the icons I use
     'yamljs',          // YAML parser
-    'marked',          // Markdown rendering
+    'marked.js',       // Markdown rendering
+    'Prism.js',        // Syntax highlighting (~2KB!)
     'MiniSearch'       // Fast fuzzy search
   ],
   dev_server: 'darkhttpd', // Or any static server
