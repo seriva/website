@@ -1,5 +1,5 @@
 ---
-title: "Building a Portfolio Website: A Journey Through Time (and Many Rewrites)"
+title: "Vibing a Portfolio Website"
 date: "2025-10-21"
 excerpt: "From hand-coded HTML to LAMP stacks to Hugo, and finally to vibe-coding a portfolio in a few hours with AI assistance. Here's my portfolio website origin story."
 tags: ["Web Development", "JavaScript", "Personal", "AI"]

@@ -1,5 +1,5 @@
 ---
-title: "From Homelab to GitHub Pages: A Journey in Self-Hosting (and Letting Go)"
+title: "From Homelab to GitHub Pages"
 date: "2025-10-29"
 excerpt: "How I went from running my own nginx server with Let's Encrypt in my homelab, building with TeamCity, to embracing the simplicity of GitHub Pages and Actions."
 tags: ["DevOps", "Self-Hosting", "Homelab", "GitHub Pages", "CI/CD"]
@@ -94,7 +94,7 @@ That's it. No nginx configs, no certbot renewal scripts, no rsync commands. Just
 
 ## Conclusion
 
-The migration was straightforward—removed Hugo, pushed to GitHub, configured Pages, updated DNS. Done in 30 minutes.
+The migration was straightforward—removed Hugo, pushed to GitHub, configured Pages, updated DNS. Done in 30 minutes. Worked so well that I did the same with [SimpleFPS](https://github.com/seriva/SimpleFPS) and [AstroHunter](https://github.com/seriva/AstroHunter).
 
 **What changed?** Every part of my homelab setup—nginx, Let's Encrypt, TeamCity, my internet connection—was a potential failure point. GitHub Pages is just... GitHub. They're better at uptime than I am.
 
