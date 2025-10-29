@@ -1,7 +1,3 @@
 # Allow all crawlers
 User-agent: *
 Allow: /
-
-# Disallow demo folders if they contain test data
-User-agent: *
-Disallow: /demo/
