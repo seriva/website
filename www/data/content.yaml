@@ -29,7 +29,7 @@ site:
     border: "#21262D"        # Soft gray border - gentle definition
     hover: "#1A2332"         # Cool dark hover state with hint of blue
     code:
-      theme: "atom-one-dark"
+      theme: "prism-tomorrow"  # Prism.js theme (prism-tomorrow, prism-okaidia, prism-dark, etc.)
   
   # Search configuration
   search:

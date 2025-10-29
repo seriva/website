@@ -47,6 +47,15 @@ QUnit.module("Simple Tests", () => {
 			300,
 			"Search debounce should be 300ms",
 		);
+		assert.ok(
+			CONSTANTS.PRISM_CDN_BASE.includes("prismjs"),
+			"Should use Prism.js CDN",
+		);
+		assert.equal(
+			CONSTANTS.DEFAULT_THEME,
+			"prism-tomorrow",
+			"Default theme should be prism-tomorrow",
+		);
 	});
 
 	QUnit.test("Search object structure", (assert) => {

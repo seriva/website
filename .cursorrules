@@ -1,0 +1,62 @@
+## Cursor Rules: Portfolio Website (Vanilla JS SPA)
+
+Keep it fast, simple, and secure. No build tools. One SPA in `www/js/main.js`.
+
+### Do
+- Use `html\`...\`` templates everywhere; all user content auto-escapes
+- Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
+- Call `await getData()` before reading config/content
+- Route with URL params: `?blog`, `?project=id`, `?page=id`; use `handleRoute()`
+- Update `<title>` from `data.site.title` in every route
+- Always call `closeMobileMenu()` inside route handlers
+- Use `MarkdownLoader.loadAsHtml(path)` for pages/posts; READMEs via `fetchGitHubReadme(repo)`
+- Initialize search with `Search.init()`; debounce inputs 300ms
+- Respect theme: set CSS variables via `applyColorScheme()`; call `applyPrismTheme()` before rendering code
+- After page transitions, rely on `Prism.highlightAllUnder()` (already wired)
+- Add new templates under `Templates.* = (args) => html\`...\``
+- Keep functions grouped by existing comment sections in `main.js`
+
+### Don’t
+- Don’t introduce frameworks/build steps or server logic
+- Don’t concatenate raw HTML strings; don’t bypass escaping without `safe()`
+- Don’t use hash routing; keep the `URLSearchParams` pattern
+- Don’t block rendering while fetching README/markdown; use the lazy loaders
+
+### Routing
+- Handlers: `loadBlogPage()`, `loadBlogPost(slug)`, `loadProjectPage(id)`, `loadPage(pageId)`
+- SPA links: `<a href="?blog" data-spa-route="page">` handled by `setupSpaRouting()`
+
+### Search
+- Indexed: `title`, `description`, `tags`, `content`
+- Boosts: `title: 2`, `description: 1.5`, `tags: 1.2`, `content: 0.5`
+- Tags clickable via `searchByTag(tag)`
+
+### Markdown & Content
+- Blog posts live in `www/data/blog/*.md` with frontmatter
+- Pages in `www/data/pages/{pageid}.md` (no frontmatter)
+- Projects list in YAML; set `github_repo: "user/repo"` to auto-fetch README
+
+### Theming & Prism
+- Themes configured in `site.colors` (`code.theme` matches Prism theme id)
+- Supported Prism themes: `prism`, `prism-dark`, `prism-tomorrow`, `prism-okaidia`, `prism-twilight`, `prism-coy`, `prism-funky`, `prism-solarizedlight`
+
+### Performance & UX
+- Mobile breakpoint `CONSTANTS.MOBILE_BREAKPOINT = 767`
+- Unified search overlay `#search-page` for all devices
+- Lazy-load heavy content (READMEs) via `loadAdditionalContent()` using `data-repo`
+
+### Dev
+- Serve: `cd www && darkhttpd . --port 8081`
+- Format: `biome format --write .`
+- Lint: `biome check .`
+- Tests: open `www/tests.html` (QUnit)
+- Quality gate: always run Lint + Tests together; changes must pass both
+
+### Key Files
+- `www/js/main.js`, `www/data/content.yaml`, `www/css/main.css`, `www/tests/`
+
+### Gotchas
+1) `getData()` is cached; always await before use
+2) Apply Prism theme before rendering code blocks
+3) Custom dropdowns: close others before opening (`initCustomDropdowns()`)
+4) `i18n.t(key)` falls back to key when missing (en-only for now)

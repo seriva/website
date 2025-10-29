@@ -3,8 +3,8 @@
 // ===========================================
 
 const CONSTANTS = {
-	HLJS_CDN_BASE: "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/",
-	DEFAULT_THEME: "github-dark",
+	PRISM_CDN_BASE: "https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/",
+	DEFAULT_THEME: "prism-tomorrow",
 	DEFAULT_TITLE: "portfolio.example.com",
 	DEFAULT_EMAIL: "contact@example.com",
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
@@ -258,6 +258,19 @@ const Templates = {
 		}
 		try {
 			const htmlContent = marked.parse(content);
+			const wrapper = document.createElement("div");
+			wrapper.className = "markdown-body";
+			wrapper.innerHTML = htmlContent;
+
+			// Apply Prism syntax highlighting after rendering
+			if (typeof Prism !== "undefined") {
+				requestAnimationFrame(() => {
+					wrapper.querySelectorAll("pre code").forEach((block) => {
+						Prism.highlightElement(block);
+					});
+				});
+			}
+
 			return safe(`<div class="markdown-body">${htmlContent}</div>`);
 		} catch (error) {
 			console.error("Error rendering markdown:", error);
@@ -367,25 +380,14 @@ const Templates = {
 // ===========================================
 
 const initializeMarked = () => {
-	if (typeof marked === "undefined" || typeof hljs === "undefined") {
-		console.error("Marked or highlight.js not loaded");
+	if (typeof marked === "undefined") {
+		console.error("Marked not loaded");
 		return;
 	}
 
 	marked.use({
 		breaks: true,
 		gfm: true,
-		renderer: {
-			code(code, language) {
-				const validLanguage = language && hljs.getLanguage(language);
-				const highlighted = validLanguage
-					? hljs.highlight(code, { language })
-					: hljs.highlightAuto(code);
-
-				const langClass = validLanguage ? ` language-${language}` : "";
-				return `<pre><code class="hljs${langClass}">${highlighted.value}</code></pre>`;
-			},
-		},
 	});
 };
 
@@ -406,18 +408,18 @@ const Email = async (event) => {
 
 window.Email = Email;
 
-const applyHljsTheme = (
+const applyPrismTheme = (
 	themeName = projectsData?.site?.colors?.code?.theme ||
 		CONSTANTS.DEFAULT_THEME,
 ) => {
 	try {
 		if (!themeName) return;
-		const themeLink = document.getElementById("hljs-theme");
+		const themeLink = document.getElementById("prism-theme");
 		if (themeLink) {
-			themeLink.href = `${CONSTANTS.HLJS_CDN_BASE}${themeName}.min.css`;
+			themeLink.href = `${CONSTANTS.PRISM_CDN_BASE}${themeName}.min.css`;
 		}
 	} catch (error) {
-		console.error("Error applying highlight.js theme:", error);
+		console.error("Error applying Prism theme:", error);
 	}
 };
 
@@ -958,7 +960,7 @@ const applyColorScheme = (colors) => {
 
 	// Apply syntax highlighting theme
 	if (colors.code?.theme) {
-		applyHljsTheme(colors.code.theme);
+		applyPrismTheme(colors.code.theme);
 	}
 };
 
@@ -1342,6 +1344,13 @@ const handleRoute = async () => {
 		const mainContent = document.getElementById("main-content");
 		if (mainContent) {
 			mainContent.classList.remove("page-transition-out");
+
+			// Apply Prism syntax highlighting to all code blocks
+			if (typeof Prism !== "undefined") {
+				requestAnimationFrame(() => {
+					Prism.highlightAllUnder(mainContent);
+				});
+			}
 		}
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 		requestAnimationFrame(updateActiveNavLink);
