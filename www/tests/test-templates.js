@@ -130,4 +130,119 @@ QUnit.module("Templates", () => {
 			);
 		}
 	});
+
+	QUnit.test(
+		"giscusComments template should return empty string when disabled",
+		(assert) => {
+			const config = {
+				blogEnabled: false,
+				projectsEnabled: false,
+				repo: "user/repo",
+				repoId: "R_test",
+				category: "General",
+				categoryId: "DIC_test",
+			};
+
+			const result = Templates.giscusComments(config, "blog");
+			assert.strictEqual(
+				result,
+				"",
+				"Should return empty string when blog comments disabled",
+			);
+
+			const result2 = Templates.giscusComments(config, "projects");
+			assert.strictEqual(
+				result2,
+				"",
+				"Should return empty string when projects comments disabled",
+			);
+		},
+	);
+
+	QUnit.test(
+		"giscusComments template should generate container when enabled",
+		(assert) => {
+			const config = {
+				blogEnabled: true,
+				projectsEnabled: true,
+				repo: "user/repo",
+				repoId: "R_test",
+				category: "General",
+				categoryId: "DIC_test",
+				mapping: "pathname",
+				strict: "0",
+				reactionsEnabled: "1",
+				emitMetadata: "0",
+				inputPosition: "top",
+				theme: "light",
+				lang: "en",
+			};
+
+			const result = Templates.giscusComments(config, "blog");
+			assert.ok(
+				result.includes("giscus-container"),
+				"Should include giscus-container class",
+			);
+			assert.ok(
+				result.includes('id="giscus-blog-'),
+				"Should include unique ID with page type",
+			);
+
+			const result2 = Templates.giscusComments(config, "projects");
+			assert.ok(
+				result2.includes("giscus-container"),
+				"Should include giscus-container class for projects",
+			);
+			assert.ok(
+				result2.includes('id="giscus-projects-'),
+				"Should include unique ID with projects page type",
+			);
+		},
+	);
+
+	QUnit.test(
+		"giscusComments template should handle missing config",
+		(assert) => {
+			const result = Templates.giscusComments(null, "blog");
+			assert.strictEqual(
+				result,
+				"",
+				"Should return empty string when config is null",
+			);
+
+			const result2 = Templates.giscusComments(undefined, "projects");
+			assert.strictEqual(
+				result2,
+				"",
+				"Should return empty string when config is undefined",
+			);
+		},
+	);
+
+	QUnit.test(
+		"giscusComments template should respect pageType parameter",
+		(assert) => {
+			const configBlogOnly = {
+				blogEnabled: true,
+				projectsEnabled: false,
+				repo: "user/repo",
+			};
+
+			const blogResult = Templates.giscusComments(configBlogOnly, "blog");
+			assert.ok(
+				blogResult.includes("giscus-container"),
+				"Should generate container for enabled blog",
+			);
+
+			const projectsResult = Templates.giscusComments(
+				configBlogOnly,
+				"projects",
+			);
+			assert.strictEqual(
+				projectsResult,
+				"",
+				"Should return empty for disabled projects",
+			);
+		},
+	);
 });

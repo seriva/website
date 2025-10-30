@@ -5,7 +5,13 @@ RUN apk add --no-cache \
     bash \
     curl \
     git \
-    darkhttpd
+    darkhttpd \
+    ca-certificates \
+    libc6-compat \
+    libstdc++ \
+    libgcc
+# Ensure CA certs are up to date for TLS downloads
+RUN update-ca-certificates
 
 # Install Biome
 RUN curl -fsSL https://github.com/biomejs/biome/releases/latest/download/biome-linux-x64-musl -o /tmp/biome && \
