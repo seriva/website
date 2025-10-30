@@ -380,24 +380,34 @@ const Templates = {
 			pageType === "blog" ? config?.blogEnabled : config?.projectsEnabled;
 		if (!isEnabled) return "";
 
-		return html`
-        <div class="giscus-container">
-            <script src="https://giscus.app/client.js"
-                    data-repo="${config.repo}"
-                    data-repo-id="${config.repoId}"
-                    data-category="${config.category}"
-                    data-category-id="${config.categoryId}"
-                    data-mapping="${config.mapping}"
-                    data-strict="${config.strict}"
-                    data-reactions-enabled="${config.reactionsEnabled}"
-                    data-emit-metadata="${config.emitMetadata}"
-                    data-input-position="${config.inputPosition}"
-                    data-theme="${config.theme}"
-                    data-lang="${config.lang}"
-                    crossorigin="anonymous"
-                    async>
-            </script>
-        </div>`;
+		// Create a unique container ID
+		const containerId = `giscus-${pageType}-${Date.now()}`;
+
+		// Schedule script injection for after DOM update
+		setTimeout(() => {
+			const container = document.getElementById(containerId);
+			if (!container) return;
+
+			const script = document.createElement("script");
+			script.src = "https://giscus.app/client.js";
+			script.setAttribute("data-repo", config.repo);
+			script.setAttribute("data-repo-id", config.repoId);
+			script.setAttribute("data-category", config.category);
+			script.setAttribute("data-category-id", config.categoryId);
+			script.setAttribute("data-mapping", config.mapping);
+			script.setAttribute("data-strict", config.strict);
+			script.setAttribute("data-reactions-enabled", config.reactionsEnabled);
+			script.setAttribute("data-emit-metadata", config.emitMetadata);
+			script.setAttribute("data-input-position", config.inputPosition);
+			script.setAttribute("data-theme", config.theme);
+			script.setAttribute("data-lang", config.lang);
+			script.setAttribute("crossorigin", "anonymous");
+			script.async = true;
+
+			container.appendChild(script);
+		}, 100);
+
+		return html`<div class="giscus-container" id="${containerId}"></div>`;
 	},
 };
 
