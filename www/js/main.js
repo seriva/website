@@ -391,6 +391,63 @@ const initializeMarked = () => {
 	});
 };
 
+// ===========================================
+// COPY CODE BUTTON FUNCTIONALITY
+// ===========================================
+
+const initCopyCodeButtons = () => {
+	const codeBlocks = document.querySelectorAll(
+		'pre[class*="language-"], pre code',
+	);
+
+	codeBlocks.forEach((block) => {
+		// Skip if button already exists
+		if (block.querySelector(".copy-code-button")) return;
+
+		// Get the actual code element
+		const codeElement =
+			block.tagName === "CODE" ? block : block.querySelector("code");
+		if (!codeElement) return;
+
+		// Create copy button
+		const button = document.createElement("button");
+		button.className = "copy-code-button";
+		button.textContent = "Copy";
+		button.setAttribute("aria-label", "Copy code to clipboard");
+
+		// Add click handler
+		button.addEventListener("click", async () => {
+			try {
+				const code = codeElement.textContent || "";
+				await navigator.clipboard.writeText(code);
+
+				// Show success feedback
+				button.textContent = "Copied!";
+				button.classList.add("copied");
+
+				// Reset after 2 seconds
+				setTimeout(() => {
+					button.textContent = "Copy";
+					button.classList.remove("copied");
+				}, 2000);
+			} catch (error) {
+				console.error("Failed to copy code:", error);
+				button.textContent = "Failed";
+				setTimeout(() => {
+					button.textContent = "Copy";
+				}, 2000);
+			}
+		});
+
+		// Add button to the pre element
+		const preElement = block.tagName === "PRE" ? block : block.parentElement;
+		if (preElement?.tagName === "PRE") {
+			preElement.style.position = "relative";
+			preElement.appendChild(button);
+		}
+	});
+};
+
 const Email = async (event) => {
 	event?.preventDefault?.();
 	event?.stopPropagation?.();
@@ -1347,6 +1404,8 @@ const handleRoute = async () => {
 			if (typeof Prism !== "undefined") {
 				requestAnimationFrame(() => {
 					Prism.highlightAllUnder(mainContent);
+					// Add copy buttons after syntax highlighting
+					initCopyCodeButtons();
 				});
 			}
 		}

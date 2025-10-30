@@ -1,4 +1,4 @@
-FROM alpine:3.19
+FROM alpine:latest
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -10,13 +10,8 @@ RUN apk add --no-cache \
 # Install Biome
 RUN curl -fsSL https://github.com/biomejs/biome/releases/latest/download/biome-linux-x64-musl -o /tmp/biome && \
     chmod 755 /tmp/biome && \
-    mv /tmp/biome /usr/local/bin/biome
-
-# Verify installation
-RUN /usr/local/bin/biome --version
-
-# Verify installation
-RUN /usr/local/bin/biome --version
+    mv /tmp/biome /usr/local/bin/biome && \
+    /usr/local/bin/biome --version
 
 # Set up git safe directory (will be overridden by postCreateCommand if needed)
 RUN git config --global --add safe.directory '*'
