@@ -11,6 +11,7 @@ Key features:
 - **Fuzzy search** - Fuse.js across projects and blog posts
 - **Dynamic color themes** - Customizable color schemes
 - **GitHub integration** - Loads project READMEs directly from GitHub
+- **Comments system** - GitHub Discussions integration via giscus (optional)
 - **Mobile-friendly** - Responsive design with unified search
 - **Unit testing** - QUnit test suite for code quality
 - **No build tools** - Pure vanilla HTML, CSS, and JavaScript
@@ -32,7 +33,7 @@ Key features:
 
 This project includes a VS Code devcontainer for a consistent development environment:
 
-- **Container**: Alpine Linux 3.19
+- **Container**: Alpine Linux (latest)
 - **Dev Server**: darkhttpd (lightweight HTTP server)
 - **Code Quality**: Biome for linting and formatting
 - **Extensions**: lit-html for syntax highlighting in template literals
@@ -252,6 +253,37 @@ colors:
 ```
 
 **Available Prism.js themes:** `prism`, `prism-dark`, `prism-tomorrow`, `prism-okaidia`, `prism-twilight`, `prism-coy`, `prism-funky`, `prism-solarizedlight`, and [many more](https://prismjs.com/)
+
+### Comments System (giscus)
+
+Integrated GitHub Discussions-powered comments via [giscus](https://giscus.app) with separate controls for blog posts and project pages:
+
+```yaml
+site:
+  comments:
+    blogEnabled: true      # Enable comments on blog posts
+    projectsEnabled: true  # Enable comments on project pages
+    repo: "username/repo"
+    repoId: "R_YOUR_REPO_ID"
+    category: "General"
+    categoryId: "DIC_YOUR_CATEGORY_ID" 
+    mapping: "pathname"
+    theme: "dark"
+```
+
+**Setup steps:**
+1. Enable Discussions on your GitHub repo (`Settings` → `Features` → `Discussions`)
+2. Install the [giscus app](https://github.com/apps/giscus) on your repository
+3. Visit [giscus.app](https://giscus.app), enter your repo name to get configuration IDs
+4. Update `repoId` and `categoryId` in your YAML with the generated values
+
+**Features:**
+- **Serverless** - No backend required, uses GitHub's infrastructure
+- **Spam protection** - GitHub authentication required, built-in moderation tools
+- **Separate control** - Enable/disable comments independently for blog vs projects
+- **Auto-mapping** - Each URL gets its own discussion thread automatically
+- **Responsive** - Works on mobile and desktop
+- **Theme integration** - Matches your site's dark/light theme
 
 ### Internationalization (i18n)
 
