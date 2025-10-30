@@ -373,6 +373,32 @@ const Templates = {
             </div>
             ${safe(paginationHtml)}
         </div>`,
+
+	giscusComments: (config, pageType = "blog") => {
+		// Check if comments are enabled for this page type
+		const isEnabled =
+			pageType === "blog" ? config?.blogEnabled : config?.projectsEnabled;
+		if (!isEnabled) return "";
+
+		return html`
+        <div class="giscus-container">
+            <script src="https://giscus.app/client.js"
+                    data-repo="${config.repo}"
+                    data-repo-id="${config.repoId}"
+                    data-category="${config.category}"
+                    data-category-id="${config.categoryId}"
+                    data-mapping="${config.mapping}"
+                    data-strict="${config.strict}"
+                    data-reactions-enabled="${config.reactionsEnabled}"
+                    data-emit-metadata="${config.emitMetadata}"
+                    data-input-position="${config.inputPosition}"
+                    data-theme="${config.theme}"
+                    data-lang="${config.lang}"
+                    crossorigin="anonymous"
+                    async>
+            </script>
+        </div>`;
+	},
 };
 
 // ===========================================
@@ -1227,7 +1253,8 @@ const loadBlogPost = async (slug) => {
 	}
 
 	const content = await loadBlogPostContent(post);
-	mainContent.innerHTML = Templates.blogPost(post, content);
+	const commentsHtml = Templates.giscusComments(data?.site?.comments, "blog");
+	mainContent.innerHTML = Templates.blogPost(post, content) + commentsHtml;
 };
 
 const loadBlogPostContent = async (post) => {
@@ -1326,6 +1353,7 @@ const loadProjectPage = async (projectId) => {
 				),
 			project.demo_url && Templates.demoIframe(project.demo_url),
 			Templates.dynamicContainer("project-links", "project", project.id, ""),
+			Templates.giscusComments(data?.site?.comments, "projects"),
 		];
 
 		mainContent.innerHTML = sections.filter(Boolean).join("");

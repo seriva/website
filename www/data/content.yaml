@@ -36,6 +36,26 @@ site:
     enabled: true
     minChars: 2
   
+  # Comments configuration (giscus - GitHub Discussions)
+  # To set up:
+  # 1. Enable Discussions on your repo: github.com/seriva/website/settings
+  # 2. Install giscus app: github.com/apps/giscus
+  # 3. Visit giscus.app and enter "seriva/website" to get your IDs
+  comments:
+    blogEnabled: true      # Enable comments on blog posts
+    projectsEnabled: true  # Enable comments on project pages
+    repo: "seriva/website"
+    repoId: "MDEwOlJlcG9zaXRvcnkxNzgwNjQ3OTM="  # Get from giscus.app
+    category: "General"  # Discussion category name
+    categoryId: "DIC_kwDOCp0Nmc4CxQUk"  # Get from giscus.app
+    mapping: "pathname"  # How to map pages to discussions
+    strict: "0"
+    reactionsEnabled: "1"
+    emitMetadata: "0"
+    inputPosition: "bottom"
+    theme: "dark"  # Options: light, dark, dark_dimmed, dark_high_contrast, transparent_dark, preferred_color_scheme
+    lang: "en"
+  
   # Social media links
   social:
     - icon: "fas fa-envelope"
