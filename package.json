@@ -1,0 +1,32 @@
+{
+	"name": "portfolio-website",
+	"version": "1.0.0",
+	"description": "Modern portfolio website with ES6 modules and Microtastic build tooling",
+	"author": "Portfolio Owner",
+	"license": "MIT",
+	"engines": {
+		"node": ">=18.0.0",
+		"npm": ">=9.0.0"
+	},
+	"scripts": {
+		"prepare": "npm run copy-assets && microtastic prep",
+		"copy-assets": "mkdir -p app/fonts app/css/prism-themes && cp node_modules/@fontsource/raleway/files/raleway-latin-400-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-600-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-700-normal.woff2 app/fonts/ && cp node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2 node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2 app/fonts/ && cp node_modules/prismjs/themes/*.min.css app/css/prism-themes/",
+		"dependencies": "microtastic prep",
+		"dev": "microtastic dev",
+		"prod": "npm run check && microtastic prod",
+		"format": "biome format --write .",
+		"check": "biome check ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"@fontsource/raleway": "^5.2.8",
+		"@fortawesome/fontawesome-free": "^7.1.0",
+		"microtastic": "latest"
+	},
+	"dependencies": {
+		"fuse.js": "^7.0.0",
+		"marked": "^11.1.1",
+		"prismjs": "^1.30.0",
+		"yamljs": "^0.3.0"
+	}
+}
