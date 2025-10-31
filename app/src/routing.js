@@ -13,6 +13,7 @@ import { Templates } from "./templates.js";
 import {
 	closeMobileMenu,
 	initCopyCodeButtons,
+	resetNavCache,
 	updateActiveNavLink,
 } from "./ui.js";
 import { getMainContent } from "./utils.js";
@@ -21,9 +22,9 @@ import { getMainContent } from "./utils.js";
 // BLOG POST LOADING
 // ===========================================
 
-const loadBlogPosts = async () => {
+const loadBlogPosts = async (data) => {
 	try {
-		const data = await getData();
+		// Accept data as parameter to avoid duplicate getData() calls
 		const postFiles = data?.blog?.posts || [];
 		if (postFiles.length === 0) return [];
 
@@ -66,7 +67,8 @@ const loadBlogPage = async (page = 1) => {
 
 	mainContent.innerHTML = Templates.loadingSpinner();
 
-	const posts = await loadBlogPosts();
+	// Pass data to avoid duplicate getData() call
+	const posts = await loadBlogPosts(data);
 	const postsPerPage = data?.blog?.postsPerPage || 5;
 	const totalPages = Math.ceil(posts.length / postsPerPage);
 	const currentPage = Math.max(1, Math.min(page, totalPages));
@@ -114,7 +116,8 @@ const loadBlogPost = async (slug) => {
 
 	mainContent.innerHTML = Templates.loadingSpinner();
 
-	const posts = await loadBlogPosts();
+	// Pass data to avoid duplicate getData() call
+	const posts = await loadBlogPosts(data);
 	const post = posts.find((p) => p.slug === slug || p.id === slug);
 
 	if (!post) {
@@ -437,6 +440,9 @@ const injectNavbar = async () => {
 		searchBar,
 		data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 	);
+
+	// Reset cached DOM queries after navbar re-render
+	resetNavCache();
 
 	// Inject search page into body if search is enabled
 	if (data?.site?.search?.enabled) {

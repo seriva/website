@@ -16,8 +16,8 @@ import {
 import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import {
-	Email,
 	addMobileMenuOutsideClickHandler,
+	createEmailHandler,
 	fullscreen,
 	initCustomDropdowns,
 	initNavbarToggle,
@@ -30,7 +30,6 @@ import { escapeHtml, getMainContent } from "./utils.js";
 
 // Expose functions for HTML onclick handlers
 window.fullscreen = fullscreen;
-window.Email = Email;
 
 // ===========================================
 // MARKDOWN CONFIGURATION
@@ -200,6 +199,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const data = await getData();
 		if (data?.site) {
 			updateMetaTags(data.site);
+			// Setup email handler with config (avoids circular dependency)
+			window.Email = createEmailHandler(data.site.email);
 		}
 
 		// Inject navbar and footer first
