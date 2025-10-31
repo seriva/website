@@ -81,23 +81,34 @@ export const fullscreen = () => {
 };
 
 // Email obfuscation handler
-export const Email = {
-	click: (user, domain) => {
-		try {
-			const email = `${user}@${domain}`;
+export const Email = async (event) => {
+	event?.preventDefault();
+
+	try {
+		// Dynamically import getData to avoid circular dependencies
+		const { getData } = await import("./data.js");
+		const data = await getData();
+		const emailConfig = data?.site?.email;
+
+		if (emailConfig?.name && emailConfig?.domain) {
+			const email = `${emailConfig.name}@${emailConfig.domain}`;
 			window.location.href = `mailto:${email}`;
-		} catch (error) {
-			console.error("Error handling email click:", error);
+		} else {
 			// Fallback to default email
+			console.warn("Email configuration not found, using fallback");
 			window.location.href = "mailto:contact@example.com";
 		}
-	},
+	} catch (error) {
+		console.error("Error handling email click:", error);
+		// Fallback to default email
+		window.location.href = "mailto:contact@example.com";
+	}
 };
 
 // Copy code button functionality
 export const initCopyCodeButtons = () => {
 	// Find all pre elements with code blocks
-	const preBlocks = document.querySelectorAll('pre');
+	const preBlocks = document.querySelectorAll("pre");
 
 	for (const pre of preBlocks) {
 		// Skip if button already exists

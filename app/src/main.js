@@ -24,7 +24,7 @@ import {
 	initCustomDropdowns,
 	initNavbarToggle,
 } from "./ui.js";
-import { escapeHtml, getMainContent, getNavbar, html, safe } from "./utils.js";
+import { escapeHtml, getMainContent } from "./utils.js";
 
 // ===========================================
 // EXPOSE GLOBALS (only what's needed)
@@ -53,11 +53,11 @@ const initializeMarked = () => {
 		renderer: {
 			code(code, language) {
 				// If language is specified, add Prism-compatible class
-				const lang = language || 'text';
-				const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : 'text';
+				const lang = language || "text";
+				const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : "text";
 				return `<pre><code class="language-${validLang}">${escapeHtml(code)}</code></pre>`;
-			}
-		}
+			},
+		},
 	});
 };
 
@@ -86,7 +86,9 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 			.join("");
 		resultsContainer.classList.add("show");
 
-		resultsContainer.querySelectorAll(".search-result-item").forEach((card) => {
+		for (const card of resultsContainer.querySelectorAll(
+			".search-result-item",
+		)) {
 			card.addEventListener("click", (e) => {
 				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
 				const link = card.querySelector(".blog-post-title a");
@@ -97,16 +99,16 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 					handleRoute();
 				}
 			});
-		});
+		}
 
-		resultsContainer.querySelectorAll("[data-spa-route]").forEach((link) => {
+		for (const link of resultsContainer.querySelectorAll("[data-spa-route]")) {
 			link.addEventListener("click", (e) => {
 				e.preventDefault();
 				onResultClick();
 				window.history.pushState({}, "", link.getAttribute("href"));
 				handleRoute();
 			});
-		});
+		}
 	} else {
 		resultsContainer.innerHTML = Templates.searchNoResults();
 		resultsContainer.classList.add("show");

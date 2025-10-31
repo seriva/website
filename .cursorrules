@@ -1,6 +1,6 @@
-## Cursor Rules: Portfolio Website (Vanilla JS SPA)
+## Cursor Rules: Portfolio Website (ES6 Modules SPA)
 
-Keep it fast, simple, and secure. No build tools. One SPA in `www/js/main.js`.
+Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modular ES6 architecture.
 
 ### Core Principles
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
@@ -8,30 +8,60 @@ Keep it fast, simple, and secure. No build tools. One SPA in `www/js/main.js`.
 - Call `await getData()` before reading config/content (cached in `projectsData`)
 - Route with URL params: `?blog`, `?project=id`, `?page=id`
 - Always call `closeMobileMenu()` and update `<title>` in route handlers
-- Keep functions grouped by existing comment sections in `main.js`
-- All magic numbers go in `CONSTANTS` object
+- Keep functions organized by module files in `app/src/`
+- All magic numbers go in `CONSTANTS` object in `constants.js`
+
+### Architecture
+- **ES6 Modules**: Clean separation of concerns across multiple files
+- **Microtastic**: Handles dependency bundling only (fuse.js, marked, prismjs, yamljs)
+- **No frameworks**: Vanilla JavaScript with modern features
+- **Template literals**: Secure HTML generation with auto-escaping
 
 ### Don't
-- Don't introduce frameworks/build steps or server logic
+- Don't introduce frameworks or heavy build steps
 - Don't concatenate raw HTML strings; don't bypass escaping without `safe()`
 - Don't use hash routing; keep the `URLSearchParams` pattern
+- Don't modify Microtastic config without good reason
 
 ### Quality Gate
-- Format: `biome format --write .`
-- Lint: `biome check .`
-- Tests: open `www/tests.html` (QUnit)
-- **All changes must pass lint + tests**
+- Format: `npm run format` or `biome format --write .`
+- Lint: `npm run check` or `biome check .`
+- **All changes must pass lint checks**
 - Update `README.md` if adding features or changing setup
 
 ### Key Patterns
-- Templates: `Templates.* = (args) => html\`...\``
-- Markdown: `MarkdownLoader.loadAsHtml(path)` for pages/posts
-- Search: `Search.init()` with 300ms debounce
+- Templates: `Templates.* = (args) => html\`...\`` (in `templates.js`)
+- Markdown: `MarkdownLoader.loadAsHtml(path)` for pages/posts (in `markdown.js`)
+- Search: `Search.init()` with 300ms debounce (in `search.js`)
 - Comments: `Templates.giscusComments(data?.site?.comments, "blog"|"projects")`
 - Theme: `applyColorScheme()` + `applyPrismTheme()` before code render
+- i18n: `i18n.t('key')` for all user-facing strings (in `i18n.js`)
 
-### Files
-- `www/js/main.js` - all app logic
-- `www/data/content.yaml` - all content + config
-- `www/css/main.css` - all styles
-- `www/tests/` - QUnit tests
+### Module Structure
+- `app/src/main.js` - entry point, initialization, exports globals
+- `app/src/constants.js` - all configuration constants
+- `app/src/utils.js` - HTML escaping, safe(), html\`\`, DOM helpers
+- `app/src/templates.js` - all template functions
+- `app/src/routing.js` - SPA routing, navbar/footer injection
+- `app/src/search.js` - Fuse.js search implementation
+- `app/src/ui.js` - UI interactions, mobile menu, dropdowns
+- `app/src/data.js` - getData(), metadata updates
+- `app/src/markdown.js` - markdown loading and rendering
+- `app/src/prism-loader.js` - syntax highlighting theme management
+- `app/src/i18n.js` - internationalization framework
+- `app/src/dependencies/` - bundled npm packages (managed by Microtastic)
+
+### Files & Directories
+- `app/index.html` - main HTML entry point
+- `app/src/` - all JavaScript modules
+- `app/data/content.yaml` - all content + config
+- `app/data/pages/` - markdown pages
+- `app/data/blog/` - markdown blog posts
+- `app/css/main.css` - all styles
+- `public/` - build output (gitignored)
+
+### Development
+- `npm install` - install dependencies
+- `npm run prepare` - bundle dependencies to `app/src/dependencies/`
+- `npm run dev` - start dev server on port 8081
+- `npm run prod` - production build (includes linting)
