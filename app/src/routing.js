@@ -16,8 +16,6 @@ import {
 } from "./ui.js";
 import { getMainContent } from "./utils.js";
 
-// Removed unused variable
-
 // Blog post loading functions
 const loadBlogPosts = async () => {
 	try {
@@ -124,7 +122,7 @@ const loadBlogPost = async (slug) => {
 	const content = await loadBlogPostContent(post);
 	const commentsHtml = Templates.giscusComments(data?.site?.comments, "blog");
 	mainContent.innerHTML = Templates.blogPost(post, content) + commentsHtml;
-	
+
 	document.title = `${post.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
 };
 
@@ -132,7 +130,9 @@ const loadBlogPostContent = async (post) => {
 	if (post.content) return post.content;
 	if (!post.filename) return null;
 
-	const result = await MarkdownLoader.loadWithFrontmatter(`data/blog/${post.filename}`);
+	const result = await MarkdownLoader.loadWithFrontmatter(
+		`data/blog/${post.filename}`,
+	);
 	return result?.content || null;
 };
 
@@ -241,7 +241,7 @@ const loadAdditionalContent = async () => {
 		if (el.dataset.repo && el.parentElement) {
 			promises.push(loadGitHubReadme(el.dataset.repo, el.id));
 		}
-		
+
 		// Load project links if element has data-project attribute
 		if (el.dataset.project) {
 			promises.push(loadProjectLinks(el.dataset.project, el.id));
@@ -260,8 +260,11 @@ const loadGitHubReadme = async (repo, containerId) => {
 	if (!element) return;
 
 	try {
-		// Add seriva/ prefix if not already present
-		const fullRepo = repo.includes("/") ? repo : `seriva/${repo}`;
+		const data = await getData();
+		const githubUsername = data?.site?.github_username || "seriva";
+
+		// Add username prefix if not already present
+		const fullRepo = repo.includes("/") ? repo : `${githubUsername}/${repo}`;
 
 		const response = await fetch(
 			`https://api.github.com/repos/${fullRepo}/readme`,
@@ -274,7 +277,7 @@ const loadGitHubReadme = async (repo, containerId) => {
 			const readmeContent = await response.text();
 			const htmlContent = marked.parse(readmeContent);
 			element.innerHTML = `<div class="markdown-body">${htmlContent}</div>`;
-			
+
 			// Apply Prism syntax highlighting to code blocks in the README
 			// This will dynamically load any needed language grammars from CDN
 			requestAnimationFrame(async () => {

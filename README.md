@@ -1,8 +1,8 @@
 ## About
 
-This is my personal portfolio website. I originally built it with [Hugo](https://gohugo.io/) and the [seriva/minimal](https://github.com/seriva/minimal-hugo-theme) theme, but wanted more control over the design and functionality, so I rewrote it as a simple single-page application.
+This is my personal portfolio website. I originally built it with [Hugo](https://gohugo.io/) and the [seriva/minimal](https://github.com/seriva/minimal-hugo-theme) theme, but wanted more control over the design and functionality, so I rewrote it as a modern single-page application.
 
-It's built with vanilla HTML, CSS, and JavaScript - no build tools or complicated setup needed. Content is managed through YAML configuration and markdown files. This new setup was mostly vibe-coded together:)
+It's built with vanilla HTML, CSS, and ES6 modules using [Microtastic](https://github.com/scriptex/microtastic) for minimal build tooling. Content is managed through YAML configuration and markdown files. This new setup was mostly vibe-coded together:)
 
 Key features:
 - **Markdown page system** - Create pages as markdown files in `/data/pages/`
@@ -13,28 +13,28 @@ Key features:
 - **GitHub integration** - Loads project READMEs directly from GitHub
 - **Comments system** - GitHub Discussions integration via giscus (optional)
 - **Mobile-friendly** - Responsive design with unified search
-- **Unit testing** - QUnit test suite for code quality
-- **No build tools** - Pure vanilla HTML, CSS, and JavaScript
+- **ES6 modules** - Clean, modular code organization
+- **Microtastic build** - Minimal build tooling for dependency bundling
 
 ## Tech Stack
 
-- **Frontend**: HTML, CSS, JavaScript (no build process)
+- **Frontend**: HTML, CSS, JavaScript (ES6 modules)
+- **Build Tool**: Microtastic for dependency bundling
 - **Styling**: Custom CSS with CSS custom properties
 - **Icons**: Font Awesome subset (solid + brands only)
-- **Search**: Fuse.js Basic 7.0.0 for fuzzy search
+- **Search**: Fuse.js 7.0.0 for fuzzy search
 - **Content**: YAML configuration + Markdown files
 - **Parsing**: yamljs parser, Marked.js v11.1.1, Prism.js v1.30.0
 - **Fonts**: Raleway (weights 400, 700)
-- **CDN**: jsDelivr for external dependencies
 - **Templating**: Tagged template literals for secure HTML
-- **Testing**: QUnit for unit tests
+- **Code Quality**: Biome for linting and formatting
 
 ## Development Environment
 
 This project includes a VS Code devcontainer for a consistent development environment:
 
 - **Container**: Alpine Linux (latest)
-- **Dev Server**: darkhttpd (lightweight HTTP server)
+- **Dev Server**: Microtastic development server
 - **Code Quality**: Biome for linting and formatting
 - **Extensions**: lit-html for syntax highlighting in template literals
 - **Port**: 8081 (auto-forwarded)
@@ -42,55 +42,66 @@ This project includes a VS Code devcontainer for a consistent development enviro
 ### Prerequisites
 - VS Code with Dev Containers extension
 - Docker
+- Node.js >= 18.0.0
+- npm >= 9.0.0
 
 ## Getting Started
 
 ### Using Dev Container (Recommended)
 1. Open project in VS Code
 2. When prompted, click "Reopen in Container" or use `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
-3. VS Code will build the container and install dependencies (darkhttpd + Biome)
-4. Run the dev server: `Ctrl+Shift+P` → "Tasks: Run Task" → "Dev Server"
-5. Open `http://localhost:8081`
+3. VS Code will build the container and install dependencies
+4. Install npm packages: `npm install`
+5. Prepare dependencies: `npm run prepare` (bundles dependencies to `app/src/dependencies/`)
+6. Run the dev server: `npm run dev`
+7. Open `http://localhost:8081`
 
 ### Manual Setup
-**Using VS Code:**
-1. Open project in VS Code
-2. `Ctrl+Shift+P` → "Tasks: Run Task" → "Dev Server"
+**Prerequisites:** Node.js and npm installed
 
-**Or from terminal:**
+1. Install dependencies:
 ```bash
-cd www && python3 -m http.server 8081
+npm install
 ```
 
-Then open `http://localhost:8081`
+2. Prepare Microtastic dependencies:
+```bash
+npm run prepare
+```
+
+3. Start development server:
+```bash
+npm run dev
+```
+
+4. Open `http://localhost:8081`
+
+### Build for Production
+
+To create an optimized production build:
+
+```bash
+npm run prod
+```
+
+This will:
+- Run code quality checks (`biome check`)
+- Bundle and minify dependencies
+- Output to `public/` directory
 
 ### Code Quality Tools
 
-The devcontainer includes Biome for code formatting and linting:
+The project uses Biome for code formatting and linting:
 
-- **Format code**: `Ctrl+Shift+P` → "Tasks: Run Task" → "Format Code"
-- **Check code quality**: `Ctrl+Shift+P` → "Tasks: Run Task" → "Check Code Quality"
+- **Format code**: `npm run format`
+- **Check code quality**: `npm run check`
 - **Auto-format**: Enabled on save in VS Code
 
-### Testing
-
-The project includes essential unit tests using QUnit:
-
-- **Run tests**: Open `tests.html` in your browser
-- **Test coverage**: Core utilities, templates, search, routing, and DOM functionality
-- **Mobile testing**: Responsive design validation
-
-**Test files:**
-- `tests.html` - Main test page with QUnit interface
-- `tests/test-utils.js` - Utility function tests (HTML escaping, title setting)
-- `tests/test-templates.js` - Template generation tests (navbar, pageLink, socialLink)
-- `tests/test-search.js` - Search functionality tests
-- `tests/test-routing.js` - SPA routing and URL parsing tests
-- `tests/test-dom.js` - DOM elements and responsive design tests
+All code changes must pass linting before deployment.
 
 ## Features & Configuration
 
-All content is managed through `data/content.yaml`. The configuration file supports:
+All content is managed through `app/data/content.yaml`. The configuration file supports:
 
 ### Projects
 
@@ -123,7 +134,7 @@ projects:
 
 ### Blog
 
-Create markdown blog posts in `data/blog/` with automatic pagination:
+Create markdown blog posts in `app/data/blog/` with automatic pagination:
 
 **1. Create a markdown file** (format: `YYYY-MM-DD-title.md`):
 
@@ -140,7 +151,7 @@ tags: ["tag1", "tag2"]
 Write your content here in markdown...
 ```
 
-**2. Configure blog settings** in `data/content.yaml`:
+**2. Configure blog settings** in `app/data/content.yaml`:
 
 ```yaml
 blog:
@@ -198,9 +209,9 @@ site:
 ### Pages & Styling
 
 **Markdown Pages:**
-Create markdown files in `/data/pages/` for clean, maintainable content:
+Create markdown files in `app/data/pages/` for clean, maintainable content:
 
-**1. Create a markdown file** (e.g., `data/pages/about.md`):
+**1. Create a markdown file** (e.g., `app/data/pages/about.md`):
 ```markdown
 # About
 
@@ -220,17 +231,17 @@ Your content here in markdown...
 ```
 
 
-**2. Configure page metadata** in `data/content.yaml`:
+**2. Configure page metadata** in `app/data/content.yaml`:
 ```yaml
 pages:
   about:
     title: "About"
     showInNav: true
     order: 1
-    # Content is loaded from /data/pages/about.md
+    # Content is loaded from app/data/pages/about.md
 ```
 
-**3. Configure site settings** in `data/content.yaml`:
+**3. Configure site settings** in `app/data/content.yaml`:
 ```yaml
 site:
   title: "Your Portfolio"

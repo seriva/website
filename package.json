@@ -14,8 +14,7 @@
 		"dev": "microtastic dev",
 		"prod": "npm run check && microtastic prod",
 		"format": "biome format --write .",
-		"check": "biome check .",
-		"test": "cd www && darkhttpd . --port 8082"
+		"check": "biome check ."
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
