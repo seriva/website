@@ -5,6 +5,18 @@
 
 import { CONSTANTS } from "./constants.js";
 
+// Cache for DOM queries (reset when navbar is re-rendered)
+let cachedNavLinks = null;
+let cachedDropdownItems = null;
+
+// Cache for mobile breakpoint check
+let isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
+
+// Update mobile breakpoint cache on resize
+window.addEventListener("resize", () => {
+	isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
+});
+
 // Close mobile navigation menu
 export const closeMobileMenu = () => {
 	const collapseElement = document.getElementById("navbarNav");
@@ -87,27 +99,19 @@ export const fullscreen = () => {
 	}
 };
 
-// Handle obfuscated email link clicks
-export const Email = async (event) => {
-	event?.preventDefault();
-
-	try {
-		// Dynamically import getData to avoid circular dependencies
-		const { getData } = await import("./data.js");
-		const data = await getData();
-		const emailConfig = data?.site?.email;
+// Create email handler with config
+export const createEmailHandler = (emailConfig) => {
+	return (event) => {
+		event?.preventDefault();
 
 		if (emailConfig?.name && emailConfig?.domain) {
 			const email = `${emailConfig.name}@${emailConfig.domain}`;
 			window.location.href = `mailto:${email}`;
 		} else {
 			console.warn("Email configuration not found, using fallback");
-			window.location.href = "mailto:contact@example.com";
+			window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
 		}
-	} catch (error) {
-		console.error("Error handling email click:", error);
-		window.location.href = "mailto:contact@example.com";
-	}
+	};
 };
 
 // Add copy buttons to all code blocks
@@ -154,11 +158,15 @@ export const initCopyCodeButtons = () => {
 // Update active state on navigation links
 export const updateActiveNavLink = () => {
 	const params = new URLSearchParams(window.location.search);
-	const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
-	const dropdownItems = document.querySelectorAll(".dropdown-item");
+
+	// Use cached queries for better performance
+	if (!cachedNavLinks) {
+		cachedNavLinks = document.querySelectorAll(".navbar-nav .nav-link");
+		cachedDropdownItems = document.querySelectorAll(".dropdown-item");
+	}
 
 	// Update navbar links
-	for (const link of navLinks) {
+	for (const link of cachedNavLinks) {
 		link.classList.remove("active");
 
 		const href = link.getAttribute("href");
@@ -178,7 +186,7 @@ export const updateActiveNavLink = () => {
 
 	// Update dropdown items and highlight dropdown toggle if project is active
 	let isProjectActive = false;
-	for (const item of dropdownItems) {
+	for (const item of cachedDropdownItems) {
 		item.classList.remove("active");
 
 		const href = item.getAttribute("href");
@@ -203,16 +211,20 @@ export const updateActiveNavLink = () => {
 	}
 };
 
+// Reset cached DOM queries (call after navbar re-render)
+export const resetNavCache = () => {
+	cachedNavLinks = null;
+	cachedDropdownItems = null;
+};
+
 // Close mobile menu when clicking outside
 export const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
 		const navbar = document.getElementById("navbar-container");
 		if (!navbar) return;
 
-		if (
-			window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT &&
-			!navbar.contains(event.target)
-		) {
+		// Use cached mobile breakpoint check for better performance
+		if (isMobile && !navbar.contains(event.target)) {
 			closeMobileMenu();
 		}
 	});

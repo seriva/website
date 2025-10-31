@@ -7,6 +7,9 @@ import { CONSTANTS } from "./constants.js";
 import { getData } from "./data.js";
 import Fuse from "./dependencies/fuse.js.js";
 
+// Cache for compiled regexes (improves repeated search highlighting)
+const regexCache = new Map();
+
 export const Search = {
 	data: [],
 	isInitialized: false,
@@ -90,11 +93,24 @@ export const Search = {
 			.map((result) => result.item);
 	},
 
-	// Highlight search query in text
+	// Highlight search query in text (with memoized regex)
 	highlight(text, query) {
 		if (!query) return text;
-		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-		const regex = new RegExp(`(${escapedQuery})`, "gi");
+
+		// Check cache first for better performance
+		let regex = regexCache.get(query);
+		if (!regex) {
+			const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			regex = new RegExp(`(${escapedQuery})`, "gi");
+			regexCache.set(query, regex);
+
+			// Limit cache size to prevent memory leaks
+			if (regexCache.size > 100) {
+				const firstKey = regexCache.keys().next().value;
+				regexCache.delete(firstKey);
+			}
+		}
+
 		return text.replace(regex, "<mark>$1</mark>");
 	},
 };

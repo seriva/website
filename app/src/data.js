@@ -3,6 +3,7 @@
 // ===========================================
 // Centralized data loading and caching system
 
+import { CONSTANTS } from "./constants.js";
 import YAML from "./dependencies/yamljs.js";
 import { i18n } from "./i18n.js";
 
@@ -55,6 +56,32 @@ export const applyColorScheme = (colors) => {
 
 	for (const [property, value] of Object.entries(mappings)) {
 		if (value) root.style.setProperty(property, value);
+	}
+
+	// Apply Prism theme from config
+	if (colors.code?.theme) {
+		applyPrismTheme(colors.code.theme);
+	}
+};
+
+// Apply Prism.js syntax highlighting theme
+export const applyPrismTheme = (themeName) => {
+	const theme = themeName || CONSTANTS.DEFAULT_THEME;
+	const themeId = "prism-theme";
+
+	// Check if theme link already exists
+	let themeLink = document.getElementById(themeId);
+
+	if (themeLink) {
+		// Update existing link
+		themeLink.href = `${CONSTANTS.PRISM_CDN_BASE}${theme}.min.css`;
+	} else {
+		// Create new link element
+		themeLink = document.createElement("link");
+		themeLink.id = themeId;
+		themeLink.rel = "stylesheet";
+		themeLink.href = `${CONSTANTS.PRISM_CDN_BASE}${theme}.min.css`;
+		document.head.appendChild(themeLink);
 	}
 };
 
