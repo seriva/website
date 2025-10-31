@@ -1,5 +1,9 @@
-// Utility functions for DOM manipulation and HTML templating
+// ===========================================
+// UTILITY FUNCTIONS
+// ===========================================
+// Core utilities for DOM manipulation and HTML templating
 
+// DOM Element Getters
 export const getMainContent = () => {
 	const element = document.getElementById("main-content");
 	if (!element) {
@@ -16,12 +20,14 @@ export const getNavbar = () => {
 	return element;
 };
 
+// HTML Template Utilities
 export const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
 	return div.innerHTML;
 };
 
+// Tagged template literal for auto-escaping HTML
 export const html = (strings, ...values) => {
 	return strings.reduce((result, str, i) => {
 		const value = values[i];
@@ -31,4 +37,5 @@ export const html = (strings, ...values) => {
 	}, "");
 };
 
+// Mark content as safe (already escaped/trusted HTML)
 export const safe = (content) => ({ __safe: true, content });

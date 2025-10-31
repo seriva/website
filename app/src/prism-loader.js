@@ -1,22 +1,16 @@
-// Dynamic Prism language loader
-// Loads language grammars from CDN on-demand
+// ===========================================
+// PRISM LANGUAGE LOADER
+// ===========================================
+// Dynamic loader for Prism syntax highlighting language grammars
 
 import Prism from "./dependencies/prismjs.js";
 
 const PRISM_CDN = "https://cdn.jsdelivr.net/npm/prismjs@1.30.0";
-const loadedLanguages = new Set(["markup", "css", "clike", "javascript"]); // Core languages
-const loadingLanguages = new Map(); // Track in-progress loads
+const loadedLanguages = new Set(["markup", "css", "clike", "javascript"]);
+const loadingLanguages = new Map();
 
-/**
- * Load a Prism language component dynamically
- * @param {string} language - Language identifier (e.g., 'bash', 'python')
- * @returns {Promise<void>}
- */
+// Load a specific language grammar from CDN
 export async function loadLanguage(language) {
-	// Temporarily expose Prism globally for CDN scripts to register
-	const hadPrism = "Prism" in window;
-	const oldPrism = window.Prism;
-	window.Prism = Prism;
 	// Normalize language name
 	const lang = language.toLowerCase();
 
@@ -30,7 +24,12 @@ export async function loadLanguage(language) {
 		return loadingLanguages.get(lang);
 	}
 
-	// Create a promise for this load
+	// Temporarily expose Prism globally for CDN scripts
+	const hadPrism = "Prism" in window;
+	const oldPrism = window.Prism;
+	window.Prism = Prism;
+
+	// Create promise for loading language
 	const loadPromise = new Promise((resolve, reject) => {
 		const script = document.createElement("script");
 		script.src = `${PRISM_CDN}/components/prism-${lang}.min.js`;
@@ -39,9 +38,8 @@ export async function loadLanguage(language) {
 		script.onload = () => {
 			loadedLanguages.add(lang);
 			loadingLanguages.delete(lang);
-			console.log(`Loaded Prism language: ${lang}`);
 
-			// Clean up global Prism if we added it
+			// Restore original Prism state
 			if (!hadPrism) {
 				window.Prism = undefined;
 			} else if (oldPrism !== Prism) {
@@ -55,7 +53,7 @@ export async function loadLanguage(language) {
 			loadingLanguages.delete(lang);
 			console.warn(`Failed to load Prism language: ${lang}`);
 
-			// Clean up global Prism if we added it
+			// Restore original Prism state
 			if (!hadPrism) {
 				window.Prism = undefined;
 			} else if (oldPrism !== Prism) {
@@ -72,11 +70,7 @@ export async function loadLanguage(language) {
 	return loadPromise;
 }
 
-/**
- * Load all languages found in code blocks on the page
- * @param {Element} container - Container element to search within
- * @returns {Promise<void[]>}
- */
+// Detect and load all languages found in code blocks
 export async function loadLanguagesForElement(container) {
 	const codeBlocks = container.querySelectorAll('code[class*="language-"]');
 	const languagesToLoad = new Set();
@@ -93,22 +87,16 @@ export async function loadLanguagesForElement(container) {
 
 	// Load all languages in parallel
 	const promises = Array.from(languagesToLoad).map((lang) =>
-		loadLanguage(lang).catch((err) => console.warn(err)),
+		loadLanguage(lang).catch((error) => console.warn(error)),
 	);
 
 	return Promise.all(promises);
 }
 
-/**
- * Highlight code in container after loading necessary languages
- * @param {Element} container - Container element to highlight
- * @returns {Promise<void>}
- */
+// Load languages and apply syntax highlighting to container
 export async function highlightElement(container) {
-	// First, load any missing languages
 	await loadLanguagesForElement(container);
 
-	// Then highlight using our imported Prism
 	if (Prism?.highlightAllUnder) {
 		Prism.highlightAllUnder(container);
 	}

@@ -1,6 +1,7 @@
 // ===========================================
-// ROUTING MODULE
+// ROUTING
 // ===========================================
+// SPA routing system for pages, projects, and blog
 
 import { CONSTANTS } from "./constants.js";
 import { getData } from "./data.js";
@@ -16,7 +17,10 @@ import {
 } from "./ui.js";
 import { getMainContent } from "./utils.js";
 
-// Blog post loading functions
+// ===========================================
+// BLOG POST LOADING
+// ===========================================
+
 const loadBlogPosts = async () => {
 	try {
 		const data = await getData();
@@ -37,7 +41,6 @@ const loadBlogPosts = async () => {
 
 const processBlogPost = async (post) => {
 	const slug = post.filename.replace(/\.md$/, "");
-	// Use YAML metadata
 	return createPostObject(slug, post, post.filename);
 };
 
@@ -52,7 +55,10 @@ const createPostObject = (slug, data, filename, content = null) => ({
 	id: slug,
 });
 
-// Page loading functions
+// ===========================================
+// PAGE LOADERS
+// ===========================================
+
 const loadBlogPage = async (page = 1) => {
 	const mainContent = getMainContent();
 	const data = await getData();
@@ -135,6 +141,10 @@ const loadBlogPostContent = async (post) => {
 	);
 	return result?.content || null;
 };
+
+// ===========================================
+// PROJECT & PAGE LOADERS
+// ===========================================
 
 const loadProjectPage = async (projectId) => {
 	const mainContent = getMainContent();
@@ -229,6 +239,10 @@ const loadProjectLinks = async (projectId, containerId) => {
 	}
 };
 
+// ===========================================
+// DYNAMIC CONTENT LOADERS
+// ===========================================
+
 const loadAdditionalContent = async () => {
 	const promises = [];
 
@@ -295,7 +309,10 @@ const loadGitHubReadme = async (repo, containerId) => {
 	}
 };
 
-// Main routing handler
+// ===========================================
+// MAIN ROUTING HANDLER
+// ===========================================
+
 const handleRoute = async () => {
 	closeMobileMenu();
 
@@ -375,7 +392,10 @@ const handleRoute = async () => {
 	}
 };
 
-// Navbar and footer injection
+// ===========================================
+// UI INJECTION
+// ===========================================
+
 const injectNavbar = async () => {
 	const navbarContainer = document.getElementById("navbar-container");
 	if (!navbarContainer) return;
@@ -459,7 +479,10 @@ const loadProjectsDropdown = async () => {
 	projectsDropdown.innerHTML = projectsHtml;
 };
 
-// SPA routing setup
+// ===========================================
+// SPA ROUTING SETUP
+// ===========================================
+
 const setupSpaRouting = () => {
 	document.addEventListener("click", (event) => {
 		const link = event.target.closest('a[href^="?"]');

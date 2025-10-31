@@ -7,16 +7,22 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies/**/*.js"]
+		"include": ["**/app/src/**/*.js"],
+		"ignore": ["**/app/src/dependencies/**"]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies/**/*.js"]
+		"include": ["**/app/src/**/*.js"],
+		"ignore": ["**/app/src/dependencies/**"]
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"organizeImports": {
+		"enabled": true
+	},
 	"linter": {
 		"enabled": true,
+		"include": ["**/app/src/**/*.js"],
+		"ignore": ["**/app/src/dependencies/**"],
 		"rules": {
 			"recommended": true
 		}

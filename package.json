@@ -9,7 +9,8 @@
 		"npm": ">=9.0.0"
 	},
 	"scripts": {
-		"prepare": "microtastic prep",
+		"prepare": "npm run copy-assets && microtastic prep",
+		"copy-assets": "mkdir -p app/fonts app/css/prism-themes && cp node_modules/@fontsource/raleway/files/raleway-latin-400-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-600-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-700-normal.woff2 app/fonts/ && cp node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2 node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2 app/fonts/ && cp node_modules/prismjs/themes/*.min.css app/css/prism-themes/",
 		"dependencies": "microtastic prep",
 		"dev": "microtastic dev",
 		"prod": "npm run check && microtastic prod",
@@ -18,6 +19,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
+		"@fontsource/raleway": "^5.2.8",
+		"@fortawesome/fontawesome-free": "^7.1.0",
 		"microtastic": "latest"
 	},
 	"dependencies": {
