@@ -14,7 +14,7 @@ export const Search = {
 	fuse: null,
 
 	// Initialize search index with content
-	async init(includeReadmes = false) {
+	async init() {
 		if (this.initPromise) return this.initPromise;
 		if (this.isInitialized) return;
 
@@ -54,15 +54,18 @@ export const Search = {
 				// Initialize Fuse.js with weighted search keys
 				this.fuse = new Fuse(this.data, {
 					keys: [
-						{ name: "title", weight: 0.4 },
-						{ name: "description", weight: 0.3 },
-						{ name: "tags", weight: 0.2 },
-						{ name: "content", weight: 0.1 },
+						{ name: "title", weight: CONSTANTS.SEARCH_WEIGHT_TITLE },
+						{
+							name: "description",
+							weight: CONSTANTS.SEARCH_WEIGHT_DESCRIPTION,
+						},
+						{ name: "tags", weight: CONSTANTS.SEARCH_WEIGHT_TAGS },
+						{ name: "content", weight: CONSTANTS.SEARCH_WEIGHT_CONTENT },
 					],
 					includeScore: true,
-					threshold: 0.4,
+					threshold: CONSTANTS.SEARCH_THRESHOLD,
 					ignoreLocation: true,
-					minMatchCharLength: 2,
+					minMatchCharLength: CONSTANTS.SEARCH_MIN_MATCH_LENGTH,
 				});
 
 				this.isInitialized = true;

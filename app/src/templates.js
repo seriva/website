@@ -3,6 +3,7 @@
 // ===========================================
 // HTML template generation using tagged template literals
 
+import { CONSTANTS } from "./constants.js";
 import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
 import { escapeHtml, html, safe } from "./utils.js";
@@ -307,7 +308,7 @@ export const Templates = {
 			pageType === "blog" ? config?.blogEnabled : config?.projectsEnabled;
 		if (!isEnabled) return "";
 
-		// Create a unique container ID
+		// Create a unique container ID (generate once!)
 		const containerId = `giscus-${pageType}-${Date.now()}`;
 
 		// Schedule script injection for after DOM update
@@ -332,7 +333,7 @@ export const Templates = {
 			script.async = true;
 
 			container.appendChild(script);
-		}, 100);
+		}, CONSTANTS.GISCUS_INJECTION_DELAY);
 
 		return html`<div class="giscus-container" id="${containerId}"></div>`;
 	},

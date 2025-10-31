@@ -14,6 +14,7 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 ### Architecture
 - **ES6 Modules**: Clean separation of concerns across multiple files
 - **Microtastic**: Handles dependency bundling only (fuse.js, marked, prismjs, yamljs)
+- **Local Assets**: Fonts and Prism themes bundled from npm, not CDN
 - **No frameworks**: Vanilla JavaScript with modern features
 - **Template literals**: Secure HTML generation with auto-escaping
 
@@ -34,7 +35,7 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - Markdown: `MarkdownLoader.loadAsHtml(path)` for pages/posts (in `markdown.js`)
 - Search: `Search.init()` with 300ms debounce (in `search.js`)
 - Comments: `Templates.giscusComments(data?.site?.comments, "blog"|"projects")`
-- Theme: `applyColorScheme()` + `applyPrismTheme()` before code render
+- Theme: `applyColorScheme()` for colors, Prism themes loaded via local CSS
 - i18n: `i18n.t('key')` for all user-facing strings (in `i18n.js`)
 
 ### Module Structure
@@ -58,10 +59,13 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/data/pages/` - markdown pages
 - `app/data/blog/` - markdown blog posts
 - `app/css/main.css` - all styles
+- `app/fonts/` - web fonts (auto-generated, gitignored)
+- `app/css/prism-themes/` - syntax highlighting themes (auto-generated, gitignored)
 - `public/` - build output (gitignored)
 
 ### Development
 - `npm install` - install dependencies
-- `npm run prepare` - bundle dependencies to `app/src/dependencies/`
+- `npm run prepare` - copy assets (fonts, Prism themes) + bundle dependencies
+- `npm run copy-assets` - copy fonts and Prism themes from node_modules
 - `npm run dev` - start dev server on port 8081
 - `npm run prod` - production build (includes linting)
