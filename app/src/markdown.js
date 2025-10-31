@@ -1,4 +1,5 @@
 // Markdown loading utilities
+import { marked } from "./dependencies/marked.js";
 import { Templates } from './templates.js';
 
 export const MarkdownLoader = {
@@ -62,7 +63,7 @@ export const MarkdownLoader = {
     async loadAsHtml(path) {
         const markdown = await this.loadFile(path);
         if (!markdown) return null;
-        const result = Templates.markdown(markdown, window.marked);
+        const result = Templates.markdown(markdown, marked);
         return result.content || result;
     },
 
@@ -70,7 +71,7 @@ export const MarkdownLoader = {
     async loadWithFrontmatterAsHtml(path) {
         const result = await this.loadWithFrontmatter(path);
         if (!result) return null;
-        const htmlResult = Templates.markdown(result.content, window.marked);
+        const htmlResult = Templates.markdown(result.content, marked);
         return {
             metadata: result.metadata,
             html: htmlResult.content || htmlResult,

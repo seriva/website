@@ -14,6 +14,7 @@ import {
 	loadProjectsDropdown,
 	setupSpaRouting,
 } from "./routing.js";
+import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import {
 	Email,
@@ -26,17 +27,9 @@ import {
 import { escapeHtml, getMainContent, getNavbar, html, safe } from "./utils.js";
 
 // ===========================================
-// EXPOSE GLOBALS (needed for dynamic language loading)
+// EXPOSE GLOBALS (only what's needed)
 // ===========================================
-window.marked = marked;
-window.Prism = Prism;
-window.Fuse = Fuse;
-window.YAML = YAML;
-window.CONSTANTS = CONSTANTS;
-window.Templates = Templates;
-window.i18n = i18n;
-window.html = html;
-window.safe = safe;
+// HTML onclick handlers (used in templates)
 window.fullscreen = fullscreen;
 window.Email = Email;
 
@@ -81,6 +74,139 @@ const applyPrismTheme = (themeName) => {
 };
 
 // ===========================================
+// SEARCH INITIALIZATION
+// ===========================================
+
+const handleSearchQuery = (query, resultsContainer, onResultClick) => {
+	const results = Search.search(query);
+
+	if (results.length > 0) {
+		resultsContainer.innerHTML = results
+			.map((item) => Templates.searchResult(item, query, Search))
+			.join("");
+		resultsContainer.classList.add("show");
+
+		resultsContainer.querySelectorAll(".search-result-item").forEach((card) => {
+			card.addEventListener("click", (e) => {
+				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
+				const link = card.querySelector(".blog-post-title a");
+				if (link) {
+					e.preventDefault();
+					onResultClick();
+					window.history.pushState({}, "", link.getAttribute("href"));
+					handleRoute();
+				}
+			});
+		});
+
+		resultsContainer.querySelectorAll("[data-spa-route]").forEach((link) => {
+			link.addEventListener("click", (e) => {
+				e.preventDefault();
+				onResultClick();
+				window.history.pushState({}, "", link.getAttribute("href"));
+				handleRoute();
+			});
+		});
+	} else {
+		resultsContainer.innerHTML = Templates.searchNoResults();
+		resultsContainer.classList.add("show");
+	}
+};
+
+const initializeSearch = () => {
+	const searchToggle = document.getElementById("search-toggle");
+	Search.init(false);
+
+	const openSearchPage = () => {
+		const searchPage = document.getElementById("search-page");
+		const searchInput = document.getElementById("search-page-input");
+
+		if (searchPage) {
+			searchPage.classList.add("show");
+			if (searchInput) {
+				requestAnimationFrame(() => searchInput.focus());
+			}
+		}
+	};
+
+	// Search toggle button - opens search page (both mobile and desktop)
+	if (searchToggle) {
+		searchToggle.addEventListener("click", (e) => {
+			e.preventDefault();
+			openSearchPage();
+		});
+	}
+};
+
+const initializeSearchPage = (searchConfig) => {
+	const searchPage = document.getElementById("search-page");
+	const searchPageInput = document.getElementById("search-page-input");
+	const searchPageResults = document.getElementById("search-page-results");
+
+	if (!searchPage || !searchPageInput || !searchPageResults) return;
+
+	const searchPageBack = document.getElementById("search-page-back");
+	const searchPageClear = document.getElementById("search-page-clear");
+
+	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
+	let searchTimeout = null;
+
+	const closeSearchPage = () => {
+		if (searchTimeout) {
+			clearTimeout(searchTimeout);
+			searchTimeout = null;
+		}
+		searchPage.classList.add("closing");
+		setTimeout(() => {
+			searchPage.classList.remove("show", "closing");
+			searchPageInput.value = "";
+			searchPageResults.innerHTML = "";
+		}, CONSTANTS.SEARCH_PAGE_CLOSE_DELAY);
+	};
+
+	searchPageBack.addEventListener("click", closeSearchPage);
+
+	const handleSearchInput = (e) => {
+		const query = e.target.value.trim();
+
+		if (query.length < minChars) {
+			searchPageResults.innerHTML = "";
+			return;
+		}
+
+		if (searchTimeout) clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(() => {
+			handleSearchQuery(query, searchPageResults, closeSearchPage);
+		}, CONSTANTS.SEARCH_DEBOUNCE_MS);
+	};
+
+	searchPageInput.addEventListener("input", handleSearchInput);
+
+	// Handle clear button
+	if (searchPageClear) {
+		searchPageClear.addEventListener("click", () => {
+			searchPageInput.value = "";
+			searchPageResults.innerHTML = "";
+			searchPageInput.focus();
+		});
+	}
+
+	// Handle ESC key to close search
+	searchPageInput.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
+			closeSearchPage();
+		}
+	});
+
+	// Close search page when clicking outside (for desktop)
+	searchPage.addEventListener("click", (e) => {
+		if (e.target === searchPage) {
+			closeSearchPage();
+		}
+	});
+};
+
+// ===========================================
 // PLACEHOLDER - Will add more modules here
 // ===========================================
 
@@ -104,6 +230,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Initialize UI components after DOM elements are ready
 		initCustomDropdowns();
 		initNavbarToggle();
+
+		// Initialize search if enabled
+		if (data?.site?.search?.enabled) {
+			initializeSearch();
+			initializeSearchPage(data.site.search);
+		}
 
 		// Handle initial route
 		await handleRoute();

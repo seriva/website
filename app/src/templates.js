@@ -1,5 +1,6 @@
-import { i18n } from "./i18n.js";
 // HTML Templates module
+import { marked } from "./dependencies/marked.js";
+import { i18n } from "./i18n.js";
 import { escapeHtml, html, safe } from "./utils.js";
 
 // Note: These global variables will be available after data loading
@@ -174,7 +175,7 @@ export const Templates = {
             <p class="project-description">${post.date}</p>
             ${post.tags?.length ? safe(`<div class="project-tags">${Templates.tagList(post.tags).content}</div>`) : ""}
             <div class="blog-post-content">
-                ${safe(Templates.markdown(content, window.marked).content)}
+                ${safe(Templates.markdown(content, marked).content)}
             </div>
             <footer class="blog-post-footer">
                 <a href="?blog" class="blog-back-link" data-spa-route="page">${i18n.t("blog.backToBlog")}</a>
