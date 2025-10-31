@@ -4,6 +4,7 @@
 
 import { CONSTANTS } from "./constants.js";
 import { getData } from "./data.js";
+import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
 import { highlightElement } from "./prism-loader.js";
@@ -271,12 +272,8 @@ const loadGitHubReadme = async (repo, containerId) => {
 
 		if (response.ok) {
 			const readmeContent = await response.text();
-			if (window.marked) {
-				const htmlContent = window.marked.parse(readmeContent);
-				element.innerHTML = `<div class="markdown-body">${htmlContent}</div>`;
-			} else {
-				element.innerHTML = `<div class="markdown-body">${readmeContent}</div>`;
-			}
+			const htmlContent = marked.parse(readmeContent);
+			element.innerHTML = `<div class="markdown-body">${htmlContent}</div>`;
 			
 			// Apply Prism syntax highlighting to code blocks in the README
 			// This will dynamically load any needed language grammars from CDN
@@ -417,6 +414,19 @@ const injectNavbar = async () => {
 		searchBar,
 		data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 	);
+
+	// Inject search page into body if search is enabled
+	if (data?.site?.search?.enabled) {
+		const existingSearchPage = document.getElementById("search-page");
+		if (!existingSearchPage) {
+			document.body.insertAdjacentHTML(
+				"beforeend",
+				Templates.searchPage(
+					data.site.search.placeholder || i18n.t("search.placeholder"),
+				),
+			);
+		}
+	}
 };
 
 const injectFooter = async () => {

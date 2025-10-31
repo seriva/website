@@ -1,6 +1,8 @@
 // Dynamic Prism language loader
 // Loads language grammars from CDN on-demand
 
+import Prism from "./dependencies/prismjs.js";
+
 const PRISM_CDN = 'https://cdn.jsdelivr.net/npm/prismjs@1.30.0';
 const loadedLanguages = new Set(['markup', 'css', 'clike', 'javascript']); // Core languages
 const loadingLanguages = new Map(); // Track in-progress loads
@@ -11,6 +13,10 @@ const loadingLanguages = new Map(); // Track in-progress loads
  * @returns {Promise<void>}
  */
 export async function loadLanguage(language) {
+	// Temporarily expose Prism globally for CDN scripts to register
+	const hadPrism = 'Prism' in window;
+	const oldPrism = window.Prism;
+	window.Prism = Prism;
 	// Normalize language name
 	const lang = language.toLowerCase();
 	
@@ -34,12 +40,28 @@ export async function loadLanguage(language) {
 			loadedLanguages.add(lang);
 			loadingLanguages.delete(lang);
 			console.log(`Loaded Prism language: ${lang}`);
+			
+			// Clean up global Prism if we added it
+			if (!hadPrism) {
+				delete window.Prism;
+			} else if (oldPrism !== Prism) {
+				window.Prism = oldPrism;
+			}
+			
 			resolve();
 		};
 		
 		script.onerror = () => {
 			loadingLanguages.delete(lang);
 			console.warn(`Failed to load Prism language: ${lang}`);
+			
+			// Clean up global Prism if we added it
+			if (!hadPrism) {
+				delete window.Prism;
+			} else if (oldPrism !== Prism) {
+				window.Prism = oldPrism;
+			}
+			
 			reject(new Error(`Failed to load language: ${lang}`));
 		};
 		
@@ -86,8 +108,8 @@ export async function highlightElement(container) {
 	// First, load any missing languages
 	await loadLanguagesForElement(container);
 	
-	// Then highlight
-	if (typeof window.Prism !== 'undefined') {
-		window.Prism.highlightAllUnder(container);
+	// Then highlight using our imported Prism
+	if (Prism?.highlightAllUnder) {
+		Prism.highlightAllUnder(container);
 	}
 }
