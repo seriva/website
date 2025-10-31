@@ -1474,12 +1474,10 @@ const handleRoute = async () => {
 		console.error("Error loading page:", error);
 		endTransition();
 		const mainContent = getMainContent();
-		if (mainContent) {
-			mainContent.innerHTML = Templates.errorMessage(
-				i18n.t("general.error"),
-				i18n.t("general.errorMessage"),
-			);
-		}
+		mainContent.innerHTML = Templates.errorMessage(
+			i18n.t("general.error"),
+			i18n.t("general.errorMessage"),
+		);
 		document.title = projectsData?.site?.title || CONSTANTS.DEFAULT_TITLE;
 	}
 };
@@ -1506,12 +1504,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 	} catch (error) {
 		console.error("Error initializing page:", error);
 		const mainContent = getMainContent();
-		if (mainContent) {
-			mainContent.innerHTML = Templates.errorMessage(
-				"Something went wrong",
-				"Please refresh the page to try again.",
-			);
-		}
+		mainContent.innerHTML = Templates.errorMessage(
+			"Something went wrong",
+			"Please refresh the page to try again.",
+		);
 	}
 });
 
