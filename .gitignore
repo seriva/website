@@ -15,3 +15,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+node_modules/
+public/
+app/src/dependencies/

@@ -1,31 +1,15 @@
-FROM alpine:latest
+# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.195.0/containers/javascript-node/.devcontainer/base.Dockerfile
+# [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 16, 14, 12, 16-bullseye, 14-bullseye, 12-bullseye, 16-buster, 14-buster, 12-buster
+ARG VARIANT=18-buster
+FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:1-${VARIANT}
 
-# Install system dependencies
-RUN apk add --no-cache \
-    bash \
-    curl \
-    git \
-    darkhttpd \
-    ca-certificates \
-    libc6-compat \
-    libstdc++ \
-    libgcc
-# Ensure CA certs are up to date for TLS downloads
-RUN update-ca-certificates
+# [Optional] Uncomment this section to install additional OS packages.
+# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+#     && apt-get -y install --no-install-recommends <your-package-list-here>
 
-# Install Biome
-RUN curl -fsSL https://github.com/biomejs/biome/releases/latest/download/biome-linux-x64-musl -o /tmp/biome && \
-    chmod 755 /tmp/biome && \
-    mv /tmp/biome /usr/local/bin/biome && \
-    /usr/local/bin/biome --version
+# [Optional] Uncomment if you want to install an additional version of node using nvm
+# ARG EXTRA_NODE_VERSION=10
+# RUN su node -c "umask 0002 && ./usr/local/share/nvm/nvm.sh && nvm install ${EXTRA_NODE_VERSION}"
 
-# Set up git safe directory (will be overridden by postCreateCommand if needed)
-RUN git config --global --add safe.directory '*'
-
-# Create a non-root user for better security
-RUN adduser -D -s /bin/bash vscode && \
-    echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# Switch to non-root user
-USER vscode
-WORKDIR /home/vscode
+# [Optional] Uncomment if you want to install more global node modules
+RUN su node -c "npm install -g npm-check-updates"
