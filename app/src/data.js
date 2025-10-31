@@ -1,9 +1,14 @@
-// Data loading and management module
+// ===========================================
+// DATA MANAGEMENT
+// ===========================================
+// Centralized data loading and caching system
+
 import YAML from "./dependencies/yamljs.js";
 import { i18n } from "./i18n.js";
 
 let projectsData = null;
 
+// Load and cache data from content.yaml
 export const getData = async () => {
 	if (projectsData) return projectsData;
 
@@ -16,8 +21,10 @@ export const getData = async () => {
 		const yamlText = await response.text();
 		projectsData = YAML.parse(yamlText);
 
-		// Apply theming and i18n
-		if (projectsData?.site?.colors) applyColorScheme(projectsData.site.colors);
+		// Apply theming and i18n after loading
+		if (projectsData?.site?.colors) {
+			applyColorScheme(projectsData.site.colors);
+		}
 		if (projectsData?.site?.i18n && projectsData?.translations) {
 			i18n.init(projectsData.site.i18n, projectsData.translations);
 		}
@@ -30,12 +37,12 @@ export const getData = async () => {
 	}
 };
 
+// Apply color scheme from config to CSS variables
 export const applyColorScheme = (colors) => {
 	if (!colors) return;
 
 	const root = document.documentElement;
 
-	// Direct mapping - cleaner and more maintainable
 	const mappings = {
 		"--accent": colors.primary,
 		"--font-color": colors.text,
@@ -51,12 +58,18 @@ export const applyColorScheme = (colors) => {
 	}
 };
 
+// Update HTML meta tags with site data
 export const updateMetaTags = (siteData) => {
 	if (!siteData) return;
-	if (siteData.title) document.title = siteData.title;
+
+	if (siteData.title) {
+		document.title = siteData.title;
+	}
 
 	const updateMeta = (selector, value) => {
-		if (value) document.querySelector(selector)?.setAttribute("content", value);
+		if (value) {
+			document.querySelector(selector)?.setAttribute("content", value);
+		}
 	};
 
 	updateMeta('meta[name="description"]', siteData.description);

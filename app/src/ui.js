@@ -1,6 +1,11 @@
-// UI utilities and interaction handlers
+// ===========================================
+// UI INTERACTIONS
+// ===========================================
+// User interface utilities and event handlers
+
 import { CONSTANTS } from "./constants.js";
 
+// Close mobile navigation menu
 export const closeMobileMenu = () => {
 	const collapseElement = document.getElementById("navbarNav");
 	const navbarToggle = document.getElementById("navbar-toggle");
@@ -15,6 +20,7 @@ export const closeMobileMenu = () => {
 	}
 };
 
+// Initialize custom dropdown menus
 export const initCustomDropdowns = () => {
 	for (const toggle of document.querySelectorAll(".dropdown-toggle")) {
 		toggle.addEventListener("click", (e) => {
@@ -47,6 +53,7 @@ export const initCustomDropdowns = () => {
 	});
 };
 
+// Initialize mobile navbar toggle button
 export const initNavbarToggle = () => {
 	const toggle = document.getElementById("navbar-toggle");
 	const navbar = document.getElementById("navbarNav");
@@ -62,7 +69,7 @@ export const initNavbarToggle = () => {
 	});
 };
 
-// Global utility functions
+// Request fullscreen for demo iframe
 export const fullscreen = () => {
 	try {
 		const iframe = document.getElementById("demo");
@@ -80,7 +87,7 @@ export const fullscreen = () => {
 	}
 };
 
-// Email obfuscation handler
+// Handle obfuscated email link clicks
 export const Email = async (event) => {
 	event?.preventDefault();
 
@@ -94,54 +101,44 @@ export const Email = async (event) => {
 			const email = `${emailConfig.name}@${emailConfig.domain}`;
 			window.location.href = `mailto:${email}`;
 		} else {
-			// Fallback to default email
 			console.warn("Email configuration not found, using fallback");
 			window.location.href = "mailto:contact@example.com";
 		}
 	} catch (error) {
 		console.error("Error handling email click:", error);
-		// Fallback to default email
 		window.location.href = "mailto:contact@example.com";
 	}
 };
 
-// Copy code button functionality
+// Add copy buttons to all code blocks
 export const initCopyCodeButtons = () => {
-	// Find all pre elements with code blocks
 	const preBlocks = document.querySelectorAll("pre");
 
 	for (const pre of preBlocks) {
-		// Skip if button already exists
 		if (pre.querySelector(".copy-code-button")) continue;
 
-		// Get the code element
 		const codeElement = pre.querySelector("code");
 		if (!codeElement) continue;
 
-		// Create copy button
 		const button = document.createElement("button");
 		button.className = "copy-code-button";
 		button.textContent = "Copy";
 		button.setAttribute("aria-label", "Copy code to clipboard");
 
-		// Add click handler
 		button.addEventListener("click", async () => {
 			try {
 				const code = codeElement.textContent || "";
 				await navigator.clipboard.writeText(code);
 
-				// Show success feedback
 				button.textContent = "Copied!";
 				button.classList.add("copied");
 
-				// Reset after 2 seconds
 				setTimeout(() => {
 					button.textContent = "Copy";
 					button.classList.remove("copied");
 				}, 2000);
-			} catch (err) {
-				console.error("Failed to copy code: ", err);
-				// Fallback for older browsers
+			} catch (error) {
+				console.error("Failed to copy code:", error);
 				button.textContent = "Failed";
 				setTimeout(() => {
 					button.textContent = "Copy";
@@ -149,17 +146,18 @@ export const initCopyCodeButtons = () => {
 			}
 		});
 
-		// Position the button - append directly to pre element
 		pre.style.position = "relative";
 		pre.appendChild(button);
 	}
 };
 
-// Update active nav link
+// Update active state on navigation links
 export const updateActiveNavLink = () => {
 	const params = new URLSearchParams(window.location.search);
 	const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+	const dropdownItems = document.querySelectorAll(".dropdown-item");
 
+	// Update navbar links
 	for (const link of navLinks) {
 		link.classList.remove("active");
 
@@ -167,7 +165,6 @@ export const updateActiveNavLink = () => {
 		if (href?.startsWith("?")) {
 			const linkParams = new URLSearchParams(href);
 
-			// Check if this link matches current route
 			if (params.get("blog") !== null && linkParams.get("blog") !== null) {
 				link.classList.add("active");
 			} else if (
@@ -178,9 +175,35 @@ export const updateActiveNavLink = () => {
 			}
 		}
 	}
+
+	// Update dropdown items and highlight dropdown toggle if project is active
+	let isProjectActive = false;
+	for (const item of dropdownItems) {
+		item.classList.remove("active");
+
+		const href = item.getAttribute("href");
+		if (href?.startsWith("?project=")) {
+			const linkParams = new URLSearchParams(href);
+			const linkProject = linkParams.get("project");
+			const currentProject = params.get("project");
+
+			if (linkProject && linkProject === currentProject) {
+				item.classList.add("active");
+				isProjectActive = true;
+			}
+		}
+	}
+
+	// Highlight the projects dropdown toggle if any project is active
+	if (isProjectActive) {
+		const projectsToggle = document.querySelector(".dropdown-toggle");
+		if (projectsToggle) {
+			projectsToggle.classList.add("active");
+		}
+	}
 };
 
-// Mobile menu outside click handler
+// Close mobile menu when clicking outside
 export const addMobileMenuOutsideClickHandler = () => {
 	document.addEventListener("click", (event) => {
 		const navbar = document.getElementById("navbar-container");

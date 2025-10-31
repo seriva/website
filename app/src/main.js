@@ -1,12 +1,11 @@
-import Fuse from "./dependencies/fuse.js.js";
-// Main application entry point - ES6 modules version
-import { marked } from "./dependencies/marked.js";
-import Prism from "./dependencies/prismjs.js";
-import YAML from "./dependencies/yamljs.js";
+// ===========================================
+// MAIN APPLICATION
+// ===========================================
+// Entry point - ES6 modules version
 
 import { CONSTANTS } from "./constants.js";
 import { getData, updateMetaTags } from "./data.js";
-import { i18n } from "./i18n.js";
+import { marked } from "./dependencies/marked.js";
 import {
 	handleRoute,
 	injectFooter,
@@ -19,7 +18,6 @@ import { Templates } from "./templates.js";
 import {
 	Email,
 	addMobileMenuOutsideClickHandler,
-	closeMobileMenu,
 	fullscreen,
 	initCustomDropdowns,
 	initNavbarToggle,
@@ -27,18 +25,15 @@ import {
 import { escapeHtml, getMainContent } from "./utils.js";
 
 // ===========================================
-// EXPOSE GLOBALS (only what's needed)
+// GLOBAL EXPORTS
 // ===========================================
-// HTML onclick handlers (used in templates)
+
+// Expose functions for HTML onclick handlers
 window.fullscreen = fullscreen;
 window.Email = Email;
 
 // ===========================================
-// APPLICATION INITIALIZATION
-// ===========================================
-
-// ===========================================
-// MARKDOWN & SYNTAX HIGHLIGHTING
+// MARKDOWN CONFIGURATION
 // ===========================================
 
 const initializeMarked = () => {
@@ -62,19 +57,7 @@ const initializeMarked = () => {
 };
 
 // ===========================================
-// PRISM THEME MANAGEMENT
-// ===========================================
-
-const applyPrismTheme = (themeName) => {
-	const themeLink = document.getElementById("prism-theme");
-	if (themeLink) {
-		const newHref = `${CONSTANTS.PRISM_CDN_BASE}${themeName}.min.css`;
-		themeLink.href = newHref;
-	}
-};
-
-// ===========================================
-// SEARCH INITIALIZATION
+// SEARCH FUNCTIONALITY
 // ===========================================
 
 const handleSearchQuery = (query, resultsContainer, onResultClick) => {
@@ -86,29 +69,30 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 			.join("");
 		resultsContainer.classList.add("show");
 
-		for (const card of resultsContainer.querySelectorAll(
-			".search-result-item",
-		)) {
-			card.addEventListener("click", (e) => {
-				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
-				const link = card.querySelector(".blog-post-title a");
-				if (link) {
-					e.preventDefault();
-					onResultClick();
-					window.history.pushState({}, "", link.getAttribute("href"));
-					handleRoute();
-				}
-			});
-		}
-
-		for (const link of resultsContainer.querySelectorAll("[data-spa-route]")) {
-			link.addEventListener("click", (e) => {
+		// Use event delegation for better performance
+		resultsContainer.onclick = (e) => {
+			// Handle SPA links
+			const link = e.target.closest("[data-spa-route]");
+			if (link) {
 				e.preventDefault();
 				onResultClick();
 				window.history.pushState({}, "", link.getAttribute("href"));
 				handleRoute();
-			});
-		}
+				return;
+			}
+
+			// Handle card clicks
+			const card = e.target.closest(".search-result-item");
+			if (card && !e.target.closest("a, .clickable-tag")) {
+				const cardLink = card.querySelector(".blog-post-title a");
+				if (cardLink) {
+					e.preventDefault();
+					onResultClick();
+					window.history.pushState({}, "", cardLink.getAttribute("href"));
+					handleRoute();
+				}
+			}
+		};
 	} else {
 		resultsContainer.innerHTML = Templates.searchNoResults();
 		resultsContainer.classList.add("show");
@@ -117,12 +101,15 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 
 const initializeSearch = () => {
 	const searchToggle = document.getElementById("search-toggle");
+	if (!searchToggle) return;
+
 	Search.init(false);
 
-	const openSearchPage = () => {
-		const searchPage = document.getElementById("search-page");
-		const searchInput = document.getElementById("search-page-input");
+	// Cache search page elements
+	const searchPage = document.getElementById("search-page");
+	const searchInput = document.getElementById("search-page-input");
 
+	const openSearchPage = () => {
 		if (searchPage) {
 			searchPage.classList.add("show");
 			if (searchInput) {
@@ -131,24 +118,23 @@ const initializeSearch = () => {
 		}
 	};
 
-	// Search toggle button - opens search page (both mobile and desktop)
-	if (searchToggle) {
-		searchToggle.addEventListener("click", (e) => {
-			e.preventDefault();
-			openSearchPage();
-		});
-	}
+	searchToggle.addEventListener("click", (e) => {
+		e.preventDefault();
+		openSearchPage();
+	});
 };
 
 const initializeSearchPage = (searchConfig) => {
-	const searchPage = document.getElementById("search-page");
-	const searchPageInput = document.getElementById("search-page-input");
-	const searchPageResults = document.getElementById("search-page-results");
+	// Cache all search page elements once
+	const elements = {
+		page: document.getElementById("search-page"),
+		input: document.getElementById("search-page-input"),
+		results: document.getElementById("search-page-results"),
+		back: document.getElementById("search-page-back"),
+		clear: document.getElementById("search-page-clear"),
+	};
 
-	if (!searchPage || !searchPageInput || !searchPageResults) return;
-
-	const searchPageBack = document.getElementById("search-page-back");
-	const searchPageClear = document.getElementById("search-page-clear");
+	if (!elements.page || !elements.input || !elements.results) return;
 
 	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
 	let searchTimeout = null;
@@ -158,53 +144,45 @@ const initializeSearchPage = (searchConfig) => {
 			clearTimeout(searchTimeout);
 			searchTimeout = null;
 		}
-		searchPage.classList.add("closing");
+		elements.page.classList.add("closing");
 		setTimeout(() => {
-			searchPage.classList.remove("show", "closing");
-			searchPageInput.value = "";
-			searchPageResults.innerHTML = "";
+			elements.page.classList.remove("show", "closing");
+			elements.input.value = "";
+			elements.results.innerHTML = "";
 		}, CONSTANTS.SEARCH_PAGE_CLOSE_DELAY);
 	};
-
-	searchPageBack.addEventListener("click", closeSearchPage);
 
 	const handleSearchInput = (e) => {
 		const query = e.target.value.trim();
 
 		if (query.length < minChars) {
-			searchPageResults.innerHTML = "";
+			elements.results.innerHTML = "";
 			return;
 		}
 
 		if (searchTimeout) clearTimeout(searchTimeout);
 		searchTimeout = setTimeout(() => {
-			handleSearchQuery(query, searchPageResults, closeSearchPage);
+			handleSearchQuery(query, elements.results, closeSearchPage);
 		}, CONSTANTS.SEARCH_DEBOUNCE_MS);
 	};
 
-	searchPageInput.addEventListener("input", handleSearchInput);
+	// Attach event listeners
+	elements.back.addEventListener("click", closeSearchPage);
+	elements.input.addEventListener("input", handleSearchInput);
+	elements.input.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") closeSearchPage();
+	});
 
-	// Handle clear button
-	if (searchPageClear) {
-		searchPageClear.addEventListener("click", () => {
-			searchPageInput.value = "";
-			searchPageResults.innerHTML = "";
-			searchPageInput.focus();
+	if (elements.clear) {
+		elements.clear.addEventListener("click", () => {
+			elements.input.value = "";
+			elements.results.innerHTML = "";
+			elements.input.focus();
 		});
 	}
 
-	// Handle ESC key to close search
-	searchPageInput.addEventListener("keydown", (e) => {
-		if (e.key === "Escape") {
-			closeSearchPage();
-		}
-	});
-
-	// Close search page when clicking outside (for desktop)
-	searchPage.addEventListener("click", (e) => {
-		if (e.target === searchPage) {
-			closeSearchPage();
-		}
+	elements.page.addEventListener("click", (e) => {
+		if (e.target === elements.page) closeSearchPage();
 	});
 };
 
@@ -246,9 +224,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		window.addEventListener("popstate", handleRoute);
 		setupSpaRouting();
 		addMobileMenuOutsideClickHandler();
-
-		console.log("Portfolio website initialized with ES6 modules!");
-		console.log("Dependencies loaded:", { marked, Prism, Fuse, YAML });
 	} catch (error) {
 		console.error("Failed to initialize application:", error);
 		// Show error in main content

@@ -1,10 +1,11 @@
-// HTML Templates module
+// ===========================================
+// TEMPLATES
+// ===========================================
+// HTML template generation using tagged template literals
+
 import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
 import { escapeHtml, html, safe } from "./utils.js";
-
-// Note: These global variables will be available after data loading
-// projectsData, Search will be imported/passed as needed
 
 export const Templates = {
 	navbar: (

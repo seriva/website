@@ -1,9 +1,13 @@
-// Markdown loading utilities
+// ===========================================
+// MARKDOWN LOADER
+// ===========================================
+// Utilities for loading and parsing markdown files
+
 import { marked } from "./dependencies/marked.js";
 import { Templates } from "./templates.js";
 
 export const MarkdownLoader = {
-	// Load markdown file from any path
+	// Load markdown file from path
 	async loadFile(path) {
 		try {
 			const response = await fetch(path);
@@ -15,7 +19,7 @@ export const MarkdownLoader = {
 		}
 	},
 
-	// Parse frontmatter from markdown content
+	// Parse YAML frontmatter from markdown content
 	parseFrontmatter(markdown) {
 		const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
 		const match = markdown.match(frontmatterRegex);
@@ -36,18 +40,19 @@ export const MarkdownLoader = {
 
 			if (!key || !value) continue;
 
-			// Handle arrays in frontmatter
+			// Parse arrays (e.g. tags: ['tag1', 'tag2'])
 			if (value.startsWith("[") && value.endsWith("]")) {
 				try {
 					metadata[key] = JSON.parse(value.replace(/'/g, '"'));
-				} catch (e) {
+				} catch (error) {
 					console.warn(
 						`Failed to parse array in frontmatter for key: ${key}`,
-						e,
+						error,
 					);
 					metadata[key] = value;
 				}
 			} else {
+				// Remove surrounding quotes
 				metadata[key] = value.replace(/^["']|["']$/g, "");
 			}
 		}
@@ -55,14 +60,14 @@ export const MarkdownLoader = {
 		return { metadata, content: content.trim() };
 	},
 
-	// Load and parse markdown with frontmatter
+	// Load markdown file with frontmatter
 	async loadWithFrontmatter(path) {
 		const markdown = await this.loadFile(path);
 		if (!markdown) return null;
 		return this.parseFrontmatter(markdown);
 	},
 
-	// Load markdown and render to HTML
+	// Load markdown file and render to HTML
 	async loadAsHtml(path) {
 		const markdown = await this.loadFile(path);
 		if (!markdown) return null;
