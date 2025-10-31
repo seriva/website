@@ -20,6 +20,14 @@ const CONSTANTS = {
 // UTILITY FUNCTIONS
 // ===========================================
 
+const getMainContent = () => {
+	const element = document.getElementById("main-content");
+	if (!element) {
+		throw new Error("Critical: #main-content element not found in DOM");
+	}
+	return element;
+};
+
 const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
@@ -258,19 +266,6 @@ const Templates = {
 		}
 		try {
 			const htmlContent = marked.parse(content);
-			const wrapper = document.createElement("div");
-			wrapper.className = "markdown-body";
-			wrapper.innerHTML = htmlContent;
-
-			// Apply Prism syntax highlighting after rendering
-			if (typeof Prism !== "undefined") {
-				requestAnimationFrame(() => {
-					wrapper.querySelectorAll("pre code").forEach((block) => {
-						Prism.highlightElement(block);
-					});
-				});
-			}
-
 			return safe(`<div class="markdown-body">${htmlContent}</div>`);
 		} catch (error) {
 			console.error("Error rendering markdown:", error);
@@ -1179,9 +1174,7 @@ const createPostObject = (slug, data, filename, content = null) => ({
 });
 
 const loadBlogPage = async (page = 1) => {
-	const mainContent = document.getElementById("main-content");
-	if (!mainContent) return;
-
+	const mainContent = getMainContent();
 	const data = await getData();
 	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
@@ -1243,9 +1236,7 @@ const setupBlogCardClicks = () => {
 };
 
 const loadBlogPost = async (slug) => {
-	const mainContent = document.getElementById("main-content");
-	if (!mainContent) return;
-
+	const mainContent = getMainContent();
 	const data = await getData();
 	document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
@@ -1304,8 +1295,7 @@ const loadProjectLinks = async (projectId, containerId) => {
 };
 
 const loadPage = async (pageId) => {
-	const mainContent = document.getElementById("main-content");
-	if (!mainContent) return;
+	const mainContent = getMainContent();
 
 	try {
 		const data = await getData();
@@ -1330,8 +1320,7 @@ const loadPage = async (pageId) => {
 };
 
 const loadProjectPage = async (projectId) => {
-	const mainContent = document.getElementById("main-content");
-	if (!mainContent) return;
+	const mainContent = getMainContent();
 
 	try {
 		const data = await getData();
@@ -1424,8 +1413,7 @@ const handleRoute = async () => {
 
 	// Helper function for page transitions
 	const startTransition = async () => {
-		const mainContent = document.getElementById("main-content");
-		if (!mainContent) return;
+		const mainContent = getMainContent();
 		mainContent.classList.add("page-transition-out");
 		await new Promise((resolve) =>
 			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
@@ -1434,7 +1422,7 @@ const handleRoute = async () => {
 	};
 
 	const endTransition = () => {
-		const mainContent = document.getElementById("main-content");
+		const mainContent = getMainContent();
 		if (mainContent) {
 			mainContent.classList.remove("page-transition-out");
 
@@ -1485,7 +1473,7 @@ const handleRoute = async () => {
 	} catch (error) {
 		console.error("Error loading page:", error);
 		endTransition();
-		const mainContent = document.getElementById("main-content");
+		const mainContent = getMainContent();
 		if (mainContent) {
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
@@ -1517,7 +1505,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		addMobileMenuOutsideClickHandler();
 	} catch (error) {
 		console.error("Error initializing page:", error);
-		const mainContent = document.getElementById("main-content");
+		const mainContent = getMainContent();
 		if (mainContent) {
 			mainContent.innerHTML = Templates.errorMessage(
 				"Something went wrong",
