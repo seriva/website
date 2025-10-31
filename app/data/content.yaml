@@ -86,6 +86,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2025-11-01-migrating-to-microtastic.md"
+      title: "Adding Minimal Build Tooling with Microtastic"
+      date: "2025-11-01"
+      excerpt: "Moving from CDN dependencies to self-hosted bundles using a minimal build tool I originally created for another project."
+      tags: ["Web Development", "JavaScript", "Performance", "Microtastic"]
     - filename: "2025-10-29-from-homelab-to-github-pages.md"
       title: "From Homelab to GitHub Pages"
       date: "2025-10-29"
