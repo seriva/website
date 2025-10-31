@@ -28,6 +28,14 @@ const getMainContent = () => {
 	return element;
 };
 
+const getNavbar = () => {
+	const element = document.getElementById("navbar-container");
+	if (!element) {
+		throw new Error("Critical: #navbar-container element not found in DOM");
+	}
+	return element;
+};
+
 const escapeHtml = (str) => {
 	const div = document.createElement("div");
 	div.textContent = str;
@@ -1512,9 +1520,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 const updateActiveNavLink = () => {
-	const navbar = document.getElementById("navbar-container");
-	if (!navbar) return;
-
+	const navbar = getNavbar();
 	const navbarLinks = navbar.querySelectorAll(".navbar-nav .nav-link");
 	const dropdownItems = navbar.querySelectorAll(".dropdown-item");
 	const projectDropdown = navbar.querySelector(".dropdown");
@@ -1553,9 +1559,7 @@ const handleSpaLinkClick = (e) => {
 
 	e.preventDefault();
 
-	const navbar = document.getElementById("navbar-container");
-	if (!navbar) return;
-
+	const navbar = getNavbar();
 	const navbarLinks = navbar.querySelectorAll(".navbar-nav .nav-link");
 	const dropdownItems = navbar.querySelectorAll(".dropdown-item");
 
