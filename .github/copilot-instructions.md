@@ -1,7 +1,7 @@
 # Portfolio Website - AI Coding Agent Guide
 
 ## What This Is
-Vanilla JS SPA (~1600 LOC). No build tools. Content in YAML + markdown. Everything in `www/js/main.js`.
+Modular ES6 SPA with Microtastic build system. Content in YAML + markdown. Modules in `app/src/`.
 
 ## Architecture
 - **Templating**: Tagged literals (`html\`...\``) with auto-escaping. Use `safe()` for trusted HTML only.
@@ -10,13 +10,13 @@ Vanilla JS SPA (~1600 LOC). No build tools. Content in YAML + markdown. Everythi
 - **Search**: Fuse.js fuzzy search (title: 2.0, description: 1.5, tags: 1.2, content: 0.5)
 - **Styling**: CSS custom properties from YAML, Prism.js for syntax highlighting
 
-## Dependencies (CDN via jsDelivr)
-- **marked.js v11.1.1** - Markdown (call `initializeMarked()` first)
-- **Prism.js v1.30.0** - Syntax highlighting (autoloader + dynamic themes)
-- **yamljs v0.3.0** - YAML parsing
-- **Fuse.js v7.0.0** - Fuzzy search
-- **Font Awesome** - Icons (solid + brands)
-- **Raleway** - Typography (400, 600, 700)
+## Dependencies (ES6 Modules via Microtastic)
+- **marked.js v11.1.1** - Markdown (ESM import, call `initializeMarked()` first)
+- **Prism.js v1.30.0** - Syntax highlighting (ESM import + dynamic themes)
+- **yamljs v0.3.0** - YAML parsing (ESM import)
+- **Fuse.js v7.0.0** - Fuzzy search (ESM import)
+- **Font Awesome** - Icons (solid + brands, CDN)
+- **Raleway** - Typography (400, 600, 700, CDN)
 
 ## Key Patterns
 
@@ -55,19 +55,27 @@ Templates.giscusComments(data?.site?.comments, "blog"|"projects")
 
 ## Development
 ```bash
-cd www && darkhttpd . --port 8081  # dev server
-biome format --write .              # format
-biome check .                       # lint
-open tests.html                     # tests
+npm run dev      # Microtastic dev server (http://localhost:8081)
+npm run prod     # Production build → public/
+npm run format   # Format code with Biome
+npm run check    # Lint with Biome
+npm run test     # Legacy test server
 ```
 
 **Quality gate**: Changes must pass `biome check` + all QUnit tests.
 
 ## File Structure
-- `www/js/main.js` - entire app (CONSTANTS → UTILITY → TEMPLATES → ROUTING → SEARCH)
-- `www/data/content.yaml` - content + config
-- `www/css/main.css` - styles (CSS custom properties for theming)
-- `www/tests/` - QUnit unit tests
+- `app/src/main.js` - entry point with ES6 imports
+- `app/src/constants.js` - configuration constants
+- `app/src/utils.js` - DOM utilities and HTML templating
+- `app/src/i18n.js` - internationalization
+- `app/src/templates.js` - HTML template functions
+- `app/src/data.js` - data loading and color theming
+- `app/src/ui.js` - UI interactions and dropdowns
+- `app/data/content.yaml` - content + config
+- `app/css/main.css` - styles (CSS custom properties for theming)
+- `www/tests/` - QUnit unit tests (legacy)
+- `public/` - production build output
 
 ## Security
 - XSS: Always use `html\`...\`` for user/external content
