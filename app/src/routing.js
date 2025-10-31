@@ -491,6 +491,8 @@ const setupSpaRouting = () => {
 			const href = link.getAttribute("href");
 			if (href !== window.location.search) {
 				window.history.pushState({}, "", href);
+				// Update active link immediately for instant visual feedback
+				updateActiveNavLink();
 				handleRoute();
 			}
 		}

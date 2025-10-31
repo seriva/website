@@ -136,13 +136,13 @@ export const initCopyCodeButtons = () => {
 				setTimeout(() => {
 					button.textContent = "Copy";
 					button.classList.remove("copied");
-				}, 2000);
+				}, CONSTANTS.COPY_BUTTON_RESET_MS);
 			} catch (error) {
 				console.error("Failed to copy code:", error);
 				button.textContent = "Failed";
 				setTimeout(() => {
 					button.textContent = "Copy";
-				}, 2000);
+				}, CONSTANTS.COPY_BUTTON_RESET_MS);
 			}
 		});
 

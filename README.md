@@ -21,13 +21,14 @@ Key features:
 - **Frontend**: HTML, CSS, JavaScript (ES6 modules)
 - **Build Tool**: Microtastic for dependency bundling
 - **Styling**: Custom CSS with CSS custom properties
-- **Icons**: Font Awesome subset (solid + brands only)
+- **Icons**: Font Awesome subset (solid + brands only) - bundled locally
 - **Search**: Fuse.js 7.0.0 for fuzzy search
 - **Content**: YAML configuration + Markdown files
 - **Parsing**: yamljs parser, Marked.js v11.1.1, Prism.js v1.30.0
-- **Fonts**: Raleway (weights 400, 700)
+- **Fonts**: Raleway (weights 400, 600, 700) - bundled locally via @fontsource
 - **Templating**: Tagged template literals for secure HTML
 - **Code Quality**: Biome for linting and formatting
+- **Assets**: All fonts and syntax themes bundled from npm (no external CDNs)
 
 ## Development Environment
 
@@ -64,10 +65,14 @@ This project includes a VS Code devcontainer for a consistent development enviro
 npm install
 ```
 
-2. Prepare Microtastic dependencies:
+2. Prepare dependencies and assets:
 ```bash
 npm run prepare
 ```
+This will:
+- Copy fonts (Raleway, Font Awesome) from node_modules to `app/fonts/`
+- Copy Prism.js syntax highlighting themes to `app/css/prism-themes/`
+- Transpile JavaScript dependencies to `app/src/dependencies/`
 
 3. Start development server:
 ```bash
@@ -86,8 +91,19 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
+- Copy assets (fonts, Prism themes) from node_modules
 - Bundle and minify dependencies
 - Output to `public/` directory
+
+### Manual Asset Copying
+
+If you need to manually copy fonts and Prism themes:
+
+```bash
+npm run copy-assets
+```
+
+Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they're auto-generated from npm packages.
 
 ### Code Quality Tools
 
@@ -194,7 +210,7 @@ site:
 
 **Features:**
 - **Fuzzy matching**: Finds results even with typos (e.g., "reactt" → "react")
-- **Weighted results**: Title matches prioritized over content matches
+- **Weighted results**: Title matches (40%) prioritized over descriptions (30%), tags (20%), and content (10%)
 - **Searches**: titles, descriptions, tags, and full content
 - **Indexes**: markdown posts and GitHub READMEs
 - **Clickable tags**: Click any tag on projects or blog posts to instantly filter by that tag
@@ -203,6 +219,7 @@ site:
 - **Centered layout**: Search results constrained to 750px max-width, matching blog content
 - **Real-time**: Results with 300ms debounce
 - **Performance**: Scales to hundreds of posts efficiently
+- **Configurable**: Search weights, thresholds, and limits defined in `constants.js`
 - Up to 8 results with match highlighting
 - Works offline after initial load
 
@@ -264,6 +281,8 @@ colors:
 ```
 
 **Available Prism.js themes:** `prism`, `prism-dark`, `prism-tomorrow`, `prism-okaidia`, `prism-twilight`, `prism-coy`, `prism-funky`, `prism-solarizedlight`, and [many more](https://prismjs.com/)
+
+All Prism themes are bundled locally from the `prismjs` npm package - no external CDN requests.
 
 ### Comments System (giscus)
 

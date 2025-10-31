@@ -103,7 +103,7 @@ const initializeSearch = () => {
 	const searchToggle = document.getElementById("search-toggle");
 	if (!searchToggle) return;
 
-	Search.init(false);
+	Search.init();
 
 	// Cache search page elements
 	const searchPage = document.getElementById("search-page");
@@ -187,7 +187,7 @@ const initializeSearchPage = (searchConfig) => {
 };
 
 // ===========================================
-// PLACEHOLDER - Will add more modules here
+// APPLICATION INITIALIZATION
 // ===========================================
 
 // Initialize everything when DOM is ready
