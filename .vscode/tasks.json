@@ -6,7 +6,7 @@
 		{
 			"label": "Dev Server",
 			"type": "shell",
-			"command": "darkhttpd www --port 8081",
+			"command": "npm run dev",
 			"group": {
 				"kind": "test",
 				"isDefault": true
@@ -23,9 +23,22 @@
 			}
 		},
 		{
+			"label": "Production Build",
+			"type": "shell",
+			"command": "npm run prod",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
 			"label": "Format Code",
 			"type": "shell",
-			"command": "biome format --write .",
+			"command": "npm run format",
 			"group": "build",
 			"presentation": {
 				"echo": true,
@@ -38,7 +51,7 @@
 		{
 			"label": "Check Code Quality",
 			"type": "shell",
-			"command": "biome check .",
+			"command": "npm run check",
 			"group": "test",
 			"presentation": {
 				"echo": true,

@@ -15,3 +15,11 @@ Thumbs.db
 
 # Logs
 *.log
+
+node_modules/
+public/
+app/src/dependencies/
+
+# Generated assets (copied from node_modules via npm run copy-assets)
+app/fonts/
+app/css/prism-themes/
