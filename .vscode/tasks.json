@@ -62,7 +62,7 @@
 			"problemMatcher": []
 		},
 		{
-			"label": "🧪 Run Tests",
+			"label": "Run Tests",
 			"type": "shell",
 			"command": "npm test",
 			"group": "test",
