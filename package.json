@@ -15,7 +15,7 @@
 		"dependencies": "microtastic prep",
 		"dev": "microtastic dev",
 		"prod": "npm run check && npm test && microtastic prod",
-		"test": "node --test 'tests/**/*.test.js'",
+		"test": "node --test tests/*.test.js",
 		"format": "biome format --write .",
 		"check": "biome check ."
 	},
