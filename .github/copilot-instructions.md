@@ -1,103 +1,96 @@
-# Portfolio Website - AI Coding Agent Guide
+# GitHub Copilot Instructions
 
-## What This Is
-Modular ES6 SPA with Microtastic build system. Content in YAML + markdown. Modules in `app/src/`.
+## Project: Portfolio Website (ES6 Modules SPA)
 
-## Architecture
-- **Templating**: Tagged literals (`html\`...\``) with auto-escaping. Use `safe()` for trusted HTML only.
-- **Routing**: `?blog`, `?project=id`, `?page=id` via `URLSearchParams` + `handleRoute()`
-- **Data**: `getData()` → cached `projectsData` → apply theme → render
-- **Search**: Fuse.js fuzzy search (title: 40%, description: 30%, tags: 20%, content: 10% - configurable in `constants.js`)
-- **Styling**: CSS custom properties from YAML, Prism.js themes loaded via local CSS (no CDN)
-- **Assets**: Fonts and Prism themes auto-generated from npm packages (gitignored)
+This is a modern portfolio website built with vanilla JavaScript (ES6 modules), Microtastic build tooling, and minimal dependencies.
 
-## Dependencies (ES6 Modules via Microtastic)
-- **marked.js v11.1.1** - Markdown (ESM import, call `initializeMarked()` first)
-- **Prism.js v1.30.0** - Syntax highlighting (ESM import + local themes in `app/css/prism-themes/`)
-- **yamljs v0.3.0** - YAML parsing (ESM import)
-- **Fuse.js v7.0.0** - Fuzzy search (ESM import)
-- **Font Awesome** - Icons (solid + brands, bundled locally from npm to `app/fonts/`)
-- **Raleway** - Typography (400, 600, 700, bundled locally via @fontsource to `app/fonts/`)
+### Key Architecture Principles
 
-## Key Patterns
+1. **ES6 Modules**: All code organized in modular files under `app/src/`
+2. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
+3. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
+4. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
+5. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
+6. **i18n**: Use `i18n.t('key')` for all user-facing strings
 
-### Templates
+### Quality Requirements
+
+Before any build or deployment, ALL of the following must pass:
+
+1. **Code Formatting**: `npm run format`
+   - Uses Biome for consistent code style
+   
+2. **Linting**: `npm run check`
+   - Uses Biome to catch errors and enforce code quality
+   
+3. **Tests**: `npm test`
+   - 34 unit tests covering:
+     - HTML escaping and template functions (`tests/utils.test.js`)
+     - All template generation (`tests/templates.test.js`)
+     - Search functionality (`tests/search.test.js`)
+     - Constants validation (`tests/constants.test.js`)
+   - Uses Node.js built-in test runner (zero test framework dependencies)
+   - All tests MUST pass before merging or deploying
+
+4. **Production Build**: `npm run prod`
+   - Automatically runs linting → tests → build
+   - Will fail if any step fails
+
+### Testing Guidelines
+
+- **When to write tests**: Add tests when creating new utility functions, templates, or core logic
+- **Test location**: Place in `tests/` directory with `.test.js` extension
+- **Test framework**: Use Node.js built-in `node:test` module
+- **DOM testing**: jsdom is available via `tests/setup.js`
+- **Run tests**: `npm test`
+
+**Example test structure:**
 ```javascript
-Templates.myTemplate = (args) => html`<div>${userInput}</div>` // auto-escapes
-${safe(trustedHtml)} // only for internal HTML
+import { describe, test } from "node:test";
+import assert from "node:assert/strict";
+
+describe("My Module", () => {
+  test("should do something", () => {
+    assert.equal(1 + 1, 2);
+  });
+});
 ```
 
-### Routing
-```javascript
-// Always in route handlers:
-closeMobileMenu();
-setDocumentTitle(data);
-```
+### Module Organization
 
-### Content
-- Blog: `app/data/blog/YYYY-MM-DD-slug.md` + frontmatter
-- Pages: `app/data/pages/{id}.md` (no frontmatter)
-- Projects: YAML with `github_repo: "user/repo"` to auto-fetch README
-
-### Comments (giscus)
-```javascript
-Templates.giscusComments(data?.site?.comments, "blog"|"projects")
-// Returns empty if disabled; setTimeout injects script after DOM update
-```
-
-## Common Gotchas
-1. `getData()` cached - always await before use
-2. Prism themes loaded via `<link>` in index.html, languages loaded dynamically from CDN
-3. Dropdowns use custom logic, not Bootstrap
-4. READMEs lazy-load via `data-repo` attributes
-5. `i18n.t(key)` falls back to key if missing
-6. Email obfuscation via `window.Email` onclick handler
-7. All magic numbers go in `CONSTANTS` (timeouts, search weights, breakpoints, etc.)
-8. `app/fonts/` and `app/css/prism-themes/` are gitignored - run `npm run copy-assets` to regenerate
-
-## Development
-```bash
-npm install          # Install dependencies
-npm run prepare      # Copy assets (fonts, Prism themes) + bundle dependencies
-npm run copy-assets  # Manually copy fonts and Prism themes from node_modules
-npm run dev          # Microtastic dev server (http://localhost:8081)
-npm run prod         # Production build → public/ (runs linting first)
-npm run format       # Format code with Biome
-npm run check        # Lint with Biome
-```
-
-**Quality gate**: Changes must pass `biome check`. Always run `npm run prepare` after fresh install.
-
-## File Structure
-- `app/src/main.js` - entry point with ES6 imports
-- `app/src/constants.js` - configuration constants (timeouts, search weights, breakpoints)
-- `app/src/utils.js` - DOM utilities and HTML templating
-- `app/src/i18n.js` - internationalization
-- `app/src/templates.js` - HTML template functions
-- `app/src/data.js` - data loading and color theming
-- `app/src/ui.js` - UI interactions and dropdowns
-- `app/src/routing.js` - SPA routing system
+- `app/src/main.js` - Entry point, initialization, exports globals
+- `app/src/constants.js` - Configuration constants
+- `app/src/utils.js` - HTML escaping, safe(), html\`\`, DOM helpers
+- `app/src/templates.js` - All template functions
+- `app/src/routing.js` - SPA routing, navbar/footer injection
 - `app/src/search.js` - Fuse.js search implementation
-- `app/src/markdown.js` - markdown loading and parsing
-- `app/src/prism-loader.js` - dynamic Prism language loading
-- `app/src/dependencies/` - bundled npm packages (auto-generated)
-- `app/data/content.yaml` - content + config
-- `app/data/pages/` - markdown page files
-- `app/data/blog/` - markdown blog posts
-- `app/css/main.css` - styles (CSS custom properties for theming)
-- `app/css/prism-themes/` - syntax highlighting themes (auto-generated, gitignored)
-- `app/fonts/` - web fonts (auto-generated, gitignored)
-- `public/` - production build output (gitignored)
+- `app/src/ui.js` - UI interactions, mobile menu, dropdowns
+- `app/src/data.js` - getData(), metadata updates
+- `app/src/markdown.js` - Markdown loading and rendering
+- `app/src/prism-loader.js` - Syntax highlighting theme management
+- `app/src/i18n.js` - Internationalization framework
 
-## Security
-- XSS: Always use `html\`...\`` for user/external content
-- Never concatenate HTML outside tagged templates
-- Optional chaining for missing data: `data?.site?.title ?? "default"`
-- Try/catch all fetch operations
+### Don't
 
-## When Modifying
-- Keep functions in appropriate sections in `main.js`
-- Add tests to `www/tests/test-*.js` files
-- Use existing CSS custom properties for consistency
-- Update `CONSTANTS` for any magic numbers
-- Update `README.md` if adding features or changing configuration/setup
+- ❌ Don't introduce heavy frameworks or build tools
+- ❌ Don't concatenate raw HTML strings (use `html\`\`` templates)
+- ❌ Don't bypass escaping without `safe()`
+- ❌ Don't use hash routing (use URLSearchParams)
+- ❌ Don't skip tests or linting before committing
+- ❌ Don't modify Microtastic config without good reason
+
+### Development Workflow
+
+1. Make changes to code
+2. Run `npm run format` to format code
+3. Run `npm run check` to lint
+4. Run `npm test` to verify tests pass
+5. Run `npm run dev` to test locally
+6. Run `npm run prod` before committing (runs all quality checks)
+
+### Build Output
+
+- Development: `npm run dev` (dev server on port 8081)
+- Production: `npm run prod` (outputs to `public/` directory)
+
+See `.cursorrules` and `README.md` for complete documentation.

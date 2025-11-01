@@ -1,6 +1,7 @@
 {
 	"name": "portfolio-website",
 	"version": "1.0.0",
+	"type": "module",
 	"description": "Modern portfolio website with ES6 modules and Microtastic build tooling",
 	"author": "Portfolio Owner",
 	"license": "MIT",
@@ -13,7 +14,8 @@
 		"copy-assets": "mkdir -p app/fonts app/css/prism-themes && cp node_modules/@fontsource/raleway/files/raleway-latin-400-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-600-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-700-normal.woff2 app/fonts/ && cp node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2 node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2 app/fonts/ && cp node_modules/prismjs/themes/*.min.css app/css/prism-themes/",
 		"dependencies": "microtastic prep",
 		"dev": "microtastic dev",
-		"prod": "npm run check && microtastic prod",
+		"prod": "npm run check && npm test && microtastic prod",
+		"test": "node --test 'tests/**/*.test.js'",
 		"format": "biome format --write .",
 		"check": "biome check ."
 	},
@@ -21,6 +23,7 @@
 		"@biomejs/biome": "^1.8.3",
 		"@fontsource/raleway": "^5.2.8",
 		"@fortawesome/fontawesome-free": "^7.1.0",
+		"jsdom": "^27.1.0",
 		"microtastic": "latest"
 	},
 	"dependencies": {

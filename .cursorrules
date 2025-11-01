@@ -27,7 +27,9 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 ### Quality Gate
 - Format: `npm run format` or `biome format --write .`
 - Lint: `npm run check` or `biome check .`
-- **All changes must pass lint checks**
+- Test: `npm test` or `node --test 'tests/**/*.test.js'`
+- **All changes must pass lint checks AND tests before build**
+- Production build runs: linting → tests → build (`npm run prod`)
 - Update `README.md` if adding features or changing setup
 
 ### Key Patterns
@@ -68,4 +70,5 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `npm run prepare` - copy assets (fonts, Prism themes) + bundle dependencies
 - `npm run copy-assets` - copy fonts and Prism themes from node_modules
 - `npm run dev` - start dev server on port 8081
-- `npm run prod` - production build (includes linting)
+- `npm test` - run all tests (34 tests covering utils, templates, search, constants)
+- `npm run prod` - production build (runs linting → tests → build)
