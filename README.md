@@ -43,7 +43,7 @@ This project includes a VS Code devcontainer for a consistent development enviro
 ### Prerequisites
 - VS Code with Dev Containers extension
 - Docker
-- Node.js >= 18.0.0
+- Node.js >= 20.0.0
 - npm >= 9.0.0
 
 ## Getting Started
