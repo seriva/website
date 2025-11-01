@@ -91,6 +91,7 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
+- Run all tests (34 unit tests)
 - Copy assets (fonts, Prism themes) from node_modules
 - Bundle and minify dependencies
 - Output to `public/` directory
@@ -114,6 +115,16 @@ The project uses Biome for code formatting and linting:
 - **Auto-format**: Enabled on save in VS Code
 
 All code changes must pass linting before deployment.
+
+### Testing
+
+Uses Node.js built-in test runner (34 tests):
+
+```bash
+npm test    # Run all tests
+```
+
+Tests cover utils, templates, search, and constants. All tests must pass before production builds.
 
 ## Features & Configuration
 
