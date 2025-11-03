@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.3.2/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -7,22 +7,17 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"include": ["**/app/src/**/*.js"],
-		"ignore": ["**/app/src/dependencies/**"]
+		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"include": ["**/app/src/**/*.js"],
-		"ignore": ["**/app/src/dependencies/**"]
+		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"]
 	},
-	"organizeImports": {
-		"enabled": true
-	},
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
-		"include": ["**/app/src/**/*.js"],
-		"ignore": ["**/app/src/dependencies/**"],
+		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"],
 		"rules": {
 			"recommended": true
 		}

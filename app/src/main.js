@@ -45,7 +45,10 @@ const initializeMarked = () => {
 		breaks: true,
 		gfm: true,
 		renderer: {
-			code(code, language) {
+			code(token) {
+				// In marked v12+, renderers receive token objects
+				const code = token.text || "";
+				const language = token.lang || "";
 				// If language is specified, add Prism-compatible class
 				const lang = language || "text";
 				const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : "text";
