@@ -20,15 +20,15 @@
 		"check": "biome check ."
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^1.8.3",
+		"@biomejs/biome": "^2.3.2",
 		"@fontsource/raleway": "^5.2.8",
 		"@fortawesome/fontawesome-free": "^7.1.0",
 		"jsdom": "^27.1.0",
 		"microtastic": "latest"
 	},
 	"dependencies": {
-		"fuse.js": "^7.0.0",
-		"marked": "^11.1.1",
+		"fuse.js": "^7.1.0",
+		"marked": "^16.4.1",
 		"prismjs": "^1.30.0",
 		"yamljs": "^0.3.0"
 	}
