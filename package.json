@@ -24,7 +24,7 @@
 		"@fontsource/raleway": "^5.2.8",
 		"@fortawesome/fontawesome-free": "^7.1.0",
 		"jsdom": "^27.1.0",
-		"microtastic": "latest"
+		"microtastic": "^0.0.47"
 	},
 	"dependencies": {
 		"fuse.js": "^7.1.0",
