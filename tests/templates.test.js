@@ -233,5 +233,89 @@ describe("Templates", () => {
 		assert.ok(result.includes("fab fa-github"), "Should include icon");
 		assert.ok(result.includes("View on GitHub"), "Should include title");
 	});
+
+	test("templates should escape XSS in nested content", () => {
+		const maliciousTitle = '<img src=x onerror=alert(1)>';
+		const result = Templates.errorMessage(maliciousTitle, "Safe message");
+
+		assert.ok(
+			result.includes("&lt;img"),
+			"Should escape opening angle bracket",
+		);
+		assert.ok(
+			result.includes("&gt;"),
+			"Should escape closing angle bracket",
+		);
+		assert.ok(
+			!result.includes("<img"),
+			"Should not contain executable img tag",
+		);
+	});
+
+	test("templates should handle multiple interpolations", () => {
+		const xss1 = '<script>alert(1)</script>';
+		const xss2 = '<iframe src="evil.com"></iframe>';
+		const result = Templates.errorMessage(xss1, xss2);
+
+		assert.ok(
+			result.includes("&lt;script&gt;"),
+			"Should escape first XSS attempt",
+		);
+		assert.ok(
+			result.includes("&lt;iframe"),
+			"Should escape second XSS attempt",
+		);
+		assert.ok(
+			!result.includes("<script>"),
+			"Should not contain raw script",
+		);
+		assert.ok(
+			!result.includes("<iframe"),
+			"Should not contain raw iframe",
+		);
+	});
+
+	test("pageLink should escape malicious page IDs", () => {
+		const maliciousId = '"><script>alert(1)</script>';
+		const result = Templates.pageLink(maliciousId, "Link Text");
+
+		// The pageId goes into href attribute, which is still escaped
+		assert.ok(
+			result.includes("&lt;script&gt;"),
+			"Should escape script tags in page ID",
+		);
+		assert.ok(
+			!result.includes('"><script>'),
+			"Should not contain raw injection attempt",
+		);
+	});
+
+	test("markdown template should handle renderer errors gracefully", () => {
+		// Pass undefined marked to test error handling
+		const result = Templates.markdown("# Test", undefined);
+
+		assert.ok(
+			result.includes("Markdown renderer not available"),
+			"Should show error message when marked is undefined",
+		);
+	});
+
+	test("tagList should escape malicious tags", () => {
+		const maliciousTags = ['<script>alert(1)</script>', 'normal-tag', '<img src=x>'];
+		const result = Templates.tagList(maliciousTags);
+
+		assert.ok(
+			!result.content.includes("<script>"),
+			"Should not contain raw script",
+		);
+		assert.ok(
+			result.content.includes("&lt;script&gt;"),
+			"Should escape script tag",
+		);
+		assert.ok(
+			result.content.includes("normal-tag"),
+			"Should include normal tags",
+		);
+	});
 });
 
