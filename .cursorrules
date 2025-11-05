@@ -46,11 +46,11 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/src/utils.js` - HTML escaping, safe(), html\`\`, DOM helpers
 - `app/src/templates.js` - all template functions
 - `app/src/routing.js` - SPA routing, navbar/footer injection
-- `app/src/search.js` - Fuse.js search implementation
+- `app/src/search.js` - Fuse.js search implementation with UI
 - `app/src/ui.js` - UI interactions, mobile menu, dropdowns
 - `app/src/data.js` - getData(), metadata updates
 - `app/src/markdown.js` - markdown loading and rendering
-- `app/src/prism-loader.js` - syntax highlighting theme management
+- `app/src/prism-loader.js` - syntax highlighting, dynamic language loading from CDN
 - `app/src/i18n.js` - internationalization framework
 - `app/src/dependencies/` - bundled npm packages (managed by Microtastic)
 

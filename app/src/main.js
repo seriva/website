@@ -8,7 +8,7 @@ import { marked } from "./dependencies/marked.js";
 import { injectFooter, injectNavbar, loadProjectsDropdown } from "./layout.js";
 import { registerRouteHandler } from "./router-events.js";
 import { handleRoute, setupSpaRouting } from "./routing.js";
-import { initializeSearch, initializeSearchPage } from "./search-ui.js";
+import { initializeSearch, initializeSearchPage } from "./search.js";
 import { Templates } from "./templates.js";
 import {
 	addMobileMenuOutsideClickHandler,
