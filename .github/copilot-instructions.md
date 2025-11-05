@@ -62,12 +62,15 @@ describe("My Module", () => {
 - `app/src/constants.js` - Configuration constants
 - `app/src/utils.js` - HTML escaping, safe(), html\`\`, DOM helpers
 - `app/src/templates.js` - All template functions
-- `app/src/routing.js` - SPA routing, navbar/footer injection
-- `app/src/search.js` - Fuse.js search implementation
+- `app/src/routing.js` - SPA routing, page navigation orchestration
+- `app/src/router-events.js` - Routing event system for decoupled navigation
+- `app/src/loaders.js` - Content loaders (blog, projects, pages)
+- `app/src/layout.js` - Navbar and footer rendering
+- `app/src/search.js` - Fuse.js search implementation with UI
 - `app/src/ui.js` - UI interactions, mobile menu, dropdowns
-- `app/src/data.js` - getData(), metadata updates
+- `app/src/context.js` - Application context, data loading, theming
 - `app/src/markdown.js` - Markdown loading and rendering
-- `app/src/prism-loader.js` - Syntax highlighting theme management
+- `app/src/prism-loader.js` - Syntax highlighting, dynamic language loading from CDN
 - `app/src/i18n.js` - Internationalization framework
 
 ### Don't
