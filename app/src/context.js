@@ -1,17 +1,21 @@
 // ===========================================
-// DATA MANAGEMENT
+// APPLICATION CONTEXT & DATA MANAGEMENT
 // ===========================================
-// Centralized data loading and caching system
+// Centralized state management and theme/meta application
 
 import { CONSTANTS } from "./constants.js";
 import YAML from "./dependencies/yamljs.js";
 import { i18n } from "./i18n.js";
 
-let projectsData = null;
+let appContext = null;
 
-// Load and cache data from content.yaml
-export const getData = async () => {
-	if (projectsData) return projectsData;
+// ===========================================
+// CONTEXT INITIALIZATION
+// ===========================================
+
+// Initialize application context from YAML
+export const initContext = async () => {
+	if (appContext) return appContext;
 
 	const yamlPath = "data/content.yaml";
 
@@ -20,23 +24,35 @@ export const getData = async () => {
 		if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
 		const yamlText = await response.text();
-		projectsData = YAML.parse(yamlText);
+		appContext = YAML.parse(yamlText);
 
 		// Apply theming and i18n after loading
-		if (projectsData?.site?.colors) {
-			applyColorScheme(projectsData.site.colors);
+		if (appContext?.site?.colors) {
+			applyColorScheme(appContext.site.colors);
 		}
-		if (projectsData?.site?.i18n && projectsData?.translations) {
-			i18n.init(projectsData.site.i18n, projectsData.translations);
+		if (appContext?.site?.i18n && appContext?.translations) {
+			i18n.init(appContext.site.i18n, appContext.translations);
 		}
 
-		return projectsData;
+		return appContext;
 	} catch (error) {
 		console.error("Failed to load content:", error);
-		projectsData = null;
+		appContext = null;
 		return null;
 	}
 };
+
+// Get cached application context (must call initContext first)
+export const getContext = () => appContext;
+
+// Clear context cache (useful for testing)
+export const clearContext = () => {
+	appContext = null;
+};
+
+// ===========================================
+// THEME & STYLING
+// ===========================================
 
 // Apply color scheme from config to CSS variables
 export const applyColorScheme = (colors) => {
@@ -84,6 +100,10 @@ export const applyPrismTheme = (themeName) => {
 		document.head.appendChild(themeLink);
 	}
 };
+
+// ===========================================
+// META TAGS
+// ===========================================
 
 // Update HTML meta tags with site data
 export const updateMetaTags = (siteData) => {

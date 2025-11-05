@@ -4,7 +4,7 @@
 // Fuse.js powered search for projects and blog posts
 
 import { CONSTANTS } from "./constants.js";
-import { getData } from "./data.js";
+import { getContext } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
 
 // Cache for compiled regexes (improves repeated search highlighting)
@@ -23,7 +23,7 @@ export const Search = {
 
 		this.initPromise = (async () => {
 			try {
-				const data = await getData();
+				const data = getContext();
 				const projects = data?.projects || [];
 				const blogPosts = data?.blog?.posts || [];
 
