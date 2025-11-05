@@ -24,11 +24,14 @@ Before any build or deployment, ALL of the following must pass:
    - Uses Biome to catch errors and enforce code quality
    
 3. **Tests**: `npm test`
-   - 34 unit tests covering:
+   - 70 unit tests covering:
      - HTML escaping and template functions (`tests/utils.test.js`)
      - All template generation (`tests/templates.test.js`)
      - Search functionality (`tests/search.test.js`)
-     - Constants validation (`tests/constants.test.js`)
+     - YAML parser (`tests/yaml-parser.test.js`)
+     - Routing logic (`tests/routing.test.js`)
+     - Markdown parsing (`tests/markdown.test.js`)
+     - Internationalization (`tests/i18n.test.js`)
    - Uses Node.js built-in test runner (zero test framework dependencies)
    - All tests MUST pass before merging or deploying
 
@@ -69,6 +72,7 @@ describe("My Module", () => {
 - `app/src/search.js` - Fuse.js search implementation with UI
 - `app/src/ui.js` - UI interactions, mobile menu, dropdowns
 - `app/src/context.js` - Application context, data loading, theming
+- `app/src/yaml-parser.js` - Minimal YAML parser for content.yaml
 - `app/src/markdown.js` - Markdown loading and rendering
 - `app/src/prism-loader.js` - Syntax highlighting, dynamic language loading from CDN
 - `app/src/i18n.js` - Internationalization framework

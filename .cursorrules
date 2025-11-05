@@ -13,8 +13,9 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 
 ### Architecture
 - **ES6 Modules**: Clean separation of concerns across multiple files
-- **Microtastic**: Handles dependency bundling only (fuse.js, marked, prismjs, yamljs)
+- **Microtastic**: Handles dependency bundling only (fuse.js, marked, prismjs)
 - **Local Assets**: Fonts and Prism themes bundled from npm, not CDN
+- **Custom YAML Parser**: Minimal ~4KB parser for content.yaml
 - **No frameworks**: Vanilla JavaScript with modern features
 - **Template literals**: Secure HTML generation with auto-escaping
 
@@ -52,6 +53,7 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/src/search.js` - Fuse.js search implementation with UI
 - `app/src/ui.js` - UI interactions, mobile menu, dropdowns
 - `app/src/context.js` - application context, data loading, theming
+- `app/src/yaml-parser.js` - minimal YAML parser for content.yaml
 - `app/src/markdown.js` - markdown loading and rendering
 - `app/src/prism-loader.js` - syntax highlighting, dynamic language loading from CDN
 - `app/src/i18n.js` - internationalization framework
@@ -73,5 +75,5 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `npm run prepare` - copy assets (fonts, Prism themes) + bundle dependencies
 - `npm run copy-assets` - copy fonts and Prism themes from node_modules
 - `npm run dev` - start dev server on port 8081
-- `npm test` - run all tests (34 tests covering utils, templates, search, constants)
+- `npm test` - run all tests (70 tests covering utils, templates, search, YAML parser, routing, markdown, i18n)
 - `npm run prod` - production build (runs linting → tests → build)

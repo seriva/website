@@ -4,8 +4,8 @@
 // Centralized state management and theme/meta application
 
 import { CONSTANTS } from "./constants.js";
-import YAML from "./dependencies/yamljs.js";
 import { i18n } from "./i18n.js";
+import { parseYAML } from "./yaml-parser.js";
 
 let appContext = null;
 
@@ -24,7 +24,7 @@ export const initContext = async () => {
 		if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
 		const yamlText = await response.text();
-		appContext = YAML.parse(yamlText);
+		appContext = parseYAML(yamlText);
 
 		// Apply theming and i18n after loading
 		if (appContext?.site?.colors) {
