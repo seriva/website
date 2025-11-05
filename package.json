@@ -10,8 +10,7 @@
 		"npm": ">=9.0.0"
 	},
 	"scripts": {
-		"prepare": "npm run copy-assets && microtastic prep",
-		"copy-assets": "mkdir -p app/fonts app/css/prism-themes && cp node_modules/@fontsource/raleway/files/raleway-latin-400-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-600-normal.woff2 node_modules/@fontsource/raleway/files/raleway-latin-700-normal.woff2 app/fonts/ && cp node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2 node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2 app/fonts/ && cp node_modules/prismjs/themes/*.min.css app/css/prism-themes/",
+		"prepare": "microtastic prep",
 		"dependencies": "microtastic prep",
 		"dev": "microtastic dev",
 		"prod": "npm run check && npm test && microtastic prod",
@@ -24,11 +23,65 @@
 		"@fontsource/raleway": "^5.2.8",
 		"@fortawesome/fontawesome-free": "^7.1.0",
 		"jsdom": "^27.1.0",
-		"microtastic": "^0.0.47"
+		"microtastic": "^0.0.48"
 	},
 	"dependencies": {
 		"fuse.js": "^7.1.0",
 		"marked": "^16.4.1",
 		"prismjs": "^1.30.0"
-	}
+	},
+	"assetCopy": [
+		{
+			"source": "node_modules/@fontsource/raleway/files/raleway-latin-400-normal.woff2",
+			"dest": "app/fonts/raleway-latin-400-normal.woff2"
+		},
+		{
+			"source": "node_modules/@fontsource/raleway/files/raleway-latin-600-normal.woff2",
+			"dest": "app/fonts/raleway-latin-600-normal.woff2"
+		},
+		{
+			"source": "node_modules/@fontsource/raleway/files/raleway-latin-700-normal.woff2",
+			"dest": "app/fonts/raleway-latin-700-normal.woff2"
+		},
+		{
+			"source": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2",
+			"dest": "app/fonts/fa-solid-900.woff2"
+		},
+		{
+			"source": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2",
+			"dest": "app/fonts/fa-brands-400.woff2"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism.min.css",
+			"dest": "app/css/prism-themes/prism.min.css"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism-dark.min.css",
+			"dest": "app/css/prism-themes/prism-dark.min.css"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism-funky.min.css",
+			"dest": "app/css/prism-themes/prism-funky.min.css"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism-okaidia.min.css",
+			"dest": "app/css/prism-themes/prism-okaidia.min.css"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism-twilight.min.css",
+			"dest": "app/css/prism-themes/prism-twilight.min.css"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism-coy.min.css",
+			"dest": "app/css/prism-themes/prism-coy.min.css"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism-solarizedlight.min.css",
+			"dest": "app/css/prism-themes/prism-solarizedlight.min.css"
+		},
+		{
+			"source": "node_modules/prismjs/themes/prism-tomorrow.min.css",
+			"dest": "app/css/prism-themes/prism-tomorrow.min.css"
+		}
+	]
 }
