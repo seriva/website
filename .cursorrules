@@ -5,7 +5,7 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 ### Core Principles
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
 - Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
-- Call `await getData()` before reading config/content (cached in `projectsData`)
+- Call `await initContext()` to load content; access via `getContext()` (cached)
 - Route with URL params: `?blog`, `?project=id`, `?page=id`
 - Always call `closeMobileMenu()` and update `<title>` in route handlers
 - Keep functions organized by module files in `app/src/`
@@ -45,10 +45,13 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/src/constants.js` - all configuration constants
 - `app/src/utils.js` - HTML escaping, safe(), html\`\`, DOM helpers
 - `app/src/templates.js` - all template functions
-- `app/src/routing.js` - SPA routing, navbar/footer injection
+- `app/src/routing.js` - SPA routing, page navigation orchestration
+- `app/src/router-events.js` - routing event system for decoupled navigation
+- `app/src/loaders.js` - content loaders (blog, projects, pages)
+- `app/src/layout.js` - navbar and footer rendering
 - `app/src/search.js` - Fuse.js search implementation with UI
 - `app/src/ui.js` - UI interactions, mobile menu, dropdowns
-- `app/src/data.js` - getData(), metadata updates
+- `app/src/context.js` - application context, data loading, theming
 - `app/src/markdown.js` - markdown loading and rendering
 - `app/src/prism-loader.js` - syntax highlighting, dynamic language loading from CDN
 - `app/src/i18n.js` - internationalization framework
