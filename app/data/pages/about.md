@@ -13,6 +13,6 @@ Over the years, I've had my hands in everything from building game engines and m
 
 When I'm not working, you'll find me tinkering with graphics and game development using OpenGL and WebGL. This site showcases some of those passion projects. I'm also a bit of a hardware enthusiast, so who knows—maybe I'll dive into electronics and IoT projects down the road!
 
-Got questions, ideas, or just want to chat? Feel free to [reach out](javascript:void(0))—I'd love to hear from you.
+Got questions, ideas, or just want to chat? Feel free to <a href="javascript:void(0)" onclick="Email(event)">reach out</a>—I'd love to hear from you.
 
 </div>
