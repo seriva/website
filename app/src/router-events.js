@@ -10,7 +10,7 @@ export const registerRouteHandler = (handler) => {
 	handleRouteCallback = handler;
 };
 
-// Trigger route navigation (called from loaders, search-ui, etc.)
+// Trigger route navigation (called from loaders, search, etc.)
 export const navigateToRoute = (href) => {
 	if (handleRouteCallback) {
 		window.history.pushState({}, "", href);
