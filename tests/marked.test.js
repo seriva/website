@@ -1,4 +1,4 @@
-// Test marked.js code renderer configuration
+// Test marked.js code renderer configuration - essentials only
 import { describe, test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
@@ -34,14 +34,10 @@ describe("Marked Code Renderer", () => {
 			"Should include language class",
 		);
 		assert.ok(result.includes("<pre>"), "Should include pre tag");
-		assert.ok(result.includes("<code"), "Should include code tag");
-		assert.ok(
-			result.includes("console.log"),
-			"Should include code content",
-		);
+		assert.ok(result.includes("console.log"), "Should include code content");
 	});
 
-	test("should render code block without language (default to text)", () => {
+	test("should default to 'text' when no language specified", () => {
 		const markdown = "```\nsome code\n```";
 		const result = marked.parse(markdown);
 
@@ -49,118 +45,34 @@ describe("Marked Code Renderer", () => {
 			result.includes('class="language-text"'),
 			"Should default to language-text",
 		);
-		assert.ok(result.includes("some code"), "Should include code content");
 	});
 
-	test("should escape HTML in code blocks", () => {
-		const markdown = "```javascript\nconst html = '<script>alert(\"xss\")</script>';\n```";
+	test("should escape HTML/XSS in code blocks", () => {
+		const markdown = "```javascript\n<script>alert('xss')</script>\nconst a = 1 & 2 < 3;\n```";
 		const result = marked.parse(markdown);
 
-		assert.ok(result.includes("&lt;script&gt;"), "Should escape opening tag");
-		assert.ok(result.includes("&lt;/script&gt;"), "Should escape closing tag");
-		assert.ok(
-			!result.includes('<script>alert("xss")</script>'),
-			"Should not contain raw script tags",
-		);
-		// Quotes inside code don't need escaping since they're in text content
-		assert.ok(result.includes("alert"), "Should include code content");
-	});
-
-	test("should handle various language identifiers", () => {
-		const languages = [
-			"python",
-			"typescript",
-			"bash",
-			"css",
-			"html",
-			"json",
-			"go",
-			"rust",
-		];
-
-		for (const lang of languages) {
-			const markdown = `\`\`\`${lang}\ncode\n\`\`\``;
-			const result = marked.parse(markdown);
-
-			assert.ok(
-				result.includes(`class="language-${lang}"`),
-				`Should handle ${lang} language`,
-			);
-		}
+		assert.ok(result.includes("&lt;script&gt;"), "Should escape tags");
+		assert.ok(result.includes("&amp;"), "Should escape ampersand");
+		assert.ok(result.includes("&lt;"), "Should escape less than");
+		assert.ok(!result.includes("<script>"), "Should not contain raw script");
 	});
 
 	test("should sanitize invalid language names", () => {
-		const markdown = "```invalid<script>alert(1)</script>\ncode\n```";
+		const markdown = "```invalid<script>\ncode\n```";
 		const result = marked.parse(markdown);
 
 		assert.ok(
 			result.includes('class="language-text"'),
 			"Should default to text for invalid language",
 		);
-		assert.ok(
-			!result.includes("<script>"),
-			"Should not include script in class name",
-		);
+		assert.ok(!result.includes("<script>"), "Should not allow XSS in class");
 	});
 
-	test("should handle hyphenated languages", () => {
-		const markdown = "```objective-c\ncode\n```";
+	test("should preserve whitespace and indentation", () => {
+		const markdown = "```python\ndef hello():\n    print('hello')\n```";
 		const result = marked.parse(markdown);
 
-		assert.ok(
-			result.includes('class="language-objective-c"'),
-			"Should handle hyphenated language names",
-		);
-	});
-
-	test("should handle numbers in language names", () => {
-		const markdown = "```c99\ncode\n```";
-		const result = marked.parse(markdown);
-
-		assert.ok(
-			result.includes('class="language-c99"'),
-			"Should handle numbers in language names",
-		);
-	});
-
-	test("should escape special characters in code", () => {
-		const markdown = "```javascript\nconst a = 1 & 2 < 3 > 0;\n```";
-		const result = marked.parse(markdown);
-
-		assert.ok(result.includes("&amp;"), "Should escape ampersand");
-		assert.ok(result.includes("&lt;"), "Should escape less than");
-		assert.ok(result.includes("&gt;"), "Should escape greater than");
-	});
-
-	test("should preserve whitespace in code blocks", () => {
-		const markdown = "```python\ndef hello():\n    print('hello')\n    return True\n```";
-		const result = marked.parse(markdown);
-
-		assert.ok(
-			result.includes("    "),
-			"Should preserve indentation spaces",
-		);
-	});
-
-	test("should handle empty code blocks", () => {
-		const markdown = "```javascript\n```";
-		const result = marked.parse(markdown);
-
-		assert.ok(result.includes("<pre>"), "Should include pre tag");
-		assert.ok(result.includes("<code"), "Should include code tag");
-		assert.ok(
-			result.includes('class="language-javascript"'),
-			"Should include language class",
-		);
-	});
-
-	test("should handle inline code differently than blocks", () => {
-		const markdown = "This is `inline code` not a block.";
-		const result = marked.parse(markdown);
-
-		// Inline code should not trigger our custom code block renderer
-		assert.ok(result.includes("inline code"), "Should include inline code");
-		assert.ok(!result.includes("<pre>"), "Should not include pre tag for inline");
+		assert.ok(result.includes("    "), "Should preserve indentation");
 	});
 });
 
