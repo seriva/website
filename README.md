@@ -24,7 +24,7 @@ Key features:
 - **Icons**: Font Awesome subset (solid + brands only) - bundled locally
 - **Search**: Fuse.js 7.0.0 for fuzzy search
 - **Content**: YAML configuration + Markdown files
-- **Parsing**: yamljs parser, Marked.js v11.1.1, Prism.js v1.30.0
+- **Parsing**: Custom minimal YAML parser (~4KB), Marked.js v11.1.1, Prism.js v1.30.0
 - **Fonts**: Raleway (weights 400, 600, 700) - bundled locally via @fontsource
 - **Templating**: Tagged template literals for secure HTML
 - **Code Quality**: Biome for linting and formatting
@@ -118,13 +118,13 @@ All code changes must pass linting before deployment.
 
 ### Testing
 
-Uses Node.js built-in test runner (34 tests):
+Uses Node.js built-in test runner (70 tests):
 
 ```bash
 npm test    # Run all tests
 ```
 
-Tests cover utils, templates, search, and constants. All tests must pass before production builds.
+Tests cover utils, templates, search, YAML parser, routing, markdown, and i18n. All tests must pass before production builds.
 
 ## Features & Configuration
 

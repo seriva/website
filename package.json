@@ -29,7 +29,6 @@
 	"dependencies": {
 		"fuse.js": "^7.1.0",
 		"marked": "^16.4.1",
-		"prismjs": "^1.30.0",
-		"yamljs": "^0.3.0"
+		"prismjs": "^1.30.0"
 	}
 }
