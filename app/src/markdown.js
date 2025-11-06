@@ -8,9 +8,10 @@ import { Templates } from "./templates.js";
 
 export const MarkdownLoader = {
 	// Load markdown file from path
-	async loadFile(path) {
+	// Supports optional fetch options (e.g., headers for GitHub API)
+	async loadFile(path, fetchOptions = {}) {
 		try {
-			const response = await fetch(path);
+			const response = await fetch(path, fetchOptions);
 			if (!response.ok) return null;
 			return response.text();
 		} catch (error) {

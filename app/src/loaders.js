@@ -278,12 +278,12 @@ export const loadGitHubReadme = async (repo, containerId) => {
 
 		// Add username prefix if not already present
 		const fullRepo = repo.includes("/") ? repo : `${githubUsername}/${repo}`;
-		
+
 		// Use raw.githubusercontent.com to avoid API rate limits
 		// Try 'main' branch first, fallback to 'master' if needed
 		const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/main/README.md`;
 
-		// Use MarkdownLoader to benefit from unified cache
+		// Load README using MarkdownLoader
 		let readmeContent = await MarkdownLoader.loadFile(rawUrl);
 
 		// Fallback to master branch if main doesn't exist
