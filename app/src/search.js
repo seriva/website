@@ -8,6 +8,7 @@ import { getContext } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
 import { navigateToRoute } from "./router-events.js";
 import { Templates } from "./templates.js";
+import { getMainContent } from "./utils.js";
 
 // ===========================================
 // SEARCH CORE
@@ -140,7 +141,13 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 			const link = e.target.closest("[data-spa-route]");
 			if (link) {
 				e.preventDefault();
-				onResultClick();
+				// Start page transition immediately to prevent flicker
+				const mainContent = getMainContent();
+				mainContent.classList.add("page-transition-out");
+				// Small delay before closing search page ensures main content transition has started
+				setTimeout(() => {
+					onResultClick();
+				}, 50);
 				navigateToRoute(link.getAttribute("href"));
 				return;
 			}
@@ -151,7 +158,13 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 				const cardLink = card.querySelector(".blog-post-title a");
 				if (cardLink) {
 					e.preventDefault();
-					onResultClick();
+					// Start page transition immediately to prevent flicker
+					const mainContent = getMainContent();
+					mainContent.classList.add("page-transition-out");
+					// Small delay before closing search page ensures main content transition has started
+					setTimeout(() => {
+						onResultClick();
+					}, 50);
 					navigateToRoute(cardLink.getAttribute("href"));
 				}
 			}
