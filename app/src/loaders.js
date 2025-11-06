@@ -278,16 +278,21 @@ export const loadGitHubReadme = async (repo, containerId) => {
 
 		// Add username prefix if not already present
 		const fullRepo = repo.includes("/") ? repo : `${githubUsername}/${repo}`;
+		
+		// Use raw.githubusercontent.com to avoid API rate limits
+		// Try 'main' branch first, fallback to 'master' if needed
+		const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/main/README.md`;
 
-		const response = await fetch(
-			`https://api.github.com/repos/${fullRepo}/readme`,
-			{
-				headers: { Accept: "application/vnd.github.v3.raw" },
-			},
-		);
+		// Use MarkdownLoader to benefit from unified cache
+		let readmeContent = await MarkdownLoader.loadFile(rawUrl);
 
-		if (response.ok) {
-			const readmeContent = await response.text();
+		// Fallback to master branch if main doesn't exist
+		if (!readmeContent) {
+			const masterUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/master/README.md`;
+			readmeContent = await MarkdownLoader.loadFile(masterUrl);
+		}
+
+		if (readmeContent) {
 			const htmlContent = marked.parse(readmeContent);
 			element.innerHTML = `<div class="markdown-body">${htmlContent}</div>`;
 
@@ -298,7 +303,7 @@ export const loadGitHubReadme = async (repo, containerId) => {
 				initCopyCodeButtons();
 			});
 		} else {
-			console.warn(`GitHub API returned ${response.status} for ${fullRepo}`);
+			console.warn(`Failed to load README for ${fullRepo}`);
 			element.innerHTML = Templates.githubReadmeError();
 		}
 	} catch (error) {
