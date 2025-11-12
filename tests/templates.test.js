@@ -116,7 +116,7 @@ describe("Templates", () => {
 
 	test("XSS: tagList should escape malicious tags", () => {
 		const maliciousTags = ['<script>alert(1)</script>', 'normal-tag'];
-		const result = Templates.tagList(maliciousTags);
+		const result = Templates._tagList(maliciousTags);
 
 		assert.ok(!result.content.includes("<script>"), "Should not contain raw script");
 		assert.ok(result.content.includes("&lt;script&gt;"), "Should escape tag");

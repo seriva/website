@@ -14,8 +14,19 @@ import { UI } from "./ui.js";
 // ===========================================
 
 export const Layout = {
+	// Initialize all layout components (navbar, footer, dropdowns)
+	async init() {
+		await this._injectNavbar();
+		await this._injectFooter();
+		await this._injectProjectsDropdown();
+	},
+
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
+
 	// Inject navbar into DOM
-	async injectNavbar() {
+	async _injectNavbar() {
 		const navbarContainer = document.getElementById("navbar-container");
 		if (!navbarContainer) return;
 
@@ -75,7 +86,7 @@ export const Layout = {
 	},
 
 	// Inject footer into DOM
-	async injectFooter() {
+	async _injectFooter() {
 		const footerContainer = document.getElementById("footer-container");
 		if (!footerContainer) return;
 
@@ -91,7 +102,7 @@ export const Layout = {
 	},
 
 	// Inject projects into dropdown menu
-	async injectProjectsDropdown() {
+	async _injectProjectsDropdown() {
 		const data = Context.get();
 		const projectsDropdown = document.getElementById("projects-dropdown");
 		if (!projectsDropdown || !data?.projects) return;

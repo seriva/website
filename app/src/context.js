@@ -14,6 +14,10 @@ let appContext = null;
 // ===========================================
 
 export const Context = {
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
 	// Initialize application context from YAML
 	async init() {
 		if (appContext) return appContext;
@@ -52,6 +56,37 @@ export const Context = {
 	clear() {
 		appContext = null;
 	},
+
+	// Update HTML meta tags with site data
+	updateMetaTags(siteData) {
+		if (!siteData) return;
+
+		if (siteData.title) {
+			document.title = siteData.title;
+		}
+
+		const updateMeta = (selector, value) => {
+			if (value) {
+				document.querySelector(selector)?.setAttribute("content", value);
+			}
+		};
+
+		updateMeta('meta[name="description"]', siteData.description);
+		updateMeta('meta[name="author"]', siteData.author);
+		updateMeta('meta[name="theme-color"]', siteData.colors?.primary);
+		updateMeta(
+			'meta[name="msapplication-TileColor"]',
+			siteData.colors?.primary,
+		);
+		updateMeta('meta[property="og:title"]', siteData.title);
+		updateMeta('meta[property="twitter:title"]', siteData.title);
+		updateMeta('meta[property="og:description"]', siteData.description);
+		updateMeta('meta[property="twitter:description"]', siteData.description);
+	},
+
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
 
 	// Apply color scheme from config to CSS variables
 	_applyColorScheme(colors) {
@@ -98,32 +133,5 @@ export const Context = {
 			themeLink.href = `${CONSTANTS.PRISM_CDN_BASE}${theme}.min.css`;
 			document.head.appendChild(themeLink);
 		}
-	},
-
-	// Update HTML meta tags with site data
-	updateMetaTags(siteData) {
-		if (!siteData) return;
-
-		if (siteData.title) {
-			document.title = siteData.title;
-		}
-
-		const updateMeta = (selector, value) => {
-			if (value) {
-				document.querySelector(selector)?.setAttribute("content", value);
-			}
-		};
-
-		updateMeta('meta[name="description"]', siteData.description);
-		updateMeta('meta[name="author"]', siteData.author);
-		updateMeta('meta[name="theme-color"]', siteData.colors?.primary);
-		updateMeta(
-			'meta[name="msapplication-TileColor"]',
-			siteData.colors?.primary,
-		);
-		updateMeta('meta[property="og:title"]', siteData.title);
-		updateMeta('meta[property="twitter:title"]', siteData.title);
-		updateMeta('meta[property="og:description"]', siteData.description);
-		updateMeta('meta[property="twitter:description"]', siteData.description);
 	},
 };

@@ -4,41 +4,13 @@
 // Entry point - orchestrates initialization
 
 import { Context } from "./context.js";
-import { marked } from "./dependencies/marked.js";
 import { Layout } from "./layout.js";
+import { MarkdownLoader } from "./markdown.js";
 import { RouterEvents } from "./router-events.js";
 import { Router } from "./routing.js";
 import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
-import { escapeHtml, getMainContent } from "./utils.js";
-
-// ===========================================
-// MARKDOWN CONFIGURATION
-// ===========================================
-
-const initializeMarked = () => {
-	if (!marked) {
-		console.error("Marked not loaded");
-		return;
-	}
-
-	marked.use({
-		breaks: true,
-		gfm: true,
-		renderer: {
-			code(token) {
-				// In marked v12+, renderers receive token objects
-				const code = token.text || "";
-				const language = token.lang || "";
-				// If language is specified, add Prism-compatible class
-				const lang = language || "text";
-				const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : "text";
-				return `<pre><code class="language-${validLang}">${escapeHtml(code)}</code></pre>`;
-			},
-		},
-	});
-};
 
 // ===========================================
 // APPLICATION INITIALIZATION
@@ -48,7 +20,7 @@ const initializeMarked = () => {
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
 		// Initialize markdown parser
-		initializeMarked();
+		MarkdownLoader.init();
 
 		// Load and cache site data (single call!)
 		const data = await Context.init();
@@ -63,14 +35,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Setup global event delegation for dynamic content (email, fullscreen, etc.)
 		UI.setupGlobalEventDelegation(data?.site?.email);
 
-		// Inject navbar and footer first
-		await Layout.injectNavbar();
-		await Layout.injectFooter();
-		await Layout.injectProjectsDropdown();
+		// Inject layout components (navbar, footer, dropdowns)
+		await Layout.init();
 
 		// Initialize UI components after DOM elements are ready
-		UI.initCustomDropdowns();
-		UI.initNavbarToggle();
+		UI.init();
 
 		// Initialize search if enabled
 		if (data?.site?.search?.enabled) {
@@ -87,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	} catch (error) {
 		console.error("Failed to initialize application:", error);
 		// Show error in main content
-		const mainContent = getMainContent();
+		const mainContent = document.getElementById("main-content");
 		if (mainContent) {
 			mainContent.innerHTML = Templates.errorMessage(
 				"Something went wrong",

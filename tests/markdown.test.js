@@ -11,13 +11,10 @@ title: Test Post
 date: 2025-01-01
 author: John Doe
 ---
-
 # Content
+This is content.`;
 
-This is the content.`;
-
-			const result = MarkdownLoader.parseFrontmatter(markdown);
-
+			const result = MarkdownLoader._parseFrontmatter(markdown);
 			assert.equal(result.metadata.title, "Test Post", "Should parse title");
 			assert.equal(result.metadata.date, "2025-01-01", "Should parse date");
 			assert.equal(result.metadata.author, "John Doe", "Should parse author");
@@ -36,7 +33,7 @@ details:
   count: 123
 ---
 Content here.`;
-			const { metadata, content } = MarkdownLoader.parseFrontmatter(markdown);
+			const { metadata, content } = MarkdownLoader._parseFrontmatter(markdown);
 			assert.equal(metadata.title, "Complex Example");
 			assert.deepEqual(metadata.details, {
 				author: "Jane Smith",
@@ -51,7 +48,7 @@ Content here.`;
 
 No frontmatter here.`;
 
-			const result = MarkdownLoader.parseFrontmatter(markdown);
+			const result = MarkdownLoader._parseFrontmatter(markdown);
 
 			assert.deepEqual(
 				result.metadata,
@@ -70,7 +67,7 @@ categories: ["web", "development"]
 
 Content here.`;
 
-			const result = MarkdownLoader.parseFrontmatter(markdown);
+			const result = MarkdownLoader._parseFrontmatter(markdown);
 
 			assert.deepEqual(
 				result.metadata.tags,
@@ -88,7 +85,7 @@ Content here.`;
 			const markdown = `---
 ---
 # Content`;
-			const result = MarkdownLoader.parseFrontmatter(markdown);
+			const result = MarkdownLoader._parseFrontmatter(markdown);
 			assert.deepEqual(result.metadata, {});
 			assert.equal(result.content, "# Content");
 		});

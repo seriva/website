@@ -6,9 +6,40 @@
 import { CONSTANTS } from "./constants.js";
 import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
-import { escapeHtml, html, safe } from "./utils.js";
+
+// ===========================================
+// TEMPLATES NAMESPACE
+// ===========================================
 
 export const Templates = {
+	// ===========================================
+	// PUBLIC METHODS - HTML Utilities
+	// ===========================================
+
+	// Escape HTML special characters to prevent XSS
+	escape: (str) => {
+		const div = document.createElement("div");
+		div.textContent = str;
+		return div.innerHTML;
+	},
+
+	// Tagged template literal for auto-escaping HTML
+	html: (strings, ...values) => {
+		return strings.reduce((result, str, i) => {
+			const value = values[i];
+			if (value === undefined || value === null) return result + str;
+			if (value?.__safe) return result + str + value.content;
+			return result + str + Templates.escape(String(value));
+		}, "");
+	},
+
+	// Mark content as safe (already escaped/trusted HTML)
+	safe: (content) => ({ __safe: true, content }),
+
+	// ===========================================
+	// PUBLIC METHODS - Template Functions
+	// ===========================================
+
 	navbar: (
 		blogLink,
 		projectsDropdown,
@@ -16,7 +47,7 @@ export const Templates = {
 		socialLinksHtml,
 		searchBar,
 		siteTitle,
-	) => html`
+	) => Templates.html`
     <nav class="navbar">
         <div class="navbar-container">
             <a class="navbar-brand" href="#">${siteTitle}</a>
@@ -25,13 +56,13 @@ export const Templates = {
             </button>
             <div class="navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav left">
-                    ${safe(blogLink)}
-                    ${safe(projectsDropdown)}
-                    ${safe(pageLinks)}
+                    ${Templates.safe(blogLink)}
+                    ${Templates.safe(projectsDropdown)}
+                    ${Templates.safe(pageLinks)}
                 </ul>
                 <ul class="navbar-nav right">
-                    ${safe(searchBar)}
-                    ${safe(socialLinksHtml)}
+                    ${Templates.safe(searchBar)}
+                    ${Templates.safe(socialLinksHtml)}
                 </ul>
             </div>
         </div>
@@ -40,7 +71,7 @@ export const Templates = {
 
 	pageLink: (pageId, pageTitle) => {
 		const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
-		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
+		return Templates.html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
 	},
 
 	socialLink: ({
@@ -59,13 +90,13 @@ export const Templates = {
 		]
 			.filter(Boolean)
 			.join(" ");
-		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${safe(attrs)}><i class="${icon}"></i></a></li>`;
+		return Templates.html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${Templates.safe(attrs)}><i class="${icon}"></i></a></li>`;
 	},
 
 	projectDropdownItem: (projectId, projectTitle) =>
-		html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
+		Templates.html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
 
-	projectsDropdown: () => html`
+	projectsDropdown: () => Templates.html`
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false">
 				${i18n.t("nav.projects")}
@@ -76,18 +107,44 @@ export const Templates = {
 		</li>
 	`,
 
-	projectLink: (link) => html`
+	projectLink: (link) => Templates.html`
         <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn">
             <i class="${link.icon}"></i>
             <span>${link.title}</span>
         </a>`,
 
-	youtubeVideo: (videoId) => html`
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
+
+	_tagList: (tags, projectsData) => {
+		if (!tags?.length) return Templates.safe("");
+		const searchEnabled = projectsData?.site?.search?.enabled !== false;
+		const clickableClass = searchEnabled ? " clickable-tag" : "";
+		return Templates.safe(
+			tags
+				.map((tag) => {
+					const dataAttr = searchEnabled
+						? ` data-search-tag="${Templates.escape(tag)}"`
+						: "";
+					return Templates.html`<span class="item-tag${clickableClass}"${Templates.safe(dataAttr)}>${tag}</span>`;
+				})
+				.join(" "),
+		);
+	},
+
+	_searchInput: (id, cssClass, placeholder) => Templates.html`
+        <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}"/>
+        <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="${i18n.t("aria.clearSearch")}">
+            <i class="fas fa-times"></i>
+        </button>`,
+
+	youtubeVideo: (videoId) => Templates.html`
         <div class="youtube-video"><div class="iframeWrapper">
             <iframe width="560" height="349" src="//www.youtube.com/embed/${videoId}?rel=0&amp;hd=1" frameborder="0" allowfullscreen></iframe>
         </div></div>`,
 
-	demoIframe: (demoUrl) => html`
+	demoIframe: (demoUrl) => Templates.html`
         <div class="markdown-body"><h2>${i18n.t("project.demo")}</h2>
             <p>${i18n.t("project.demoInstructions")}</p>
             <div class="iframeWrapper">
@@ -96,32 +153,16 @@ export const Templates = {
         </div>`,
 
 	dynamicContainer: (id, dataAttr, dataValue, loadingText = null) =>
-		html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText || i18n.t("general.loading")}</p></div>`,
+		Templates.html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText || i18n.t("general.loading")}</p></div>`,
 
-	tagList: (tags, projectsData) => {
-		if (!tags?.length) return safe("");
-		const searchEnabled = projectsData?.site?.search?.enabled !== false;
-		const clickableClass = searchEnabled ? " clickable-tag" : "";
-		return safe(
-			tags
-				.map((tag) => {
-					const dataAttr = searchEnabled
-						? ` data-search-tag="${escapeHtml(tag)}"`
-						: "";
-					return html`<span class="item-tag${clickableClass}"${safe(dataAttr)}>${tag}</span>`;
-				})
-				.join(" "),
-		);
-	},
-
-	blogPostCard: (post, index) => html`
+	blogPostCard: (post, index) => Templates.html`
         <article class="blog-post-card" data-index="${index}">
             <h2 class="blog-post-title">
                 <a href="?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
             </h2>
             <div class="blog-post-meta">
                 <span class="blog-post-date"><i class="fas fa-calendar"></i> ${post.date}</span>
-                ${post.tags?.length ? safe(`<span class="blog-post-tags">${Templates.tagList(post.tags).content}</span>`) : ""}
+                ${post.tags?.length ? Templates.safe(`<span class="blog-post-tags">${Templates._tagList(post.tags).content}</span>`) : ""}
             </div>
             <p class="blog-post-excerpt">${post.excerpt}</p>
         </article>`,
@@ -147,7 +188,7 @@ export const Templates = {
 
 				const activeClass = i === currentPage ? " active" : "";
 				pageNumbers.push(
-					html`<li class="page-item${activeClass}"><a class="page-link" href="?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
+					Templates.html`<li class="page-item${activeClass}"><a class="page-link" href="?blog&p=${i}" data-spa-route="page">${i}</a></li>`,
 				);
 				lastAdded = i;
 			}
@@ -156,13 +197,13 @@ export const Templates = {
 		const prevDisabled = currentPage === 1 ? " disabled" : "";
 		const nextDisabled = currentPage === totalPages ? " disabled" : "";
 
-		return html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
+		return Templates.html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
             <li class="page-item${prevDisabled}">
                 <a class="page-link" href="?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
-            ${safe(pageNumbers.join(""))}
+            ${Templates.safe(pageNumbers.join(""))}
             <li class="page-item${nextDisabled}">
                 <a class="page-link" href="?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
@@ -171,13 +212,13 @@ export const Templates = {
         </ul></nav>`;
 	},
 
-	blogPost: (post, content) => html`
+	blogPost: (post, content) => Templates.html`
         <article class="blog-post-full">
             <h1 class="project-title">${post.title}</h1>
             <p class="project-description">${post.date}</p>
-            ${post.tags?.length ? safe(`<div class="project-tags">${Templates.tagList(post.tags).content}</div>`) : ""}
+            ${post.tags?.length ? Templates.safe(`<div class="project-tags">${Templates._tagList(post.tags).content}</div>`) : ""}
             <div class="blog-post-content">
-                ${safe(Templates.markdown(content, marked).content)}
+                ${Templates.safe(Templates.markdown(content, marked).content)}
             </div>
             <footer class="blog-post-footer">
                 <a href="?blog" class="blog-back-link" data-spa-route="page">${i18n.t("blog.backToBlog")}</a>
@@ -185,9 +226,9 @@ export const Templates = {
         </article>`,
 
 	loadingSpinner: () =>
-		html`<div class="loading-spinner">${i18n.t("general.loading")}</div>`,
+		Templates.html`<div class="loading-spinner">${i18n.t("general.loading")}</div>`,
 
-	errorMessage: (title, message) => html`
+	errorMessage: (title, message) => Templates.html`
         <div class="error-message">
             <h1>${title}</h1>
             <p>${message}</p>
@@ -195,37 +236,38 @@ export const Templates = {
 
 	markdown: (content, marked) => {
 		if (typeof marked === "undefined") {
-			return html`<div class="markdown-body"><p>Markdown renderer not available</p></div>`;
+			return Templates.html`<div class="markdown-body"><p>Markdown renderer not available</p></div>`;
 		}
 		try {
 			const htmlContent = marked.parse(content);
-			return safe(`<div class="markdown-body">${htmlContent}</div>`);
+			return Templates.safe(`<div class="markdown-body">${htmlContent}</div>`);
 		} catch (error) {
 			console.error("Error rendering markdown:", error);
-			return html`<div class="markdown-body"><p>Error rendering markdown</p></div>`;
+			return Templates.html`<div class="markdown-body"><p>Error rendering markdown</p></div>`;
 		}
 	},
 
-	githubReadmeError: () => html`<p>${i18n.t("project.readmeError")}</p>`,
+	githubReadmeError: () =>
+		Templates.html`<p>${i18n.t("project.readmeError")}</p>`,
 
-	projectLinksSection: (linksHtml) => html`
+	projectLinksSection: (linksHtml) => Templates.html`
         <div class="markdown-body">
             <h2>${i18n.t("project.links")}</h2>
-            <div class="download-buttons">${safe(linksHtml)}</div>
+            <div class="download-buttons">${Templates.safe(linksHtml)}</div>
         </div>`,
 
-	projectHeader: (title, description, tags) => html`
+	projectHeader: (title, description, tags) => Templates.html`
         <h1 class="project-title">${title}</h1>
         <p class="project-description">${description}</p>
-        <div class="project-tags">${safe(Templates.tagList(tags).content)}</div>`,
+        <div class="project-tags">${Templates.safe(Templates._tagList(tags).content)}</div>`,
 
-	mediaSection: (videosHtml) => html`
+	mediaSection: (videosHtml) => Templates.html`
         <div class="markdown-body">
             <h2>${i18n.t("project.media")}</h2>
-            ${safe(videosHtml)}
+            ${Templates.safe(videosHtml)}
         </div>`,
 
-	footer: (authorName, currentYear) => html`
+	footer: (authorName, currentYear) => Templates.html`
         <footer class="footer">
             <div class="footer-container">
                 <p class="footer-text">
@@ -234,20 +276,14 @@ export const Templates = {
             </div>
         </footer>`,
 
-	searchInput: (id, cssClass, placeholder) => html`
-        <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}"/>
-        <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="${i18n.t("aria.clearSearch")}">
-            <i class="fas fa-times"></i>
-        </button>`,
-
-	searchBar: () => html`
+	searchBar: () => Templates.html`
         <li class="nav-item navbar-icon">
             <button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}">
                 <i class="fas fa-search"></i>
             </button>
         </li>`,
 
-	searchPage: (placeholder) => html`
+	searchPage: (placeholder) => Templates.html`
         <div class="search-page" id="search-page">
             <div class="search-page-header">
                 <div class="search-page-header-content">
@@ -255,7 +291,7 @@ export const Templates = {
                         <i class="fas fa-arrow-left"></i>
                     </button>
                     <div class="search-page-input-wrapper">
-                        ${safe(Templates.searchInput("search-page-input", "search-page-input", placeholder))}
+                        ${Templates.safe(Templates._searchInput("search-page-input", "search-page-input", placeholder))}
                     </div>
                 </div>
             </div>
@@ -271,35 +307,35 @@ export const Templates = {
 			: i18n.t("badges.blog");
 		const allTags = [typeTag, ...item.tags];
 
-		return html`
+		return Templates.html`
             <article class="search-result-item blog-post-card">
                 <h2 class="blog-post-title">
-                    <a href="${item.url}" data-spa-route="${item.type}">${safe(Search.highlight(item.title, query))}</a>
+                    <a href="${item.url}" data-spa-route="${item.type}">${Templates.safe(Search.highlight(item.title, query))}</a>
                 </h2>
                 <div class="blog-post-meta">
-                    ${allTags.length ? safe(html`<span class="blog-post-tags">${safe(allTags.map((tag) => html`<span class="item-tag">${tag}</span>`).join(" "))}</span>`) : ""}
+                    ${allTags.length ? Templates.safe(Templates.html`<span class="blog-post-tags">${Templates.safe(allTags.map((tag) => Templates.html`<span class="item-tag">${tag}</span>`).join(" "))}</span>`) : ""}
                 </div>
-                <p class="blog-post-excerpt">${safe(Search.highlight(item.description, query))}</p>
+                <p class="blog-post-excerpt">${Templates.safe(Search.highlight(item.description, query))}</p>
             </article>`;
 	},
 
-	searchNoResults: () => html`
+	searchNoResults: () => Templates.html`
         <div class="search-no-results">
             <i class="fas fa-search"></i>
             <p>${i18n.t("search.noResults")}</p>
         </div>`,
 
-	blogEmpty: () => html`
+	blogEmpty: () => Templates.html`
         <div class="blog-container">
             <p class="blog-empty">${i18n.t("blog.noPosts")}</p>
         </div>`,
 
-	blogContainer: (postsHtml, paginationHtml) => html`
+	blogContainer: (postsHtml, paginationHtml) => Templates.html`
         <div class="blog-container">
             <div class="blog-posts">
-                ${safe(postsHtml)}
+                ${Templates.safe(postsHtml)}
             </div>
-            ${safe(paginationHtml)}
+            ${Templates.safe(paginationHtml)}
         </div>`,
 
 	giscusComments: (config, pageType = "blog") => {
@@ -335,6 +371,6 @@ export const Templates = {
 			container.appendChild(script);
 		}, CONSTANTS.GISCUS_INJECTION_DELAY);
 
-		return html`<div class="giscus-container" id="${containerId}"></div>`;
+		return Templates.html`<div class="giscus-container" id="${containerId}"></div>`;
 	},
 };

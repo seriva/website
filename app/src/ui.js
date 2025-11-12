@@ -6,6 +6,10 @@
 import { CONSTANTS } from "./constants.js";
 import { i18n } from "./i18n.js";
 
+// ===========================================
+// UI NAMESPACE
+// ===========================================
+
 // Cache for DOM queries (reset when navbar is re-rendered)
 let cachedNavLinks = null;
 let cachedDropdownItems = null;
@@ -18,42 +22,18 @@ window.addEventListener("resize", () => {
 	isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
 });
 
-// Request fullscreen for demo iframe
-const fullscreen = () => {
-	try {
-		const iframe = document.getElementById("demo");
-		if (!iframe) return;
-
-		const request =
-			iframe.requestFullscreen ||
-			iframe.webkitRequestFullscreen ||
-			iframe.mozRequestFullScreen ||
-			iframe.msRequestFullscreen;
-
-		if (request) request.call(iframe);
-	} catch (error) {
-		console.error("Error requesting fullscreen:", error);
-	}
-};
-
-// Handle email link clicks
-const handleEmailClick = (event, emailConfig) => {
-	event?.preventDefault();
-
-	if (emailConfig?.name && emailConfig?.domain) {
-		const email = `${emailConfig.name}@${emailConfig.domain}`;
-		window.location.href = `mailto:${email}`;
-	} else {
-		console.warn("Email configuration not found, using fallback");
-		window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
-	}
-};
-
-// ===========================================
-// UI NAMESPACE
-// ===========================================
-
 export const UI = {
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
+	// Initialize all UI components
+	init() {
+		this._initCustomDropdowns();
+		this._initNavbarToggle();
+		this.initCopyCodeButtons();
+	},
+
 	// Close mobile navigation menu
 	closeMobileMenu() {
 		const collapseElement = document.getElementById("navbarNav");
@@ -69,60 +49,7 @@ export const UI = {
 		}
 	},
 
-	// Initialize custom dropdown menus
-	initCustomDropdowns() {
-		for (const toggle of document.querySelectorAll(".dropdown-toggle")) {
-			toggle.addEventListener("click", (e) => {
-				e.preventDefault();
-				const dropdown = toggle.closest(".dropdown");
-				const isOpen = dropdown.classList.contains("show");
-
-				// Close all other dropdowns
-				for (const d of document.querySelectorAll(".dropdown.show")) {
-					if (d !== dropdown) {
-						d.classList.remove("show");
-						const t = d.querySelector(".dropdown-toggle");
-						if (t) t.setAttribute("aria-expanded", "false");
-					}
-				}
-
-				dropdown.classList.toggle("show", !isOpen);
-				toggle.setAttribute("aria-expanded", !isOpen);
-			});
-		}
-
-		document.addEventListener("click", (e) => {
-			if (
-				e.target.closest(".dropdown-item") ||
-				!e.target.closest(".dropdown")
-			) {
-				for (const d of document.querySelectorAll(".dropdown.show")) {
-					d.classList.remove("show");
-					const toggle = d.querySelector(".dropdown-toggle");
-					if (toggle) toggle.setAttribute("aria-expanded", "false");
-				}
-			}
-		});
-	},
-
-	// Initialize mobile navbar toggle button
-	initNavbarToggle() {
-		const toggle = document.getElementById("navbar-toggle");
-		const navbar = document.getElementById("navbarNav");
-
-		if (!toggle || !navbar) return;
-
-		toggle.addEventListener("click", () => {
-			const isExpanded = toggle.getAttribute("aria-expanded") === "true";
-
-			navbar.classList.toggle("show");
-			toggle.classList.toggle("active");
-			toggle.setAttribute("aria-expanded", !isExpanded);
-		});
-	},
-
 	// Setup global event delegation for dynamic content
-	// This replaces the need for window.Email and window.fullscreen
 	setupGlobalEventDelegation(emailConfig) {
 		// Use event delegation on document to handle dynamically added elements
 		document.addEventListener("click", (event) => {
@@ -134,10 +61,10 @@ export const UI = {
 			switch (action) {
 				case "fullscreen":
 					event.preventDefault();
-					fullscreen();
+					UI._fullscreen();
 					break;
 				case "email":
-					handleEmailClick(event, emailConfig);
+					UI._handleEmailClick(event, emailConfig);
 					break;
 				default:
 					break;
@@ -259,5 +186,92 @@ export const UI = {
 				UI.closeMobileMenu();
 			}
 		});
+	},
+
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
+
+	// Initialize custom dropdown menus
+	_initCustomDropdowns() {
+		for (const toggle of document.querySelectorAll(".dropdown-toggle")) {
+			toggle.addEventListener("click", (e) => {
+				e.preventDefault();
+				const dropdown = toggle.closest(".dropdown");
+				const isOpen = dropdown.classList.contains("show");
+
+				// Close all other dropdowns
+				for (const d of document.querySelectorAll(".dropdown.show")) {
+					if (d !== dropdown) {
+						d.classList.remove("show");
+						const t = d.querySelector(".dropdown-toggle");
+						if (t) t.setAttribute("aria-expanded", "false");
+					}
+				}
+
+				dropdown.classList.toggle("show", !isOpen);
+				toggle.setAttribute("aria-expanded", !isOpen);
+			});
+		}
+
+		document.addEventListener("click", (e) => {
+			if (
+				e.target.closest(".dropdown-item") ||
+				!e.target.closest(".dropdown")
+			) {
+				for (const d of document.querySelectorAll(".dropdown.show")) {
+					d.classList.remove("show");
+					const toggle = d.querySelector(".dropdown-toggle");
+					if (toggle) toggle.setAttribute("aria-expanded", "false");
+				}
+			}
+		});
+	},
+
+	// Initialize mobile navbar toggle button
+	_initNavbarToggle() {
+		const toggle = document.getElementById("navbar-toggle");
+		const navbar = document.getElementById("navbarNav");
+
+		if (!toggle || !navbar) return;
+
+		toggle.addEventListener("click", () => {
+			const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+
+			navbar.classList.toggle("show");
+			toggle.classList.toggle("active");
+			toggle.setAttribute("aria-expanded", !isExpanded);
+		});
+	},
+
+	// Request fullscreen for demo iframe
+	_fullscreen() {
+		try {
+			const iframe = document.getElementById("demo");
+			if (!iframe) return;
+
+			const request =
+				iframe.requestFullscreen ||
+				iframe.webkitRequestFullscreen ||
+				iframe.mozRequestFullScreen ||
+				iframe.msRequestFullscreen;
+
+			if (request) request.call(iframe);
+		} catch (error) {
+			console.error("Error requesting fullscreen:", error);
+		}
+	},
+
+	// Handle email link clicks
+	_handleEmailClick(event, emailConfig) {
+		event?.preventDefault();
+
+		if (emailConfig?.name && emailConfig?.domain) {
+			const email = `${emailConfig.name}@${emailConfig.domain}`;
+			window.location.href = `mailto:${email}`;
+		} else {
+			console.warn("Email configuration not found, using fallback");
+			window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
+		}
 	},
 };

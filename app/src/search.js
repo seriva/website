@@ -8,7 +8,6 @@ import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
 import { RouterEvents } from "./router-events.js";
 import { Templates } from "./templates.js";
-import { getMainContent } from "./utils.js";
 
 // ===========================================
 // SEARCH CORE
@@ -247,7 +246,7 @@ export const Search = {
 				if (link) {
 					e.preventDefault();
 					// Start page transition immediately to prevent flicker
-					const mainContent = getMainContent();
+					const mainContent = document.getElementById("main-content");
 					mainContent.classList.add("page-transition-out");
 					// Small delay before closing search page ensures main content transition has started
 					setTimeout(() => {
@@ -264,7 +263,7 @@ export const Search = {
 					if (cardLink) {
 						e.preventDefault();
 						// Start page transition immediately to prevent flicker
-						const mainContent = getMainContent();
+						const mainContent = document.getElementById("main-content");
 						mainContent.classList.add("page-transition-out");
 						// Small delay before closing search page ensures main content transition has started
 						setTimeout(() => {
