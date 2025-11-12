@@ -23,8 +23,138 @@ export const Search = {
 	initPromise: null,
 	fuse: null,
 
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
+	// Highlight search query in text (with memoized regex)
+	highlight(text, query) {
+		if (!query) return text;
+
+		// Check cache first for better performance
+		let regex = regexCache.get(query);
+		if (!regex) {
+			const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			regex = new RegExp(`(${escapedQuery})`, "gi");
+			regexCache.set(query, regex);
+
+			// Limit cache size to prevent memory leaks
+			if (regexCache.size > 100) {
+				const firstKey = regexCache.keys().next().value;
+				regexCache.delete(firstKey);
+			}
+		}
+
+		return text.replace(regex, "<mark>$1</mark>");
+	},
+
+	// Initialize all search UI components
+	initUI(searchConfig) {
+		// Initialize search data/index
+		Search._init();
+
+		// Setup search toggle button
+		const searchToggle = document.getElementById("search-toggle");
+		const searchPage = document.getElementById("search-page");
+		const searchInput = document.getElementById("search-page-input");
+
+		const openSearchPage = () => {
+			if (searchPage) {
+				searchPage.classList.add("show");
+				if (searchInput) {
+					requestAnimationFrame(() => searchInput.focus());
+				}
+			}
+		};
+
+		if (searchToggle) {
+			searchToggle.addEventListener("click", (e) => {
+				e.preventDefault();
+				openSearchPage();
+			});
+		}
+
+		// Setup search page UI
+		const elements = {
+			page: searchPage,
+			input: searchInput,
+			results: document.getElementById("search-page-results"),
+			back: document.getElementById("search-page-back"),
+			clear: document.getElementById("search-page-clear"),
+		};
+
+		if (elements.page && elements.input && elements.results) {
+			const minChars = searchConfig?.minChars || CONSTANTS.SEARCH_MIN_CHARS;
+			let searchTimeout = null;
+
+			const closeSearchPage = () => {
+				if (searchTimeout) {
+					clearTimeout(searchTimeout);
+					searchTimeout = null;
+				}
+				elements.page.classList.add("closing");
+				setTimeout(() => {
+					elements.page.classList.remove("show", "closing");
+					elements.input.value = "";
+					elements.results.innerHTML = "";
+				}, CONSTANTS.SEARCH_PAGE_CLOSE_DELAY);
+			};
+
+			const handleSearchInput = (e) => {
+				const query = e.target.value.trim();
+
+				if (query.length < minChars) {
+					elements.results.innerHTML = "";
+					return;
+				}
+
+				if (searchTimeout) clearTimeout(searchTimeout);
+				searchTimeout = setTimeout(() => {
+					Search._handleSearchQuery(query, elements.results, closeSearchPage);
+				}, CONSTANTS.SEARCH_DEBOUNCE_MS);
+			};
+
+			// Attach event listeners
+			elements.back.addEventListener("click", closeSearchPage);
+			elements.input.addEventListener("input", handleSearchInput);
+			elements.input.addEventListener("keydown", (e) => {
+				if (e.key === "Escape") closeSearchPage();
+			});
+
+			if (elements.clear) {
+				elements.clear.addEventListener("click", () => {
+					elements.input.value = "";
+					elements.results.innerHTML = "";
+					elements.input.focus();
+				});
+			}
+
+			elements.page.addEventListener("click", (e) => {
+				if (e.target === elements.page) closeSearchPage();
+			});
+		}
+
+		// Setup tag search event delegation
+		document.addEventListener("click", (event) => {
+			const tagElement = event.target.closest("[data-search-tag]");
+			if (!tagElement) return;
+
+			event.preventDefault();
+			event.stopPropagation();
+
+			const tag = tagElement.getAttribute("data-search-tag");
+			if (tag) {
+				Search._searchByTag(tag);
+			}
+		});
+	},
+
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
+
 	// Initialize search index with content
-	async init() {
+	async _init() {
 		if (this.initPromise) return this.initPromise;
 		if (this.isInitialized) return;
 
@@ -89,7 +219,7 @@ export const Search = {
 	},
 
 	// Perform search query
-	search(query) {
+	_search(query) {
 		if (!query || query.length < CONSTANTS.SEARCH_MIN_CHARS || !this.fuse) {
 			return [];
 		}
@@ -100,63 +230,21 @@ export const Search = {
 			.map((result) => result.item);
 	},
 
-	// Highlight search query in text (with memoized regex)
-	highlight(text, query) {
-		if (!query) return text;
+	// Handle search query and display results
+	_handleSearchQuery(query, resultsContainer, onResultClick) {
+		const results = Search._search(query);
 
-		// Check cache first for better performance
-		let regex = regexCache.get(query);
-		if (!regex) {
-			const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-			regex = new RegExp(`(${escapedQuery})`, "gi");
-			regexCache.set(query, regex);
+		if (results.length > 0) {
+			resultsContainer.innerHTML = results
+				.map((item) => Templates.searchResult(item, query, Search))
+				.join("");
+			resultsContainer.classList.add("show");
 
-			// Limit cache size to prevent memory leaks
-			if (regexCache.size > 100) {
-				const firstKey = regexCache.keys().next().value;
-				regexCache.delete(firstKey);
-			}
-		}
-
-		return text.replace(regex, "<mark>$1</mark>");
-	},
-};
-
-// ===========================================
-// SEARCH UI - QUERY HANDLER
-// ===========================================
-
-const handleSearchQuery = (query, resultsContainer, onResultClick) => {
-	const results = Search.search(query);
-
-	if (results.length > 0) {
-		resultsContainer.innerHTML = results
-			.map((item) => Templates.searchResult(item, query, Search))
-			.join("");
-		resultsContainer.classList.add("show");
-
-		// Use event delegation for better performance
-		resultsContainer.onclick = (e) => {
-			// Handle SPA links
-			const link = e.target.closest("[data-spa-route]");
-			if (link) {
-				e.preventDefault();
-				// Start page transition immediately to prevent flicker
-				const mainContent = getMainContent();
-				mainContent.classList.add("page-transition-out");
-				// Small delay before closing search page ensures main content transition has started
-				setTimeout(() => {
-					onResultClick();
-				}, 50);
-				RouterEvents.RouterEvents.navigateToRoute(link.getAttribute("href"));
-				return;
-			}
-
-			// Handle card clicks
-			const card = e.target.closest(".search-result-item");
-			if (card && !e.target.closest("a, .clickable-tag")) {
-				const cardLink = card.querySelector(".blog-post-title a");
-				if (cardLink) {
+			// Use event delegation for better performance
+			resultsContainer.onclick = (e) => {
+				// Handle SPA links
+				const link = e.target.closest("[data-spa-route]");
+				if (link) {
 					e.preventDefault();
 					// Start page transition immediately to prevent flicker
 					const mainContent = getMainContent();
@@ -165,142 +253,45 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 					setTimeout(() => {
 						onResultClick();
 					}, 50);
-					RouterEvents.navigateToRoute(cardLink.getAttribute("href"));
+					RouterEvents.RouterEvents.navigateToRoute(link.getAttribute("href"));
+					return;
 				}
-			}
-		};
-	} else {
-		resultsContainer.innerHTML = Templates.searchNoResults();
-		resultsContainer.classList.add("show");
-	}
-};
 
-// ===========================================
-// SEARCH UI - TOGGLE
-// ===========================================
+				// Handle card clicks
+				const card = e.target.closest(".search-result-item");
+				if (card && !e.target.closest("a, .clickable-tag")) {
+					const cardLink = card.querySelector(".blog-post-title a");
+					if (cardLink) {
+						e.preventDefault();
+						// Start page transition immediately to prevent flicker
+						const mainContent = getMainContent();
+						mainContent.classList.add("page-transition-out");
+						// Small delay before closing search page ensures main content transition has started
+						setTimeout(() => {
+							onResultClick();
+						}, 50);
+						RouterEvents.navigateToRoute(cardLink.getAttribute("href"));
+					}
+				}
+			};
+		} else {
+			resultsContainer.innerHTML = Templates.searchNoResults();
+			resultsContainer.classList.add("show");
+		}
+	},
 
-export const initializeSearch = () => {
-	const searchToggle = document.getElementById("search-toggle");
-	if (!searchToggle) return;
+	// Open search page with tag pre-filled
+	_searchByTag(tag) {
+		const searchPage = document.getElementById("search-page");
+		const searchInput = document.getElementById("search-page-input");
 
-	Search.init();
-
-	// Cache search page elements
-	const searchPage = document.getElementById("search-page");
-	const searchInput = document.getElementById("search-page-input");
-
-	const openSearchPage = () => {
-		if (searchPage) {
+		if (searchPage && searchInput) {
 			searchPage.classList.add("show");
-			if (searchInput) {
-				requestAnimationFrame(() => searchInput.focus());
-			}
+			searchInput.value = tag;
+			requestAnimationFrame(() => {
+				searchInput.focus();
+				searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+			});
 		}
-	};
-
-	searchToggle.addEventListener("click", (e) => {
-		e.preventDefault();
-		openSearchPage();
-	});
-};
-
-// ===========================================
-// SEARCH UI - SEARCH PAGE
-// ===========================================
-
-export const initializeSearchPage = (searchConfig) => {
-	// Cache all search page elements once
-	const elements = {
-		page: document.getElementById("search-page"),
-		input: document.getElementById("search-page-input"),
-		results: document.getElementById("search-page-results"),
-		back: document.getElementById("search-page-back"),
-		clear: document.getElementById("search-page-clear"),
-	};
-
-	if (!elements.page || !elements.input || !elements.results) return;
-
-	const minChars = searchConfig.minChars || CONSTANTS.SEARCH_MIN_CHARS;
-	let searchTimeout = null;
-
-	const closeSearchPage = () => {
-		if (searchTimeout) {
-			clearTimeout(searchTimeout);
-			searchTimeout = null;
-		}
-		elements.page.classList.add("closing");
-		setTimeout(() => {
-			elements.page.classList.remove("show", "closing");
-			elements.input.value = "";
-			elements.results.innerHTML = "";
-		}, CONSTANTS.SEARCH_PAGE_CLOSE_DELAY);
-	};
-
-	const handleSearchInput = (e) => {
-		const query = e.target.value.trim();
-
-		if (query.length < minChars) {
-			elements.results.innerHTML = "";
-			return;
-		}
-
-		if (searchTimeout) clearTimeout(searchTimeout);
-		searchTimeout = setTimeout(() => {
-			handleSearchQuery(query, elements.results, closeSearchPage);
-		}, CONSTANTS.SEARCH_DEBOUNCE_MS);
-	};
-
-	// Attach event listeners
-	elements.back.addEventListener("click", closeSearchPage);
-	elements.input.addEventListener("input", handleSearchInput);
-	elements.input.addEventListener("keydown", (e) => {
-		if (e.key === "Escape") closeSearchPage();
-	});
-
-	if (elements.clear) {
-		elements.clear.addEventListener("click", () => {
-			elements.input.value = "";
-			elements.results.innerHTML = "";
-			elements.input.focus();
-		});
-	}
-
-	elements.page.addEventListener("click", (e) => {
-		if (e.target === elements.page) closeSearchPage();
-	});
-};
-
-// ===========================================
-// SEARCH UI - TAG SEARCH
-// ===========================================
-
-// Open search page with tag pre-filled
-const searchByTag = (tag) => {
-	const searchPage = document.getElementById("search-page");
-	const searchInput = document.getElementById("search-page-input");
-
-	if (searchPage && searchInput) {
-		searchPage.classList.add("show");
-		searchInput.value = tag;
-		requestAnimationFrame(() => {
-			searchInput.focus();
-			searchInput.dispatchEvent(new Event("input", { bubbles: true }));
-		});
-	}
-};
-
-// Initialize tag search event delegation
-export const initializeTagSearch = () => {
-	document.addEventListener("click", (event) => {
-		const tagElement = event.target.closest("[data-search-tag]");
-		if (!tagElement) return;
-
-		event.preventDefault();
-		event.stopPropagation();
-
-		const tag = tagElement.getAttribute("data-search-tag");
-		if (tag) {
-			searchByTag(tag);
-		}
-	});
+	},
 };

@@ -29,7 +29,7 @@ export const Context = {
 
 			// Apply theming and i18n after loading
 			if (appContext?.site?.colors) {
-				Context.applyColorScheme(appContext.site.colors);
+				Context._applyColorScheme(appContext.site.colors);
 			}
 			if (appContext?.site?.i18n && appContext?.translations) {
 				i18n.init(appContext.site.i18n, appContext.translations);
@@ -54,7 +54,7 @@ export const Context = {
 	},
 
 	// Apply color scheme from config to CSS variables
-	applyColorScheme(colors) {
+	_applyColorScheme(colors) {
 		if (!colors) return;
 
 		const root = document.documentElement;
@@ -75,12 +75,12 @@ export const Context = {
 
 		// Apply Prism theme from config
 		if (colors.code?.theme) {
-			Context.applyPrismTheme(colors.code.theme);
+			Context._applyPrismTheme(colors.code.theme);
 		}
 	},
 
 	// Apply Prism.js syntax highlighting theme
-	applyPrismTheme(themeName) {
+	_applyPrismTheme(themeName) {
 		const theme = themeName || CONSTANTS.DEFAULT_THEME;
 		const themeId = "prism-theme";
 

@@ -90,8 +90,8 @@ export const Layout = {
 		}
 	},
 
-	// Load projects into dropdown menu
-	async loadProjectsDropdown() {
+	// Inject projects into dropdown menu
+	async injectProjectsDropdown() {
 		const data = Context.get();
 		const projectsDropdown = document.getElementById("projects-dropdown");
 		if (!projectsDropdown || !data?.projects) return;
