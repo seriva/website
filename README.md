@@ -91,7 +91,7 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
-- Run all tests (34 unit tests)
+- Run all tests (65 unit tests)
 - Copy assets (fonts, Prism themes) from node_modules
 - Bundle and minify dependencies
 - Output to `public/` directory
@@ -118,13 +118,13 @@ All code changes must pass linting before deployment.
 
 ### Testing
 
-Uses Node.js built-in test runner (70 tests):
+Uses Node.js built-in test runner (65 tests):
 
 ```bash
 npm test    # Run all tests
 ```
 
-Tests cover utils, templates, search, YAML parser, routing, markdown, and i18n. All tests must pass before production builds.
+Tests cover template utilities, templates, search, YAML parser, routing, markdown, marked configuration, and i18n. All tests must pass before production builds.
 
 ## Features & Configuration
 
