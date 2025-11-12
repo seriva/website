@@ -6,8 +6,38 @@
 import Prism from "./dependencies/prismjs.js";
 
 const PRISM_CDN = "https://cdn.jsdelivr.net/npm/prismjs@1.30.0";
+
+// Languages included in core Prism bundle
 const loadedLanguages = new Set(["markup", "css", "clike", "javascript"]);
+
+// Track in-flight language loads to prevent duplicate requests
 const loadingLanguages = new Map();
+
+// Temporarily expose Prism globally for CDN script loading
+// NECESSARY: Prism CDN scripts are NOT ES modules and expect window.Prism to exist.
+// They use the pattern: (function(_self){"use strict"; var Prism = _self.Prism; ...})(self);
+// We expose our module-based Prism, let the CDN extend it, then clean up.
+const withGlobalPrism = (callback) => {
+	const hadPrism = "Prism" in window;
+	const oldPrism = window.Prism;
+
+	// Expose our Prism instance globally so CDN scripts can extend it
+	window.Prism = Prism;
+
+	// Ensure cleanup happens even if callback throws
+	try {
+		return callback();
+	} finally {
+		// Restore previous state after a tick (CDN script needs time to execute)
+		queueMicrotask(() => {
+			if (!hadPrism) {
+				delete window.Prism;
+			} else if (oldPrism !== Prism) {
+				window.Prism = oldPrism;
+			}
+		});
+	}
+};
 
 // Load a specific language grammar from CDN
 export async function loadLanguage(language) {
@@ -24,46 +54,28 @@ export async function loadLanguage(language) {
 		return loadingLanguages.get(lang);
 	}
 
-	// Temporarily expose Prism globally for CDN scripts
-	const hadPrism = "Prism" in window;
-	const oldPrism = window.Prism;
-	window.Prism = Prism;
-
 	// Create promise for loading language
-	const loadPromise = new Promise((resolve, reject) => {
-		const script = document.createElement("script");
-		script.src = `${PRISM_CDN}/components/prism-${lang}.min.js`;
-		script.async = true;
+	const loadPromise = withGlobalPrism(() => {
+		return new Promise((resolve, reject) => {
+			const script = document.createElement("script");
+			script.src = `${PRISM_CDN}/components/prism-${lang}.min.js`;
+			script.async = true;
 
-		script.onload = () => {
-			loadedLanguages.add(lang);
-			loadingLanguages.delete(lang);
+			script.onload = () => {
+				loadedLanguages.add(lang);
+				loadingLanguages.delete(lang);
+				resolve();
+			};
 
-			// Restore original Prism state
-			if (!hadPrism) {
-				window.Prism = undefined;
-			} else if (oldPrism !== Prism) {
-				window.Prism = oldPrism;
-			}
+			script.onerror = () => {
+				loadingLanguages.delete(lang);
+				const error = new Error(`Failed to load Prism language: ${lang}`);
+				console.warn(error.message);
+				reject(error);
+			};
 
-			resolve();
-		};
-
-		script.onerror = () => {
-			loadingLanguages.delete(lang);
-			console.warn(`Failed to load Prism language: ${lang}`);
-
-			// Restore original Prism state
-			if (!hadPrism) {
-				window.Prism = undefined;
-			} else if (oldPrism !== Prism) {
-				window.Prism = oldPrism;
-			}
-
-			reject(new Error(`Failed to load language: ${lang}`));
-		};
-
-		document.head.appendChild(script);
+			document.head.appendChild(script);
+		});
 	});
 
 	loadingLanguages.set(lang, loadPromise);

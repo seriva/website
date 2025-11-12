@@ -278,7 +278,8 @@ site:
 
 social:
   - icon: "fas fa-envelope"
-    onclick: "javascript:Email(event);"
+    href: "#"
+    data-action: "email"
   - icon: "fab fa-github" 
     href: "https://github.com/username"
 

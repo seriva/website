@@ -5,7 +5,7 @@
 
 import { CONSTANTS } from "./constants.js";
 import { i18n } from "./i18n.js";
-import { parseYAML } from "./yaml-parser.js";
+import { YAMLParser } from "./yaml-parser.js";
 
 let appContext = null;
 
@@ -24,7 +24,7 @@ export const initContext = async () => {
 		if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
 		const yamlText = await response.text();
-		appContext = parseYAML(yamlText);
+		appContext = YAMLParser.parse(yamlText);
 
 		// Apply theming and i18n after loading
 		if (appContext?.site?.colors) {
