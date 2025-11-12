@@ -65,7 +65,7 @@ The application follows a modular namespace pattern with clear separation of con
         │                │
         ├────────────────┼──────────────┬──────────────┐
         ▼                ▼              ▼              ▼
-   ┌──────────────┐ ┌─────────┐  ┌──────────┐  ┌────────────┐
+   ┌───────────────┐ ┌─────────┐  ┌──────────┐  ┌────────────┐
    │ MarkdownLoader│ │   UI    │  │  Prism   │  │ CONSTANTS  │
    │ (Parse MD)    │ │ (Inter) │  │ (Syntax) │  │ (Config)   │
    └───────────────┘ └─────────┘  └──────────┘  └────────────┘
