@@ -34,7 +34,7 @@ Key features:
 
 The application follows a modular namespace pattern with clear separation of concerns:
 
-```
+```text
              ┌─────────────────────┐
              │      main.js        │
              │   (Entry Point)     │
