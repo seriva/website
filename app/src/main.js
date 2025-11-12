@@ -8,11 +8,7 @@ import { marked } from "./dependencies/marked.js";
 import { Layout } from "./layout.js";
 import { RouterEvents } from "./router-events.js";
 import { Router } from "./routing.js";
-import {
-	initializeSearch,
-	initializeSearchPage,
-	initializeTagSearch,
-} from "./search.js";
+import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
 import { escapeHtml, getMainContent } from "./utils.js";
@@ -70,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Inject navbar and footer first
 		await Layout.injectNavbar();
 		await Layout.injectFooter();
-		await Layout.loadProjectsDropdown();
+		await Layout.injectProjectsDropdown();
 
 		// Initialize UI components after DOM elements are ready
 		UI.initCustomDropdowns();
@@ -78,9 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Initialize search if enabled
 		if (data?.site?.search?.enabled) {
-			initializeSearch();
-			initializeSearchPage(data.site.search);
-			initializeTagSearch();
+			Search.initUI(data.site.search);
 		}
 
 		// Handle initial route
