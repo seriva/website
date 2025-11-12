@@ -24,6 +24,7 @@ export const Router = {
 	async handleRoute() {
 		UI.closeMobileMenu();
 
+		// Parse URL parameters into route object
 		const params = new URLSearchParams(window.location.search);
 		const route = {
 			project: params.get("project"),
@@ -32,44 +33,50 @@ export const Router = {
 			blogPage: params.get("p") ? Number.parseInt(params.get("p"), 10) : 1,
 		};
 
-		await Router._startTransition();
+		// Cache main content element to avoid repeated DOM queries
+		const mainContent = document.getElementById("main-content");
+
+		// Start page transition
+		await Router._startTransition(mainContent);
 
 		try {
-			const data = Context.get();
-
+			// Route to appropriate content loader
 			if (route.blog !== null) {
+				// Blog: either blog listing (empty string) or specific post (slug)
 				await (route.blog === ""
 					? Loaders.loadBlogPage(route.blogPage)
 					: Loaders.loadBlogPost(route.blog));
 			} else if (route.project) {
+				// Project: load project page then additional content (README, links)
 				await Loaders.loadProjectPage(route.project);
+				// Wait for next frame to ensure DOM updates before loading additional content
 				await new Promise((resolve) => requestAnimationFrame(resolve));
 				await Loaders.loadAdditionalContent();
 			} else if (route.page) {
+				// Custom page: load markdown page
 				await Loaders.loadPage(route.page);
 			} else {
-				// No route specified - redirect to default and load blog
-				const defaultRoute = data.site?.defaultRoute || "?blog";
+				// No route specified: redirect to default route and load blog
+				const data = Context.get();
+				const defaultRoute = data?.site?.defaultRoute || "?blog";
 				window.history.replaceState({}, "", defaultRoute);
 				await Loaders.loadBlogPage(1);
 			}
 
-			Router._endTransition();
+			// End transition and apply post-render tasks
+			Router._endTransition(mainContent);
 		} catch (error) {
+			// Handle routing/loading errors gracefully
 			console.error("Error loading page:", error);
-			Router._endTransition();
-			const mainContent = document.getElementById("main-content");
+			Router._endTransition(mainContent);
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
 			);
-			// Get data for title, but don't fail if it's not available
-			try {
-				const data = Context.get();
-				document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
-			} catch {
-				document.title = CONSTANTS.DEFAULT_TITLE;
-			}
+
+			// Set fallback title
+			const data = Context.get();
+			document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 		}
 	},
 
@@ -95,8 +102,7 @@ export const Router = {
 	// ===========================================
 
 	// Start page transition animation
-	async _startTransition() {
-		const mainContent = document.getElementById("main-content");
+	async _startTransition(mainContent) {
 		mainContent.classList.add("page-transition-out");
 		await new Promise((resolve) =>
 			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
@@ -104,20 +110,17 @@ export const Router = {
 		mainContent.innerHTML = Templates.loadingSpinner();
 	},
 
-	// End page transition and apply highlighting
-	_endTransition() {
-		const mainContent = document.getElementById("main-content");
-		if (mainContent) {
-			mainContent.classList.remove("page-transition-out");
+	// End page transition and finalize page load
+	_endTransition(mainContent) {
+		mainContent.classList.remove("page-transition-out");
 
-			// Apply Prism syntax highlighting to all code blocks
-			requestAnimationFrame(async () => {
-				await PrismLoader.highlight(mainContent);
-				// Add copy buttons after syntax highlighting
-				UI.initCopyCodeButtons();
-			});
-		}
+		// Schedule post-render tasks
+		requestAnimationFrame(async () => {
+			await PrismLoader.highlight(mainContent);
+			UI.initCopyCodeButtons();
+			UI.updateActiveNavLink();
+		});
+
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-		requestAnimationFrame(UI.updateActiveNavLink);
 	},
 };
