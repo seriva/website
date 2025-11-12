@@ -3,23 +3,18 @@
 // ===========================================
 // Entry point - orchestrates initialization
 
-import { initContext, updateMetaTags } from "./context.js";
+import { Context } from "./context.js";
 import { marked } from "./dependencies/marked.js";
-import { injectFooter, injectNavbar, loadProjectsDropdown } from "./layout.js";
-import { registerRouteHandler } from "./router-events.js";
-import { handleRoute, setupSpaRouting } from "./routing.js";
+import { Layout } from "./layout.js";
+import { RouterEvents } from "./router-events.js";
+import { Router } from "./routing.js";
 import {
 	initializeSearch,
 	initializeSearchPage,
 	initializeTagSearch,
 } from "./search.js";
 import { Templates } from "./templates.js";
-import {
-	addMobileMenuOutsideClickHandler,
-	initCustomDropdowns,
-	initNavbarToggle,
-	setupGlobalEventDelegation,
-} from "./ui.js";
+import { UI } from "./ui.js";
 import { escapeHtml, getMainContent } from "./utils.js";
 
 // ===========================================
@@ -60,26 +55,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 		initializeMarked();
 
 		// Load and cache site data (single call!)
-		const data = await initContext();
+		const data = await Context.init();
 
 		if (data?.site) {
-			updateMetaTags(data.site);
+			Context.updateMetaTags(data.site);
 		}
 
 		// Register route handler for navigation (no global coupling!)
-		registerRouteHandler(handleRoute);
+		RouterEvents.registerRouteHandler(Router.handleRoute);
 
 		// Setup global event delegation for dynamic content (email, fullscreen, etc.)
-		setupGlobalEventDelegation(data?.site?.email);
+		UI.setupGlobalEventDelegation(data?.site?.email);
 
 		// Inject navbar and footer first
-		await injectNavbar();
-		await injectFooter();
-		await loadProjectsDropdown();
+		await Layout.injectNavbar();
+		await Layout.injectFooter();
+		await Layout.loadProjectsDropdown();
 
 		// Initialize UI components after DOM elements are ready
-		initCustomDropdowns();
-		initNavbarToggle();
+		UI.initCustomDropdowns();
+		UI.initNavbarToggle();
 
 		// Initialize search if enabled
 		if (data?.site?.search?.enabled) {
@@ -89,12 +84,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		// Handle initial route
-		await handleRoute();
+		await Router.handleRoute();
 
 		// Set up routing
-		window.addEventListener("popstate", handleRoute);
-		setupSpaRouting();
-		addMobileMenuOutsideClickHandler();
+		window.addEventListener("popstate", Router.handleRoute);
+		Router.setupSpaRouting();
+		UI.addMobileMenuOutsideClickHandler();
 	} catch (error) {
 		console.error("Failed to initialize application:", error);
 		// Show error in main content

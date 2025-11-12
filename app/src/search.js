@@ -4,9 +4,9 @@
 // Fuse.js powered search for projects and blog posts with UI
 
 import { CONSTANTS } from "./constants.js";
-import { getContext } from "./context.js";
+import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
-import { navigateToRoute } from "./router-events.js";
+import { RouterEvents } from "./router-events.js";
 import { Templates } from "./templates.js";
 import { getMainContent } from "./utils.js";
 
@@ -30,7 +30,7 @@ export const Search = {
 
 		this.initPromise = (async () => {
 			try {
-				const data = getContext();
+				const data = Context.get();
 				const projects = data?.projects || [];
 				const blogPosts = data?.blog?.posts || [];
 
@@ -148,7 +148,7 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 				setTimeout(() => {
 					onResultClick();
 				}, 50);
-				navigateToRoute(link.getAttribute("href"));
+				RouterEvents.RouterEvents.navigateToRoute(link.getAttribute("href"));
 				return;
 			}
 
@@ -165,7 +165,7 @@ const handleSearchQuery = (query, resultsContainer, onResultClick) => {
 					setTimeout(() => {
 						onResultClick();
 					}, 50);
-					navigateToRoute(cardLink.getAttribute("href"));
+					RouterEvents.navigateToRoute(cardLink.getAttribute("href"));
 				}
 			}
 		};

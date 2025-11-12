@@ -7,11 +7,15 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
 ### Key Architecture Principles
 
 1. **ES6 Modules**: All code organized in modular files under `app/src/`
-2. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
-3. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
-4. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
-5. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
-6. **i18n**: Use `i18n.t('key')` for all user-facing strings
+2. **Namespace Pattern**: Use object exports for grouping related functions
+   - Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
+   - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
+   - Exception: Keep `utils.js` as individual exports (truly standalone utilities)
+3. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
+4. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
+5. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
+6. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
+7. **i18n**: Use `i18n.t('key')` for all user-facing strings
 
 ### Quality Requirements
 
@@ -61,21 +65,24 @@ describe("My Module", () => {
 
 ### Module Organization
 
-- `app/src/main.js` - Entry point, initialization, exports globals
-- `app/src/constants.js` - Configuration constants
-- `app/src/utils.js` - HTML escaping, safe(), html\`\`, DOM helpers
-- `app/src/templates.js` - All template functions
-- `app/src/routing.js` - SPA routing, page navigation orchestration
-- `app/src/router-events.js` - Routing event system for decoupled navigation
-- `app/src/loaders.js` - Content loaders (blog, projects, pages)
-- `app/src/layout.js` - Navbar and footer rendering
-- `app/src/search.js` - Fuse.js search implementation with UI
-- `app/src/ui.js` - UI interactions, mobile menu, dropdowns
-- `app/src/context.js` - Application context, data loading, theming
-- `app/src/yaml-parser.js` - Minimal YAML parser for content.yaml
-- `app/src/markdown.js` - Markdown loading and rendering
-- `app/src/prism-loader.js` - Syntax highlighting, dynamic language loading from CDN
-- `app/src/i18n.js` - Internationalization framework
+**Namespace Pattern Modules** (export single object):
+- `app/src/ui.js` - `UI` namespace for UI interactions, mobile menu, dropdowns
+- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
+- `app/src/context.js` - `Context` namespace for app state, data loading, theming
+- `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
+- `app/src/layout.js` - `Layout` namespace for navbar and footer rendering
+- `app/src/router-events.js` - `RouterEvents` namespace for routing event system
+- `app/src/templates.js` - `Templates` namespace for all template functions
+- `app/src/search.js` - `Search` namespace for Fuse.js search implementation
+- `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
+- `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
+- `app/src/i18n.js` - `i18n` namespace for internationalization
+- `app/src/constants.js` - `CONSTANTS` object for configuration
+
+**Other Modules**:
+- `app/src/main.js` - Entry point, initialization
+- `app/src/utils.js` - Individual utility exports (escapeHtml, safe, html, etc.)
+- `app/src/prism-loader.js` - Syntax highlighting, dynamic language loading
 
 ### Don't
 
@@ -84,6 +91,8 @@ describe("My Module", () => {
 - ❌ Don't bypass escaping without `safe()`
 - ❌ Don't use hash routing (use URLSearchParams)
 - ❌ Don't skip tests or linting before committing
+- ❌ Don't export individual functions from modules (use namespace pattern instead)
+- ❌ Don't create new modules without following the namespace pattern
 - ❌ Don't modify Microtastic config without good reason
 
 ### Development Workflow

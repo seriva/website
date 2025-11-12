@@ -5,15 +5,21 @@
 
 let handleRouteCallback = null;
 
-// Register the route handler (called once in main.js)
-export const registerRouteHandler = (handler) => {
-	handleRouteCallback = handler;
-};
+// ===========================================
+// ROUTER EVENTS NAMESPACE
+// ===========================================
 
-// Trigger route navigation (called from loaders, search, etc.)
-export const navigateToRoute = (href) => {
-	if (handleRouteCallback) {
-		window.history.pushState({}, "", href);
-		handleRouteCallback();
-	}
+export const RouterEvents = {
+	// Register the route handler (called once in main.js)
+	registerRouteHandler(handler) {
+		handleRouteCallback = handler;
+	},
+
+	// Trigger route navigation (called from loaders, search, etc.)
+	navigateToRoute(href) {
+		if (handleRouteCallback) {
+			window.history.pushState({}, "", href);
+			handleRouteCallback();
+		}
+	},
 };
