@@ -52,11 +52,6 @@ export const Context = {
 		return appContext;
 	},
 
-	// Clear context cache (useful for testing)
-	clear() {
-		appContext = null;
-	},
-
 	// Update HTML meta tags with site data
 	updateMetaTags(siteData) {
 		if (!siteData) return;

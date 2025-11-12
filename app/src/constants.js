@@ -11,7 +11,6 @@ export const CONSTANTS = {
 	// Defaults
 	DEFAULT_THEME: "prism-tomorrow",
 	DEFAULT_TITLE: "portfolio.example.com",
-	DEFAULT_EMAIL: "contact@example.com",
 
 	// Breakpoints & Timing
 	MOBILE_BREAKPOINT: 767,
