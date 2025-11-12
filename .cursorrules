@@ -3,11 +3,14 @@
 Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modular ES6 architecture.
 
 ### Core Principles
+- **Namespace Pattern**: Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
+  - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
+  - Exception: `utils.js` keeps individual exports (truly standalone utilities)
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
 - Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
-- Call `await initContext()` to load content; access via `getContext()` (cached)
+- Call `await Context.init()` to load content; access via `Context.get()` (cached)
 - Route with URL params: `?blog`, `?project=id`, `?page=id`
-- Always call `closeMobileMenu()` and update `<title>` in route handlers
+- Always call `UI.closeMobileMenu()` and update `<title>` in route handlers
 - Keep functions organized by module files in `app/src/`
 - All magic numbers go in `CONSTANTS` object in `constants.js`
 
@@ -24,6 +27,8 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - Don't concatenate raw HTML strings; don't bypass escaping without `safe()`
 - Don't use hash routing; keep the `URLSearchParams` pattern
 - Don't modify Microtastic config without good reason
+- Don't export individual functions from modules (use namespace pattern)
+- Don't create new modules without following the namespace pattern
 
 ### Quality Gate
 - Format: `npm run format` or `biome format --write .`
@@ -38,25 +43,31 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - Markdown: `MarkdownLoader.loadAsHtml(path)` for pages/posts (in `markdown.js`)
 - Search: `Search.init()` with 300ms debounce (in `search.js`)
 - Comments: `Templates.giscusComments(data?.site?.comments, "blog"|"projects")`
-- Theme: `applyColorScheme()` for colors, Prism themes loaded via local CSS
+- Theme: `Context.applyColorScheme()` for colors, Prism themes loaded via local CSS
 - i18n: `i18n.t('key')` for all user-facing strings (in `i18n.js`)
+- Routing: `Router.handleRoute()` for navigation, `RouterEvents.navigateToRoute(href)` for programmatic navigation
+- UI: `UI.closeMobileMenu()`, `UI.initCopyCodeButtons()`, etc.
 
 ### Module Structure
-- `app/src/main.js` - entry point, initialization, exports globals
-- `app/src/constants.js` - all configuration constants
-- `app/src/utils.js` - HTML escaping, safe(), html\`\`, DOM helpers
-- `app/src/templates.js` - all template functions
-- `app/src/routing.js` - SPA routing, page navigation orchestration
-- `app/src/router-events.js` - routing event system for decoupled navigation
-- `app/src/loaders.js` - content loaders (blog, projects, pages)
-- `app/src/layout.js` - navbar and footer rendering
-- `app/src/search.js` - Fuse.js search implementation with UI
-- `app/src/ui.js` - UI interactions, mobile menu, dropdowns
-- `app/src/context.js` - application context, data loading, theming
-- `app/src/yaml-parser.js` - minimal YAML parser for content.yaml
-- `app/src/markdown.js` - markdown loading and rendering
-- `app/src/prism-loader.js` - syntax highlighting, dynamic language loading from CDN
-- `app/src/i18n.js` - internationalization framework
+
+**Namespace Pattern Modules** (export single object):
+- `app/src/ui.js` - `UI` namespace for UI interactions, mobile menu, dropdowns
+- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
+- `app/src/context.js` - `Context` namespace for app state, data loading, theming
+- `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
+- `app/src/layout.js` - `Layout` namespace for navbar and footer rendering
+- `app/src/router-events.js` - `RouterEvents` namespace for routing event system
+- `app/src/templates.js` - `Templates` namespace for all template functions
+- `app/src/search.js` - `Search` namespace for Fuse.js search implementation
+- `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
+- `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
+- `app/src/i18n.js` - `i18n` namespace for internationalization
+- `app/src/constants.js` - `CONSTANTS` object for configuration
+
+**Other Modules**:
+- `app/src/main.js` - entry point, initialization
+- `app/src/utils.js` - individual utility exports (escapeHtml, safe, html, etc.)
+- `app/src/prism-loader.js` - syntax highlighting, dynamic language loading
 - `app/src/dependencies/` - bundled npm packages (managed by Microtastic)
 
 ### Files & Directories
