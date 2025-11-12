@@ -247,13 +247,13 @@ export const Search = {
 					e.preventDefault();
 					// Start page transition immediately to prevent flicker
 					const mainContent = document.getElementById("main-content");
-					mainContent.classList.add("page-transition-out");
-					// Small delay before closing search page ensures main content transition has started
-					setTimeout(() => {
-						onResultClick();
-					}, 50);
-					RouterEvents.RouterEvents.navigateToRoute(link.getAttribute("href"));
-					return;
+				mainContent.classList.add("page-transition-out");
+				// Small delay before closing search page ensures main content transition has started
+				setTimeout(() => {
+					onResultClick();
+				}, 50);
+				RouterEvents.navigateToRoute(link.getAttribute("href"));
+				return;
 				}
 
 				// Handle card clicks
