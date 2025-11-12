@@ -30,6 +30,72 @@ Key features:
 - **Code Quality**: Biome for linting and formatting
 - **Assets**: All fonts and syntax themes bundled from npm (no external CDNs)
 
+## Architecture
+
+The application follows a modular namespace pattern with clear separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         main.js                             │
+│                    (Entry Point)                            │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+        ┌────────────┴────────────┐
+        ▼                         ▼
+   ┌─────────┐            ┌──────────────┐
+   │ Context │◄───────────│ YAMLParser   │
+   │ (State) │            │ (Parse YAML) │
+   └────┬────┘            └──────────────┘
+        │
+        │ provides data to
+        │
+        ├─────────────────┬──────────────┬─────────────────┐
+        ▼                 ▼              ▼                 ▼
+   ┌─────────┐      ┌─────────┐    ┌─────────┐     ┌──────────┐
+   │ Router  │      │ Layout  │    │ Search  │     │   i18n   │
+   │ (Nav)   │      │ (UI)    │    │ (Fuse)  │     │ (Trans)  │
+   └────┬────┘      └────┬────┘    └────┬────┘     └──────────┘
+        │                │              │
+        │ coordinates    │ renders      │ searches
+        ▼                ▼              ▼
+   ┌──────────┐    ┌───────────┐  ┌──────────────┐
+   │ Loaders  │───►│ Templates │  │ RouterEvents │
+   │ (Content)│    │ (HTML)    │  │ (PubSub)     │
+   └────┬─────┘    └─────┬─────┘  └──────────────┘
+        │                │
+        ├────────────────┼──────────────┬──────────────┐
+        ▼                ▼              ▼              ▼
+   ┌──────────────┐ ┌─────────┐  ┌──────────┐  ┌────────────┐
+   │ MarkdownLoader│ │   UI    │  │  Prism   │  │ CONSTANTS  │
+   │ (Parse MD)    │ │ (Inter) │  │ (Syntax) │  │ (Config)   │
+   └───────────────┘ └─────────┘  └──────────┘  └────────────┘
+```
+
+**Module Responsibilities:**
+
+- **`main.js`** - Application initialization and setup
+- **`Context`** - Global state management, theme application, data caching
+- **`Router`** - SPA routing, URL handling, page transitions
+- **`Layout`** - Navbar and footer rendering
+- **`Loaders`** - Content fetching (blog posts, projects, pages, GitHub READMEs)
+- **`Templates`** - HTML generation with auto-escaping security
+- **`Search`** - Fuse.js search with UI, tag filtering, result highlighting
+- **`UI`** - Interactive elements (mobile menu, copy buttons, dropdowns)
+- **`MarkdownLoader`** - Markdown parsing with frontmatter support
+- **`PrismLoader`** - Syntax highlighting with dynamic language loading
+- **`YAMLParser`** - Minimal YAML parser for content.yaml
+- **`RouterEvents`** - Event system for decoupled navigation
+- **`i18n`** - Translation system for multi-language support
+- **`CONSTANTS`** - Application-wide configuration
+
+**Data Flow:**
+1. `main.js` initializes `Context` which loads and parses `content.yaml`
+2. `Router` handles URL changes and coordinates with `Loaders`
+3. `Loaders` fetch content and use `Templates` to render HTML
+4. `Search` indexes content from `Context` and provides fuzzy search
+5. `UI` handles user interactions and updates the DOM
+6. All modules consume data from `Context.get()` (cached)
+
 ## Development Environment
 
 This project includes a VS Code devcontainer for a consistent development environment:
