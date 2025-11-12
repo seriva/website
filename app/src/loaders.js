@@ -15,93 +15,136 @@ import { UI } from "./ui.js";
 import { getMainContent } from "./utils.js";
 
 // ===========================================
-// BLOG POST UTILITIES
-// ===========================================
-
-const createPostObject = (slug, data, filename, content = null) => ({
-	slug,
-	title: data.title || "Untitled",
-	date: data.date || "",
-	excerpt: data.excerpt || "",
-	tags: data.tags || [],
-	content,
-	filename,
-	id: slug,
-});
-
-const processBlogPost = async (post) => {
-	const slug = post.filename.replace(/\.md$/, "");
-	return createPostObject(slug, post, post.filename);
-};
-
-const loadBlogPosts = async (data) => {
-	try {
-		const postFiles = data?.blog?.posts || [];
-		if (postFiles.length === 0) return [];
-
-		const results = await Promise.allSettled(postFiles.map(processBlogPost));
-		const posts = results
-			.filter((result) => result.status === "fulfilled")
-			.map((result) => result.value);
-
-		return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-	} catch (error) {
-		console.error("Error loading blog posts:", error);
-		return [];
-	}
-};
-
-const loadBlogPostContent = async (post) => {
-	if (post.content) return post.content;
-	if (!post.filename) return null;
-
-	const result = await MarkdownLoader.loadWithFrontmatter(
-		`data/blog/${post.filename}`,
-	);
-	return result?.content || null;
-};
-
-const setupBlogCardClicks = () => {
-	for (const card of document.querySelectorAll(".blog-post-card")) {
-		card.addEventListener("click", (e) => {
-			if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
-
-			const link = card.querySelector(".blog-post-title a");
-			if (link) {
-				e.preventDefault();
-				RouterEvents.navigateToRoute(link.getAttribute("href"));
-			}
-		});
-	}
-};
-
-const loadProjectLinks = async (projectId, containerId) => {
-	if (!projectId || !containerId) return;
-
-	const container = document.getElementById(containerId);
-	if (!container) return;
-
-	try {
-		const data = Context.get();
-		const project = data?.projects?.find((p) => p.id === projectId);
-		if (!data || !project?.links) {
-			container.style.display = "none";
-			return;
-		}
-
-		container.innerHTML = Templates.projectLinksSection(
-			project.links.map(Templates.projectLink).join(""),
-		);
-	} catch (error) {
-		console.error(`Error loading content for project ${projectId}`, error);
-	}
-};
-
-// ===========================================
 // LOADERS NAMESPACE
 // ===========================================
 
 export const Loaders = {
+	// Load all blog posts from data
+	async _loadBlogPosts(data) {
+		try {
+			const postFiles = data?.blog?.posts || [];
+			if (postFiles.length === 0) return [];
+
+			const results = await Promise.allSettled(
+				postFiles.map(async (post) => {
+					const slug = post.filename.replace(/\.md$/, "");
+					return {
+						slug,
+						title: post.title || "Untitled",
+						date: post.date || "",
+						excerpt: post.excerpt || "",
+						tags: post.tags || [],
+						content: null,
+						filename: post.filename,
+						id: slug,
+					};
+				}),
+			);
+			const posts = results
+				.filter((result) => result.status === "fulfilled")
+				.map((result) => result.value);
+
+			return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+		} catch (error) {
+			console.error("Error loading blog posts:", error);
+			return [];
+		}
+	},
+
+	// Load blog post content from markdown file
+	async _loadBlogPostContent(post) {
+		if (post.content) return post.content;
+		if (!post.filename) return null;
+
+		const result = await MarkdownLoader.loadWithFrontmatter(
+			`data/blog/${post.filename}`,
+		);
+		return result?.content || null;
+	},
+
+	// Setup click handlers for blog post cards
+	_setupBlogCardClicks() {
+		for (const card of document.querySelectorAll(".blog-post-card")) {
+			card.addEventListener("click", (e) => {
+				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
+
+				const link = card.querySelector(".blog-post-title a");
+				if (link) {
+					e.preventDefault();
+					RouterEvents.navigateToRoute(link.getAttribute("href"));
+				}
+			});
+		}
+	},
+
+	// Load project links section
+	async _loadProjectLinks(projectId, containerId) {
+		if (!projectId || !containerId) return;
+
+		const container = document.getElementById(containerId);
+		if (!container) return;
+
+		try {
+			const data = Context.get();
+			const project = data?.projects?.find((p) => p.id === projectId);
+			if (!data || !project?.links) {
+				container.style.display = "none";
+				return;
+			}
+
+			container.innerHTML = Templates.projectLinksSection(
+				project.links.map(Templates.projectLink).join(""),
+			);
+		} catch (error) {
+			console.error(`Error loading content for project ${projectId}`, error);
+		}
+	},
+
+	// Load and render GitHub README
+	async _loadGitHubReadme(repo, containerId) {
+		const element = document.getElementById(containerId);
+		if (!element) return;
+
+		try {
+			const data = Context.get();
+			const githubUsername = data?.site?.github_username || "seriva";
+
+			// Add username prefix if not already present
+			const fullRepo = repo.includes("/") ? repo : `${githubUsername}/${repo}`;
+
+			// Use raw.githubusercontent.com to avoid API rate limits
+			// Try 'main' branch first, fallback to 'master' if needed
+			const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/main/README.md`;
+
+			// Load README using MarkdownLoader
+			let readmeContent = await MarkdownLoader.loadFile(rawUrl);
+
+			// Fallback to master branch if main doesn't exist
+			if (!readmeContent) {
+				const masterUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/master/README.md`;
+				readmeContent = await MarkdownLoader.loadFile(masterUrl);
+			}
+
+			if (readmeContent) {
+				const htmlContent = marked.parse(readmeContent);
+				element.innerHTML = `<div class="markdown-body">${htmlContent}</div>`;
+
+				// Apply Prism syntax highlighting to code blocks in the README
+				requestAnimationFrame(async () => {
+					await highlightElement(element);
+					// Add copy buttons after syntax highlighting
+					UI.initCopyCodeButtons();
+				});
+			} else {
+				console.warn(`Failed to load README for ${fullRepo}`);
+				element.innerHTML = Templates.githubReadmeError();
+			}
+		} catch (error) {
+			console.warn(`Failed to load README for ${repo}:`, error);
+			element.innerHTML = Templates.githubReadmeError();
+		}
+	},
+
 	// Load and display blog page with pagination
 	async loadBlogPage(page = 1) {
 		const mainContent = getMainContent();
@@ -110,7 +153,7 @@ export const Loaders = {
 
 		mainContent.innerHTML = Templates.loadingSpinner();
 
-		const posts = await loadBlogPosts(data);
+		const posts = await Loaders._loadBlogPosts(data);
 		const postsPerPage = data?.blog?.postsPerPage || 5;
 		const totalPages = Math.ceil(posts.length / postsPerPage);
 		const currentPage = Math.max(1, Math.min(page, totalPages));
@@ -132,7 +175,7 @@ export const Loaders = {
 			Templates.blogPagination(currentPage, totalPages),
 		);
 
-		setupBlogCardClicks();
+		Loaders._setupBlogCardClicks();
 		document.title = `${data.blog.title || "Blog"} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
 	},
 
@@ -144,7 +187,7 @@ export const Loaders = {
 
 		mainContent.innerHTML = Templates.loadingSpinner();
 
-		const posts = await loadBlogPosts(data);
+		const posts = await Loaders._loadBlogPosts(data);
 		const post = posts.find((p) => p.slug === slug || p.id === slug);
 
 		if (!post) {
@@ -155,7 +198,7 @@ export const Loaders = {
 			return;
 		}
 
-		const content = await loadBlogPostContent(post);
+		const content = await Loaders._loadBlogPostContent(post);
 		const commentsHtml = Templates.giscusComments(data?.site?.comments, "blog");
 		mainContent.innerHTML = Templates.blogPost(post, content) + commentsHtml;
 
@@ -252,12 +295,12 @@ export const Loaders = {
 
 			// Load GitHub README if element has data-repo attribute
 			if (el.dataset.repo && el.parentElement) {
-				promises.push(Loaders.loadGitHubReadme(el.dataset.repo, el.id));
+				promises.push(Loaders._loadGitHubReadme(el.dataset.repo, el.id));
 			}
 
 			// Load project links if element has data-project attribute
 			if (el.dataset.project) {
-				promises.push(loadProjectLinks(el.dataset.project, el.id));
+				promises.push(Loaders._loadProjectLinks(el.dataset.project, el.id));
 			}
 		}
 
@@ -265,51 +308,6 @@ export const Loaders = {
 			await Promise.all(promises);
 		} catch (error) {
 			console.error("Error loading additional content", error);
-		}
-	},
-
-	// Load and render GitHub README
-	async loadGitHubReadme(repo, containerId) {
-		const element = document.getElementById(containerId);
-		if (!element) return;
-
-		try {
-			const data = Context.get();
-			const githubUsername = data?.site?.github_username || "seriva";
-
-			// Add username prefix if not already present
-			const fullRepo = repo.includes("/") ? repo : `${githubUsername}/${repo}`;
-
-			// Use raw.githubusercontent.com to avoid API rate limits
-			// Try 'main' branch first, fallback to 'master' if needed
-			const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/main/README.md`;
-
-			// Load README using MarkdownLoader
-			let readmeContent = await MarkdownLoader.loadFile(rawUrl);
-
-			// Fallback to master branch if main doesn't exist
-			if (!readmeContent) {
-				const masterUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/master/README.md`;
-				readmeContent = await MarkdownLoader.loadFile(masterUrl);
-			}
-
-			if (readmeContent) {
-				const htmlContent = marked.parse(readmeContent);
-				element.innerHTML = `<div class="markdown-body">${htmlContent}</div>`;
-
-				// Apply Prism syntax highlighting to code blocks in the README
-				requestAnimationFrame(async () => {
-					await highlightElement(element);
-					// Add copy buttons after syntax highlighting
-					UI.initCopyCodeButtons();
-				});
-			} else {
-				console.warn(`Failed to load README for ${fullRepo}`);
-				element.innerHTML = Templates.githubReadmeError();
-			}
-		} catch (error) {
-			console.warn(`Failed to load README for ${repo}:`, error);
-			element.innerHTML = Templates.githubReadmeError();
 		}
 	},
 };
