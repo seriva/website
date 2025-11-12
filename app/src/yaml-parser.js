@@ -11,6 +11,10 @@
 // Supports: comments, objects, arrays (inline & multi-line), strings, numbers, booleans
 
 export const YAMLParser = {
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
 	parse(yamlText) {
 		if (!yamlText) {
 			return {};
@@ -112,6 +116,10 @@ export const YAMLParser = {
 
 		return root;
 	},
+
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
 
 	// Parse a value string into appropriate type
 	_parseValue(str) {

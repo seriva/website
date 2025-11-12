@@ -8,6 +8,34 @@ import { Templates } from "./templates.js";
 import { YAMLParser } from "./yaml-parser.js";
 
 export const MarkdownLoader = {
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
+	// Initialize marked with custom configuration
+	init() {
+		if (!marked) {
+			console.error("Marked not loaded");
+			return;
+		}
+
+		marked.use({
+			breaks: true,
+			gfm: true,
+			renderer: {
+				code(token) {
+					// In marked v12+, renderers receive token objects
+					const code = token.text || "";
+					const language = token.lang || "";
+					// If language is specified, add Prism-compatible class
+					const lang = language || "text";
+					const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : "text";
+					return `<pre><code class="language-${validLang}">${Templates.escape(code)}</code></pre>`;
+				},
+			},
+		});
+	},
+
 	// Load markdown file from path
 	// Supports optional fetch options (e.g., headers for GitHub API)
 	async loadFile(path, fetchOptions = {}) {
@@ -21,8 +49,27 @@ export const MarkdownLoader = {
 		}
 	},
 
+	// Load markdown file with frontmatter
+	async loadWithFrontmatter(path) {
+		const markdown = await this.loadFile(path);
+		if (!markdown) return null;
+		return this._parseFrontmatter(markdown);
+	},
+
+	// Load markdown file and render to HTML
+	async loadAsHtml(path) {
+		const markdown = await this.loadFile(path);
+		if (!markdown) return null;
+		const result = Templates.markdown(markdown, marked);
+		return result.content || result;
+	},
+
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
+
 	// Parse YAML frontmatter from markdown content
-	parseFrontmatter(markdown) {
+	_parseFrontmatter(markdown) {
 		const frontmatterRegex = /^---\n([\s\S]*?)---\n([\s\S]*)$/;
 		const match = markdown.match(frontmatterRegex);
 
@@ -42,23 +89,8 @@ export const MarkdownLoader = {
 		return { metadata, content: content.trim() };
 	},
 
-	// Load markdown file with frontmatter
-	async loadWithFrontmatter(path) {
-		const markdown = await this.loadFile(path);
-		if (!markdown) return null;
-		return this.parseFrontmatter(markdown);
-	},
-
-	// Load markdown file and render to HTML
-	async loadAsHtml(path) {
-		const markdown = await this.loadFile(path);
-		if (!markdown) return null;
-		const result = Templates.markdown(markdown, marked);
-		return result.content || result;
-	},
-
 	// Load markdown with frontmatter and render content to HTML
-	async loadWithFrontmatterAsHtml(path) {
+	async _loadWithFrontmatterAsHtml(path) {
 		const result = await this.loadWithFrontmatter(path);
 		if (!result) return null;
 		const htmlResult = Templates.markdown(result.content, marked);

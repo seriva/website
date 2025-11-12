@@ -7,42 +7,19 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { Loaders } from "./loaders.js";
-import { highlightElement } from "./prism-loader.js";
+import { PrismLoader } from "./prism-loader.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
-import { getMainContent } from "./utils.js";
-
-// Helper function for page transitions
-const startTransition = async () => {
-	const mainContent = getMainContent();
-	mainContent.classList.add("page-transition-out");
-	await new Promise((resolve) =>
-		setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
-	);
-	mainContent.innerHTML = Templates.loadingSpinner();
-};
-
-const endTransition = () => {
-	const mainContent = getMainContent();
-	if (mainContent) {
-		mainContent.classList.remove("page-transition-out");
-
-		// Apply Prism syntax highlighting to all code blocks
-		requestAnimationFrame(async () => {
-			await highlightElement(mainContent);
-			// Add copy buttons after syntax highlighting
-			UI.initCopyCodeButtons();
-		});
-	}
-	window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-	requestAnimationFrame(UI.updateActiveNavLink);
-};
 
 // ===========================================
 // ROUTER NAMESPACE
 // ===========================================
 
 export const Router = {
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
 	// Main routing handler - orchestrates page navigation
 	async handleRoute() {
 		UI.closeMobileMenu();
@@ -55,7 +32,7 @@ export const Router = {
 			blogPage: params.get("p") ? Number.parseInt(params.get("p"), 10) : 1,
 		};
 
-		await startTransition();
+		await Router._startTransition();
 
 		try {
 			const data = Context.get();
@@ -77,11 +54,11 @@ export const Router = {
 				await Loaders.loadBlogPage(1);
 			}
 
-			endTransition();
+			Router._endTransition();
 		} catch (error) {
 			console.error("Error loading page:", error);
-			endTransition();
-			const mainContent = getMainContent();
+			Router._endTransition();
+			const mainContent = document.getElementById("main-content");
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
@@ -111,5 +88,36 @@ export const Router = {
 				}
 			}
 		});
+	},
+
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
+
+	// Start page transition animation
+	async _startTransition() {
+		const mainContent = document.getElementById("main-content");
+		mainContent.classList.add("page-transition-out");
+		await new Promise((resolve) =>
+			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
+		);
+		mainContent.innerHTML = Templates.loadingSpinner();
+	},
+
+	// End page transition and apply highlighting
+	_endTransition() {
+		const mainContent = document.getElementById("main-content");
+		if (mainContent) {
+			mainContent.classList.remove("page-transition-out");
+
+			// Apply Prism syntax highlighting to all code blocks
+			requestAnimationFrame(async () => {
+				await PrismLoader.highlight(mainContent);
+				// Add copy buttons after syntax highlighting
+				UI.initCopyCodeButtons();
+			});
+		}
+		window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+		requestAnimationFrame(UI.updateActiveNavLink);
 	},
 };

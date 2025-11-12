@@ -3,7 +3,7 @@ import { describe, test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
 import { marked } from "../app/src/dependencies/marked.js";
-import { escapeHtml } from "../app/src/utils.js";
+import { Templates } from "../app/src/templates.js";
 
 describe("Marked Code Renderer", () => {
 	beforeEach(() => {
@@ -19,7 +19,7 @@ describe("Marked Code Renderer", () => {
 					// If language is specified, add Prism-compatible class
 					const lang = language || "text";
 					const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : "text";
-					return `<pre><code class="language-${validLang}">${escapeHtml(code)}</code></pre>`;
+					return `<pre><code class="language-${validLang}">${Templates.escape(code)}</code></pre>`;
 				},
 			},
 		});

@@ -13,9 +13,9 @@ describe("Search Functionality", () => {
 	});
 
 	test("should handle empty/null queries", () => {
-		assert.equal(Search.search("").length, 0, "Empty query returns no results");
-		assert.equal(Search.search(null).length, 0, "Null query returns no results");
-		assert.equal(Search.search(undefined).length, 0, "Undefined query returns no results");
+		assert.equal(Search._search("").length, 0, "Empty query returns no results");
+		assert.equal(Search._search(null).length, 0, "Null query returns no results");
+		assert.equal(Search._search(undefined).length, 0, "Undefined query returns no results");
 	});
 
 	test("should respect min character requirement", async () => {
@@ -28,7 +28,7 @@ describe("Search Functionality", () => {
 			threshold: CONSTANTS.SEARCH_THRESHOLD,
 		});
 
-		const results = Search.search("a"); // 1 character, below min
+		const results = Search._search("a"); // 1 character, below min
 		assert.equal(results.length, 0, "Should not search below min chars");
 	});
 
@@ -45,7 +45,7 @@ describe("Search Functionality", () => {
 			threshold: CONSTANTS.SEARCH_THRESHOLD,
 		});
 
-		const results = Search.search("test");
+		const results = Search._search("test");
 		assert.ok(results.length > 0, "Should find matching results");
 	});
 
@@ -63,7 +63,7 @@ describe("Search Functionality", () => {
 			threshold: CONSTANTS.SEARCH_THRESHOLD,
 		});
 
-		const results = Search.search("Project");
+		const results = Search._search("Project");
 		assert.ok(results.length <= CONSTANTS.SEARCH_MAX_RESULTS, "Should limit results");
 	});
 });
