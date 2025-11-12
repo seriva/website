@@ -462,6 +462,12 @@ a.icon:hover {
 	font-size: 1em;
 }
 
+/* Hide native browser clear button (X) for search inputs */
+.search-page-input::-webkit-search-cancel-button {
+	-webkit-appearance: none;
+	appearance: none;
+}
+
 .search-page-input:focus {
 	outline: none;
 	border-color: var(--accent);
