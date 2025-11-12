@@ -5,6 +5,7 @@
 
 import { marked } from "./dependencies/marked.js";
 import { Templates } from "./templates.js";
+import { YAMLParser } from "./yaml-parser.js";
 
 export const MarkdownLoader = {
 	// Load markdown file from path
@@ -22,7 +23,7 @@ export const MarkdownLoader = {
 
 	// Parse YAML frontmatter from markdown content
 	parseFrontmatter(markdown) {
-		const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+		const frontmatterRegex = /^---\n([\s\S]*?)---\n([\s\S]*)$/;
 		const match = markdown.match(frontmatterRegex);
 
 		if (!match) {
@@ -30,33 +31,13 @@ export const MarkdownLoader = {
 		}
 
 		const [, frontmatter, content] = match;
-		const metadata = {};
 
-		for (const line of frontmatter.split("\n")) {
-			const colonIndex = line.indexOf(":");
-			if (colonIndex === -1) continue;
-
-			const key = line.slice(0, colonIndex).trim();
-			const value = line.slice(colonIndex + 1).trim();
-
-			if (!key || !value) continue;
-
-			// Parse arrays (e.g. tags: ['tag1', 'tag2'])
-			if (value.startsWith("[") && value.endsWith("]")) {
-				try {
-					metadata[key] = JSON.parse(value.replace(/'/g, '"'));
-				} catch (error) {
-					console.warn(
-						`Failed to parse array in frontmatter for key: ${key}`,
-						error,
-					);
-					metadata[key] = value;
-				}
-			} else {
-				// Remove surrounding quotes
-				metadata[key] = value.replace(/^["']|["']$/g, "");
-			}
+		// If frontmatter is empty (just whitespace), return the content as-is
+		if (!frontmatter.trim()) {
+			return { metadata: {}, content: content.trim() };
 		}
+
+		const metadata = YAMLParser.parse(frontmatter);
 
 		return { metadata, content: content.trim() };
 	},

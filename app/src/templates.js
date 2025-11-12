@@ -45,14 +45,14 @@ export const Templates = {
 
 	socialLink: ({
 		href = "#",
-		onclick = "",
+		"data-action": dataAction = "",
 		target = "",
 		rel = "",
 		"aria-label": ariaLabel = "",
 		icon,
 	}) => {
 		const attrs = [
-			onclick && `onclick="${onclick}"`,
+			dataAction && `data-action="${dataAction}"`,
 			target && `target="${target}"`,
 			rel && `rel="${rel}"`,
 			ariaLabel && `aria-label="${ariaLabel}"`,
@@ -66,12 +66,12 @@ export const Templates = {
 		html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
 
 	projectsDropdown: () => html`
-		<li class="nav-item navbar-menu dropdown">
+		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false">
-				Projects
+				${i18n.t("nav.projects")}
 			</a>
 			<ul class="dropdown-menu" id="projects-dropdown">
-				<li><a class="dropdown-item" href="#">Loading projects...</a></li>
+				<li><a class="dropdown-item" href="#">${i18n.t("dropdown.loadingProjects")}</a></li>
 			</ul>
 		</li>
 	`,
@@ -88,15 +88,15 @@ export const Templates = {
         </div></div>`,
 
 	demoIframe: (demoUrl) => html`
-        <div class="markdown-body"><h2>Play!</h2>
-            <p>On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls.</p>
+        <div class="markdown-body"><h2>${i18n.t("project.demo")}</h2>
+            <p>${i18n.t("project.demoInstructions")}</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" class="download-btn" onclick="fullscreen()"><i class="fas fa-expand"></i><span>Go Fullscreen</span></button></center>
+            </div><br><center><button id="fullscreen" class="download-btn" data-action="fullscreen"><i class="fas fa-expand"></i><span>${i18n.t("project.fullscreen")}</span></button></center>
         </div>`,
 
-	dynamicContainer: (id, dataAttr, dataValue, loadingText = "Loading...") =>
-		html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText}</p></div>`,
+	dynamicContainer: (id, dataAttr, dataValue, loadingText = null) =>
+		html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText || i18n.t("general.loading")}</p></div>`,
 
 	tagList: (tags, projectsData) => {
 		if (!tags?.length) return safe("");
@@ -105,10 +105,10 @@ export const Templates = {
 		return safe(
 			tags
 				.map((tag) => {
-					const onclickAttr = searchEnabled
-						? ` onclick="event.stopPropagation(); searchByTag('${escapeHtml(tag)}')"`
+					const dataAttr = searchEnabled
+						? ` data-search-tag="${escapeHtml(tag)}"`
 						: "";
-					return html`<span class="item-tag${clickableClass}"${safe(onclickAttr)}>${tag}</span>`;
+					return html`<span class="item-tag${clickableClass}"${safe(dataAttr)}>${tag}</span>`;
 				})
 				.join(" "),
 		);
@@ -235,14 +235,14 @@ export const Templates = {
         </footer>`,
 
 	searchInput: (id, cssClass, placeholder) => html`
-        <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="Search"/>
-        <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="Clear search">
+        <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}"/>
+        <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="${i18n.t("aria.clearSearch")}">
             <i class="fas fa-times"></i>
         </button>`,
 
 	searchBar: () => html`
         <li class="nav-item navbar-icon">
-            <button class="nav-link search-toggle" id="search-toggle" aria-label="Search">
+            <button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}">
                 <i class="fas fa-search"></i>
             </button>
         </li>`,
@@ -251,7 +251,7 @@ export const Templates = {
         <div class="search-page" id="search-page">
             <div class="search-page-header">
                 <div class="search-page-header-content">
-                    <button class="search-page-back" id="search-page-back" aria-label="Go back">
+                    <button class="search-page-back" id="search-page-back" aria-label="${i18n.t("aria.goBack")}">
                         <i class="fas fa-arrow-left"></i>
                     </button>
                     <div class="search-page-input-wrapper">

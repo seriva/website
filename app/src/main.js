@@ -8,23 +8,19 @@ import { marked } from "./dependencies/marked.js";
 import { injectFooter, injectNavbar, loadProjectsDropdown } from "./layout.js";
 import { registerRouteHandler } from "./router-events.js";
 import { handleRoute, setupSpaRouting } from "./routing.js";
-import { initializeSearch, initializeSearchPage } from "./search.js";
+import {
+	initializeSearch,
+	initializeSearchPage,
+	initializeTagSearch,
+} from "./search.js";
 import { Templates } from "./templates.js";
 import {
 	addMobileMenuOutsideClickHandler,
-	createEmailHandler,
-	fullscreen,
 	initCustomDropdowns,
 	initNavbarToggle,
+	setupGlobalEventDelegation,
 } from "./ui.js";
 import { escapeHtml, getMainContent } from "./utils.js";
-
-// ===========================================
-// GLOBAL EXPORTS
-// ===========================================
-
-// Expose functions for HTML onclick handlers
-window.fullscreen = fullscreen;
 
 // ===========================================
 // MARKDOWN CONFIGURATION
@@ -68,12 +64,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (data?.site) {
 			updateMetaTags(data.site);
-			// Setup email handler with config
-			window.Email = createEmailHandler(data.site.email);
 		}
 
 		// Register route handler for navigation (no global coupling!)
 		registerRouteHandler(handleRoute);
+
+		// Setup global event delegation for dynamic content (email, fullscreen, etc.)
+		setupGlobalEventDelegation(data?.site?.email);
 
 		// Inject navbar and footer first
 		await injectNavbar();
@@ -88,6 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (data?.site?.search?.enabled) {
 			initializeSearch();
 			initializeSearchPage(data.site.search);
+			initializeTagSearch();
 		}
 
 		// Handle initial route

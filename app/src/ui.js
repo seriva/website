@@ -4,6 +4,7 @@
 // User interface utilities and event handlers
 
 import { CONSTANTS } from "./constants.js";
+import { i18n } from "./i18n.js";
 
 // Cache for DOM queries (reset when navbar is re-rendered)
 let cachedNavLinks = null;
@@ -82,7 +83,7 @@ export const initNavbarToggle = () => {
 };
 
 // Request fullscreen for demo iframe
-export const fullscreen = () => {
+const fullscreen = () => {
 	try {
 		const iframe = document.getElementById("demo");
 		if (!iframe) return;
@@ -99,19 +100,41 @@ export const fullscreen = () => {
 	}
 };
 
-// Create email handler with config
-export const createEmailHandler = (emailConfig) => {
-	return (event) => {
-		event?.preventDefault();
+// Handle email link clicks
+const handleEmailClick = (event, emailConfig) => {
+	event?.preventDefault();
 
-		if (emailConfig?.name && emailConfig?.domain) {
-			const email = `${emailConfig.name}@${emailConfig.domain}`;
-			window.location.href = `mailto:${email}`;
-		} else {
-			console.warn("Email configuration not found, using fallback");
-			window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
+	if (emailConfig?.name && emailConfig?.domain) {
+		const email = `${emailConfig.name}@${emailConfig.domain}`;
+		window.location.href = `mailto:${email}`;
+	} else {
+		console.warn("Email configuration not found, using fallback");
+		window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
+	}
+};
+
+// Setup global event delegation for dynamic content
+// This replaces the need for window.Email and window.fullscreen
+export const setupGlobalEventDelegation = (emailConfig) => {
+	// Use event delegation on document to handle dynamically added elements
+	document.addEventListener("click", (event) => {
+		const target = event.target.closest("[data-action]");
+		if (!target) return;
+
+		const action = target.getAttribute("data-action");
+
+		switch (action) {
+			case "fullscreen":
+				event.preventDefault();
+				fullscreen();
+				break;
+			case "email":
+				handleEmailClick(event, emailConfig);
+				break;
+			default:
+				break;
 		}
-	};
+	});
 };
 
 // Add copy buttons to all code blocks
@@ -126,26 +149,26 @@ export const initCopyCodeButtons = () => {
 
 		const button = document.createElement("button");
 		button.className = "copy-code-button";
-		button.textContent = "Copy";
-		button.setAttribute("aria-label", "Copy code to clipboard");
+		button.textContent = i18n.t("code.copy");
+		button.setAttribute("aria-label", i18n.t("aria.copyCode"));
 
 		button.addEventListener("click", async () => {
 			try {
 				const code = codeElement.textContent || "";
 				await navigator.clipboard.writeText(code);
 
-				button.textContent = "Copied!";
+				button.textContent = i18n.t("code.copied");
 				button.classList.add("copied");
 
 				setTimeout(() => {
-					button.textContent = "Copy";
+					button.textContent = i18n.t("code.copy");
 					button.classList.remove("copied");
 				}, CONSTANTS.COPY_BUTTON_RESET_MS);
 			} catch (error) {
 				console.error("Failed to copy code:", error);
-				button.textContent = "Failed";
+				button.textContent = i18n.t("code.copyFailed");
 				setTimeout(() => {
-					button.textContent = "Copy";
+					button.textContent = i18n.t("code.copy");
 				}, CONSTANTS.COPY_BUTTON_RESET_MS);
 			}
 		});

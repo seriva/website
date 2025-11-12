@@ -275,7 +275,7 @@ export const initializeSearchPage = (searchConfig) => {
 // ===========================================
 
 // Open search page with tag pre-filled
-export const searchByTag = (tag) => {
+const searchByTag = (tag) => {
 	const searchPage = document.getElementById("search-page");
 	const searchInput = document.getElementById("search-page-input");
 
@@ -289,5 +289,18 @@ export const searchByTag = (tag) => {
 	}
 };
 
-// Expose globally for HTML onclick handlers
-window.searchByTag = searchByTag;
+// Initialize tag search event delegation
+export const initializeTagSearch = () => {
+	document.addEventListener("click", (event) => {
+		const tagElement = event.target.closest("[data-search-tag]");
+		if (!tagElement) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		const tag = tagElement.getAttribute("data-search-tag");
+		if (tag) {
+			searchByTag(tag);
+		}
+	});
+};

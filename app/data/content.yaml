@@ -59,8 +59,8 @@ site:
   # Social media links
   social:
     - icon: "fas fa-envelope"
-      href: "javascript:void(0)"
-      onclick: "javascript:Email(event);"
+      href: "#"
+      data-action: "email"
       aria-label: "Contact Luuk via email"
     
     - icon: "fab fa-github"
@@ -277,3 +277,11 @@ translations:
     "footer.rights": "All rights reserved"
     "badges.project": "Project"
     "badges.blog": "Blog"
+    "aria.search": "Search"
+    "aria.goBack": "Go back"
+    "aria.clearSearch": "Clear search"
+    "aria.copyCode": "Copy code to clipboard"
+    "dropdown.loadingProjects": "Loading projects..."
+    "code.copy": "Copy"
+    "code.copied": "Copied!"
+    "code.copyFailed": "Failed"
