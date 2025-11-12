@@ -10,7 +10,7 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
 2. **Namespace Pattern**: Use object exports for grouping related functions
    - Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
    - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
-   - Exception: Keep `utils.js` as individual exports (truly standalone utilities)
+   - All modules follow this pattern consistently
 3. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
 4. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
 5. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
@@ -28,13 +28,14 @@ Before any build or deployment, ALL of the following must pass:
    - Uses Biome to catch errors and enforce code quality
    
 3. **Tests**: `npm test`
-   - 70 unit tests covering:
-     - HTML escaping and template functions (`tests/utils.test.js`)
+   - 65 unit tests covering:
+     - HTML escaping and template utilities (`tests/template-utils.test.js`)
      - All template generation (`tests/templates.test.js`)
      - Search functionality (`tests/search.test.js`)
      - YAML parser (`tests/yaml-parser.test.js`)
      - Routing logic (`tests/routing.test.js`)
      - Markdown parsing (`tests/markdown.test.js`)
+     - Marked.js configuration (`tests/marked.test.js`)
      - Internationalization (`tests/i18n.test.js`)
    - Uses Node.js built-in test runner (zero test framework dependencies)
    - All tests MUST pass before merging or deploying
@@ -72,17 +73,17 @@ describe("My Module", () => {
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
 - `app/src/layout.js` - `Layout` namespace for navbar and footer rendering
 - `app/src/router-events.js` - `RouterEvents` namespace for routing event system
-- `app/src/templates.js` - `Templates` namespace for all template functions
+- `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
 - `app/src/search.js` - `Search` namespace for Fuse.js search implementation
 - `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
 - `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
+- `app/src/prism-loader.js` - `PrismLoader` namespace for syntax highlighting
 - `app/src/i18n.js` - `i18n` namespace for internationalization
 - `app/src/constants.js` - `CONSTANTS` object for configuration
 
 **Other Modules**:
 - `app/src/main.js` - Entry point, initialization
-- `app/src/utils.js` - Individual utility exports (escapeHtml, safe, html, etc.)
-- `app/src/prism-loader.js` - Syntax highlighting, dynamic language loading
+- `app/src/dependencies/` - Bundled npm packages (Fuse.js, Marked, Prism)
 
 ### Don't
 

@@ -5,7 +5,7 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 ### Core Principles
 - **Namespace Pattern**: Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
   - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
-  - Exception: `utils.js` keeps individual exports (truly standalone utilities)
+  - All modules follow this pattern consistently
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
 - Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
 - Call `await Context.init()` to load content; access via `Context.get()` (cached)
@@ -57,17 +57,16 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
 - `app/src/layout.js` - `Layout` namespace for navbar and footer rendering
 - `app/src/router-events.js` - `RouterEvents` namespace for routing event system
-- `app/src/templates.js` - `Templates` namespace for all template functions
+- `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
 - `app/src/search.js` - `Search` namespace for Fuse.js search implementation
 - `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
 - `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
+- `app/src/prism-loader.js` - `PrismLoader` namespace for syntax highlighting
 - `app/src/i18n.js` - `i18n` namespace for internationalization
 - `app/src/constants.js` - `CONSTANTS` object for configuration
 
 **Other Modules**:
 - `app/src/main.js` - entry point, initialization
-- `app/src/utils.js` - individual utility exports (escapeHtml, safe, html, etc.)
-- `app/src/prism-loader.js` - syntax highlighting, dynamic language loading
 - `app/src/dependencies/` - bundled npm packages (managed by Microtastic)
 
 ### Files & Directories
