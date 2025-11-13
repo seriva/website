@@ -62,11 +62,6 @@ site:
   
   # Social media links
   social:
-    - icon: "fas fa-envelope"
-      href: "#"
-      data-action: "email"
-      aria-label: "Contact Luuk via email"
-    
     - icon: "fab fa-github"
       href: "https://github.com/seriva/"
       target: "_blank"

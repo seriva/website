@@ -1723,14 +1723,6 @@ button.nav-link:active {
 	min-height: 100px;
 }
 
-.form-error {
-	display: block;
-	color: #ef4444;
-	font-size: 0.8rem;
-	margin-top: 0.2rem;
-	min-height: 0;
-}
-
 .form-status {
 	padding: 0.6rem;
 	border-radius: 4px;
@@ -1754,6 +1746,7 @@ button.nav-link:active {
 .contact-form .btn {
 	width: 100%;
 	padding: 12px 24px;
+	margin-top: 0.75rem;
 	background-color: #2a2a2a;
 	border: 2px solid var(--accent);
 	border-radius: 8px;
