@@ -8,6 +8,7 @@ import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
 import { RouterEvents } from "./router-events.js";
 import { Templates } from "./templates.js";
+import { UI } from "./ui.js";
 
 // ===========================================
 // SEARCH CORE
@@ -59,6 +60,8 @@ export const Search = {
 
 		const openSearchPage = () => {
 			if (searchPage) {
+				// Close mobile menu before opening search
+				UI.closeMobileMenu();
 				searchPage.classList.add("show");
 				if (searchInput) {
 					requestAnimationFrame(() => searchInput.focus());
