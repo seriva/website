@@ -1632,6 +1632,10 @@ button.nav-link:active {
 	justify-content: center;
 }
 
+.contact-modal.closing {
+	animation: fadeOut 0.2s ease-in-out forwards;
+}
+
 .contact-modal-content {
 	background-color: var(--background-color);
 	border: 2px solid var(--border-color);
@@ -1641,6 +1645,9 @@ button.nav-link:active {
 	width: 100%;
 	position: relative;
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+	opacity: 0;
+	transform: scale(0.95);
+	animation: scaleFadeIn 0.25s ease-out forwards;
 }
 
 .contact-modal-header {
