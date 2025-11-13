@@ -58,22 +58,28 @@ export const Email = {
 		const modal = document.getElementById(this._FIELD_IDS.MODAL);
 		if (!modal) return;
 
+		modal.classList.remove("closing");
 		modal.classList.add("show");
 
-		// Focus first input
+		// Focus first input after animation starts
 		const nameInput = document.getElementById(this._FIELD_IDS.NAME);
 		if (nameInput) {
 			requestAnimationFrame(() => nameInput.focus());
 		}
 	},
 
-	// Hide contact form modal
+	// Hide contact form modal with animation
 	hide() {
 		const modal = document.getElementById(this._FIELD_IDS.MODAL);
-		if (modal) {
-			modal.classList.remove("show");
+		if (!modal) return;
+
+		modal.classList.add("closing");
+
+		// Wait for animation to complete before hiding
+		setTimeout(() => {
+			modal.classList.remove("show", "closing");
 			this._resetForm();
-		}
+		}, 200); // Match animation duration
 	},
 
 	// ===========================================
