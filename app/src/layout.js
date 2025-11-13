@@ -54,9 +54,13 @@ export const Layout = {
 			.map((page) => Templates.pageLink(page.id, page.title))
 			.join("");
 		const socialLinksHtml = (data?.site?.social || [])
+			.filter((link) => link["data-action"] !== "email")
 			.map((link) => Templates.socialLink(link))
 			.join("");
 		const searchBar = data?.site?.search?.enabled ? Templates.searchBar() : "";
+		const emailButton = data?.site?.emailjs?.enabled
+			? Templates.emailButton()
+			: "";
 		const projectsDropdown = Templates.projectsDropdown();
 
 		navbarContainer.innerHTML = Templates.navbar(
@@ -65,6 +69,7 @@ export const Layout = {
 			pageLinks,
 			socialLinksHtml,
 			searchBar,
+			emailButton,
 			data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 		);
 

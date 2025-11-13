@@ -12,6 +12,7 @@ Key features:
 - **Dynamic color themes** - Customizable color schemes
 - **GitHub integration** - Loads project READMEs directly from GitHub
 - **Comments system** - GitHub Discussions integration via giscus (optional)
+- **Contact form** - EmailJS integration with spam protection (optional)
 - **Mobile-friendly** - Responsive design with unified search
 - **ES6 modules** - Clean, modular code organization
 - **Microtastic build** - Minimal build tooling for dependency bundling
@@ -387,6 +388,32 @@ site:
 - **Auto-mapping** - Each URL gets its own discussion thread automatically
 - **Responsive** - Works on mobile and desktop
 - **Theme integration** - Matches your site's dark/light theme
+
+### Contact Form (EmailJS)
+
+The site includes a contact form modal with email delivery via [EmailJS](https://www.emailjs.com/). When enabled, an envelope icon button appears in the navbar (before social media links).
+
+**Setup:**
+1. Sign up at emailjs.com (free tier: 200 emails/month)
+2. Create an email service and template
+3. Configure template variables: `{{title}}`, `{{name}}`, `{{email}}`, `{{time}}`, `{{message}}`
+4. Add credentials to `content.yaml`:
+
+```yaml
+site:
+  emailjs:
+    enabled: true
+    serviceId: "service_xxx"      # From EmailJS dashboard
+    templateId: "template_xxx"    # From EmailJS dashboard
+    publicKey: "your_public_key"  # From EmailJS dashboard
+```
+
+**Features:**
+- Modal form with name, email, and message fields
+- Client-side validation (required fields, email format)
+- Success/error feedback messages
+- Mobile-friendly with automatic menu closing
+- Form automatically closes 2 seconds after successful send
 
 ### Internationalization (i18n)
 

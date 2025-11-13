@@ -60,8 +60,6 @@ export const Search = {
 
 		const openSearchPage = () => {
 			if (searchPage) {
-				// Close mobile menu before opening search
-				UI.closeMobileMenu();
 				searchPage.classList.add("show");
 				if (searchInput) {
 					requestAnimationFrame(() => searchInput.focus());
@@ -72,6 +70,7 @@ export const Search = {
 		if (searchToggle) {
 			searchToggle.addEventListener("click", (e) => {
 				e.preventDefault();
+				UI.closeMobileMenu();
 				openSearchPage();
 			});
 		}
