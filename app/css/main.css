@@ -1729,6 +1729,12 @@ button.nav-link:active {
 	margin-bottom: 0.25rem;
 	text-align: center;
 	font-size: 0.9rem;
+	display: none;
+}
+
+.form-status.success,
+.form-status.error {
+	display: block;
 }
 
 .form-status.success {
