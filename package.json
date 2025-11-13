@@ -10,18 +10,20 @@
 		"npm": ">=9.0.0"
 	},
 	"scripts": {
-		"prepare": "microtastic prep",
+		"prepare": "husky && microtastic prep",
 		"dependencies": "microtastic prep",
 		"dev": "microtastic dev",
-		"prod": "npm run check && npm test && microtastic prod",
+		"prod": "npm run check && npm test && microtastic prod && npm run seo",
 		"test": "node --test tests/*.test.js",
 		"format": "biome format --write .",
-		"check": "biome check ."
+		"check": "biome check .",
+		"seo": "node scripts/generate-seo.js"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.5",
 		"@fontsource/raleway": "^5.2.8",
 		"@fortawesome/fontawesome-free": "^7.1.0",
+		"husky": "^9.1.7",
 		"jsdom": "^27.2.0",
 		"microtastic": "^0.0.48"
 	},

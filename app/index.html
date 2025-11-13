@@ -24,6 +24,20 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml">
+    
+    <!-- Performance Optimizations -->
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/main.css" as="style">
+    <link rel="modulepreload" href="src/main.js">
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+    
+    <!-- Preconnect to external domains we'll use -->
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+    
     <!-- Stylesheets -->
     <!-- Prism.js theme will be injected dynamically from content.yaml colors.code.theme -->
     <link rel="stylesheet" href="css/main.css">

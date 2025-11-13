@@ -1,3 +1,6 @@
 # Allow all crawlers
 User-agent: *
 Allow: /
+
+# Sitemap location
+Sitemap: https://luukvanvenrooij.nl/sitemap.xml
