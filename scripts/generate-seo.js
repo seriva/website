@@ -13,8 +13,10 @@ import { YAMLParser } from "../app/src/yaml-parser.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const RSS_MAX_ITEMS = 20; // Limit RSS feed items
+
 // ===========================================
-// SITEMAP GENERATION
+// UTILITIES
 // ===========================================
 
 function escapeXml(str) {
@@ -26,74 +28,58 @@ function escapeXml(str) {
 		.replace(/'/g, "&apos;");
 }
 
+function buildXml(parts) {
+	return parts.join("");
+}
+
 function generateSitemap(contentData, baseUrl) {
-	const urls = [];
 	const today = new Date().toISOString().split("T")[0];
+	const parts = [
+		'<?xml version="1.0" encoding="UTF-8"?>\n',
+		'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n',
+	];
+
+	// Helper to add URL entry
+	const addUrl = (path, lastmod, changefreq, priority) => {
+		parts.push(
+			"  <url>\n",
+			`    <loc>${baseUrl}${path}</loc>\n`,
+			`    <lastmod>${lastmod}</lastmod>\n`,
+			`    <changefreq>${changefreq}</changefreq>\n`,
+			`    <priority>${priority}</priority>\n`,
+			"  </url>\n",
+		);
+	};
 
 	// Add homepage (blog)
-	urls.push({
-		loc: baseUrl,
-		lastmod: today,
-		changefreq: "weekly",
-		priority: "1.0",
-	});
+	addUrl("", today, "weekly", "1.0");
 
 	// Add blog posts
 	if (contentData.blog?.posts) {
 		for (const post of contentData.blog.posts) {
-			const filename = post.filename;
-			const slug = filename.replace(/\.md$/, "");
-
-			urls.push({
-				loc: `${baseUrl}?blog=${escapeXml(slug)}`,
-				lastmod: post.date || today,
-				changefreq: "monthly",
-				priority: "0.8",
-			});
+			const slug = escapeXml(post.filename.replace(/\.md$/, ""));
+			addUrl(`?blog=${slug}`, post.date || today, "monthly", "0.8");
 		}
 	}
 
 	// Add projects
 	if (contentData.projects) {
 		for (const project of contentData.projects) {
-			urls.push({
-				loc: `${baseUrl}?project=${escapeXml(project.id)}`,
-				lastmod: today,
-				changefreq: "monthly",
-				priority: "0.9",
-			});
+			const id = escapeXml(project.id);
+			addUrl(`?project=${id}`, today, "monthly", "0.9");
 		}
 	}
 
 	// Add pages
 	if (contentData.pages) {
-		for (const [pageId, page] of Object.entries(contentData.pages)) {
-			urls.push({
-				loc: `${baseUrl}?page=${escapeXml(pageId)}`,
-				lastmod: today,
-				changefreq: "monthly",
-				priority: "0.7",
-			});
+		for (const pageId of Object.keys(contentData.pages)) {
+			const id = escapeXml(pageId);
+			addUrl(`?page=${id}`, today, "monthly", "0.7");
 		}
 	}
 
-	// Generate XML
-	let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-	xml +=
-		'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
-	for (const url of urls) {
-		xml += "  <url>\n";
-		xml += `    <loc>${url.loc}</loc>\n`;
-		xml += `    <lastmod>${url.lastmod}</lastmod>\n`;
-		xml += `    <changefreq>${url.changefreq}</changefreq>\n`;
-		xml += `    <priority>${url.priority}</priority>\n`;
-		xml += "  </url>\n";
-	}
-
-	xml += "</urlset>\n";
-
-	return xml;
+	parts.push("</urlset>\n");
+	return buildXml(parts);
 }
 
 // ===========================================
@@ -102,95 +88,104 @@ function generateSitemap(contentData, baseUrl) {
 
 function generateRssFeed(contentData, baseUrl) {
 	const site = contentData.site || {};
-	const blog = contentData.blog || {};
-	const posts = blog.posts || [];
+	const posts = contentData.blog?.posts || [];
 
-	// Sort posts by date (newest first)
-	const sortedPosts = [...posts].sort((a, b) => {
-		const dateA = new Date(a.date || "1970-01-01");
-		const dateB = new Date(b.date || "1970-01-01");
-		return dateB - dateA;
-	});
+	// Sort posts by date (newest first) and limit to RSS_MAX_ITEMS
+	const sortedPosts = [...posts]
+		.sort((a, b) => {
+			const dateA = new Date(a.date || "1970-01-01");
+			const dateB = new Date(b.date || "1970-01-01");
+			return dateB - dateA;
+		})
+		.slice(0, RSS_MAX_ITEMS);
 
-	// Build feed
-	let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-	xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n';
-	xml += "  <channel>\n";
-	xml += `    <title>${escapeXml(site.title || "Blog")}</title>\n`;
-	xml += `    <link>${baseUrl}</link>\n`;
-	xml += `    <description>${escapeXml(site.description || "Latest blog posts")}</description>\n`;
-	xml += `    <language>en</language>\n`;
-	xml += `    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>\n`;
-	xml += `    <atom:link href="${baseUrl}/rss.xml" rel="self" type="application/rss+xml" />\n`;
+	const now = new Date().toUTCString();
+	const parts = [
+		'<?xml version="1.0" encoding="UTF-8"?>\n',
+		'<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n',
+		"  <channel>\n",
+		`    <title>${escapeXml(site.title || "Blog")}</title>\n`,
+		`    <link>${baseUrl}</link>\n`,
+		`    <description>${escapeXml(site.description || "Latest blog posts")}</description>\n`,
+		"    <language>en</language>\n",
+		`    <lastBuildDate>${now}</lastBuildDate>\n`,
+		`    <atom:link href="${baseUrl}/rss.xml" rel="self" type="application/rss+xml" />\n`,
+	];
 
 	// Add blog posts
 	for (const post of sortedPosts) {
-		const filename = post.filename;
-		const slug = filename.replace(/\.md$/, "");
-		const postUrl = `${baseUrl}?blog=${escapeXml(slug)}`;
-		const pubDate = post.date
-			? new Date(post.date).toUTCString()
-			: new Date().toUTCString();
+		const slug = escapeXml(post.filename.replace(/\.md$/, ""));
+		const postUrl = `${baseUrl}?blog=${slug}`;
+		const title = escapeXml(post.title || slug);
+		const pubDate = post.date ? new Date(post.date).toUTCString() : now;
 
-		xml += "    <item>\n";
-		xml += `      <title>${escapeXml(post.title || slug)}</title>\n`;
-		xml += `      <link>${postUrl}</link>\n`;
-		xml += `      <guid isPermaLink="true">${postUrl}</guid>\n`;
-		xml += `      <pubDate>${pubDate}</pubDate>\n`;
+		parts.push(
+			"    <item>\n",
+			`      <title>${title}</title>\n`,
+			`      <link>${postUrl}</link>\n`,
+			`      <guid isPermaLink="true">${postUrl}</guid>\n`,
+			`      <pubDate>${pubDate}</pubDate>\n`,
+		);
 
 		if (post.excerpt) {
-			xml += `      <description>${escapeXml(post.excerpt)}</description>\n`;
+			parts.push(`      <description>${escapeXml(post.excerpt)}</description>\n`);
 		}
 
 		// Add categories/tags
-		if (post.tags && Array.isArray(post.tags)) {
+		if (post.tags?.length) {
 			for (const tag of post.tags) {
-				xml += `      <category>${escapeXml(tag)}</category>\n`;
+				parts.push(`      <category>${escapeXml(tag)}</category>\n`);
 			}
 		}
 
-		xml += "    </item>\n";
+		parts.push("    </item>\n");
 	}
 
-	xml += "  </channel>\n";
-	xml += "</rss>\n";
-
-	return xml;
+	parts.push("  </channel>\n", "</rss>\n");
+	return buildXml(parts);
 }
 
 // ===========================================
 // MAIN
 // ===========================================
 
+function getBaseUrl(contentData) {
+	// Priority: site.url > site.title (if domain-like) > default
+	if (contentData.site?.url) {
+		return contentData.site.url.replace(/\/$/, ""); // Remove trailing slash
+	}
+	if (contentData.site?.title?.includes(".")) {
+		return `https://${contentData.site.title}`;
+	}
+	return "https://example.com";
+}
+
 function main() {
 	try {
-		// Read content.yaml
+		// Read and parse content.yaml
 		const contentPath = join(__dirname, "../app/data/content.yaml");
 		const yamlText = readFileSync(contentPath, "utf8");
 		const contentData = YAMLParser.parse(yamlText);
 
-		// Get base URL from site title or use default
-		const baseUrl =
-			contentData.site?.title?.includes(".")
-				? `https://${contentData.site.title}`
-				: "https://example.com";
+		const baseUrl = getBaseUrl(contentData);
+		const publicDir = join(__dirname, "../public");
 
 		// Generate sitemap
 		const sitemap = generateSitemap(contentData, baseUrl);
-		const publicSitemapPath = join(__dirname, "../public/sitemap.xml");
-		writeFileSync(publicSitemapPath, sitemap);
-		console.log(`✓ Generated sitemap: ${publicSitemapPath}`);
-
+		const sitemapPath = join(publicDir, "sitemap.xml");
+		writeFileSync(sitemapPath, sitemap);
+		
 		const urlCount = (sitemap.match(/<url>/g) || []).length;
+		console.log(`✓ Generated sitemap: ${sitemapPath}`);
 		console.log(`  → ${urlCount} URLs`);
 
 		// Generate RSS feed
 		const rssFeed = generateRssFeed(contentData, baseUrl);
-		const publicRssPath = join(__dirname, "../public/rss.xml");
-		writeFileSync(publicRssPath, rssFeed);
-		console.log(`✓ Generated RSS feed: ${publicRssPath}`);
-
+		const rssPath = join(publicDir, "rss.xml");
+		writeFileSync(rssPath, rssFeed);
+		
 		const itemCount = (rssFeed.match(/<item>/g) || []).length;
+		console.log(`✓ Generated RSS feed: ${rssPath}`);
 		console.log(`  → ${itemCount} blog posts`);
 	} catch (error) {
 		console.error("Error generating sitemap/RSS feed:", error.message);
