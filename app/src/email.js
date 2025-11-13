@@ -106,33 +106,27 @@ export const Email = {
 		const config = data?.site?.emailjs;
 
 		if (!this.initialized) {
-			this._showError(
+			this._showStatus(
 				"EmailJS not configured. Please add your EmailJS credentials to content.yaml to enable contact form.",
+				"error",
 			);
 			return;
 		}
 
-		// Get form data
 		const form = e.target;
 		const submitBtn = document.getElementById(this._FIELD_IDS.SUBMIT);
-		const statusDiv = document.getElementById(this._FIELD_IDS.STATUS);
 
 		// Validate
 		if (!this._validateForm(form)) {
 			return;
 		}
 
-		// Disable submit button
+		// Disable submit button and clear status
 		if (submitBtn) {
 			submitBtn.disabled = true;
 			submitBtn.textContent = i18n.t("contact.sending");
 		}
-
-		// Clear previous status
-		if (statusDiv) {
-			statusDiv.textContent = "";
-			statusDiv.className = "form-status";
-		}
+		this._clearStatus();
 
 		try {
 			// Get form values
@@ -236,17 +230,20 @@ export const Email = {
 		}
 	},
 
+	_clearStatus() {
+		const statusDiv = document.getElementById(this._FIELD_IDS.STATUS);
+		if (statusDiv) {
+			statusDiv.textContent = "";
+			statusDiv.className = "form-status";
+		}
+	},
+
 	_resetForm() {
 		const form = document.getElementById(this._FIELD_IDS.FORM);
 		if (form) {
 			form.reset();
 			this._clearFieldErrors();
-
-			const statusDiv = document.getElementById(this._FIELD_IDS.STATUS);
-			if (statusDiv) {
-				statusDiv.textContent = "";
-				statusDiv.className = "form-status";
-			}
+			this._clearStatus();
 
 			// Reset submit button
 			const submitBtn = document.getElementById(this._FIELD_IDS.SUBMIT);
