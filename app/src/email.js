@@ -16,6 +16,18 @@ import { Templates } from "./templates.js";
 export const Email = {
 	initialized: false,
 
+	// Field IDs
+	_FIELD_IDS: {
+		NAME: "contact-name",
+		EMAIL: "contact-email",
+		MESSAGE: "contact-message",
+		STATUS: "contact-status",
+		SUBMIT: "contact-submit",
+		MODAL: "contact-modal",
+		CLOSE: "contact-modal-close",
+		FORM: "contact-form",
+	},
+
 	// ===========================================
 	// PUBLIC METHODS
 	// ===========================================
@@ -26,15 +38,11 @@ export const Email = {
 		const config = data?.site?.emailjs;
 
 		// Only initialize if enabled
-		if (!config?.enabled) {
-			return;
-		}
+		if (!config?.enabled) return;
 
 		// Inject the contact form modal
-		const existingModal = document.getElementById("contact-modal");
-		if (!existingModal) {
+		if (!document.getElementById(this._FIELD_IDS.MODAL)) {
 			document.body.insertAdjacentHTML("beforeend", Templates.contactForm());
-			// Setup event listeners only once after injection
 			this._setupEventListeners();
 		}
 
@@ -47,13 +55,13 @@ export const Email = {
 
 	// Show contact form modal
 	show() {
-		const modal = document.getElementById("contact-modal");
+		const modal = document.getElementById(this._FIELD_IDS.MODAL);
 		if (!modal) return;
 
 		modal.classList.add("show");
 
 		// Focus first input
-		const nameInput = document.getElementById("contact-name");
+		const nameInput = document.getElementById(this._FIELD_IDS.NAME);
 		if (nameInput) {
 			requestAnimationFrame(() => nameInput.focus());
 		}
@@ -61,7 +69,7 @@ export const Email = {
 
 	// Hide contact form modal
 	hide() {
-		const modal = document.getElementById("contact-modal");
+		const modal = document.getElementById(this._FIELD_IDS.MODAL);
 		if (modal) {
 			modal.classList.remove("show");
 			this._resetForm();
@@ -73,28 +81,15 @@ export const Email = {
 	// ===========================================
 
 	_setupEventListeners() {
-		const modal = document.getElementById("contact-modal");
-		const closeBtn = document.getElementById("contact-modal-close");
-		const form = document.getElementById("contact-form");
+		const modal = document.getElementById(this._FIELD_IDS.MODAL);
+		const closeBtn = document.getElementById(this._FIELD_IDS.CLOSE);
+		const form = document.getElementById(this._FIELD_IDS.FORM);
 
-		// Close button
-		if (closeBtn) {
-			closeBtn.addEventListener("click", () => this.hide());
-		}
-
-		// Click outside to close
-		if (modal) {
-			modal.addEventListener("click", (e) => {
-				if (e.target === modal) {
-					this.hide();
-				}
-			});
-		}
-
-		// Form submission
-		if (form) {
-			form.addEventListener("submit", (e) => this._handleSubmit(e));
-		}
+		closeBtn?.addEventListener("click", () => this.hide());
+		modal?.addEventListener("click", (e) => {
+			if (e.target === modal) this.hide();
+		});
+		form?.addEventListener("submit", (e) => this._handleSubmit(e));
 
 		// ESC key to close
 		document.addEventListener("keydown", (e) => {
@@ -119,8 +114,8 @@ export const Email = {
 
 		// Get form data
 		const form = e.target;
-		const submitBtn = document.getElementById("contact-submit");
-		const statusDiv = document.getElementById("contact-status");
+		const submitBtn = document.getElementById(this._FIELD_IDS.SUBMIT);
+		const statusDiv = document.getElementById(this._FIELD_IDS.STATUS);
 
 		// Validate
 		if (!this._validateForm(form)) {
@@ -171,9 +166,9 @@ export const Email = {
 	},
 
 	_validateForm(form) {
-		const nameInput = form.querySelector("#contact-name");
-		const emailInput = form.querySelector("#contact-email");
-		const messageInput = form.querySelector("#contact-message");
+		const nameInput = form.querySelector(`#${this._FIELD_IDS.NAME}`);
+		const emailInput = form.querySelector(`#${this._FIELD_IDS.EMAIL}`);
+		const messageInput = form.querySelector(`#${this._FIELD_IDS.MESSAGE}`);
 
 		// Clear previous errors
 		this._clearFieldErrors();
@@ -222,9 +217,11 @@ export const Email = {
 	},
 
 	_clearFieldErrors() {
-		const inputs = ["contact-name", "contact-email", "contact-message"].map(
-			(id) => document.getElementById(id),
-		);
+		const inputs = [
+			this._FIELD_IDS.NAME,
+			this._FIELD_IDS.EMAIL,
+			this._FIELD_IDS.MESSAGE,
+		].map((id) => document.getElementById(id));
 
 		for (const input of inputs) {
 			if (input) input.classList.remove("error");
@@ -232,7 +229,7 @@ export const Email = {
 	},
 
 	_showStatus(message, type) {
-		const statusDiv = document.getElementById("contact-status");
+		const statusDiv = document.getElementById(this._FIELD_IDS.STATUS);
 		if (statusDiv) {
 			statusDiv.textContent = message;
 			statusDiv.className = `form-status ${type}`;
@@ -240,19 +237,19 @@ export const Email = {
 	},
 
 	_resetForm() {
-		const form = document.getElementById("contact-form");
+		const form = document.getElementById(this._FIELD_IDS.FORM);
 		if (form) {
 			form.reset();
 			this._clearFieldErrors();
 
-			const statusDiv = document.getElementById("contact-status");
+			const statusDiv = document.getElementById(this._FIELD_IDS.STATUS);
 			if (statusDiv) {
 				statusDiv.textContent = "";
 				statusDiv.className = "form-status";
 			}
 
 			// Reset submit button
-			const submitBtn = document.getElementById("contact-submit");
+			const submitBtn = document.getElementById(this._FIELD_IDS.SUBMIT);
 			if (submitBtn) {
 				submitBtn.disabled = false;
 				submitBtn.textContent = i18n.t("contact.send");

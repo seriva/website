@@ -424,7 +424,7 @@ export const Templates = {
 							aria-required="true"
 						></textarea>
 					</div>
-					<div class="form-status error" id="contact-status">Email: This field is required</div>
+					<div class="form-status" id="contact-status"></div>
 					<button type="submit" class="btn btn-primary" id="contact-submit">
 						${i18n.t("contact.send")}
 					</button>
