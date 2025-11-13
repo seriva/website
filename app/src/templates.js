@@ -46,6 +46,7 @@ export const Templates = {
 		pageLinks,
 		socialLinksHtml,
 		searchBar,
+		emailButton,
 		siteTitle,
 	) => Templates.html`
     <nav class="navbar">
@@ -62,6 +63,7 @@ export const Templates = {
                 </ul>
                 <ul class="navbar-nav right">
                     ${Templates.safe(searchBar)}
+                    ${Templates.safe(emailButton)}
                     ${Templates.safe(socialLinksHtml)}
                 </ul>
             </div>
@@ -283,6 +285,13 @@ export const Templates = {
             </button>
         </li>`,
 
+	emailButton: () => Templates.html`
+        <li class="nav-item navbar-icon">
+            <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}">
+                <i class="fas fa-envelope"></i>
+            </button>
+        </li>`,
+
 	searchPage: (placeholder) => Templates.html`
         <div class="search-page" id="search-page">
             <div class="search-page-header">
@@ -373,4 +382,57 @@ export const Templates = {
 
 		return Templates.html`<div class="giscus-container" id="${containerId}"></div>`;
 	},
+
+	// Contact form modal
+	contactForm: () => Templates.html`
+		<div class="contact-modal" id="contact-modal">
+			<div class="contact-modal-content">
+				<div class="contact-modal-header">
+					<h2>${i18n.t("contact.title")}</h2>
+					<button class="contact-modal-close" id="contact-modal-close" aria-label="${i18n.t("contact.close")}">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<form class="contact-form" id="contact-form">
+					<div class="form-group">
+						<label for="contact-name">${i18n.t("contact.name")}*</label>
+						<input 
+							type="text" 
+							id="contact-name" 
+							name="name" 
+							required 
+							aria-required="true"
+						/>
+						<span class="form-error" id="contact-name-error"></span>
+					</div>
+					<div class="form-group">
+						<label for="contact-email">${i18n.t("contact.email")}*</label>
+						<input 
+							type="email" 
+							id="contact-email" 
+							name="email" 
+							required 
+							aria-required="true"
+						/>
+						<span class="form-error" id="contact-email-error"></span>
+					</div>
+					<div class="form-group">
+						<label for="contact-message">${i18n.t("contact.message")}*</label>
+						<textarea 
+							id="contact-message" 
+							name="message" 
+							rows="6" 
+							required 
+							aria-required="true"
+						></textarea>
+						<span class="form-error" id="contact-message-error"></span>
+					</div>
+					<div class="form-status" id="contact-status"></div>
+					<button type="submit" class="btn btn-primary" id="contact-submit">
+						${i18n.t("contact.send")}
+					</button>
+				</form>
+			</div>
+		</div>
+	`,
 };

@@ -4,6 +4,7 @@
 // Entry point - orchestrates initialization
 
 import { Context } from "./context.js";
+import { Email } from "./email.js";
 import { Layout } from "./layout.js";
 import { MarkdownLoader } from "./markdown.js";
 import { RouterEvents } from "./router-events.js";
@@ -32,10 +33,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Register route handler for navigation (no global coupling!)
 		RouterEvents.registerRouteHandler(Router.handleRoute);
 
-		// Setup global event delegation for dynamic content (email, fullscreen, etc.)
-		UI.setupGlobalEventDelegation(data?.site?.email);
+		// Initialize EmailJS contact form if enabled
+		Email.init();
 
-		// Inject layout components (navbar, footer, dropdowns)
+		// Setup global event delegation for dynamic content (email, fullscreen, etc.)
+		UI.setupGlobalEventDelegation(); // Inject layout components (navbar, footer, dropdowns)
 		await Layout.init();
 
 		// Initialize UI components after DOM elements are ready

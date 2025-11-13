@@ -14,11 +14,6 @@ site:
     defaultLanguage: "en"
     availableLanguages: ["en"]
   
-  # Email configuration
-  email:
-    name: "luukvanvenrooij84"
-    domain: "gmail.com"
-  
   # Color scheme and theming - Matrix/Terminal Dark Green
   colors:
     primary: "#10B981"       # Vibrant emerald green - fresh and tech-inspired
@@ -35,6 +30,15 @@ site:
   search:
     enabled: true
     minChars: 2
+
+  # EmailJS configuration
+  # Sign up at https://www.emailjs.com/ (free tier: 200 emails/month)
+  # After signup, get these values from EmailJS dashboard
+  emailjs:
+    enabled: true
+    serviceId: "service_hdevvjf"      # Get from EmailJS dashboard
+    templateId: "template_zqi4xf9"    # Get from EmailJS dashboard
+    publicKey: "9zV-MvliyA4G90Ie9"      # Get from EmailJS dashboard
   
   # Comments configuration (giscus - GitHub Discussions)
   # To set up:
@@ -285,3 +289,14 @@ translations:
     "code.copy": "Copy"
     "code.copied": "Copied!"
     "code.copyFailed": "Failed"
+    "contact.title": "Get in Touch"
+    "contact.name": "Name"
+    "contact.email": "Email"
+    "contact.message": "Message"
+    "contact.send": "Send Message"
+    "contact.sending": "Sending..."
+    "contact.success": "Message sent successfully!"
+    "contact.error": "Failed to send message. Please try again."
+    "contact.required": "This field is required"
+    "contact.invalidEmail": "Please enter a valid email address"
+    "contact.close": "Close"

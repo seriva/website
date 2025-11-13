@@ -4,6 +4,7 @@
 // User interface utilities and event handlers
 
 import { CONSTANTS } from "./constants.js";
+import { Email } from "./email.js";
 import { i18n } from "./i18n.js";
 
 // ===========================================
@@ -50,24 +51,47 @@ export const UI = {
 	},
 
 	// Setup global event delegation for dynamic content
-	setupGlobalEventDelegation(emailConfig) {
+	setupGlobalEventDelegation() {
 		// Use event delegation on document to handle dynamically added elements
 		document.addEventListener("click", (event) => {
-			const target = event.target.closest("[data-action]");
-			if (!target) return;
+			// Handle email button
+			const emailToggle = event.target.closest("#email-toggle");
+			if (emailToggle) {
+				event.preventDefault();
+				UI.closeMobileMenu();
+				Email.show();
+				return;
+			}
 
-			const action = target.getAttribute("data-action");
+			// Handle data-action elements
+			const actionTarget = event.target.closest("[data-action]");
+			if (actionTarget) {
+				const action = actionTarget.getAttribute("data-action");
 
-			switch (action) {
-				case "fullscreen":
-					event.preventDefault();
-					UI._fullscreen();
-					break;
-				case "email":
-					UI._handleEmailClick(event, emailConfig);
-					break;
-				default:
-					break;
+				switch (action) {
+					case "fullscreen":
+						event.preventDefault();
+						UI.fullscreen();
+						break;
+					default:
+						break;
+				}
+				return;
+			}
+
+			// Close mobile menu when social media links are clicked
+			const socialLink = event.target.closest(".social-links a");
+			if (socialLink && isMobile) {
+				UI.closeMobileMenu();
+				return;
+			}
+
+			// Close mobile menu when navigation links are clicked
+			const navLink = event.target.closest(
+				".navbar-nav .nav-link, .dropdown-item",
+			);
+			if (navLink && isMobile) {
+				UI.closeMobileMenu();
 			}
 		});
 	},
@@ -188,6 +212,24 @@ export const UI = {
 		});
 	},
 
+	// Request fullscreen for demo iframe
+	fullscreen() {
+		try {
+			const iframe = document.getElementById("demo");
+			if (!iframe) return;
+
+			const request =
+				iframe.requestFullscreen ||
+				iframe.webkitRequestFullscreen ||
+				iframe.mozRequestFullScreen ||
+				iframe.msRequestFullscreen;
+
+			if (request) request.call(iframe);
+		} catch (error) {
+			console.error("Error requesting fullscreen:", error);
+		}
+	},
+
 	// ===========================================
 	// PRIVATE METHODS
 	// ===========================================
@@ -242,36 +284,5 @@ export const UI = {
 			toggle.classList.toggle("active");
 			toggle.setAttribute("aria-expanded", !isExpanded);
 		});
-	},
-
-	// Request fullscreen for demo iframe
-	_fullscreen() {
-		try {
-			const iframe = document.getElementById("demo");
-			if (!iframe) return;
-
-			const request =
-				iframe.requestFullscreen ||
-				iframe.webkitRequestFullscreen ||
-				iframe.mozRequestFullScreen ||
-				iframe.msRequestFullscreen;
-
-			if (request) request.call(iframe);
-		} catch (error) {
-			console.error("Error requesting fullscreen:", error);
-		}
-	},
-
-	// Handle email link clicks
-	_handleEmailClick(event, emailConfig) {
-		event?.preventDefault();
-
-		if (emailConfig?.name && emailConfig?.domain) {
-			const email = `${emailConfig.name}@${emailConfig.domain}`;
-			window.location.href = `mailto:${email}`;
-		} else {
-			console.warn("Email configuration not found, using fallback");
-			window.location.href = `mailto:${CONSTANTS.DEFAULT_EMAIL}`;
-		}
 	},
 };

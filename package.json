@@ -28,6 +28,7 @@
 		"microtastic": "^0.0.48"
 	},
 	"dependencies": {
+		"@emailjs/browser": "^4.4.1",
 		"fuse.js": "^7.1.0",
 		"marked": "^17.0.0",
 		"prismjs": "^1.30.0"

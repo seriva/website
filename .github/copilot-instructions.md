@@ -75,6 +75,7 @@ describe("My Module", () => {
 - `app/src/router-events.js` - `RouterEvents` namespace for routing event system
 - `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
 - `app/src/search.js` - `Search` namespace for Fuse.js search implementation
+- `app/src/email.js` - `Email` namespace for EmailJS contact form integration
 - `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
 - `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
 - `app/src/prism-loader.js` - `PrismLoader` namespace for syntax highlighting
