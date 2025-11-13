@@ -403,7 +403,6 @@ export const Templates = {
 							required 
 							aria-required="true"
 						/>
-						<span class="form-error" id="contact-name-error"></span>
 					</div>
 					<div class="form-group">
 						<label for="contact-email">${i18n.t("contact.email")}*</label>
@@ -414,7 +413,6 @@ export const Templates = {
 							required 
 							aria-required="true"
 						/>
-						<span class="form-error" id="contact-email-error"></span>
 					</div>
 					<div class="form-group">
 						<label for="contact-message">${i18n.t("contact.message")}*</label>
@@ -425,9 +423,8 @@ export const Templates = {
 							required 
 							aria-required="true"
 						></textarea>
-						<span class="form-error" id="contact-message-error"></span>
 					</div>
-					<div class="form-status" id="contact-status"></div>
+					<div class="form-status error" id="contact-status">Email: This field is required</div>
 					<button type="submit" class="btn btn-primary" id="contact-submit">
 						${i18n.t("contact.send")}
 					</button>

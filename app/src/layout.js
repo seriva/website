@@ -54,7 +54,6 @@ export const Layout = {
 			.map((page) => Templates.pageLink(page.id, page.title))
 			.join("");
 		const socialLinksHtml = (data?.site?.social || [])
-			.filter((link) => link["data-action"] !== "email")
 			.map((link) => Templates.socialLink(link))
 			.join("");
 		const searchBar = data?.site?.search?.enabled ? Templates.searchBar() : "";
