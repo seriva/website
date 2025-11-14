@@ -5,6 +5,7 @@
 
 import { Context } from "./context.js";
 import { Email } from "./email.js";
+import { ErrorHandler } from "./error-handler.js";
 import { Layout } from "./layout.js";
 import { MarkdownLoader } from "./markdown.js";
 import { RouterEvents } from "./router-events.js";
@@ -16,6 +17,9 @@ import { UI } from "./ui.js";
 // ===========================================
 // APPLICATION INITIALIZATION
 // ===========================================
+
+// Initialize error handler first (before anything can fail)
+ErrorHandler.init();
 
 // Initialize everything when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
