@@ -7,6 +7,7 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
 import { Templates } from "./templates.js";
+import { UI } from "./ui.js";
 
 // ===========================================
 // SEARCH CORE
