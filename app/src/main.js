@@ -8,7 +8,6 @@ import { Email } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
 import { Layout } from "./layout.js";
 import { MarkdownLoader } from "./markdown.js";
-import { RouterEvents } from "./router-events.js";
 import { Router } from "./routing.js";
 import { Search } from "./search.js";
 import { Templates } from "./templates.js";
@@ -34,9 +33,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (data?.site) {
 			Context.updateMetaTags(data.site);
 		}
-
-		// Register route handler for navigation (no global coupling!)
-		RouterEvents.registerRouteHandler(Router.handleRoute);
 
 		// Initialize EmailJS contact form if enabled
 		Email.init();

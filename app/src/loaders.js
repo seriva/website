@@ -9,7 +9,6 @@ import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
 import { PrismLoader } from "./prism-loader.js";
-import { RouterEvents } from "./router-events.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
 
@@ -240,7 +239,10 @@ export const Loaders = {
 				const link = card.querySelector(".blog-post-title a");
 				if (link) {
 					e.preventDefault();
-					RouterEvents.navigateToRoute(link.getAttribute("href"));
+					const href = link.getAttribute("href");
+					window.history.pushState({}, "", href);
+					// Dynamic import to avoid circular dependency
+					import("./routing.js").then(({ Router }) => Router.handleRoute());
 				}
 			});
 		}
