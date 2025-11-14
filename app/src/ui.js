@@ -69,6 +69,10 @@ export const UI = {
 				const action = actionTarget.getAttribute("data-action");
 
 				switch (action) {
+					case "email":
+						event.preventDefault();
+						Email.show();
+						break;
 					case "fullscreen":
 						event.preventDefault();
 						UI.fullscreen();

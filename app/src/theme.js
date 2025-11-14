@@ -39,36 +39,19 @@ export const Theme = {
 
 	// Get giscus theme for current or specified theme
 	getGiscusTheme(theme = null) {
-		const targetTheme = theme || this.current || "dark";
-		const data = Context.get();
-		const colors =
-			targetTheme === "dark"
-				? data?.site?.theme?.dark
-				: data?.site?.theme?.light;
-		return colors?.comments?.theme || targetTheme;
+		const colors = this._getThemeColors(theme);
+		return colors?.comments?.theme || theme || this.current || "dark";
 	},
 
 	// Get Prism theme for current or specified theme
 	getPrismTheme(theme = null) {
-		const targetTheme = theme || this.current || "dark";
-		const data = Context.get();
-		const colors =
-			targetTheme === "dark"
-				? data?.site?.theme?.dark
-				: data?.site?.theme?.light;
+		const colors = this._getThemeColors(theme);
 		return colors?.code?.theme || "prism-tomorrow";
 	},
 
 	// Apply a specific theme
 	apply(theme) {
-		const data = Context.get();
-		if (!data?.site) return;
-
-		// Get colors for the theme (try new structure first, fall back to old)
-		const colors =
-			theme === "dark"
-				? data.site.theme?.dark || data.site.colorsDark
-				: data.site.theme?.light || data.site.colorsLight;
+		const colors = this._getThemeColors(theme);
 		if (!colors) {
 			console.error(`Theme colors not found for: ${theme}`);
 			return;
@@ -83,14 +66,20 @@ export const Theme = {
 		this.current = theme;
 		localStorage.setItem(this.storageKey, theme);
 		document.documentElement.setAttribute("data-theme", theme);
-
-		// Update toggle button icon
-		this._updateToggleIcon();
 	},
 
 	// ===========================================
 	// PRIVATE METHODS
 	// ===========================================
+
+	// Get theme colors for specified theme (or current theme)
+	_getThemeColors(theme = null) {
+		const targetTheme = theme || this.current || "dark";
+		const data = Context.get();
+		return targetTheme === "dark"
+			? data?.site?.theme?.dark
+			: data?.site?.theme?.light;
+	},
 
 	// Get theme based on system preference (if default is "auto")
 	_getAutoTheme(defaultTheme) {
@@ -173,25 +162,6 @@ export const Theme = {
 				{ giscus: { setConfig: { theme: giscusTheme } } },
 				"https://giscus.app",
 			);
-		}
-	},
-
-	// Update toggle button icon based on current theme
-	_updateToggleIcon() {
-		const toggleBtn = document.getElementById("theme-toggle");
-		if (!toggleBtn) return;
-
-		const sunIcon = toggleBtn.querySelector(".fa-sun");
-		const moonIcon = toggleBtn.querySelector(".fa-moon");
-
-		if (this.current === "dark") {
-			// Show sun icon (to switch to light)
-			if (sunIcon) sunIcon.style.display = "inline";
-			if (moonIcon) moonIcon.style.display = "none";
-		} else {
-			// Show moon icon (to switch to dark)
-			if (sunIcon) sunIcon.style.display = "none";
-			if (moonIcon) moonIcon.style.display = "inline";
 		}
 	},
 };

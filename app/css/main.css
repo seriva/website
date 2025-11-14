@@ -48,6 +48,10 @@
 	--font-size-base: 16px;
 	--font-size-sm: 0.9em;
 	--font-size-lg: 1.1em;
+	
+	/* Theme transition */
+	--theme-transition-duration: 0.3s;
+	--theme-transition-timing: ease-in-out;
 	--line-height-base: 1.6;
 	--transition-fast: 0.2s ease;
 	--transition-normal: 0.3s ease;
@@ -81,6 +85,32 @@ html::after {
 *::before,
 *::after {
 	box-sizing: border-box;
+}
+
+/* Smooth theme transitions for all elements */
+*,
+*::before,
+*::after {
+	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+				color var(--theme-transition-duration) var(--theme-transition-timing),
+				border-color var(--theme-transition-duration) var(--theme-transition-timing),
+				fill var(--theme-transition-duration) var(--theme-transition-timing),
+				stroke var(--theme-transition-duration) var(--theme-transition-timing);
+}
+
+/* Preserve existing transitions for interactive elements */
+a,
+button,
+input,
+textarea,
+select,
+.nav-link,
+.dropdown-item {
+	transition: background-color var(--transition-fast),
+				color var(--transition-fast),
+				border-color var(--transition-fast),
+				opacity var(--transition-fast),
+				transform var(--transition-fast);
 }
 
 body {
@@ -334,21 +364,30 @@ a.icon:hover {
 	transform: scale(0.95);
 }
 
-/* Show/hide icons based on theme */
+.theme-toggle i {
+	transition: opacity var(--theme-transition-duration) var(--theme-transition-timing),
+				transform var(--theme-transition-duration) var(--theme-transition-timing);
+}
+
+/* Show/hide icons based on theme with fade */
 [data-theme="dark"] .theme-toggle .fa-sun {
 	display: inline;
+	opacity: 1;
 }
 
 [data-theme="dark"] .theme-toggle .fa-moon {
 	display: none;
+	opacity: 0;
 }
 
 [data-theme="light"] .theme-toggle .fa-sun {
 	display: none;
+	opacity: 0;
 }
 
 [data-theme="light"] .theme-toggle .fa-moon {
 	display: inline;
+	opacity: 1;
 }
 
 /* Search */

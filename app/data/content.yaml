@@ -34,13 +34,13 @@ site:
     
     # Light theme colors - Clean and minimal
     light:
-      primary: "#059669"       # Darker emerald green for better contrast on light bg
-      secondary: "#E5E7EB"     # Medium gray header/navbar - more visible
+      primary: "#047857"       # Even darker emerald green for stronger contrast
+      secondary: "#D1D5DB"     # Darker gray header/navbar for better definition
       background: "#FFFFFF"    # White background - clean and professional
-      text: "#111827"          # Dark gray text - excellent readability
-      textLight: "#6B7280"     # Medium gray - subtle secondary text
-      border: "#D1D5DB"        # More visible border
-      hover: "#F3F4F6"         # Light gray hover state - more contrast
+      text: "#0F172A"          # Almost black text - maximum readability
+      textLight: "#475569"     # Darker gray - more visible secondary text
+      border: "#9CA3AF"        # More visible border - stronger contrast
+      hover: "#E5E7EB"         # Medium gray hover state - more contrast
       code:
         theme: "prism-coy"     # Light Prism theme for code blocks
       comments:
