@@ -7,7 +7,6 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { Templates } from "./templates.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // LAYOUT NAMESPACE
@@ -73,9 +72,6 @@ export const Layout = {
 			themeToggle,
 			data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 		);
-
-		// Reset cached DOM queries after navbar re-render
-		UI.resetNavCache();
 
 		// Inject search page into body if search is enabled
 		if (data?.site?.search?.enabled) {
