@@ -16,7 +16,6 @@ import { UI } from "./ui.js";
 export const Search = {
 	data: [],
 	isInitialized: false,
-	initPromise: null,
 	fuse: null,
 
 	// ===========================================
@@ -140,67 +139,61 @@ export const Search = {
 
 	// Initialize search index with content
 	async _init() {
-		if (this.initPromise) return this.initPromise;
 		if (this.isInitialized) return;
 
-		this.initPromise = (async () => {
-			try {
-				const data = Context.get();
-				const projects = data?.projects || [];
-				const blogPosts = data?.blog?.posts || [];
+		try {
+			const data = Context.get();
+			const projects = data?.projects || [];
+			const blogPosts = data?.blog?.posts || [];
 
-				// Index projects (without READMEs for performance)
-				const projectsIndexed = projects.map((p) => ({
-					id: p.id,
-					title: p.title,
-					description: p.description,
+			// Index projects (without READMEs for performance)
+			const projectsIndexed = projects.map((p) => ({
+				id: p.id,
+				title: p.title,
+				description: p.description,
+				tags: p.tags || [],
+				content: "",
+				type: "project",
+				url: `?project=${p.id}`,
+				github_repo: p.github_repo,
+			}));
+
+			// Index blog posts from YAML metadata
+			const blogPostsIndexed = blogPosts.map((p) => {
+				const slug = p.filename.replace(/\.md$/, "");
+				return {
+					id: slug,
+					title: p.title || slug,
+					description: p.excerpt || "",
 					tags: p.tags || [],
-					content: "",
-					type: "project",
-					url: `?project=${p.id}`,
-					github_repo: p.github_repo,
-				}));
+					type: "blog",
+					url: `/?blog=${slug}`,
+				};
+			});
 
-				// Index blog posts from YAML metadata
-				const blogPostsIndexed = blogPosts.map((p) => {
-					const slug = p.filename.replace(/\.md$/, "");
-					return {
-						id: slug,
-						title: p.title || slug,
-						description: p.excerpt || "",
-						tags: p.tags || [],
-						type: "blog",
-						url: `/?blog=${slug}`,
-					};
-				});
+			this.data = [...projectsIndexed, ...blogPostsIndexed];
 
-				this.data = [...projectsIndexed, ...blogPostsIndexed];
+			// Initialize Fuse.js with weighted search keys
+			this.fuse = new Fuse(this.data, {
+				keys: [
+					{ name: "title", weight: CONSTANTS.SEARCH_WEIGHT_TITLE },
+					{
+						name: "description",
+						weight: CONSTANTS.SEARCH_WEIGHT_DESCRIPTION,
+					},
+					{ name: "tags", weight: CONSTANTS.SEARCH_WEIGHT_TAGS },
+					{ name: "content", weight: CONSTANTS.SEARCH_WEIGHT_CONTENT },
+				],
+				includeScore: true,
+				threshold: CONSTANTS.SEARCH_THRESHOLD,
+				ignoreLocation: true,
+				minMatchCharLength: CONSTANTS.SEARCH_MIN_MATCH_LENGTH,
+			});
 
-				// Initialize Fuse.js with weighted search keys
-				this.fuse = new Fuse(this.data, {
-					keys: [
-						{ name: "title", weight: CONSTANTS.SEARCH_WEIGHT_TITLE },
-						{
-							name: "description",
-							weight: CONSTANTS.SEARCH_WEIGHT_DESCRIPTION,
-						},
-						{ name: "tags", weight: CONSTANTS.SEARCH_WEIGHT_TAGS },
-						{ name: "content", weight: CONSTANTS.SEARCH_WEIGHT_CONTENT },
-					],
-					includeScore: true,
-					threshold: CONSTANTS.SEARCH_THRESHOLD,
-					ignoreLocation: true,
-					minMatchCharLength: CONSTANTS.SEARCH_MIN_MATCH_LENGTH,
-				});
-
-				this.isInitialized = true;
-			} catch (error) {
-				console.error("Error initializing search:", error);
-				this.initPromise = null;
-			}
-		})();
-
-		return this.initPromise;
+			this.isInitialized = true;
+		} catch (error) {
+			console.error("Error initializing search:", error);
+		}
 	},
 
 	// Perform search query

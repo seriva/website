@@ -193,24 +193,19 @@ export const Loaders = {
 			const postFiles = data?.blog?.posts || [];
 			if (postFiles.length === 0) return [];
 
-			const results = await Promise.allSettled(
-				postFiles.map(async (post) => {
-					const slug = post.filename.replace(/\.md$/, "");
-					return {
-						slug,
-						title: post.title || "Untitled",
-						date: post.date || "",
-						excerpt: post.excerpt || "",
-						tags: post.tags || [],
-						content: null,
-						filename: post.filename,
-						id: slug,
-					};
-				}),
-			);
-			const posts = results
-				.filter((result) => result.status === "fulfilled")
-				.map((result) => result.value);
+			const posts = postFiles.map((post) => {
+				const slug = post.filename.replace(/\.md$/, "");
+				return {
+					slug,
+					title: post.title || "Untitled",
+					date: post.date || "",
+					excerpt: post.excerpt || "",
+					tags: post.tags || [],
+					content: null,
+					filename: post.filename,
+					id: slug,
+				};
+			});
 
 			return posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 		} catch (error) {
