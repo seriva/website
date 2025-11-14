@@ -78,12 +78,15 @@ export const UI = {
 				return;
 			}
 
-			// Close mobile menu when navigation links are clicked
+			// Close mobile menu when navigation links are clicked (but not dropdown toggles)
 			const navLink = event.target.closest(
 				".navbar-nav .nav-link, .dropdown-item",
 			);
 			if (navLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
-				UI.closeMobileMenu();
+				// Don't close menu if clicking dropdown toggle
+				if (!navLink.classList.contains("dropdown-toggle")) {
+					UI.closeMobileMenu();
+				}
 			}
 		});
 	},
