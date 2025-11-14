@@ -51,7 +51,7 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - Comments: `Templates.giscusComments(data?.site?.comments, "blog"|"projects")`
 - Theme: `Context.applyColorScheme()` for colors, Prism themes loaded via local CSS
 - i18n: `i18n.t('key')` for all user-facing strings (in `i18n.js`)
-- Routing: `Router.handleRoute()` for navigation, `RouterEvents.navigateToRoute(href)` for programmatic navigation
+- Routing: `Router.handleRoute()` for navigation, `window.history.pushState()` + `Router.handleRoute()` for programmatic navigation
 - UI: `UI.closeMobileMenu()`, `UI.initCopyCodeButtons()`, etc.
 
 ### Module Structure
@@ -62,7 +62,6 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/src/context.js` - `Context` namespace for app state, data loading, theming
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
 - `app/src/layout.js` - `Layout` namespace for navbar and footer rendering
-- `app/src/router-events.js` - `RouterEvents` namespace for routing event system
 - `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
 - `app/src/search.js` - `Search` namespace for Fuse.js search implementation
 - `app/src/email.js` - `Email` namespace for EmailJS contact form integration

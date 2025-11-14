@@ -36,35 +36,34 @@ Key features:
 The application follows a modular namespace pattern with clear separation of concerns:
 
 ```text
-            ┌─────────────────────┐
-            │      main.js        │
-            │   (Entry Point)     │
-            └──────────┬──────────┘
+            ┌────────────────────┐
+            │      main.js       │
+            │   (Entry Point)    │
+            └──────────┬─────────┘
                        │
                        │
                        ▼
 ┌──────────┐     ┌──────────┐         ┌─────────────┐
-│CONSTANTS │     │ Context  │◄────────│ YAMLParser  │────────┐
-│  (Cfg)   │     │ (State)  │         │ (Parse YAML)│        │
-└────┬─────┘     └────┬─────┘         └─────────────┘        │
-     │                │                                      │
-     │                │ provides data                        │
-     │                │                                      │
-     └──┬─────────────┼──────────┬──────────┬──────────┐     │
-        ▼             ▼          ▼          ▼          ▼     │
-   ┌─────────┐  ┌────────┐ ┌────────┐ ┌────────┐ ┌─────────┐ │
-   │ Router  │  │ Layout │ │ Search │ │Loaders │ │  i18n   │ │
-   │ (Route) │  │(Nav/UI)│ │ (Fuse) │ │(Fetch) │ │ (Trans) │ │
-   └────┬────┘  └───┬────┘ └───┬────┘ └───┬────┘ └────┬────┘ │
-        │           │          │          │           │      │
-        │           └──────────┴─────┬────┴───────────┘      │
-        │                            │                       │
-        │              ┌─────────────┼──────────────┐        │
-        ▼              ▼             ▼              ▼        │
-┌──────────────┐  ┌───────────┐  ┌─────────┐  ┌──────────┐   │
-│ RouterEvents │  │ Templates │  │   UI    │  │ Markdown │◄──┘
-│   (PubSub)   │  │   (HTML)  │  │(Actions)│  │  Loader  │
-└──────────────┘  └───────────┘  └─────────┘  └──────────┘
+│CONSTANTS │     │ Context  │◄────────│ YAMLParser  │───────────────────────────┐
+│  (Cfg)   │     │ (State)  │         │ (Parse YAML)│                           │
+└────┬─────┘     └────┬─────┘         └─────────────┘                           │
+     │                │                                                         │
+     │                │ provides data                                           │
+     └──┬─────────────┼──────────┬──────────┬──────────┬──────────┬──────────┐  │
+        ▼             ▼          ▼          ▼          ▼          ▼          ▼  │
+   ┌─────────┐  ┌────────┐ ┌────────┐ ┌────────┐ ┌─────────┐ ┌───────┐ ┌───────┐│
+   │ Router  │  │ Layout │ │ Search │ │Loaders │ │  i18n   │ │ Theme │ │ Email ││
+   │ (Route) │  │(Nav/UI)│ │ (Fuse) │ │(Fetch) │ │ (Trans) │ │ (L/D) │ │(Form) ││
+   └─────────┘  └───┬────┘ └───┬────┘ └───┬────┘ └────┬────┘ └───────┘ └───────┘│
+                    │          │          │           │                         │ 
+                    └──────────┴──────────┴───────────┘                         │
+                                    │                                           │
+                       ┌────────────┼─────────────┐                             │
+                       ▼            ▼             ▼                             │
+                 ┌───────────┐  ┌─────────┐  ┌──────────┐                       │
+                 │ Templates │  │   UI    │  │ Markdown │◄──────────────────────┘
+                 │   (HTML)  │  │(Actions)│  │  Loader  │
+                 └───────────┘  └─────────┘  └──────────┘
 ```
 
 **Module Responsibilities:**
@@ -82,7 +81,6 @@ The application follows a modular namespace pattern with clear separation of con
 - **`MarkdownLoader`** - Markdown parsing with frontmatter support
 - **`PrismLoader`** - Syntax highlighting with dynamic language loading
 - **`YAMLParser`** - Minimal YAML parser for content.yaml
-- **`RouterEvents`** - Event system for decoupled navigation
 - **`i18n`** - Translation system for multi-language support
 - **`CONSTANTS`** - Application-wide configuration
 

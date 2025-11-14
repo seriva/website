@@ -6,9 +6,7 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
-import { RouterEvents } from "./router-events.js";
 import { Templates } from "./templates.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // SEARCH CORE
@@ -254,7 +252,10 @@ export const Search = {
 					setTimeout(() => {
 						onResultClick();
 					}, 50);
-					RouterEvents.navigateToRoute(link.getAttribute("href"));
+					const href = link.getAttribute("href");
+					window.history.pushState({}, "", href);
+					// Dynamic import to avoid circular dependency
+					import("./routing.js").then(({ Router }) => Router.handleRoute());
 					return;
 				}
 
@@ -271,7 +272,10 @@ export const Search = {
 						setTimeout(() => {
 							onResultClick();
 						}, 50);
-						RouterEvents.navigateToRoute(cardLink.getAttribute("href"));
+						const href = cardLink.getAttribute("href");
+						window.history.pushState({}, "", href);
+						// Dynamic import to avoid circular dependency
+						import("./routing.js").then(({ Router }) => Router.handleRoute());
 					}
 				}
 			};
