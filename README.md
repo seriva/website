@@ -9,7 +9,7 @@ Key features:
 - **Markdown blog system** - Blog posts with pagination and metadata
 - **YAML configuration** - Easy content management and site settings
 - **Fuzzy search** - Fuse.js across projects and blog posts
-- **Dynamic color themes** - Customizable color schemes
+- **Light/Dark themes** - Toggle button with smooth transitions, localStorage persistence, auto system preference
 - **GitHub integration** - Loads project READMEs directly from GitHub
 - **Comments system** - GitHub Discussions integration via giscus (optional)
 - **Contact form** - EmailJS integration with spam protection (optional)
@@ -70,13 +70,15 @@ The application follows a modular namespace pattern with clear separation of con
 **Module Responsibilities:**
 
 - **`main.js`** - Application initialization and setup
-- **`Context`** - Global state management, theme application, data caching
+- **`Context`** - Global state management, data loading and caching
+- **`Theme`** - Light/dark mode switching, color scheme application, Prism and giscus theme management
 - **`Router`** - SPA routing, URL handling, page transitions
 - **`Layout`** - Navbar and footer rendering
 - **`Loaders`** - Content fetching (blog posts, projects, pages, GitHub READMEs)
 - **`Templates`** - HTML generation with auto-escaping security
 - **`Search`** - Fuse.js search with UI, tag filtering, result highlighting
 - **`UI`** - Interactive elements (mobile menu, copy buttons, dropdowns)
+- **`Email`** - Contact form modal and EmailJS integration
 - **`MarkdownLoader`** - Markdown parsing with frontmatter support
 - **`PrismLoader`** - Syntax highlighting with dynamic language loading
 - **`YAMLParser`** - Minimal YAML parser for content.yaml
@@ -344,19 +346,43 @@ social:
     data-action: "email"
   - icon: "fab fa-github" 
     href: "https://github.com/username"
-
-colors:
-  primary: "#F59E0B"
-  background: "#0C0A09" 
-  text: "#FAFAF9"
-  # ... etc
-  code:
-    theme: "prism-tomorrow"  # Prism.js theme for syntax highlighting
 ```
 
-**Available Prism.js themes:** `prism`, `prism-dark`, `prism-tomorrow`, `prism-okaidia`, `prism-twilight`, `prism-coy`, `prism-funky`, `prism-solarizedlight`, and [many more](https://prismjs.com/)
+### Theme System (Light/Dark Mode)
 
-All Prism themes are bundled locally from the `prismjs` npm package - no external CDN requests.
+Integrated light/dark theme system with toggle button, smooth transitions, and localStorage persistence:
+
+```yaml
+site:
+  theme:
+    default: "dark"  # "dark", "light", or "auto" (system preference)
+    dark:
+      primary: "#10B981"
+      secondary: "#111827"
+      background: "#0D1117"
+      text: "#E6EDF3"
+      textLight: "#7D8590"
+      border: "#21262D"
+      hover: "#1A2332"
+      code:
+        theme: "prism-tomorrow"
+      comments:
+        theme: "dark"
+    light:
+      primary: "#047857"
+      secondary: "#D1D5DB"
+      background: "#FFFFFF"
+      text: "#0F172A"
+      textLight: "#475569"
+      border: "#9CA3AF"
+      hover: "#E5E7EB"
+      code:
+        theme: "prism-coy"
+      comments:
+        theme: "light"
+```
+
+Available Prism themes: `prism-tomorrow`, `prism-okaidia`, `prism-dark`, `prism-coy`, `prism-solarizedlight`, and [more](https://prismjs.com/). All bundled locally from npm.
 
 ### Comments System (giscus)
 

@@ -85,7 +85,7 @@ describe("YAML Parser", () => {
 
 	// Test light theme exists
 	assert.ok(result.site.theme.light);
-	assert.equal(result.site.theme.light.primary, "#059669");
+	assert.equal(result.site.theme.light.primary, "#047857");
 
 	// Test comments theme config (nested under each theme)
 	assert.equal(result.site.theme.dark.comments.theme, "dark");
