@@ -11,18 +11,6 @@ import { i18n } from "./i18n.js";
 // UI NAMESPACE
 // ===========================================
 
-// Cache for DOM queries (reset when navbar is re-rendered)
-let cachedNavLinks = null;
-let cachedDropdownItems = null;
-
-// Cache for mobile breakpoint check
-let isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
-
-// Update mobile breakpoint cache on resize
-window.addEventListener("resize", () => {
-	isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
-});
-
 export const UI = {
 	// ===========================================
 	// PUBLIC METHODS
@@ -85,7 +73,7 @@ export const UI = {
 
 			// Close mobile menu when social media links are clicked
 			const socialLink = event.target.closest(".social-links a");
-			if (socialLink && isMobile) {
+			if (socialLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
 				UI.closeMobileMenu();
 				return;
 			}
@@ -94,7 +82,7 @@ export const UI = {
 			const navLink = event.target.closest(
 				".navbar-nav .nav-link, .dropdown-item",
 			);
-			if (navLink && isMobile) {
+			if (navLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
 				UI.closeMobileMenu();
 			}
 		});
@@ -144,15 +132,11 @@ export const UI = {
 	// Update active state on navigation links
 	updateActiveNavLink() {
 		const params = new URLSearchParams(window.location.search);
-
-		// Use cached queries for better performance
-		if (!cachedNavLinks) {
-			cachedNavLinks = document.querySelectorAll(".navbar-nav .nav-link");
-			cachedDropdownItems = document.querySelectorAll(".dropdown-item");
-		}
+		const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+		const dropdownItems = document.querySelectorAll(".dropdown-item");
 
 		// Update navbar links
-		for (const link of cachedNavLinks) {
+		for (const link of navLinks) {
 			link.classList.remove("active");
 
 			const href = link.getAttribute("href");
@@ -172,7 +156,7 @@ export const UI = {
 
 		// Update dropdown items and highlight dropdown toggle if project is active
 		let isProjectActive = false;
-		for (const item of cachedDropdownItems) {
+		for (const item of dropdownItems) {
 			item.classList.remove("active");
 
 			const href = item.getAttribute("href");
@@ -197,19 +181,13 @@ export const UI = {
 		}
 	},
 
-	// Reset cached DOM queries (call after navbar re-render)
-	resetNavCache() {
-		cachedNavLinks = null;
-		cachedDropdownItems = null;
-	},
-
 	// Close mobile menu when clicking outside
 	addMobileMenuOutsideClickHandler() {
 		document.addEventListener("click", (event) => {
 			const navbar = document.getElementById("navbar-container");
 			if (!navbar) return;
 
-			// Use cached mobile breakpoint check for better performance
+			const isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
 			if (isMobile && !navbar.contains(event.target)) {
 				UI.closeMobileMenu();
 			}

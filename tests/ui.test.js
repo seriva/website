@@ -64,9 +64,6 @@ describe("UI", () => {
 
 		// Simulate blog route
 		window.history.replaceState({}, "", "?blog");
-
-		// Reset cache and update
-		UI.resetNavCache();
 		UI.updateActiveNavLink();
 
 		assert.ok(
@@ -80,7 +77,6 @@ describe("UI", () => {
 
 		// Simulate page route
 		window.history.replaceState({}, "", "?page=about");
-		UI.resetNavCache();
 		UI.updateActiveNavLink();
 
 		assert.ok(
@@ -93,14 +89,6 @@ describe("UI", () => {
 		);
 
 		document.body.removeChild(navbar);
-	});
-
-	test("should reset nav cache", () => {
-		// This tests that resetNavCache doesn't throw
-		// and allows cache to be rebuilt
-		assert.doesNotThrow(() => {
-			UI.resetNavCache();
-		}, "Should reset cache without errors");
 	});
 
 	test("should add copy button to code blocks", () => {
@@ -175,8 +163,6 @@ describe("UI", () => {
 
 		// Simulate project route
 		window.history.replaceState({}, "", "?project=test-project");
-
-		UI.resetNavCache();
 		UI.updateActiveNavLink();
 
 		assert.ok(

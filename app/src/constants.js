@@ -9,7 +9,6 @@ export const CONSTANTS = {
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
 
 	// Defaults
-	DEFAULT_THEME: "prism-tomorrow",
 	DEFAULT_TITLE: "portfolio.example.com",
 
 	// Breakpoints & Timing
