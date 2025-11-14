@@ -14,17 +14,37 @@ site:
     defaultLanguage: "en"
     availableLanguages: ["en"]
   
-  # Color scheme and theming - Matrix/Terminal Dark Green
-  colors:
-    primary: "#10B981"       # Vibrant emerald green - fresh and tech-inspired
-    secondary: "#111827"     # Deep slate gray - clean header/navbar
-    background: "#0D1117"    # GitHub-style dark background - professional
-    text: "#E6EDF3"          # Bright off-white - excellent contrast
-    textLight: "#7D8590"     # Muted slate gray - subtle secondary text
-    border: "#21262D"        # Soft gray border - gentle definition
-    hover: "#1A2332"         # Cool dark hover state with hint of blue
-    code:
-      theme: "prism-tomorrow"  # Prism.js theme (prism-tomorrow, prism-okaidia, prism-dark, etc.)
+  # Theme Configuration
+  theme:
+    default: "dark"  # Options: "dark", "light", "auto" (respects system preference)
+    
+    # Dark theme colors - Matrix/Terminal inspired
+    dark:
+      primary: "#10B981"       # Vibrant emerald green - fresh and tech-inspired
+      secondary: "#111827"     # Deep slate gray - clean header/navbar
+      background: "#0D1117"    # GitHub-style dark background - professional
+      text: "#E6EDF3"          # Bright off-white - excellent contrast
+      textLight: "#7D8590"     # Muted slate gray - subtle secondary text
+      border: "#21262D"        # Soft gray border - gentle definition
+      hover: "#1A2332"         # Cool dark hover state with hint of blue
+      code:
+        theme: "prism-tomorrow"  # Prism.js theme (prism-tomorrow, prism-okaidia, prism-dark, etc.)
+      comments:
+        theme: "dark"  # Giscus theme for dark mode
+    
+    # Light theme colors - Clean and minimal
+    light:
+      primary: "#059669"       # Darker emerald green for better contrast on light bg
+      secondary: "#E5E7EB"     # Medium gray header/navbar - more visible
+      background: "#FFFFFF"    # White background - clean and professional
+      text: "#111827"          # Dark gray text - excellent readability
+      textLight: "#6B7280"     # Medium gray - subtle secondary text
+      border: "#D1D5DB"        # More visible border
+      hover: "#F3F4F6"         # Light gray hover state - more contrast
+      code:
+        theme: "prism-coy"     # Light Prism theme for code blocks
+      comments:
+        theme: "light"  # Giscus theme for light mode
   
   # Search configuration
   search:
@@ -57,7 +77,6 @@ site:
     reactionsEnabled: "1"
     emitMetadata: "0"
     inputPosition: "bottom"
-    theme: "dark"  # Options: light, dark, dark_dimmed, dark_high_contrast, transparent_dark, preferred_color_scheme
     lang: "en"
   
   # Social media links
@@ -280,6 +299,10 @@ translations:
     "aria.goBack": "Go back"
     "aria.clearSearch": "Clear search"
     "aria.copyCode": "Copy code to clipboard"
+    "aria.toggleTheme": "Toggle theme"
+    "theme.toggleTitle": "Toggle light/dark mode"
+    "search.buttonTitle": "Search projects and blog posts"
+    "contact.buttonTitle": "Get in touch"
     "dropdown.loadingProjects": "Loading projects..."
     "code.copy": "Copy"
     "code.copied": "Copied!"

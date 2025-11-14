@@ -15,7 +15,11 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
 4. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
 5. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
 6. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
-7. **i18n**: Use `i18n.t('key')` for all user-facing strings
+7. **i18n (Internationalization)**: 
+   - **ALWAYS** use `i18n.t('key')` for ALL user-facing text (labels, titles, messages, placeholders, aria-labels, tooltips)
+   - **NEVER** hardcode user-facing strings in templates or code
+   - Add new translation keys to `app/data/content.yaml` under `translations.en`
+   - Examples: `i18n.t('aria.toggleTheme')`, `i18n.t('contact.title')`, `i18n.t('search.placeholder')`
 
 ### Quality Requirements
 

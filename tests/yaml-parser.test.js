@@ -73,17 +73,26 @@ describe("YAML Parser", () => {
 		const yaml = readFileSync("app/data/content.yaml", "utf8");
 		const result = YAMLParser.parse(yaml);
 
-		// Test site config
-		assert.equal(result.site.title, "luukvanvenrooij.nl");
-		assert.equal(result.site.author, "Luuk van Venrooij");
-		assert.equal(result.site.github_username, "seriva");
+	// Test site config
+	assert.equal(result.site.title, "luukvanvenrooij.nl");
+	assert.equal(result.site.author, "Luuk van Venrooij");
+	assert.equal(result.site.github_username, "seriva");
 
-		// Test colors
-		assert.equal(result.site.colors.primary, "#10B981");
-		assert.equal(result.site.colors.background, "#0D1117");
+	// Test theme config structure
+	assert.equal(result.site.theme.default, "dark");
+	assert.equal(result.site.theme.dark.primary, "#10B981");
+	assert.equal(result.site.theme.dark.background, "#0D1117");
 
-		// Test nested config
-		assert.equal(result.site.i18n.defaultLanguage, "en");
+	// Test light theme exists
+	assert.ok(result.site.theme.light);
+	assert.equal(result.site.theme.light.primary, "#059669");
+
+	// Test comments theme config (nested under each theme)
+	assert.equal(result.site.theme.dark.comments.theme, "dark");
+	assert.equal(result.site.theme.light.comments.theme, "light");
+
+	// Test nested config
+	assert.equal(result.site.i18n.defaultLanguage, "en");
 		assert.deepEqual(result.site.i18n.availableLanguages, ["en"]);
 
 		// Test social array

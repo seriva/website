@@ -6,6 +6,7 @@
 import { CONSTANTS } from "./constants.js";
 import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
+import { Theme } from "./theme.js";
 
 // ===========================================
 // TEMPLATES NAMESPACE
@@ -47,6 +48,7 @@ export const Templates = {
 		socialLinksHtml,
 		searchBar,
 		emailButton,
+		themeToggle,
 		siteTitle,
 	) => Templates.html`
     <nav class="navbar">
@@ -63,6 +65,7 @@ export const Templates = {
                 </ul>
                 <ul class="navbar-nav right">
                     ${Templates.safe(searchBar)}
+                    ${Templates.safe(themeToggle)}
                     ${Templates.safe(emailButton)}
                     ${Templates.safe(socialLinksHtml)}
                 </ul>
@@ -94,6 +97,15 @@ export const Templates = {
 			.join(" ");
 		return Templates.html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${Templates.safe(attrs)}><i class="${icon}"></i></a></li>`;
 	},
+
+	themeToggle: () => Templates.html`
+		<li class="nav-item navbar-icon">
+			<button id="theme-toggle" class="theme-toggle nav-link" aria-label="${i18n.t("aria.toggleTheme")}" title="${i18n.t("theme.toggleTitle")}">
+				<i class="fas fa-sun"></i>
+				<i class="fas fa-moon"></i>
+			</button>
+		</li>
+	`,
 
 	projectDropdownItem: (projectId, projectTitle) =>
 		Templates.html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
@@ -280,14 +292,14 @@ export const Templates = {
 
 	searchBar: () => Templates.html`
         <li class="nav-item navbar-icon">
-            <button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}">
+            <button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}" title="${i18n.t("search.buttonTitle")}">
                 <i class="fas fa-search"></i>
             </button>
         </li>`,
 
 	emailButton: () => Templates.html`
         <li class="nav-item navbar-icon">
-            <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}">
+            <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}">
                 <i class="fas fa-envelope"></i>
             </button>
         </li>`,
@@ -361,6 +373,11 @@ export const Templates = {
 			const container = document.getElementById(containerId);
 			if (!container) return;
 
+			// Get giscus theme from Theme module
+			const currentTheme =
+				document.documentElement.getAttribute("data-theme") || "dark";
+			const giscusTheme = Theme.getGiscusTheme(currentTheme);
+
 			const script = document.createElement("script");
 			script.src = "https://giscus.app/client.js";
 			script.setAttribute("data-repo", config.repo);
@@ -372,7 +389,7 @@ export const Templates = {
 			script.setAttribute("data-reactions-enabled", config.reactionsEnabled);
 			script.setAttribute("data-emit-metadata", config.emitMetadata);
 			script.setAttribute("data-input-position", config.inputPosition);
-			script.setAttribute("data-theme", config.theme);
+			script.setAttribute("data-theme", giscusTheme);
 			script.setAttribute("data-lang", config.lang);
 			script.setAttribute("crossorigin", "anonymous");
 			script.async = true;
