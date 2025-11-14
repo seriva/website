@@ -12,6 +12,7 @@ import { RouterEvents } from "./router-events.js";
 import { Router } from "./routing.js";
 import { Search } from "./search.js";
 import { Templates } from "./templates.js";
+import { Theme } from "./theme.js";
 import { UI } from "./ui.js";
 
 // ===========================================
@@ -51,6 +52,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (data?.site?.search?.enabled) {
 			Search.initUI(data.site.search);
 		}
+
+		// Initialize theme system (loads user preference from localStorage)
+		Theme.init();
 
 		// Handle initial route
 		await Router.handleRoute();

@@ -60,6 +60,7 @@ export const Layout = {
 		const emailButton = data?.site?.emailjs?.enabled
 			? Templates.emailButton()
 			: "";
+		const themeToggle = Templates.themeToggle();
 		const projectsDropdown = Templates.projectsDropdown();
 
 		navbarContainer.innerHTML = Templates.navbar(
@@ -69,6 +70,7 @@ export const Layout = {
 			socialLinksHtml,
 			searchBar,
 			emailButton,
+			themeToggle,
 			data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 		);
 

@@ -13,6 +13,11 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - Always call `UI.closeMobileMenu()` and update `<title>` in route handlers
 - Keep functions organized by module files in `app/src/`
 - All magic numbers go in `CONSTANTS` object in `constants.js`
+- **i18n (Internationalization)**: 
+  - **ALWAYS** use `i18n.t('key')` for ALL user-facing text (labels, titles, messages, placeholders, aria-labels, tooltips)
+  - **NEVER** hardcode user-facing strings in templates or code
+  - Add new translation keys to `app/data/content.yaml` under `translations.en`
+  - Examples: `i18n.t('aria.toggleTheme')`, `i18n.t('contact.title')`, `i18n.t('search.placeholder')`
 
 ### Architecture
 - **ES6 Modules**: Clean separation of concerns across multiple files
@@ -29,6 +34,7 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - Don't modify Microtastic config without good reason
 - Don't export individual functions from modules (use namespace pattern)
 - Don't create new modules without following the namespace pattern
+- Don't hardcode user-facing text; always use `i18n.t('key')` for internationalization
 
 ### Quality Gate
 - Format: `npm run format` or `biome format --write .`

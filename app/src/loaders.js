@@ -73,6 +73,7 @@ export const Loaders = {
 		}
 
 		const content = await Loaders._loadBlogPostContent(post);
+
 		const commentsHtml = Templates.giscusComments(data?.site?.comments, "blog");
 		mainContent.innerHTML = Templates.blogPost(post, content) + commentsHtml;
 
