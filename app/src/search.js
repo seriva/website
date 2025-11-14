@@ -13,9 +13,6 @@ import { UI } from "./ui.js";
 // SEARCH CORE
 // ===========================================
 
-// Cache for compiled regexes (improves repeated search highlighting)
-const regexCache = new Map();
-
 export const Search = {
 	data: [],
 	isInitialized: false,
@@ -26,24 +23,12 @@ export const Search = {
 	// PUBLIC METHODS
 	// ===========================================
 
-	// Highlight search query in text (with memoized regex)
+	// Highlight search query in text
 	highlight(text, query) {
 		if (!query) return text;
 
-		// Check cache first for better performance
-		let regex = regexCache.get(query);
-		if (!regex) {
-			const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-			regex = new RegExp(`(${escapedQuery})`, "gi");
-			regexCache.set(query, regex);
-
-			// Limit cache size to prevent memory leaks
-			if (regexCache.size > 100) {
-				const firstKey = regexCache.keys().next().value;
-				regexCache.delete(firstKey);
-			}
-		}
-
+		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const regex = new RegExp(`(${escapedQuery})`, "gi");
 		return text.replace(regex, "<mark>$1</mark>");
 	},
 
