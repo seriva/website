@@ -213,7 +213,12 @@ export const Email = {
 	},
 
 	_isValidEmail(email) {
-		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+		// RFC 5322 compliant email validation with max length check
+		if (!email || email.length > 254) return false;
+		// More permissive local part, strict domain part with required TLD
+		const emailRegex =
+			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+		return emailRegex.test(email) && !email.includes(" ");
 	},
 
 	_clearFieldErrors() {
