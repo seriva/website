@@ -87,10 +87,44 @@ html::after {
 	box-sizing: border-box;
 }
 
-/* Smooth theme transitions for all elements */
-*,
-*::before,
-*::after {
+/* Smooth theme transitions - optimized to target elements that actually change */
+html,
+body,
+main,
+header,
+footer,
+nav,
+section,
+article,
+div,
+span,
+p,
+h1, h2, h3, h4, h5, h6,
+a,
+button,
+input,
+textarea,
+select,
+label,
+svg,
+path,
+code,
+pre,
+blockquote,
+table,
+th,
+td,
+img,
+mark,
+.navbar,
+.nav-link,
+.dropdown,
+.dropdown-item,
+.blog-post-card,
+.search-result-item,
+.copy-code-button,
+.theme-toggle,
+.clickable-tag {
 	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
 				color var(--theme-transition-duration) var(--theme-transition-timing),
 				border-color var(--theme-transition-duration) var(--theme-transition-timing),
@@ -327,7 +361,6 @@ a.icon:hover {
 	padding: 11px 20px;
 	color: var(--font-color);
 	text-decoration: none;
-	transition: all var(--transition-fast);
 	line-height: 1.2;
 	font-size: 1.25em;
 	font-weight: 700;
