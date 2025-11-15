@@ -25,11 +25,11 @@
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8181],
+	"forwardPorts": [8081],
 
 	// Use 'portsAttributes' to set default properties for specific forwarded ports. More info: https://code.visualstudio.com/docs/remote/devcontainerjson-reference.
 	"portsAttributes": {
-		"8181": {
+		"8081": {
 			"label": "devserver",
 			"onAutoForward": "notify"
 		}
