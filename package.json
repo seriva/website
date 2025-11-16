@@ -25,7 +25,7 @@
 		"@fortawesome/fontawesome-free": "^7.1.0",
 		"husky": "^9.1.7",
 		"jsdom": "^27.2.0",
-		"microtastic": "^0.0.48"
+		"microtastic": "^0.0.50"
 	},
 	"dependencies": {
 		"@emailjs/browser": "^4.4.1",
