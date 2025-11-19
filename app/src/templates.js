@@ -6,7 +6,7 @@
 import { CONSTANTS } from "./constants.js";
 import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
-import { html, trusted } from "./reactive.js";
+import { html, join, trusted } from "./reactive.js";
 import { Theme } from "./theme.js";
 
 // ===========================================
@@ -328,55 +328,7 @@ export const Templates = {
 		return html`<div class="giscus-container" id="${containerId}"></div>`;
 	},
 
-	// Contact form modal
-	contactForm: () => html`
-		<div class="contact-modal" id="contact-modal">
-			<div class="contact-modal-content">
-				<div class="contact-modal-header">
-					<h2>${i18n.t("contact.title")}</h2>
-					<button class="contact-modal-close" id="contact-modal-close" aria-label="${i18n.t("contact.close")}">
-						<i class="fas fa-times"></i>
-					</button>
-				</div>
-				<form class="contact-form" id="contact-form">
-					<div class="form-group">
-						<label for="contact-name">${i18n.t("contact.name")}*</label>
-						<input 
-							type="text" 
-							id="contact-name" 
-							name="name" 
-							required 
-							aria-required="true"
-						/>
-					</div>
-					<div class="form-group">
-						<label for="contact-email">${i18n.t("contact.email")}*</label>
-						<input 
-							type="email" 
-							id="contact-email" 
-							name="email" 
-							required 
-							aria-required="true"
-						/>
-					</div>
-					<div class="form-group">
-						<label for="contact-message">${i18n.t("contact.message")}*</label>
-						<textarea 
-							id="contact-message" 
-							name="message" 
-							rows="6" 
-							required 
-							aria-required="true"
-						></textarea>
-					</div>
-					<div class="form-status" id="contact-status"></div>
-					<button type="submit" class="btn btn-primary" id="contact-submit">
-						${i18n.t("contact.send")}
-					</button>
-				</form>
-			</div>
-		</div>
-	`,
+
 
 	// ===========================================
 	// PRIVATE METHODS
@@ -386,17 +338,15 @@ export const Templates = {
 		if (!tags?.length) return html``;
 		const searchEnabled = projectsData?.site?.search?.enabled !== false;
 		const clickableClass = searchEnabled ? " clickable-tag" : "";
-		return trusted(
-			tags
-				.map((tag) => {
-					if (searchEnabled) {
-						return html`<span class="item-tag${clickableClass}" data-search-tag="${tag}">${tag}</span>`
-							.content;
-					}
-					return html`<span class="item-tag">${tag}</span>`.content;
-				})
-				.join(" "),
-		);
+
+		const tagElements = tags.map((tag) => {
+			if (searchEnabled) {
+				return html`<span class="item-tag${clickableClass}" data-search-tag="${tag}">${tag}</span>`;
+			}
+			return html`<span class="item-tag">${tag}</span>`;
+		});
+
+		return join(tagElements, " ");
 	},
 
 	_searchInput: (id, cssClass, placeholder) => html`

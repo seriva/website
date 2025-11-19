@@ -12,9 +12,9 @@ import { Reactive, Signals } from "./reactive.js";
 // ===========================================
 
 export const Theme = {
-	current: null,
 	storageKey: "theme-preference",
 	_themeSignal: null,
+	_component: null,
 
 	// ===========================================
 	// PUBLIC METHODS
@@ -29,29 +29,39 @@ export const Theme = {
 		const savedTheme = localStorage.getItem(this.storageKey);
 		const theme = savedTheme || this._getAutoTheme(defaultTheme);
 
+		// Create component context
+		this._component = Reactive.createComponent();
+
 		// Create reactive theme signal
 		this._themeSignal = Signals.create(theme);
 
 		// Auto-update data-theme attribute
-		Reactive.bindAttr(
+		this._component.bindAttr(
 			document.documentElement,
 			"data-theme",
 			this._themeSignal,
 		);
 
 		// Subscribe to theme changes for side effects
-		this._themeSignal.subscribe((newTheme) => {
-			this.current = newTheme;
-			localStorage.setItem(this.storageKey, newTheme);
-			const colors = this._getThemeColors(newTheme);
-			if (colors) {
-				this._applyColorScheme(colors);
-				this._applyPrismTheme(newTheme);
-				this._updateGiscus(newTheme);
-			}
-		});
+		this._component.track(
+			this._themeSignal.subscribe((newTheme) => {
+				localStorage.setItem(this.storageKey, newTheme);
+				const colors = this._getThemeColors(newTheme);
+				if (colors) {
+					this._applyColorScheme(colors);
+					this._applyPrismTheme(newTheme);
+					this._updateGiscus(newTheme);
+				}
+			}),
+		);
 
 		this._setupToggleListener();
+	},
+
+	// Cleanup theme subscriptions
+	cleanup() {
+		this._component?.cleanup();
+		this._component = null;
 	},
 
 	// Toggle between light and dark theme
@@ -60,15 +70,22 @@ export const Theme = {
 		this._themeSignal.set(newTheme);
 	},
 
+	// Get current theme
+	getCurrent() {
+		return this._themeSignal?.get() || "dark";
+	},
+
 	// Get giscus theme for current or specified theme
 	getGiscusTheme(theme = null) {
-		const colors = this._getThemeColors(theme);
-		return colors?.comments?.theme || theme || this.current || "dark";
+		const currentTheme = theme || this.getCurrent();
+		const colors = this._getThemeColors(currentTheme);
+		return colors?.comments?.theme || currentTheme;
 	},
 
 	// Get Prism theme for current or specified theme
 	getPrismTheme(theme = null) {
-		const colors = this._getThemeColors(theme);
+		const currentTheme = theme || this.getCurrent();
+		const colors = this._getThemeColors(currentTheme);
 		return colors?.code?.theme || "prism-tomorrow";
 	},
 
@@ -92,7 +109,7 @@ export const Theme = {
 
 	// Get theme colors for specified theme (or current theme)
 	_getThemeColors(theme = null) {
-		const targetTheme = theme || this.current || "dark";
+		const targetTheme = theme || this.getCurrent();
 		const data = Context.get();
 		return targetTheme === "dark"
 			? data?.site?.theme?.dark

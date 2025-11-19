@@ -13,6 +13,8 @@ import { Reactive, Signals } from "./reactive.js";
 // ===========================================
 
 export const UI = {
+	_copyButtonComponents: new Map(),
+
 	// ===========================================
 	// PUBLIC METHODS
 	// ===========================================
@@ -22,6 +24,14 @@ export const UI = {
 		this._initCustomDropdowns();
 		this._initNavbarToggle();
 		this.initCopyCodeButtons();
+	},
+
+	// Cleanup copy button components
+	cleanupCopyButtons() {
+		for (const component of this._copyButtonComponents.values()) {
+			component.cleanup();
+		}
+		this._copyButtonComponents.clear();
 	},
 
 	// Close mobile navigation menu
@@ -106,20 +116,25 @@ export const UI = {
 			button.className = "copy-code-button";
 			button.setAttribute("aria-label", i18n.t("aria.copyCode"));
 
+			// Create component context for this copy button
+			const component = Reactive.createComponent();
+
 			// Create reactive button state
 			const buttonState = Signals.create("copy");
-			const buttonText = Signals.computed(
+			const buttonText = component.computed(
 				() => i18n.t(`code.${buttonState.get()}`),
 				[buttonState],
 			);
 
 			// Bind button text to signal
-			Reactive.bindText(button, buttonText);
+			component.bindText(button, buttonText);
 
 			// Subscribe to state changes for CSS class updates
-			buttonState.subscribe((state) => {
-				button.classList.toggle("copied", state === "copied");
-			});
+			component.track(
+				buttonState.subscribe((state) => {
+					button.classList.toggle("copied", state === "copied");
+				}),
+			);
 
 			button.addEventListener("click", async () => {
 				try {
@@ -142,6 +157,9 @@ export const UI = {
 
 			pre.style.position = "relative";
 			pre.appendChild(button);
+
+			// Store component for cleanup
+			this._copyButtonComponents.set(button, component);
 		}
 	},
 
