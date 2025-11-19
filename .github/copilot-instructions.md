@@ -11,6 +11,11 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
    - Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
    - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
    - All modules follow this pattern consistently
+   - **Method Organization**: Within namespace objects, organize methods in this order:
+     1. Utility methods (if any) at the top
+     2. Public methods (called from other modules)
+     3. Private methods (internal use only) at the bottom with `_` prefix
+   - Private method naming: Prefix with underscore `_privateMethod()`
 3. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
 4. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
 5. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)

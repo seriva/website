@@ -6,6 +6,7 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
+import { trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
 // ===========================================
@@ -13,6 +14,10 @@ import { Templates } from "./templates.js";
 // ===========================================
 
 export const Layout = {
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
 	// Initialize all layout components (navbar, footer, dropdowns)
 	async init() {
 		await this._injectNavbar();
@@ -47,14 +52,18 @@ export const Layout = {
 		const blogLink = blogPage
 			? Templates.pageLink(blogPage.id, blogPage.title)
 			: "";
-		const pageLinks = pages
-			.filter((page) => page.id !== "blog" && page.showInNav)
-			.sort((a, b) => a.order - b.order)
-			.map((page) => Templates.pageLink(page.id, page.title))
-			.join("");
-		const socialLinksHtml = (data?.site?.social || [])
-			.map((link) => Templates.socialLink(link))
-			.join("");
+		const pageLinks = trusted(
+			pages
+				.filter((page) => page.id !== "blog" && page.showInNav)
+				.sort((a, b) => a.order - b.order)
+				.map((page) => Templates.pageLink(page.id, page.title).content)
+				.join(""),
+		);
+		const socialLinksHtml = trusted(
+			(data?.site?.social || [])
+				.map((link) => Templates.socialLink(link).content)
+				.join(""),
+		);
 		const searchBar = data?.site?.search?.enabled ? Templates.searchBar() : "";
 		const emailButton = data?.site?.emailjs?.enabled
 			? Templates.emailButton()
@@ -71,7 +80,7 @@ export const Layout = {
 			emailButton,
 			themeToggle,
 			data?.site?.title || CONSTANTS.DEFAULT_TITLE,
-		);
+		).content;
 
 		// Inject search page into body if search is enabled
 		if (data?.site?.search?.enabled) {
@@ -81,7 +90,7 @@ export const Layout = {
 					"beforeend",
 					Templates.searchPage(
 						data.site.search.placeholder || i18n.t("search.placeholder"),
-					),
+					).content,
 				);
 			}
 		}
@@ -97,7 +106,10 @@ export const Layout = {
 			const authorName = data?.site?.author || "Portfolio Owner";
 			const currentYear = new Date().getFullYear();
 
-			footerContainer.innerHTML = Templates.footer(authorName, currentYear);
+			footerContainer.innerHTML = Templates.footer(
+				authorName,
+				currentYear,
+			).content;
 		} catch (error) {
 			console.error("Error injecting footer:", error);
 		}
@@ -109,12 +121,15 @@ export const Layout = {
 		const projectsDropdown = document.getElementById("projects-dropdown");
 		if (!projectsDropdown || !data?.projects) return;
 
-		const projectsHtml = data.projects
-			.map((project) =>
-				Templates.projectDropdownItem(project.id, project.title),
-			)
-			.join("");
+		const projectsHtml = trusted(
+			data.projects
+				.map(
+					(project) =>
+						Templates.projectDropdownItem(project.id, project.title).content,
+				)
+				.join(""),
+		);
 
-		projectsDropdown.innerHTML = projectsHtml;
+		projectsDropdown.innerHTML = projectsHtml.content;
 	},
 };

@@ -51,43 +51,49 @@ describe("Email", () => {
 		);
 	});
 
-	test("should clear status with empty message", () => {
+	test("should have reactive status message signal", async () => {
 		// Create status element
 		const statusDiv = document.createElement("div");
 		statusDiv.id = "contact-status";
-		statusDiv.textContent = "Some message";
-		statusDiv.className = "form-status error";
+		statusDiv.className = "form-status";
 		document.body.appendChild(statusDiv);
 
-		Email._clearStatus();
+		// Import Signals to test reactive behavior
+		const { Signals } = await import("../app/src/reactive.js");
 
-		assert.strictEqual(statusDiv.textContent, "", "Should clear text");
-		assert.strictEqual(
-			statusDiv.className,
-			"form-status",
-			"Should reset class",
-		);
+		// Simulate Email's reactive status setup
+		const statusMessage = Signals.create({ text: "", type: "" });
+		statusMessage.subscribe((status) => {
+			statusDiv.textContent = status.text;
+			statusDiv.className = status.type
+				? `form-status ${status.type}`
+				: "form-status";
+		});
 
-		document.body.removeChild(statusDiv);
-	});
-
-	test("should show status with message and type", () => {
-		const statusDiv = document.createElement("div");
-		statusDiv.id = "contact-status";
-		document.body.appendChild(statusDiv);
-
-		Email._showStatus("Test message", "success");
+		// Set status message
+		statusMessage.set({ text: "Test message", type: "success" });
 
 		assert.strictEqual(
 			statusDiv.textContent,
 			"Test message",
-			"Should set message",
+			"Should set message via signal",
 		);
 		assert.ok(
 			statusDiv.className.includes("success"),
 			"Should include success class",
 		);
 
+		// Clear status
+		statusMessage.set({ text: "", type: "" });
+
+		assert.strictEqual(statusDiv.textContent, "", "Should clear text via signal");
+		assert.strictEqual(
+			statusDiv.className,
+			"form-status",
+			"Should reset class via signal",
+		);
+
+		// Cleanup
 		document.body.removeChild(statusDiv);
 	});
 

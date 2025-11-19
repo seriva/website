@@ -6,6 +6,7 @@
 import { CONSTANTS } from "./constants.js";
 import { Email } from "./email.js";
 import { i18n } from "./i18n.js";
+import { Reactive, Signals } from "./reactive.js";
 
 // ===========================================
 // UI NAMESPACE
@@ -103,26 +104,38 @@ export const UI = {
 
 			const button = document.createElement("button");
 			button.className = "copy-code-button";
-			button.textContent = i18n.t("code.copy");
 			button.setAttribute("aria-label", i18n.t("aria.copyCode"));
+
+			// Create reactive button state
+			const buttonState = Signals.create("copy");
+			const buttonText = Signals.computed(
+				() => i18n.t(`code.${buttonState.get()}`),
+				[buttonState],
+			);
+
+			// Bind button text to signal
+			Reactive.bindText(button, buttonText);
+
+			// Subscribe to state changes for CSS class updates
+			buttonState.subscribe((state) => {
+				button.classList.toggle("copied", state === "copied");
+			});
 
 			button.addEventListener("click", async () => {
 				try {
 					const code = codeElement.textContent || "";
 					await navigator.clipboard.writeText(code);
 
-					button.textContent = i18n.t("code.copied");
-					button.classList.add("copied");
+					buttonState.set("copied");
 
 					setTimeout(() => {
-						button.textContent = i18n.t("code.copy");
-						button.classList.remove("copied");
+						buttonState.set("copy");
 					}, CONSTANTS.COPY_BUTTON_RESET_MS);
 				} catch (error) {
 					console.error("Failed to copy code:", error);
-					button.textContent = i18n.t("code.copyFailed");
+					buttonState.set("copyFailed");
 					setTimeout(() => {
-						button.textContent = i18n.t("code.copy");
+						buttonState.set("copy");
 					}, CONSTANTS.COPY_BUTTON_RESET_MS);
 				}
 			});

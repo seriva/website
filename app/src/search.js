@@ -6,6 +6,7 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
+import { trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
 
@@ -213,9 +214,11 @@ export const Search = {
 		const results = Search._search(query);
 
 		if (results.length > 0) {
-			resultsContainer.innerHTML = results
-				.map((item) => Templates.searchResult(item, query, Search))
-				.join("");
+			resultsContainer.innerHTML = trusted(
+				results
+					.map((item) => Templates.searchResult(item, query, Search).content)
+					.join(""),
+			).content;
 			resultsContainer.classList.add("show");
 
 			// Use event delegation for better performance
@@ -259,7 +262,7 @@ export const Search = {
 				}
 			};
 		} else {
-			resultsContainer.innerHTML = Templates.searchNoResults();
+			resultsContainer.innerHTML = Templates.searchNoResults().content;
 			resultsContainer.classList.add("show");
 		}
 	},

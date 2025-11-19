@@ -5,6 +5,7 @@
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
+import { Reactive, Signals } from "./reactive.js";
 
 // ===========================================
 // THEME NAMESPACE
@@ -13,6 +14,7 @@ import { Context } from "./context.js";
 export const Theme = {
 	current: null,
 	storageKey: "theme-preference",
+	_themeSignal: null,
 
 	// ===========================================
 	// PUBLIC METHODS
@@ -27,14 +29,35 @@ export const Theme = {
 		const savedTheme = localStorage.getItem(this.storageKey);
 		const theme = savedTheme || this._getAutoTheme(defaultTheme);
 
-		this.apply(theme);
+		// Create reactive theme signal
+		this._themeSignal = Signals.create(theme);
+
+		// Auto-update data-theme attribute
+		Reactive.bindAttr(
+			document.documentElement,
+			"data-theme",
+			this._themeSignal,
+		);
+
+		// Subscribe to theme changes for side effects
+		this._themeSignal.subscribe((newTheme) => {
+			this.current = newTheme;
+			localStorage.setItem(this.storageKey, newTheme);
+			const colors = this._getThemeColors(newTheme);
+			if (colors) {
+				this._applyColorScheme(colors);
+				this._applyPrismTheme(newTheme);
+				this._updateGiscus(newTheme);
+			}
+		});
+
 		this._setupToggleListener();
 	},
 
 	// Toggle between light and dark theme
 	toggle() {
-		const newTheme = this.current === "dark" ? "light" : "dark";
-		this.apply(newTheme);
+		const newTheme = this._themeSignal.get() === "dark" ? "light" : "dark";
+		this._themeSignal.set(newTheme);
 	},
 
 	// Get giscus theme for current or specified theme
@@ -57,15 +80,10 @@ export const Theme = {
 			return;
 		}
 
-		// Apply all theme changes
-		this._applyColorScheme(colors);
-		this._applyPrismTheme(theme);
-		this._updateGiscus(theme);
-
-		// Save current theme state
-		this.current = theme;
-		localStorage.setItem(this.storageKey, theme);
-		document.documentElement.setAttribute("data-theme", theme);
+		// Update signal - this triggers all side effects automatically
+		if (this._themeSignal) {
+			this._themeSignal.set(theme);
+		}
 	},
 
 	// ===========================================
@@ -106,7 +124,7 @@ export const Theme = {
 			const data = Context.get();
 			if (data?.site?.theme?.default === "auto") {
 				const theme = e.matches ? "dark" : "light";
-				this.apply(theme);
+				this._themeSignal.set(theme);
 			}
 		});
 	},

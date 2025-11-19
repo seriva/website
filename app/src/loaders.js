@@ -9,6 +9,7 @@ import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
 import { PrismLoader } from "./prism-loader.js";
+import { trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
 
@@ -27,7 +28,7 @@ export const Loaders = {
 		const data = Context.get();
 		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
 
-		mainContent.innerHTML = Templates.loadingSpinner();
+		mainContent.innerHTML = Templates.loadingSpinner().content;
 
 		const posts = await Loaders._loadBlogPosts(data);
 		const postsPerPage = data?.blog?.postsPerPage || 5;
@@ -38,18 +39,22 @@ export const Loaders = {
 		const paginatedPosts = posts.slice(startIndex, endIndex);
 
 		if (paginatedPosts.length === 0) {
-			mainContent.innerHTML = Templates.blogEmpty();
+			mainContent.innerHTML = Templates.blogEmpty().content;
 			return;
 		}
 
-		const postsHtml = paginatedPosts
-			.map((post, index) => Templates.blogPostCard(post, startIndex + index))
-			.join("");
-
+		const postsHtml = trusted(
+			paginatedPosts
+				.map(
+					(post, index) =>
+						Templates.blogPostCard(post, startIndex + index).content,
+				)
+				.join(""),
+		);
 		mainContent.innerHTML = Templates.blogContainer(
 			postsHtml,
 			Templates.blogPagination(currentPage, totalPages),
-		);
+		).content;
 
 		Loaders._setupBlogCardClicks();
 		document.title = `${data.blog.title || "Blog"} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
@@ -58,7 +63,7 @@ export const Loaders = {
 	// Load and display a single blog post
 	async loadBlogPost(slug) {
 		const mainContent = document.getElementById("main-content");
-		mainContent.innerHTML = Templates.loadingSpinner();
+		mainContent.innerHTML = Templates.loadingSpinner().content;
 		const data = Context.get();
 		const posts = await Loaders._loadBlogPosts(data);
 		const post = posts.find((p) => p.slug === slug || p.id === slug);
@@ -67,14 +72,15 @@ export const Loaders = {
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.blogNotFound"),
 				i18n.t("general.blogNotFoundMessage"),
-			);
+			).content;
 			return;
 		}
 
 		const content = await Loaders._loadBlogPostContent(post);
 
 		const commentsHtml = Templates.giscusComments(data?.site?.comments, "blog");
-		mainContent.innerHTML = Templates.blogPost(post, content) + commentsHtml;
+		mainContent.innerHTML =
+			Templates.blogPost(post, content).content + commentsHtml.content;
 
 		document.title = `${post.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
 	},
@@ -90,7 +96,7 @@ export const Loaders = {
 				mainContent.innerHTML = Templates.errorMessage(
 					i18n.t("general.projectNotFound"),
 					i18n.t("general.projectNotFoundMessage"),
-				);
+				).content;
 				return;
 			}
 
@@ -104,7 +110,7 @@ export const Loaders = {
 					project.tags,
 				),
 				project.github_repo &&
-					Templates.dynamicContainer(
+					Templates._dynamicContainer(
 						"github-readme",
 						"repo",
 						project.github_repo,
@@ -112,20 +118,27 @@ export const Loaders = {
 					),
 				project.youtube_videos?.length &&
 					Templates.mediaSection(
-						project.youtube_videos.map(Templates.youtubeVideo).join(""),
+						trusted(
+							project.youtube_videos
+								.map((v) => Templates._youtubeVideo(v).content)
+								.join(""),
+						),
 					),
-				project.demo_url && Templates.demoIframe(project.demo_url),
-				Templates.dynamicContainer("project-links", "project", project.id, ""),
+				project.demo_url && Templates._demoIframe(project.demo_url),
+				Templates._dynamicContainer("project-links", "project", project.id, ""),
 				Templates.giscusComments(data?.site?.comments, "projects"),
 			];
 
-			mainContent.innerHTML = sections.filter(Boolean).join("");
+			mainContent.innerHTML = sections
+				.filter(Boolean)
+				.map((section) => section.content)
+				.join("");
 		} catch (error) {
 			console.error(`Error loading project page ${projectId}:`, error);
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
-			);
+			).content;
 		}
 	},
 
@@ -152,7 +165,7 @@ export const Loaders = {
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
-			);
+			).content;
 		}
 	},
 
@@ -259,8 +272,12 @@ export const Loaders = {
 			}
 
 			container.innerHTML = Templates.projectLinksSection(
-				project.links.map(Templates.projectLink).join(""),
-			);
+				trusted(
+					project.links
+						.map((link) => Templates.projectLink(link).content)
+						.join(""),
+				),
+			).content;
 		} catch (error) {
 			console.error(`Error loading content for project ${projectId}`, error);
 		}
@@ -303,11 +320,11 @@ export const Loaders = {
 				});
 			} else {
 				console.warn(`Failed to load README for ${fullRepo}`);
-				element.innerHTML = Templates.githubReadmeError();
+				element.innerHTML = Templates.githubReadmeError().content;
 			}
 		} catch (error) {
 			console.warn(`Failed to load README for ${repo}:`, error);
-			element.innerHTML = Templates.githubReadmeError();
+			element.innerHTML = Templates.githubReadmeError().content;
 		}
 	},
 };

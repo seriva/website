@@ -4,43 +4,66 @@ import assert from "node:assert/strict";
 import "./setup.js";
 import { Templates } from "../app/src/templates.js";
 
+// Helper to extract content from safe-marked objects
+const getContent = (result) => result?.content || result;
+
 describe("Templates", () => {
 	test("navbar should generate valid structure", () => {
-		const result = Templates.navbar(
+		const result = getContent(Templates.navbar(
 			"<li>Blog</li>",
 			"<li>Projects</li>",
 			"<li>About</li>",
 			"<li>Social</li>",
 			"<li>Search</li>",
 			"Test Site",
-		);
+		));
 
 		assert.ok(result.includes("Test Site"), "Should include site title");
 		assert.ok(result.includes("navbar-toggle"), "Should include mobile toggle");
 	});
 
-	test("pageLink should generate correct SPA routes", () => {
-		const result = Templates.pageLink("about", "About");
+	test("pageLink should generate correct HTML", () => {
+		const result = getContent(Templates.pageLink("about", "About Page"));
 
 		assert.ok(result.includes('href="?page=about"'), "Should create page route");
 		assert.ok(result.includes('data-spa-route="page"'), "Should add SPA attribute");
+		assert.ok(result.includes("About Page"), "Should include link text");
 	});
 
-	test("socialLink should generate external links", () => {
+	test("socialLink should generate social links", () => {
+		const result = getContent(Templates.socialLink({
+			href: "https://github.com/test",
+			target: "_blank",
+			rel: "noopener noreferrer",
+			"aria-label": "GitHub",
+			icon: "fab fa-github",
+		}));
+
+		assert.ok(result.includes("https://github.com/test"), "Should include href");
+		assert.ok(result.includes("fab fa-github"), "Should include icon");
+	});
+
+	test("errorMessage should display errors", () => {
+		const result = getContent(Templates.errorMessage("Test Error", "Test Description"));
+
+		assert.ok(result.includes("error-message"), "Should have error class");
+		assert.ok(result.includes("Test Error"), "Should include error title");
+		assert.ok(result.includes("Test Description"), "Should include description");
+	});	test("socialLink should generate external links", () => {
 		const socialData = {
 			href: "https://github.com/test",
 			icon: "fab fa-github",
 			target: "_blank",
 		};
 
-		const result = Templates.socialLink(socialData);
+		const result = getContent(Templates.socialLink(socialData));
 
 		assert.ok(result.includes("https://github.com/test"), "Should include href");
 		assert.ok(result.includes("fab fa-github"), "Should include icon");
 	});
 
 	test("errorMessage should display error content", () => {
-		const result = Templates.errorMessage("Test Error", "Test message");
+		const result = getContent(Templates.errorMessage("Test Error", "Test message"));
 
 		assert.ok(result.includes("error-message"), "Should have error class");
 		assert.ok(result.includes("Test Error"), "Should include error title");
@@ -50,7 +73,7 @@ describe("Templates", () => {
 		const config = { blogEnabled: false, projectsEnabled: false };
 
 		assert.strictEqual(
-			Templates.giscusComments(config, "blog"),
+			getContent(Templates.giscusComments(config, "blog")),
 			"",
 			"Should return empty when disabled",
 		);
@@ -64,21 +87,21 @@ describe("Templates", () => {
 			categoryId: "DIC_test",
 		};
 
-		const result = Templates.giscusComments(config, "blog");
+		const result = getContent(Templates.giscusComments(config, "blog"));
 		assert.ok(result.includes("giscus-container"), "Should create container");
 		assert.ok(result.includes('id="giscus-blog-'), "Should have unique ID");
 	});
 
 	test("giscusComments should handle missing config", () => {
 		assert.strictEqual(
-			Templates.giscusComments(null, "blog"),
+			getContent(Templates.giscusComments(null, "blog")),
 			"",
 			"Should handle null config",
 		);
 	});
 
 	test("markdown template should handle renderer errors", () => {
-		const result = Templates.markdown("# Test", undefined);
+		const result = getContent(Templates.markdown("# Test", undefined));
 
 		assert.ok(
 			result.includes("Markdown renderer not available"),
@@ -89,7 +112,7 @@ describe("Templates", () => {
 	// XSS Protection Tests (Critical)
 	test("XSS: should escape malicious content in errorMessage", () => {
 		const maliciousTitle = '<img src=x onerror=alert(1)>';
-		const result = Templates.errorMessage(maliciousTitle, "Safe message");
+		const result = getContent(Templates.errorMessage(maliciousTitle, "Safe message"));
 
 		assert.ok(!result.includes("<img"), "Should not contain executable tag");
 		assert.ok(result.includes("&lt;img"), "Should escape tag");
@@ -98,7 +121,7 @@ describe("Templates", () => {
 	test("XSS: should escape multiple injection attempts", () => {
 		const xss1 = '<script>alert(1)</script>';
 		const xss2 = '<iframe src="evil.com"></iframe>';
-		const result = Templates.errorMessage(xss1, xss2);
+		const result = getContent(Templates.errorMessage(xss1, xss2));
 
 		assert.ok(!result.includes("<script>"), "Should not contain raw script");
 		assert.ok(!result.includes("<iframe"), "Should not contain raw iframe");
@@ -108,7 +131,7 @@ describe("Templates", () => {
 
 	test("XSS: pageLink should escape malicious page IDs", () => {
 		const maliciousId = '"><script>alert(1)</script>';
-		const result = Templates.pageLink(maliciousId, "Link Text");
+		const result = getContent(Templates.pageLink(maliciousId, "Link Text"));
 
 		assert.ok(result.includes("&lt;script&gt;"), "Should escape injection");
 		assert.ok(!result.includes('"><script>'), "Should not allow breakout");
@@ -116,11 +139,11 @@ describe("Templates", () => {
 
 	test("XSS: tagList should escape malicious tags", () => {
 		const maliciousTags = ['<script>alert(1)</script>', 'normal-tag'];
-		const result = Templates._tagList(maliciousTags);
+		const result = getContent(Templates._tagList(maliciousTags));
 
-		assert.ok(!result.content.includes("<script>"), "Should not contain raw script");
-		assert.ok(result.content.includes("&lt;script&gt;"), "Should escape tag");
-		assert.ok(result.content.includes("normal-tag"), "Should include safe tags");
+		assert.ok(!result.includes("<script>"), "Should not contain raw script");
+		assert.ok(result.includes("&lt;script&gt;"), "Should escape tag");
+		assert.ok(result.includes("normal-tag"), "Should include safe tags");
 	});
 });
 
