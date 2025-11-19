@@ -7,29 +7,100 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import emailjs from "./dependencies/@emailjs/browser.js";
 import { i18n } from "./i18n.js";
-import { Reactive, Signals } from "./reactive.js";
-import { Templates } from "./templates.js";
+import { html, Reactive } from "./reactive.js";
 
-// ===========================================
-// EMAIL NAMESPACE
-// ===========================================
+class EmailController extends Reactive.Component {
+	initialized = false;
+	_MODAL_ID = "contact-modal";
+	_NAME_ID = "contact-name";
 
-export const Email = {
-	initialized: false,
-	_buttonState: null,
-	_statusMessage: null,
+	// Define component state
+	state() {
+		return {
+			// Form state
+			buttonState: "send",
+			buttonDisabled: false,
+			statusMessage: { text: "", type: "" },
 
-	// Field IDs
-	_FIELD_IDS: {
-		NAME: "contact-name",
-		EMAIL: "contact-email",
-		MESSAGE: "contact-message",
-		STATUS: "contact-status",
-		SUBMIT: "contact-submit",
-		MODAL: "contact-modal",
-		CLOSE: "contact-modal-close",
-		FORM: "contact-form",
-	},
+			// Form data (two-way bound)
+			name: "",
+			email: "",
+			message: "",
+
+			// Validation errors (explicit nested signals)
+			errors: {
+				name: this.signal(false),
+				email: this.signal(false),
+				message: this.signal(false),
+			},
+
+			// Computed values
+			statusText: () => html`<span>${this.statusMessage.get().text}</span>`,
+			statusClass: () => {
+				const status = this.statusMessage.get();
+				return status.type ? `form-status ${status.type}` : "form-status";
+			},
+			buttonText: () => i18n.t(`contact.${this.buttonState.get()}`),
+		};
+	}
+
+	// Template for the contact form
+	template() {
+		return html`
+		<div class="contact-modal" id="contact-modal" data-on-click="_handleModalClick">
+			<div class="contact-modal-content">
+				<div class="contact-modal-header">
+					<h2>${i18n.t("contact.title")}</h2>
+					<button class="contact-modal-close" id="contact-modal-close" aria-label="${i18n.t("contact.close")}" data-on-click="hide">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<form class="contact-form" id="contact-form" data-on-submit="_handleSubmit">
+					<div class="form-group">
+						<label for="contact-name">${i18n.t("contact.name")}*</label>
+						<input 
+							type="text" 
+							id="contact-name" 
+							name="name" 
+							required 
+							aria-required="true"
+							data-class-error="errors.name"
+							data-model="name"
+						/>
+					</div>
+					<div class="form-group">
+						<label for="contact-email">${i18n.t("contact.email")}*</label>
+						<input 
+							type="email" 
+							id="contact-email" 
+							name="email" 
+							required 
+							aria-required="true"
+							data-class-error="errors.email"
+							data-model="email"
+						/>
+					</div>
+					<div class="form-group">
+						<label for="contact-message">${i18n.t("contact.message")}*</label>
+						<textarea 
+							id="contact-message" 
+							name="message" 
+							rows="6" 
+							required 
+							aria-required="true"
+							data-class-error="errors.message"
+							data-model="message"
+						></textarea>
+					</div>
+					<div class="form-status" id="contact-status" data-html="statusText" data-attr-class="statusClass"></div>
+					<button type="submit" class="btn btn-primary" id="contact-submit" data-text="buttonText" data-bool-disabled="buttonDisabled">
+						${i18n.t("contact.send")}
+					</button>
+				</form>
+			</div>
+		</div>
+		`;
+	}
 
 	// ===========================================
 	// PUBLIC METHODS
@@ -43,18 +114,20 @@ export const Email = {
 		// Only initialize if enabled
 		if (!config?.enabled) return;
 
-		// Inject the contact form modal if not already present
-		if (!document.getElementById(this._FIELD_IDS.MODAL)) {
-			document.body.insertAdjacentHTML(
-				"beforeend",
-				Templates.contactForm().content,
-			);
-			this._setupEventListeners();
-		}
+		// Initialize reactive state (now that i18n is ready)
+		this.initState();
 
-		// Always setup reactive elements (they may not be initialized yet)
-		if (!this._buttonState || !this._statusMessage) {
-			this._setupReactiveElements();
+		// Inject the contact form modal if not already present
+		if (!document.getElementById(this._MODAL_ID)) {
+			const modal = this.render();
+			document.body.appendChild(modal);
+
+			// ESC key to close (must be global)
+			document.addEventListener("keydown", (e) => {
+				if (e.key === "Escape" && modal.classList.contains("show")) {
+					this.hide();
+				}
+			});
 		}
 
 		// Initialize EmailJS only if public key is configured
@@ -62,26 +135,26 @@ export const Email = {
 			emailjs.init(config.publicKey);
 			this.initialized = true;
 		}
-	},
+	}
 
 	// Show contact form modal
 	show() {
-		const modal = document.getElementById(this._FIELD_IDS.MODAL);
+		const modal = document.getElementById(this._MODAL_ID);
 		if (!modal) return;
 
 		modal.classList.remove("closing");
 		modal.classList.add("show");
 
 		// Focus first input after animation starts
-		const nameInput = document.getElementById(this._FIELD_IDS.NAME);
+		const nameInput = document.getElementById(this._NAME_ID);
 		if (nameInput) {
 			requestAnimationFrame(() => nameInput.focus());
 		}
-	},
+	}
 
 	// Hide contact form modal with animation
 	hide() {
-		const modal = document.getElementById(this._FIELD_IDS.MODAL);
+		const modal = document.getElementById(this._MODAL_ID);
 		if (!modal) return;
 
 		modal.classList.add("closing");
@@ -91,55 +164,17 @@ export const Email = {
 			modal.classList.remove("show", "closing");
 			this._resetForm();
 		}, 200); // Match animation duration
-	},
+	}
 
 	// ===========================================
 	// PRIVATE METHODS
 	// ===========================================
 
-	_setupReactiveElements() {
-		// Setup reactive button state
-		this._buttonState = Signals.create("send");
-		const submitBtn = document.getElementById(this._FIELD_IDS.SUBMIT);
-		if (submitBtn) {
-			const buttonText = Signals.computed(
-				() => i18n.t(`contact.${this._buttonState.get()}`),
-				[this._buttonState],
-			);
-			Reactive.bindText(submitBtn, buttonText);
+	_handleModalClick(e) {
+		if (e.target.id === this._MODAL_ID) {
+			this.hide();
 		}
-
-		// Setup reactive status message
-		this._statusMessage = Signals.create({ text: "", type: "" });
-		const statusDiv = document.getElementById(this._FIELD_IDS.STATUS);
-		if (statusDiv) {
-			this._statusMessage.subscribe((status) => {
-				statusDiv.textContent = status.text;
-				statusDiv.className = status.type
-					? `form-status ${status.type}`
-					: "form-status";
-			});
-		}
-	},
-
-	_setupEventListeners() {
-		const modal = document.getElementById(this._FIELD_IDS.MODAL);
-		const closeBtn = document.getElementById(this._FIELD_IDS.CLOSE);
-		const form = document.getElementById(this._FIELD_IDS.FORM);
-
-		closeBtn?.addEventListener("click", () => this.hide());
-		modal?.addEventListener("click", (e) => {
-			if (e.target === modal) this.hide();
-		});
-		form?.addEventListener("submit", (e) => this._handleSubmit(e));
-
-		// ESC key to close
-		document.addEventListener("keydown", (e) => {
-			if (e.key === "Escape" && modal?.classList.contains("show")) {
-				this.hide();
-			}
-		});
-	},
+	}
 
 	async _handleSubmit(e) {
 		e.preventDefault();
@@ -148,147 +183,134 @@ export const Email = {
 		const config = data?.site?.emailjs;
 
 		if (!this.initialized) {
-			this._statusMessage.set({
+			this.statusMessage.set({
 				text: "EmailJS not configured. Please add your EmailJS credentials to content.yaml to enable contact form.",
 				type: "error",
 			});
 			return;
 		}
 
-		const form = e.target;
-		const submitBtn = document.getElementById(this._FIELD_IDS.SUBMIT);
-
 		// Validate
-		if (!this._validateForm(form)) {
+		if (!this._validateForm()) {
 			return;
 		}
 
-		// Disable submit button and clear status
-		if (submitBtn) {
-			submitBtn.disabled = true;
-		}
-		this._buttonState.set("sending");
-		this._statusMessage.set({ text: "", type: "" });
+		// Disable submit button and clear status reactively
+		this.buttonDisabled.set(true);
+		this.buttonState.set("sending");
+		this.statusMessage.set({ text: "", type: "" });
 
 		try {
-			// Get form values
-			const formData = new FormData(form);
 			const templateParams = {
 				title: data?.site?.title || CONSTANTS.DEFAULT_TITLE,
-				name: formData.get("name"),
-				email: formData.get("email"),
+				name: this.name.get(),
+				email: this.email.get(),
 				time: new Date().toISOString(),
-				message: formData.get("message"),
+				message: this.message.get(),
 			};
 
 			// Send email via EmailJS
 			await emailjs.send(config.serviceId, config.templateId, templateParams);
 
 			// Show success message
-			this._statusMessage.set({
-				text: i18n.t("contact.success"),
-				type: "success",
+			this.batch(() => {
+				this.statusMessage.set({
+					text: i18n.t("contact.success"),
+					type: "success",
+				});
+				this.buttonState.set("send");
 			});
-			this._buttonState.set("send");
 
 			// Reset form after delay
 			setTimeout(() => this.hide(), 2000);
 		} catch (error) {
 			console.error("Failed to send email:", error);
-			this._statusMessage.set({ text: i18n.t("contact.error"), type: "error" });
-			this._buttonState.set("send");
+			this.batch(() => {
+				this.statusMessage.set({
+					text: i18n.t("contact.error"),
+					type: "error",
+				});
+				this.buttonState.set("send");
 
-			// Re-enable submit button only on error
-			if (submitBtn) {
-				submitBtn.disabled = false;
-			}
+				// Re-enable submit button only on error
+				this.buttonDisabled.set(false);
+			});
 		}
-	},
+	}
 
-	_validateForm(form) {
-		const nameInput = form.querySelector(`#${this._FIELD_IDS.NAME}`);
-		const emailInput = form.querySelector(`#${this._FIELD_IDS.EMAIL}`);
-		const messageInput = form.querySelector(`#${this._FIELD_IDS.MESSAGE}`);
+	_validateForm() {
+		let isValid = true;
+		const name = this.name.get().trim();
+		const email = this.email.get().trim();
+		const message = this.message.get().trim();
 
-		// Clear previous errors
-		this._clearFieldErrors();
+		// Reset all errors first
+		this.errors.name.set(false);
+		this.errors.email.set(false);
+		this.errors.message.set(false);
 
 		// Validate name
-		if (!nameInput?.value.trim()) {
-			this._statusMessage.set({
+		if (!name) {
+			this.statusMessage.set({
 				text: `${i18n.t("contact.name")}: ${i18n.t("contact.required")}`,
 				type: "error",
 			});
-			nameInput?.classList.add("error");
-			return false;
+			this.errors.name.set(true);
+			isValid = false;
+			return isValid; // Stop at first error for status message clarity
 		}
 
 		// Validate email
-		if (!emailInput?.value.trim()) {
-			this._statusMessage.set({
+		if (!email) {
+			this.statusMessage.set({
 				text: `${i18n.t("contact.email")}: ${i18n.t("contact.required")}`,
 				type: "error",
 			});
-			emailInput?.classList.add("error");
-			return false;
+			this.errors.email.set(true);
+			isValid = false;
+			return isValid;
 		}
 
-		if (!this._isValidEmail(emailInput.value)) {
-			this._statusMessage.set({
+		// RFC 5322 compliant email validation with max length check
+		const emailRegex =
+			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+		if (!email || email.length > 254 || !emailRegex.test(email) || email.includes(" ")) {
+			this.statusMessage.set({
 				text: i18n.t("contact.invalidEmail"),
 				type: "error",
 			});
-			emailInput?.classList.add("error");
-			return false;
+			this.errors.email.set(true);
+			isValid = false;
+			return isValid;
 		}
 
 		// Validate message
-		if (!messageInput?.value.trim()) {
-			this._statusMessage.set({
+		if (!message) {
+			this.statusMessage.set({
 				text: `${i18n.t("contact.message")}: ${i18n.t("contact.required")}`,
 				type: "error",
 			});
-			messageInput?.classList.add("error");
-			return false;
+			this.errors.message.set(true);
+			isValid = false;
+			return isValid;
 		}
 
-		return true;
-	},
-
-	_isValidEmail(email) {
-		// RFC 5322 compliant email validation with max length check
-		if (!email || email.length > 254) return false;
-		// More permissive local part, strict domain part with required TLD
-		const emailRegex =
-			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-		return emailRegex.test(email) && !email.includes(" ");
-	},
-
-	_clearFieldErrors() {
-		const inputs = [
-			this._FIELD_IDS.NAME,
-			this._FIELD_IDS.EMAIL,
-			this._FIELD_IDS.MESSAGE,
-		].map((id) => document.getElementById(id));
-
-		for (const input of inputs) {
-			if (input) input.classList.remove("error");
-		}
-	},
+		return isValid;
+	}
 
 	_resetForm() {
-		const form = document.getElementById(this._FIELD_IDS.FORM);
-		if (form) {
-			form.reset();
-			this._clearFieldErrors();
-			this._statusMessage.set({ text: "", type: "" });
-			this._buttonState.set("send");
+		this.batch(() => {
+			this.name.set("");
+			this.email.set("");
+			this.message.set("");
+			this.errors.name.set(false);
+			this.errors.email.set(false);
+			this.errors.message.set(false);
+			this.statusMessage.set({ text: "", type: "" });
+			this.buttonState.set("send");
+			this.buttonDisabled.set(false);
+		});
+	}
+}
 
-			// Reset submit button
-			const submitBtn = document.getElementById(this._FIELD_IDS.SUBMIT);
-			if (submitBtn) {
-				submitBtn.disabled = false;
-			}
-		}
-	},
-};
+export const Email = new EmailController();

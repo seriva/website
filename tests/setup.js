@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 
 // Create a minimal DOM environment
 const dom = new JSDOM(
-	`<!DOCTYPE html>
+    `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -24,11 +24,11 @@ const dom = new JSDOM(
     <div id="footer-container"></div>
 </body>
 </html>`,
-	{
-		url: "http://localhost:8081",
-		pretendToBeVisual: true,
-		resources: "usable",
-	},
+    {
+        url: "http://localhost:8081",
+        pretendToBeVisual: true,
+        resources: "usable",
+    },
 );
 
 // Set up global objects
@@ -37,4 +37,6 @@ global.document = dom.window.document;
 global.HTMLElement = dom.window.HTMLElement;
 global.Element = dom.window.Element;
 global.Node = dom.window.Node;
+global.Event = dom.window.Event;
+global.CustomEvent = dom.window.CustomEvent;
 
