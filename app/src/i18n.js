@@ -7,6 +7,10 @@ export const i18n = {
 	currentLanguage: null,
 	translations: {},
 
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
 	// Initialize i18n with config and translations
 	init(config, translations) {
 		this.currentLanguage = config?.defaultLanguage || "en";

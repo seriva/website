@@ -6,6 +6,11 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - **Namespace Pattern**: Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
   - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
   - All modules follow this pattern consistently
+  - **Method Organization**: Within namespace objects, organize methods in this order:
+    1. Utility methods (if any) at the top
+    2. Public methods (called from other modules)
+    3. Private methods (internal use only) at the bottom with `_` prefix
+  - Private method naming: Prefix with underscore `_privateMethod()`
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
 - Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
 - Call `await Context.init()` to load content; access via `Context.get()` (cached)

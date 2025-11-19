@@ -72,7 +72,7 @@ export const Router = {
 			mainContent.innerHTML = Templates.errorMessage(
 				i18n.t("general.error"),
 				i18n.t("general.errorMessage"),
-			);
+			).content;
 
 			// Set fallback title
 			const data = Context.get();
@@ -107,7 +107,7 @@ export const Router = {
 		await new Promise((resolve) =>
 			setTimeout(resolve, CONSTANTS.PAGE_TRANSITION_DELAY),
 		);
-		mainContent.innerHTML = Templates.loadingSpinner();
+		mainContent.innerHTML = Templates.loadingSpinner().content;
 	},
 
 	// End page transition and finalize page load

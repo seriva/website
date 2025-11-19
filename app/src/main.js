@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			mainContent.innerHTML = Templates.errorMessage(
 				"Something went wrong",
 				"Please refresh the page to try again.",
-			);
+			).content;
 		}
 	}
 });

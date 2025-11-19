@@ -4,6 +4,7 @@
 // Utilities for loading and parsing markdown files
 
 import { marked } from "./dependencies/marked.js";
+import { html } from "./reactive.js";
 import { Templates } from "./templates.js";
 import { YAMLParser } from "./yaml-parser.js";
 
@@ -30,7 +31,9 @@ export const MarkdownLoader = {
 					// If language is specified, add Prism-compatible class
 					const lang = language || "text";
 					const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : "text";
-					return `<pre><code class="language-${validLang}">${Templates.escape(code)}</code></pre>`;
+					
+					// Use html tagged template for automatic escaping
+					return html`<pre><code class="language-${validLang}">${code}</code></pre>`.content;
 				},
 			},
 		});
