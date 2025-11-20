@@ -5,7 +5,7 @@
 
 export const CONSTANTS = {
 	// Paths
-	PRISM_CDN_BASE: "css/prism-themes/",
+	PRISM_CDN_BASE: "/css/prism-themes/",
 	GITHUB_RAW_BASE: "https://raw.githubusercontent.com",
 
 	// Defaults

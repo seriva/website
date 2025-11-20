@@ -7,15 +7,41 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
 ### Key Architecture Principles
 
 1. **ES6 Modules**: All code organized in modular files under `app/src/`
-2. **Namespace Pattern**: Use object exports for grouping related functions
+2. **Component Naming**: Components extending `Reactive.Component` use simple names (e.g., `Navbar`, `Search`, `ContactForm`), not `*Controller` suffix
+3. **Reactive System**: Use `reactive.js` for all interactive components and state management
+   - Create components with `Reactive.Component` base class for full-featured components
+   - Use `Reactive.createComponent()` for lightweight component contexts
+   - Signals for reactive state: `this.signal(value)` or `Signals.create(value)`
+   - Computed values: `this.computed(() => ...)` or `Signals.computed(() => ...)`
+   - Batch updates for multiple changes: `this.batch(() => ...)` or `Signals.batch(() => ...)`
+   - Declarative binding in templates:
+     - `data-text` - bind text content
+     - `data-html` - bind HTML content (auto-escapes unless using `safe()`)
+     - `data-attr-*` - bind attributes
+     - `data-class-*` - toggle classes
+     - `data-bool-*` - toggle boolean attributes (checked, disabled, etc.)
+     - `data-model` - two-way binding for inputs
+     - `data-on-click`, `data-on-submit` - event handlers (auto-batched)
+   - Prefer reactive.js for all interactive features - it provides consistency and maintainability
+4. **Namespace Pattern**: Use object exports for grouping related functions
    - Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
-   - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
-   - All modules follow this pattern consistently
-3. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
-4. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
-5. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
-6. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
-7. **i18n (Internationalization)**: 
+   - Example: `Context.get()`, `Loaders.loadBlogPage()`, `Templates.errorMessage()`
+   - All non-component modules follow this pattern consistently
+   - **Method Organization**: Within namespace objects and components, organize methods in this order:
+     1. **Public methods first** (called from other modules or templates)
+     2. **Private methods last** (internal use only) at the bottom with `_` prefix
+   - Private method naming: Always prefix with underscore `_privateMethod()`
+   - **Component Structure**: For `Reactive.Component` classes:
+     1. Constructor and lifecycle methods first
+     2. `state()` method defining reactive state (signals, computed values)
+     3. `template()` method returning HTML
+     4. Public methods next (called from templates or other components)
+     5. Private methods last with `_` prefix (internal logic)
+5. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
+6. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
+7. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
+8. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
+9. **i18n (Internationalization)**: 
    - **ALWAYS** use `i18n.t('key')` for ALL user-facing text (labels, titles, messages, placeholders, aria-labels, tooltips)
    - **NEVER** hardcode user-facing strings in templates or code
    - Add new translation keys to `app/data/content.yaml` under `translations.en`
@@ -32,15 +58,20 @@ Before any build or deployment, ALL of the following must pass:
    - Uses Biome to catch errors and enforce code quality
    
 3. **Tests**: `npm test`
-   - 65 unit tests covering:
+   - 122 unit tests covering:
+     - Reactive system (signals, computed, batching, components) (`tests/reactive.test.js`)
      - HTML escaping and template utilities (`tests/template-utils.test.js`)
-     - All template generation (`tests/templates.test.js`)
+     - Template generation (`tests/templates.test.js`)
      - Search functionality (`tests/search.test.js`)
      - YAML parser (`tests/yaml-parser.test.js`)
      - Routing logic (`tests/routing.test.js`)
      - Markdown parsing (`tests/markdown.test.js`)
-     - Marked.js configuration (`tests/marked.test.js`)
      - Internationalization (`tests/i18n.test.js`)
+     - Theme management (`tests/theme.test.js`)
+     - Email controller (`tests/email.test.js`)
+     - Error handler (`tests/error-handler.test.js`)
+     - UI utilities (`tests/ui.test.js`)
+     - Prism loader (`tests/prism-loader.test.js`)
    - Uses Node.js built-in test runner (zero test framework dependencies)
    - All tests MUST pass before merging or deploying
 
@@ -70,24 +101,48 @@ describe("My Module", () => {
 
 ### Module Organization
 
+**Core Module**:
+- `app/src/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
+
 **Namespace Pattern Modules** (export single object):
-- `app/src/ui.js` - `UI` namespace for UI interactions, mobile menu, dropdowns
-- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
 - `app/src/context.js` - `Context` namespace for app state, data loading, theming
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
-- `app/src/layout.js` - `Layout` namespace for navbar and footer rendering
+- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
 - `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
-- `app/src/search.js` - `Search` namespace for Fuse.js search implementation
-- `app/src/email.js` - `Email` namespace for EmailJS contact form integration
 - `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
 - `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
 - `app/src/prism-loader.js` - `PrismLoader` namespace for syntax highlighting
 - `app/src/i18n.js` - `i18n` namespace for internationalization
 - `app/src/constants.js` - `CONSTANTS` object for configuration
 
+**Reactive Components** (extend `Reactive.Component`):
+- `app/src/navbar.js` - `Navbar` component for navbar rendering
+- `app/src/footer.js` - `Footer` component for footer rendering
+- `app/src/search.js` - `Search` component for Fuse.js search (conditionally initialized)
+- `app/src/email.js` - `ContactForm` component for EmailJS contact form (conditionally initialized)
+- `app/src/theme.js` - `ThemeManager` component for theme management
+- `app/src/blog-list.js` - `BlogList` for blog listing pages
+- `app/src/blog-post.js` - `BlogPost` for blog post detail pages
+- `app/src/project.js` - `Project` for project detail pages
+- `app/src/page.js` - `Page` for custom markdown pages
+
 **Other Modules**:
 - `app/src/main.js` - Entry point, initialization
-- `app/src/dependencies/` - Bundled npm packages (Fuse.js, Marked, Prism)
+- `app/src/error-handler.js` - `ErrorHandler` for global error handling
+- `app/src/dependencies/` - Bundled npm packages (Fuse.js, Marked, Prism, EmailJS)
+
+### Component Initialization
+
+- Components are initialized in `main.js` after Context.init() loads data
+- Conditional initialization:
+  - `Search`: only if `data?.site?.search?.enabled`
+  - `ContactForm`: only if `data?.site?.emailjs?.enabled`
+- Core components (`Navbar`, `Footer`, `ThemeManager`) always initialize
+- Interactive components use reactive.js features:
+  - Declarative event binding with `data-on-click`
+  - Two-way binding with `data-model`
+  - Reactive state with signals and computed values
+  - Automatic batching for event handlers
 
 ### Don't
 
@@ -99,6 +154,8 @@ describe("My Module", () => {
 - ❌ Don't export individual functions from modules (use namespace pattern instead)
 - ❌ Don't create new modules without following the namespace pattern
 - ❌ Don't modify Microtastic config without good reason
+- ❌ Don't create interactive components without using reactive.js
+- ❌ Don't put private methods before public methods (always: public first, private last with `_` prefix)
 
 ### Development Workflow
 
