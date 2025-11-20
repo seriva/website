@@ -1,10 +1,20 @@
 // Test email module - validation and essential logic
-import { describe, test } from "node:test";
+import { describe, test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { Email } from "../app/src/email.js";
+import { EmailController } from "../app/src/email.js";
+
+let Email;
 
 describe("Email", () => {
+	beforeEach(() => {
+		// Create fresh instance for each test (with config disabled to avoid initialization)
+		Email = Object.assign(
+			Object.create(EmailController.prototype),
+			new EmailController(),
+		);
+	});
+
 	test("should validate correct email format", () => {
 		assert.ok(
 			Email._isValidEmail("test@example.com"),

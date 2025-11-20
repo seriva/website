@@ -80,7 +80,8 @@ describe("My Module", () => {
 - `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
 - `app/src/context.js` - `Context` namespace for app state, data loading, theming
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
-- `app/src/layout.js` - `Layout` namespace for navbar and footer rendering
+- `app/src/navbar.js` - `NavbarController` component for navbar rendering
+- `app/src/footer.js` - `FooterController` component for footer rendering
 - `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
 - `app/src/search.js` - `Search` namespace for Fuse.js search implementation
 - `app/src/email.js` - `Email` namespace for EmailJS contact form integration

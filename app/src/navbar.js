@@ -1,179 +1,168 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
-import { Reactive, trusted, html } from "./reactive.js";
-import { Templates } from "./templates.js";
+import { html, Reactive, trusted } from "./reactive.js";
 
 export class NavbarController extends Reactive.Component {
-    state() {
-        return {
-            mobileMenuOpen: false,
-        };
-    }
+	state() {
+		const data = Context.get();
 
-    template() {
-        return { __safe: true, content: "" };
-    }
+		return {
+			mobileMenuOpen: false,
+			siteTitle: data?.site?.title || CONSTANTS.DEFAULT_TITLE,
+			searchEnabled: data?.site?.search?.enabled || false,
+			emailEnabled: data?.site?.emailjs?.enabled || false,
+			searchPlaceholder:
+				data?.site?.search?.placeholder || i18n.t("search.placeholder"),
+		};
+	}
 
-    async init() {
-        this.initState();
-        await this._render();
-    }
+	template() {
+		const data = Context.get();
+		const pages = data?.pages
+			? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
+			: [];
 
-    toggleMobileMenu() {
-        const isOpen = !this.mobileMenuOpen.get();
-        this.mobileMenuOpen.set(isOpen);
+		if (data?.blog?.showInNav) {
+			pages.push({
+				id: "blog",
+				title: data.blog.title || "Blog",
+				showInNav: true,
+				order: 999,
+			});
+		}
 
-        const collapse = document.getElementById("navbarNav");
-        const toggle = document.getElementById("navbar-toggle");
+		const blogPage = pages.find((page) => page.id === "blog");
+		const blogLink = blogPage
+			? this._tplPageLink(blogPage.id, blogPage.title)
+			: "";
 
-        if (collapse && toggle) {
-            collapse.classList.toggle("show", isOpen);
-            toggle.setAttribute("aria-expanded", isOpen);
-        }
-    }
+		const pageLinks = trusted(
+			pages
+				.filter((page) => page.id !== "blog" && page.showInNav)
+				.sort((a, b) => (a.order || 0) - (b.order || 0))
+				.map((page) => this._tplPageLink(page.id, page.title).content)
+				.join(""),
+		);
 
-    async _render() {
-        const navbarContainer = document.getElementById("navbar-container");
-        if (!navbarContainer) return;
+		const socialLinksHtml = trusted(
+			(data?.site?.social || [])
+				.map((link) => this._tplSocialLink(link).content)
+				.join(""),
+		);
 
-        const data = Context.get();
-        const pages = data?.pages
-            ? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
-            : [];
+		const searchBar = this.searchEnabled.get() ? this._tplSearchBar() : "";
+		const emailButton = this.emailEnabled.get() ? this._tplEmailButton() : "";
 
-        if (data?.blog?.showInNav) {
-            pages.push({
-                id: "blog",
-                title: data.blog.title || "Blog",
-                showInNav: true,
-                order: 999
-            });
-        }
+		return html`
+		<nav class="navbar">
+			<div class="navbar-container">
+				<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
+				<button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" data-on-click="toggleMobileMenu">
+					<span class="navbar-toggle-icon"></span>
+				</button>
+				<div class="navbar-collapse" id="navbarNav">
+					<ul class="navbar-nav left">
+						${blogLink}
+						${this._tplProjectsDropdown()}
+						${pageLinks}
+					</ul>
+					<ul class="navbar-nav right">
+						${searchBar}
+						${this._tplThemeToggle()}
+						${emailButton}
+						${socialLinksHtml}
+					</ul>
+				</div>
+			</div>
+		</nav>
+		`;
+	}
 
-        // Build navbar inline
-        const blogPage = pages.find((page) => page.id === "blog");
-        const blogLink = blogPage
-            ? this._tplPageLink(blogPage.id, blogPage.title)
-            : "";
+	constructor() {
+		super();
+		this.initState();
 
-        const pageLinks = trusted(
-            pages
-                .filter((page) => page.id !== "blog" && page.showInNav)
-                .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map((page) => this._tplPageLink(page.id, page.title).content)
-                .join(""),
-        );
+		const navbarContainer = document.getElementById("navbar-container");
+		if (navbarContainer) {
+			const navbarElement = this.render();
+			navbarContainer.innerHTML = "";
+			navbarContainer.appendChild(navbarElement);
 
-        const socialLinksHtml = trusted(
-            (data?.site?.social || [])
-                .map((link) => this._tplSocialLink(link).content)
-                .join(""),
-        );
+			// Inject projects into dropdown
+			this._injectProjectsDropdown();
 
-        const searchBar = data?.site?.search?.enabled ? this._tplSearchBar() : "";
-        const emailButton = data?.site?.emailjs?.enabled
-            ? this._tplEmailButton()
-            : "";
-        const themeToggle = this._tplThemeToggle();
-        const projectsDropdown = this._tplProjectsDropdown();
+			// Inject search page into body if search is enabled
+			if (this.searchEnabled.get()) {
+				const existingSearchPage = document.getElementById("search-page");
+				if (!existingSearchPage) {
+					document.body.insertAdjacentHTML(
+						"beforeend",
+						this._tplSearchPage(this.searchPlaceholder.get()).content,
+					);
+				}
+			}
+		}
+	}
 
-        // Render and inject
-        const navbarContent = this._tplNavbar(
-            blogLink,
-            projectsDropdown,
-            pageLinks,
-            socialLinksHtml,
-            searchBar,
-            emailButton,
-            themeToggle,
-            data?.site?.title || CONSTANTS.DEFAULT_TITLE,
-        );
+	toggleMobileMenu() {
+		const isOpen = !this.mobileMenuOpen.get();
+		this.mobileMenuOpen.set(isOpen);
 
-        navbarContainer.innerHTML = navbarContent.content;
+		const collapse = document.getElementById("navbarNav");
+		const toggle = document.getElementById("navbar-toggle");
 
-        // Bind interactions
-        this.scan(navbarContainer);
+		if (collapse && toggle) {
+			collapse.classList.toggle("show", isOpen);
+			toggle.setAttribute("aria-expanded", isOpen);
+		}
+	}
 
-        // Inject projects into dropdown
-        await this._injectProjectsDropdown();
+	async _injectProjectsDropdown() {
+		const data = Context.get();
+		const projectsDropdown = document.getElementById("projects-dropdown");
+		if (!projectsDropdown || !data?.projects) return;
 
-        // Inject search page into body if search is enabled
-        if (data?.site?.search?.enabled) {
-            const existingSearchPage = document.getElementById("search-page");
-            if (!existingSearchPage) {
-                document.body.insertAdjacentHTML(
-                    "beforeend",
-                    this._tplSearchPage(
-                        data.site.search.placeholder || i18n.t("search.placeholder"),
-                    ).content,
-                );
-            }
-        }
-    }
+		const projectsHtml = trusted(
+			data.projects
+				.map(
+					(project) =>
+						this._tplProjectDropdownItem(project.id, project.title).content,
+				)
+				.join(""),
+		);
 
-    async _injectProjectsDropdown() {
-        const data = Context.get();
-        const projectsDropdown = document.getElementById("projects-dropdown");
-        if (!projectsDropdown || !data?.projects) return;
+		projectsDropdown.innerHTML = projectsHtml.content;
+	}
 
-        const projectsHtml = trusted(
-            data.projects
-                .map(
-                    (project) =>
-                        this._tplProjectDropdownItem(project.id, project.title).content,
-                )
-                .join(""),
-        );
+	// TEMPLATES
 
-        projectsDropdown.innerHTML = projectsHtml.content;
-    }
+	_tplPageLink(pageId, pageTitle) {
+		const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
+		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
+	}
 
-    // TEMPLATES
+	_tplSocialLink({
+		href = "#",
+		"data-action": dataAction = "",
+		target = "",
+		rel = "",
+		"aria-label": ariaLabel = "",
+		icon,
+	}) {
+		const attrs = [
+			dataAction && `data-action="${dataAction}"`,
+			target && `target="${target}"`,
+			rel && `rel="${rel}"`,
+			ariaLabel && `aria-label="${ariaLabel}"`,
+		]
+			.filter(Boolean)
+			.join(" ");
+		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${trusted(attrs)}><i class="${icon}"></i></a></li>`;
+	}
 
-    _tplNavbar(blogLink, projectsDropdown, pageLinks, socialLinksHtml, searchBar, emailButton, themeToggle, siteTitle) {
-        return html`
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a class="navbar-brand" href="#">${siteTitle}</a>
-            <button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" data-on-click="toggleMobileMenu">
-                <span class="navbar-toggle-icon"></span>
-            </button>
-            <div class="navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav left">
-                    ${blogLink}
-                    ${projectsDropdown}
-                    ${pageLinks}
-                </ul>
-                <ul class="navbar-nav right">
-                    ${searchBar}
-                    ${themeToggle}
-                    ${emailButton}
-                    ${socialLinksHtml}
-                </ul>
-            </div>
-        </div>
-    </nav>
-    `;
-    }
-
-    _tplPageLink(pageId, pageTitle) {
-        const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
-        return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
-    }
-
-    _tplSocialLink({ href = "#", "data-action": dataAction = "", target = "", rel = "", "aria-label": ariaLabel = "", icon }) {
-        const attrs = [
-            dataAction && `data-action="${dataAction}"`,
-            target && `target="${target}"`,
-            rel && `rel="${rel}"`,
-            ariaLabel && `aria-label="${ariaLabel}"`,
-        ].filter(Boolean).join(" ");
-        return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${trusted(attrs)}><i class="${icon}"></i></a></li>`;
-    }
-
-    _tplThemeToggle() {
-        return html`
+	_tplThemeToggle() {
+		return html`
 		<li class="nav-item navbar-icon">
 			<button id="theme-toggle" class="theme-toggle nav-link" aria-label="${i18n.t("aria.toggleTheme")}" title="${i18n.t("theme.toggleTitle")}">
 				<i class="fas fa-sun"></i>
@@ -181,10 +170,10 @@ export class NavbarController extends Reactive.Component {
 			</button>
 		</li>
 	`;
-    }
+	}
 
-    _tplProjectsDropdown() {
-        return html`
+	_tplProjectsDropdown() {
+		return html`
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false">
 				${i18n.t("nav.projects")}
@@ -194,32 +183,32 @@ export class NavbarController extends Reactive.Component {
 			</ul>
 		</li>
 	`;
-    }
+	}
 
-    _tplProjectDropdownItem(projectId, projectTitle) {
-        return html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`;
-    }
+	_tplProjectDropdownItem(projectId, projectTitle) {
+		return html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`;
+	}
 
-    _tplSearchBar() {
-        return html`
+	_tplSearchBar() {
+		return html`
         <li class="nav-item navbar-icon">
             <button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}" title="${i18n.t("search.buttonTitle")}">
                 <i class="fas fa-search"></i>
             </button>
         </li>`;
-    }
+	}
 
-    _tplEmailButton() {
-        return html`
+	_tplEmailButton() {
+		return html`
         <li class="nav-item navbar-icon">
             <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}">
                 <i class="fas fa-envelope"></i>
             </button>
         </li>`;
-    }
+	}
 
-    _tplSearchPage(placeholder) {
-        return html`
+	_tplSearchPage(placeholder) {
+		return html`
         <div class="search-page" id="search-page">
             <div class="search-page-header">
                 <div class="search-page-header-content">
@@ -235,13 +224,13 @@ export class NavbarController extends Reactive.Component {
                 <div class="search-page-results" id="search-page-results"></div>
             </div>
         </div>`;
-    }
+	}
 
-    _tplSearchInput(id, cssClass, placeholder) {
-        return html`
+	_tplSearchInput(id, cssClass, placeholder) {
+		return html`
         <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}"/>
         <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="${i18n.t("aria.clearSearch")}">
             <i class="fas fa-times"></i>
         </button>`;
-    }
+	}
 }
