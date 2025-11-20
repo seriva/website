@@ -1,145 +1,88 @@
 ## About
 
-This is my personal portfolio website. I originally built it with [Hugo](https://gohugo.io/) and the [seriva/minimal](https://github.com/seriva/minimal-hugo-theme) theme, but wanted more control over the design and functionality, so I rewrote it as a modern single-page application.
+Personal portfolio website built with vanilla JavaScript (ES6 modules), custom reactive system, and [Microtastic](https://github.com/scriptex/microtastic) for minimal build tooling. Content managed through YAML configuration and markdown files.
 
-It's built with vanilla HTML, CSS, and ES6 modules using [Microtastic](https://github.com/scriptex/microtastic) for minimal build tooling. Content is managed through YAML configuration and markdown files. This new setup was mostly vibe-coded together:)
-
-Key features:
-- **Markdown page system** - Create pages as markdown files in `/data/pages/`
-- **Markdown blog system** - Blog posts with pagination and metadata
-- **YAML configuration** - Easy content management and site settings
-- **Fuzzy search** - Fuse.js across projects and blog posts
-- **Light/Dark themes** - Toggle button with smooth transitions, localStorage persistence, auto system preference
-- **GitHub integration** - Loads project READMEs directly from GitHub
-- **Comments system** - GitHub Discussions integration via giscus (optional)
-- **Contact form** - EmailJS integration with spam protection (optional)
-- **Mobile-friendly** - Responsive design with unified search
-- **ES6 modules** - Clean, modular code organization
-- **Microtastic build** - Minimal build tooling for dependency bundling
+**Key Features:** Reactive UI with signals • Path-based SPA routing • Markdown blog & pages • Fuzzy search (Fuse.js) • Light/Dark themes • GitHub integration • Optional comments (giscus) & contact form (EmailJS)
 
 ## Tech Stack
 
-- **Frontend**: HTML, CSS, JavaScript (ES6 modules)
-- **Build Tool**: Microtastic for dependency bundling
-- **Styling**: Custom CSS with CSS custom properties
-- **Icons**: Font Awesome subset (solid + brands only) - bundled locally
-- **Search**: Fuse.js 7.0.0 for fuzzy search
-- **Content**: YAML configuration + Markdown files
-- **Parsing**: Custom minimal YAML parser (~4KB), Marked.js v11.1.1, Prism.js v1.30.0
-- **Fonts**: Raleway (weights 400, 600, 700) - bundled locally via @fontsource
-- **Templating**: Tagged template literals for secure HTML
-- **Code Quality**: Biome for linting and formatting
-- **Assets**: All fonts and syntax themes bundled from npm (no external CDNs)
+- **Core**: Vanilla HTML/CSS/JS (ES6 modules) • Custom reactive system (signals, computed, declarative binding)
+- **Build**: Microtastic (SPA dev server) • Biome 2.3.6 (lint/format) • Node.js test runner (122 tests)
+- **Content**: YAML config + Markdown • Custom YAML parser (~4KB) • Marked.js v17 • Prism.js v1.30
+- **Features**: Fuse.js 7.1 (search) • EmailJS (contact form) • giscus (comments)
+- **Assets**: Raleway fonts • Font Awesome subset (local, no CDNs)
 
 ## Architecture
 
-The application follows a modular namespace pattern with clear separation of concerns:
+The application follows a modular namespace pattern with reactive components:
 
 ```text
-            ┌────────────────────┐
-            │      main.js       │
-            │   (Entry Point)    │
-            └──────────┬─────────┘
-                       │
-                       │
-                       ▼
-┌──────────┐     ┌──────────┐         ┌─────────────┐
-│CONSTANTS │     │ Context  │◄────────│ YAMLParser  │───────────────────────┐
-│  (Cfg)   │     │ (State)  │         │ (Parse YAML)│                       │
-└────┬─────┘     └────┬─────┘         └─────────────┘                       │
-     │                │                                                     │
-     │                │ provides data                                       │
-     │────────────┬──────────┬──────────┬──────────┬──────────┬─────────┐   │
-     ▼            ▼          ▼          ▼          ▼          ▼         ▼   │
-┌─────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌─────────┐ ┌───────┐ ┌───────┐│
-│ Router  │ │ Layout │ │ Search │ │Loaders │ │  i18n   │ │ Theme │ │ Email ││
-│ (Route) │ │(Nav/UI)│ │ (Fuse) │ │(Fetch) │ │ (Trans) │ │ (L/D) │ │(Form) ││
-└─────────┘ └───┬────┘ └───┬────┘ └───┬────┘ └────┬────┘ └───────┘ └───────┘│
-                │          │          │           │                         │ 
-                └──────────┴────┬─────┴───────────┘                         │
-                                │                                           │
-                   ┌────────────┼─────────────┐                             │
-                   ▼            ▼             ▼                             │
-             ┌───────────┐  ┌─────────┐  ┌──────────┐                       │
-             │ Templates │  │   UI    │  │ Markdown │◄──────────────────────┘
-             │   (HTML)  │  │(Actions)│  │  Loader  │
-             └───────────┘  └─────────┘  └──────────┘
+                 ┌────────────────────┐
+                 │      main.js       │
+                 │   (Init + Events)  │
+                 └──────────┬─────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+         ┌──────────┐  ┌──────────┐  ┌──────────┐
+         │ Context  │◄─│YAMLParser│  │ Reactive │
+         │ (State)  │  │  (Parse) │  │ (System) │
+         └─────┬────┘  └──────────┘  └─────┬────┘
+               │                           │
+               │ provides data             │ powers
+               │                           │
+    ┌──────────┼──────────┬────────────────┼──────────┐
+    ▼          ▼          ▼                ▼          ▼
+┌────────┐ ┌────────┐ ┌─────────┐     ┌─────────┐ ┌────────┐
+│ Router │ │Loaders │ │  i18n   │     │ Navbar  │ │ Footer │
+│(Routes)│ │(Fetch) │ │ (Trans) │     │  (Nav)  │ │        │
+└────┬───┘ └───┬────┘ └─────────┘     └─────────┘ └────────┘
+     │         │                             
+     │    ┌────┴────────┬─────────────┬─────────────┐
+     │    ▼             ▼             ▼             ▼
+     │ ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐
+     └─│ BlogList │ │ BlogPost │ │ Project │ │   Page   │
+       │  (List)  │ │  (Post)  │ │ (Repo)  │ │ (Custom) │
+       └──────────┘ └──────────┘ └─────────┘ └──────────┘
+            │             │            │           │
+            └─────────────┴────────────┴───────────┘
+                          │
+         ┌────────────────┼────────────────┐
+         ▼                ▼                ▼
+    ┌──────────┐    ┌──────────┐    ┌──────────┐
+    │Templates │    │ Markdown │    │  Prism   │
+    │  (HTML)  │    │  Loader  │    │  Loader  │
+    └──────────┘    └──────────┘    └──────────┘
+         
+    Conditional Components:
+    ┌─────────┐  ┌─────────────┐  ┌──────────────┐
+    │ Search  │  │ ContactForm │  │ThemeManager  │
+    │ (Fuse)  │  │  (EmailJS)  │  │   (L/D)      │
+    └─────────┘  └─────────────┘  └──────────────┘
 ```
 
-**Module Responsibilities:**
+**Key Modules:**
 
-- **`main.js`** - Application initialization and setup
-- **`Context`** - Global state management, data loading and caching
-- **`Theme`** - Light/dark mode switching, color scheme application, Prism and giscus theme management
-- **`Router`** - SPA routing, URL handling, page transitions
-- **`Layout`** - Navbar and footer rendering
-- **`Loaders`** - Content fetching (blog posts, projects, pages, GitHub READMEs)
-- **`Templates`** - HTML generation with auto-escaping security
-- **`Search`** - Fuse.js search with UI, tag filtering, result highlighting
-- **`UI`** - Interactive elements (mobile menu, copy buttons, dropdowns)
-- **`Email`** - Contact form modal and EmailJS integration
-- **`MarkdownLoader`** - Markdown parsing with frontmatter support
-- **`PrismLoader`** - Syntax highlighting with dynamic language loading
-- **`YAMLParser`** - Minimal YAML parser for content.yaml
-- **`i18n`** - Translation system for multi-language support
-- **`CONSTANTS`** - Application-wide configuration
+- **Core**: `main.js` (init, event delegation) • `reactive.js` (signals, components) • `Context` (state, data) • `Router` (SPA routing)
+- **Components**: `Navbar`, `Footer`, `BlogList`, `BlogPost`, `Project`, `Page` (reactive UI)
+- **Features**: `Search` (Fuse.js, conditional) • `ContactForm` (EmailJS, conditional) • `Theme` (light/dark)
+- **Utilities**: `Loaders` (fetch content) • `Templates` (HTML generation) • `MarkdownLoader` • `PrismLoader` • `YAMLParser` • `i18n`
 
-**Data Flow:**
-1. `main.js` initializes `Context` which loads and parses `content.yaml`
-2. `Router` handles URL changes and coordinates with `Loaders`
-3. `Loaders` fetch content and use `Templates` to render HTML
-4. `Search` indexes content from `Context` and provides fuzzy search
-5. `UI` handles user interactions and updates the DOM
-6. All modules consume data from `Context.get()` (cached)
+## Development
 
-## Development Environment
+**Prerequisites:** Node.js >= 20.0.0, npm >= 9.0.0
 
-This project includes a VS Code devcontainer for a consistent development environment:
-
-- **Container**: Alpine Linux (latest)
-- **Dev Server**: Microtastic development server
-- **Code Quality**: Biome for linting and formatting
-- **Extensions**: lit-html for syntax highlighting in template literals
-- **Port**: 8081 (auto-forwarded)
-
-### Prerequisites
-- VS Code with Dev Containers extension
-- Docker
-- Node.js >= 20.0.0
-- npm >= 9.0.0
+**Optional:** VS Code devcontainer (Alpine Linux, port 8081 auto-forwarded)
 
 ## Getting Started
 
-### Using Dev Container (Recommended)
-1. Open project in VS Code
-2. When prompted, click "Reopen in Container" or use `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
-3. VS Code will build the container and install dependencies
-4. Install npm packages: `npm install`
-5. Prepare dependencies: `npm run prepare` (bundles dependencies to `app/src/dependencies/`)
-6. Run the dev server: `npm run dev`
-7. Open `http://localhost:8081`
-
-### Manual Setup
-**Prerequisites:** Node.js and npm installed
-
-1. Install dependencies:
 ```bash
-npm install
+npm install        # Install dependencies
+npm run prepare    # Bundle fonts, themes, dependencies
+npm run dev        # Start dev server (http://localhost:8081)
 ```
 
-2. Prepare dependencies and assets:
-```bash
-npm run prepare
-```
-This will:
-- Copy fonts (Raleway, Font Awesome) from node_modules to `app/fonts/`
-- Copy Prism.js syntax highlighting themes to `app/css/prism-themes/`
-- Transpile JavaScript dependencies to `app/src/dependencies/`
-
-3. Start development server:
-```bash
-npm run dev
-```
+**Dev Container:** Open in VS Code → "Reopen in Container" → `npm install` → `npm run prepare` → `npm run dev`
 
 4. Open `http://localhost:8081`
 
@@ -180,13 +123,63 @@ All code changes must pass linting before deployment.
 
 ### Testing
 
-Uses Node.js built-in test runner (65 tests):
+Uses Node.js built-in test runner (122 tests):
 
 ```bash
 npm test    # Run all tests
 ```
 
-Tests cover template utilities, templates, search, YAML parser, routing, markdown, marked configuration, and i18n. All tests must pass before production builds.
+Tests cover:
+- Reactive system (signals, computed, batching, components)
+- HTML escaping and template utilities
+- Template generation
+- Search functionality
+- YAML parser
+- Routing logic
+- Markdown parsing
+- Internationalization
+- Theme management
+- Email controller
+- Error handler
+- UI utilities
+- Prism loader
+
+All tests must pass before production builds.
+
+## Reactive System
+
+Custom signals-based reactive system (~5KB) with declarative binding:
+
+```javascript
+export class Counter extends Reactive.Component {
+  state() {
+    return {
+      count: this.signal(0),
+      doubled: this.computed(() => this.count() * 2),
+    };
+  }
+  template() {
+    return html`<button data-on-click="increment" data-text="count"></button>`;
+  }
+  increment() { this.count(this.count() + 1); }
+}
+```
+
+**Declarative Bindings:** `data-text`, `data-html`, `data-attr-*`, `data-class-*`, `data-bool-*`, `data-model`, `data-on-click/submit`
+
+**Benefits:** Direct DOM updates • Auto-batching • Computed values • No virtual DOM • No build step required
+
+## Routing & SPA Support
+
+**Path-based URLs:** `/`, `/blog/`, `/blog/post-slug`, `/project/id`, `/page/id`
+
+**Dev Server:** Microtastic modified (`node_modules/microtastic/index.js`) to serve `index.html` for routes without extensions, maintains hot reload
+
+**GitHub Pages:** Custom `404.html` redirects via hash (`#!redirect=<path>`), `main.js` restores clean URL with `history.replaceState()`
+
+**Absolute Paths:** All resources use root-relative paths (`/css/main.css`, `/data/content.yaml`) to work from any route depth
+
+**Event Delegation:** Dynamic content uses `data-action` attributes (e.g., `<a data-action="email">`) handled globally in `main.js`
 
 ## Features & Configuration
 
@@ -194,85 +187,43 @@ All content is managed through `app/data/content.yaml`. The configuration file s
 
 ### Projects
 
-Add projects with detailed information including GitHub repos, demos, and custom links:
-
 ```yaml
 projects:
   - id: "my-project"
     title: "Cool Project"
-    description: "A brief description of what this project does"
-    tags: ["JavaScript", "HTML", "CSS"]
-    weight: 1                    # Display order
-    github_repo: "my-project"    # Auto-loads README from GitHub
-    demo_url: "https://example.com/demo"
-    youtube_videos: ["dQw4w9WgXcQ"]
+    tags: ["JavaScript"]
+    weight: 1
+    github_repo: "my-project"  # Auto-loads README
+    demo_url: "https://example.com"
+    youtube_videos: ["videoId"]
     links:
       - title: "GitHub"
         icon: "fab fa-github"
-        href: "https://github.com/username/my-project"
-      - title: "Live Demo"
-        icon: "fas fa-external-link-alt"
-        href: "https://example.com"
+        href: "https://github.com/user/repo"
 ```
 
-**Features:**
-- READMEs automatically loaded from GitHub
-- YouTube video embeds
-- Custom links with Font Awesome icons
-- Tag-based organization
+**Features:** Auto-load GitHub READMEs • YouTube embeds • Font Awesome icons • Tag organization
 
 ### Blog
 
-Create markdown blog posts in `app/data/blog/` with automatic pagination:
-
-**1. Create a markdown file** (format: `YYYY-MM-DD-title.md`):
-
-```markdown
----
-title: "Your Post Title"
-date: "2025-10-21"
-excerpt: "A brief summary of your post"
-tags: ["tag1", "tag2"]
----
-
-# Your Post Content
-
-Write your content here in markdown...
-```
-
-**2. Configure blog settings** in `app/data/content.yaml`:
+Create posts in `app/data/blog/` with frontmatter (title, date, excerpt, tags), register in `content.yaml`:
 
 ```yaml
 blog:
-  title: "Blog"
-  showInNav: true
-  order: 1
   postsPerPage: 5
-  dateFormat: "MMMM D, YYYY"
   posts:
-    - filename: "2025-10-21-your-post-title.md"
-      title: "Your Post Title"
+    - filename: "2025-10-21-post-title.md"
+      title: "Post Title"
       date: "2025-10-21"
-      excerpt: "A brief summary of your post"
-      tags: ["tag1", "tag2"]
-    - filename: "2025-10-20-another-post.md"
-      title: "Another Post"
-      date: "2025-10-20"
-      excerpt: "Summary of another post"
-      tags: ["tag3"]
+      excerpt: "Summary"
+      tags: ["tag1"]
 ```
 
-**Features:**
-- Markdown parsing with Marked.js (supports GFM - GitHub Flavored Markdown)
-- Syntax highlighting via Highlight.js with theme support
-- Automatic date sorting (newest first)
-- Pagination support
-- Tags and excerpts
-- No separate manifest needed
+**Features:** GFM markdown • Syntax highlighting • Pagination • Auto-sorting • Tags
 
 ### Search
 
-Powered by [Fuse.js](https://www.fusejs.io/) for lightweight, fuzzy search across all projects and blog posts:
+Fuse.js fuzzy search across projects and blog posts (conditionally loaded):
 
 ```yaml
 site:
@@ -281,167 +232,74 @@ site:
     minChars: 2
 ```
 
-**Features:**
-- **Fuzzy matching**: Finds results even with typos (e.g., "reactt" → "react")
-- **Weighted results**: Title matches (40%) prioritized over descriptions (30%), tags (20%), and content (10%)
-- **Searches**: titles, descriptions, tags, and full content
-- **Indexes**: markdown posts and GitHub READMEs
-- **Clickable tags**: Click any tag on projects or blog posts to instantly filter by that tag
-- **Unified experience**: Search icon in navbar opens full-page search overlay on both desktop and mobile
-- **Smooth animations**: Elegant slide-down and fade-in effects when opening search
-- **Centered layout**: Search results constrained to 750px max-width, matching blog content
-- **Real-time**: Results with 300ms debounce
-- **Performance**: Scales to hundreds of posts efficiently
-- **Configurable**: Search weights, thresholds, and limits defined in `constants.js`
-- Up to 8 results with match highlighting
-- Works offline after initial load
+**Features:** Fuzzy matching • Weighted results (title 40%, desc 30%, tags 20%, content 10%) • Clickable tag filters • Real-time with debounce • Up to 8 results • Offline support
 
-### Pages & Styling
+### Pages
 
-**Markdown Pages:**
-Create markdown files in `app/data/pages/` for clean, maintainable content:
+Create markdown files in `app/data/pages/`, configure in `content.yaml`:
 
-**1. Create a markdown file** (e.g., `app/data/pages/about.md`):
-```markdown
-# About
-
-<div style="text-align: center; margin-bottom: 20px;">
-  <img class="about-pic" 
-       src="https://example.com/your-photo.jpg" 
-       alt="Your name" 
-       loading="eager">
-</div>
-
-Your content here in markdown...
-
-## Skills
-- JavaScript
-- Python
-- React
-```
-
-
-**2. Configure page metadata** in `app/data/content.yaml`:
 ```yaml
 pages:
   about:
     title: "About"
     showInNav: true
     order: 1
-    # Content is loaded from app/data/pages/about.md
 ```
 
-**3. Configure site settings** in `app/data/content.yaml`:
-```yaml
-site:
-  title: "Your Portfolio"
-  description: "Your description"
-  defaultRoute: "/?blog"  # Options: "/?blog", "/?page=about", "project=projectId"
+### Theme (Light/Dark Mode)
 
-social:
-  - icon: "fas fa-envelope"
-    href: "#"
-    data-action: "email"
-  - icon: "fab fa-github" 
-    href: "https://github.com/username"
-```
-
-### Theme System (Light/Dark Mode)
-
-Integrated light/dark theme system with toggle button, smooth transitions, and localStorage persistence:
+Toggle button with localStorage persistence, system preference support:
 
 ```yaml
 site:
   theme:
-    default: "dark"  # "dark", "light", or "auto" (system preference)
+    default: "dark"  # "dark", "light", "auto"
     dark:
       primary: "#10B981"
-      secondary: "#111827"
-      background: "#0D1117"
-      text: "#E6EDF3"
-      textLight: "#7D8590"
-      border: "#21262D"
-      hover: "#1A2332"
       code:
         theme: "prism-tomorrow"
-      comments:
-        theme: "dark"
     light:
       primary: "#047857"
-      secondary: "#D1D5DB"
-      background: "#FFFFFF"
-      text: "#0F172A"
-      textLight: "#475569"
-      border: "#9CA3AF"
-      hover: "#E5E7EB"
       code:
         theme: "prism-coy"
-      comments:
-        theme: "light"
 ```
 
-Available Prism themes: `prism-tomorrow`, `prism-okaidia`, `prism-dark`, `prism-coy`, `prism-solarizedlight`, and [more](https://prismjs.com/). All bundled locally from npm.
+Prism themes: `prism-tomorrow`, `prism-okaidia`, `prism-dark`, `prism-coy`, `prism-solarizedlight` (bundled locally)
 
-### Comments System (giscus)
+### Comments (giscus)
 
-Integrated GitHub Discussions-powered comments via [giscus](https://giscus.app) with separate controls for blog posts and project pages:
+GitHub Discussions-powered comments via [giscus](https://giscus.app):
 
 ```yaml
 site:
   comments:
-    blogEnabled: true      # Enable comments on blog posts
-    projectsEnabled: true  # Enable comments on project pages
+    blogEnabled: true
+    projectsEnabled: true
     repo: "username/repo"
     repoId: "R_YOUR_REPO_ID"
-    category: "General"
-    categoryId: "DIC_YOUR_CATEGORY_ID" 
-    mapping: "pathname"
-    theme: "dark"
+    categoryId: "DIC_YOUR_CATEGORY_ID"
 ```
 
-**Setup steps:**
-1. Enable Discussions on your GitHub repo (`Settings` → `Features` → `Discussions`)
-2. Install the [giscus app](https://github.com/apps/giscus) on your repository
-3. Visit [giscus.app](https://giscus.app), enter your repo name to get configuration IDs
-4. Update `repoId` and `categoryId` in your YAML with the generated values
-
-**Features:**
-- **Serverless** - No backend required, uses GitHub's infrastructure
-- **Spam protection** - GitHub authentication required, built-in moderation tools
-- **Separate control** - Enable/disable comments independently for blog vs projects
-- **Auto-mapping** - Each URL gets its own discussion thread automatically
-- **Responsive** - Works on mobile and desktop
-- **Theme integration** - Matches your site's dark/light theme
+**Setup:** Enable Discussions on repo → Install giscus app → Get IDs from giscus.app
 
 ### Contact Form (EmailJS)
 
-The site includes a contact form modal with email delivery via [EmailJS](https://www.emailjs.com/). When enabled, an envelope icon button appears in the navbar (before social media links).
-
-**Setup:**
-1. Sign up at emailjs.com (free tier: 200 emails/month)
-2. Create an email service and template
-3. Configure template variables: `{{title}}`, `{{name}}`, `{{email}}`, `{{time}}`, `{{message}}`
-4. Add credentials to `content.yaml`:
+Modal form with email delivery (conditionally loaded):
 
 ```yaml
 site:
   emailjs:
     enabled: true
-    serviceId: "service_xxx"      # From EmailJS dashboard
-    templateId: "template_xxx"    # From EmailJS dashboard
-    publicKey: "your_public_key"  # From EmailJS dashboard
+    serviceId: "service_xxx"
+    templateId: "template_xxx"
+    publicKey: "your_public_key"
 ```
 
-**Features:**
-- Modal form with name, email, and message fields
-- Client-side validation (required fields, email format)
-- Success/error feedback messages
-- Mobile-friendly with automatic menu closing
-- Form automatically closes 2 seconds after successful send
+**Setup:** Sign up at emailjs.com → Create service/template with variables `{{title}}`, `{{name}}`, `{{email}}`, `{{time}}`, `{{message}}`
 
 ### Internationalization (i18n)
 
-The site includes a built-in i18n framework for multi-language support. Currently configured for English only, but designed for easy expansion:
+Built-in i18n framework (currently English only):
 
 ```yaml
 site:
@@ -452,47 +310,8 @@ site:
 translations:
   en:
     "nav.projects": "Projects"
-    "nav.blog": "Blog"
     "search.placeholder": "Search..."
-    "search.noResults": "No results found"
-    "blog.backToBlog": "← Back to Blog"
-    "blog.noPosts": "No blog posts yet. Check back soon!"
-    "project.links": "Links"
-    "project.media": "Media"
-    "general.loading": "Loading..."
-    "general.error": "Error loading page"
-    "footer.rights": "All rights reserved"
     # ... more translations
 ```
 
-**To add a new language:**
-
-1. Add language code to `availableLanguages`:
-   ```yaml
-   availableLanguages: ["en", "nl", "es"]
-   ```
-
-2. Copy the `en` translations and translate the values:
-   ```yaml
-   translations:
-     en:
-       "nav.projects": "Projects"
-       "nav.blog": "Blog"
-     nl:
-       "nav.projects": "Projecten"
-       "nav.blog": "Blog"
-     es:
-       "nav.projects": "Proyectos"
-       "nav.blog": "Blog"
-   ```
-
-3. Implement language switcher in UI (optional - framework supports it via `i18n.setLanguage('nl')`)
-
-**Translation keys used:**
-- `nav.*` - Navigation items
-- `search.*` - Search UI strings
-- `blog.*` - Blog page text
-- `project.*` - Project page labels
-- `general.*` - Error messages and common text
-- `footer.*` - Footer text
-- `badges.*` - Result type badges
+**To add a language:** Add to `availableLanguages` (`["en", "nl"]`), copy `en` translations and translate values, use `i18n.setLanguage('nl')` to switch

@@ -1,7 +1,7 @@
 // ===========================================
-// APPLICATION CONTEXT & DATA MANAGEMENT
+// CONTEXT
 // ===========================================
-// Centralized state management and data loading
+// Global state management and data loading
 
 import { i18n } from "./i18n.js";
 import { YAMLParser } from "./yaml-parser.js";
@@ -21,7 +21,7 @@ export const Context = {
 	async init() {
 		if (appContext) return appContext;
 
-		const yamlPath = "data/content.yaml";
+		const yamlPath = "/data/content.yaml";
 
 		try {
 			const response = await fetch(yamlPath);
@@ -34,6 +34,8 @@ export const Context = {
 			if (appContext?.site?.i18n && appContext?.translations) {
 				i18n.init(appContext.site.i18n, appContext.translations);
 			}
+
+			this._updateMetaTags();
 
 			return appContext;
 		} catch (error) {
@@ -48,12 +50,21 @@ export const Context = {
 		return appContext;
 	},
 
-	// Update HTML meta tags with site data
-	updateMetaTags(siteData) {
-		if (!siteData) return;
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
 
-		if (siteData.title) {
-			document.title = siteData.title;
+	// Set context manually (for testing)
+	_set(data) {
+		appContext = data;
+	},
+
+	// Update HTML meta tags with site data
+	_updateMetaTags() {
+		if (!appContext?.site) return;
+
+		if (appContext.site.title) {
+			document.title = appContext.site.title;
 		}
 
 		const updateMeta = (selector, value) => {
@@ -62,16 +73,19 @@ export const Context = {
 			}
 		};
 
-		updateMeta('meta[name="description"]', siteData.description);
-		updateMeta('meta[name="author"]', siteData.author);
-		updateMeta('meta[name="theme-color"]', siteData.colors?.primary);
+		updateMeta('meta[name="description"]', appContext.site.description);
+		updateMeta('meta[name="author"]', appContext.site.author);
+		updateMeta('meta[name="theme-color"]', appContext.site.colors?.primary);
 		updateMeta(
 			'meta[name="msapplication-TileColor"]',
-			siteData.colors?.primary,
+			appContext.site.colors?.primary,
 		);
-		updateMeta('meta[property="og:title"]', siteData.title);
-		updateMeta('meta[property="twitter:title"]', siteData.title);
-		updateMeta('meta[property="og:description"]', siteData.description);
-		updateMeta('meta[property="twitter:description"]', siteData.description);
+		updateMeta('meta[property="og:title"]', appContext.site.title);
+		updateMeta('meta[property="twitter:title"]', appContext.site.title);
+		updateMeta('meta[property="og:description"]', appContext.site.description);
+		updateMeta(
+			'meta[property="twitter:description"]',
+			appContext.site.description,
+		);
 	},
 };

@@ -58,7 +58,7 @@ function generateSitemap(contentData, baseUrl) {
 	if (contentData.blog?.posts) {
 		for (const post of contentData.blog.posts) {
 			const slug = escapeXml(post.filename.replace(/\.md$/, ""));
-			addUrl(`?blog=${slug}`, post.date || today, "monthly", "0.8");
+			addUrl(`/blog/${slug}`, post.date || today, "monthly", "0.8");
 		}
 	}
 
@@ -66,7 +66,7 @@ function generateSitemap(contentData, baseUrl) {
 	if (contentData.projects) {
 		for (const project of contentData.projects) {
 			const id = escapeXml(project.id);
-			addUrl(`?project=${id}`, today, "monthly", "0.9");
+			addUrl(`/project/${id}`, today, "monthly", "0.9");
 		}
 	}
 
@@ -74,7 +74,7 @@ function generateSitemap(contentData, baseUrl) {
 	if (contentData.pages) {
 		for (const pageId of Object.keys(contentData.pages)) {
 			const id = escapeXml(pageId);
-			addUrl(`?page=${id}`, today, "monthly", "0.7");
+			addUrl(`/page/${id}`, today, "monthly", "0.7");
 		}
 	}
 
@@ -115,7 +115,7 @@ function generateRssFeed(contentData, baseUrl) {
 	// Add blog posts
 	for (const post of sortedPosts) {
 		const slug = escapeXml(post.filename.replace(/\.md$/, ""));
-		const postUrl = `${baseUrl}?blog=${slug}`;
+		const postUrl = `${baseUrl}/blog/${slug}`;
 		const title = escapeXml(post.title || slug);
 		const pubDate = post.date ? new Date(post.date).toUTCString() : now;
 
@@ -174,7 +174,7 @@ function main() {
 		const sitemap = generateSitemap(contentData, baseUrl);
 		const sitemapPath = join(publicDir, "sitemap.xml");
 		writeFileSync(sitemapPath, sitemap);
-		
+
 		const urlCount = (sitemap.match(/<url>/g) || []).length;
 		console.log(`✓ Generated sitemap: ${sitemapPath}`);
 		console.log(`  → ${urlCount} URLs`);
@@ -183,7 +183,7 @@ function main() {
 		const rssFeed = generateRssFeed(contentData, baseUrl);
 		const rssPath = join(publicDir, "rss.xml");
 		writeFileSync(rssPath, rssFeed);
-		
+
 		const itemCount = (rssFeed.match(/<item>/g) || []).length;
 		console.log(`✓ Generated RSS feed: ${rssPath}`);
 		console.log(`  → ${itemCount} blog posts`);

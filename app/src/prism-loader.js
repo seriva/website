@@ -1,7 +1,7 @@
 // ===========================================
-// PRISM LANGUAGE LOADER
+// PRISM LOADER
 // ===========================================
-// Dynamic loader for Prism syntax highlighting language grammars
+// Dynamic syntax highlighting language grammar loader
 
 import Prism from "./dependencies/prismjs.js";
 

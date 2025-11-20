@@ -1,18 +1,18 @@
 // ===========================================
-// MAIN APPLICATION
+// MAIN
 // ===========================================
-// Entry point - orchestrates initialization
+// Application entry point and initialization
 
 import { Context } from "./context.js";
-import { Email } from "./email.js";
+import { ContactForm } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
-import { Layout } from "./layout.js";
+import { Footer } from "./footer.js";
 import { MarkdownLoader } from "./markdown.js";
+import { Navbar } from "./navbar.js";
 import { Router } from "./routing.js";
 import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // APPLICATION INITIALIZATION
@@ -30,35 +30,47 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Load and cache site data (single call!)
 		const data = await Context.init();
 
-		if (data?.site) {
-			Context.updateMetaTags(data.site);
+		// Initialize navbar and footer
+		new Navbar();
+		new Footer();
+
+		// Initialize contact form if enabled
+		if (data?.site?.emailjs?.enabled) {
+			new ContactForm();
 		}
-
-		// Initialize EmailJS contact form if enabled
-		Email.init();
-
-		// Setup global event delegation for dynamic content (email, fullscreen, etc.)
-		UI.setupGlobalEventDelegation(); // Inject layout components (navbar, footer, dropdowns)
-		await Layout.init();
-
-		// Initialize UI components after DOM elements are ready
-		UI.init();
 
 		// Initialize search if enabled
 		if (data?.site?.search?.enabled) {
-			Search.initUI(data.site.search);
+			new Search();
 		}
 
 		// Initialize theme system (loads user preference from localStorage)
 		Theme.init();
 
-		// Handle initial route
-		await Router.handleRoute();
+		// Handle 404.html redirect (for dev server and GitHub Pages)
+		const hash = window.location.hash;
+		if (hash.startsWith("#!redirect=")) {
+			const redirect = decodeURIComponent(hash.substring(11));
+			// Replace the URL with the original path
+			window.history.replaceState({}, "", redirect);
+		}
 
-		// Set up routing
+		// Set up global event delegation for data-action attributes
+		document.addEventListener("click", (e) => {
+			const target = e.target.closest("[data-action]");
+			if (!target) return;
+
+			const action = target.getAttribute("data-action");
+			if (action === "email") {
+				e.preventDefault();
+				window.dispatchEvent(new CustomEvent("email:show"));
+			}
+		});
+
+		// Handle initial route
+		await Router.handleRoute(); // Set up routing
 		window.addEventListener("popstate", Router.handleRoute);
 		Router.setupSpaRouting();
-		UI.addMobileMenuOutsideClickHandler();
 	} catch (error) {
 		console.error("Failed to initialize application:", error);
 		// Show error in main content
@@ -67,7 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			mainContent.innerHTML = Templates.errorMessage(
 				"Something went wrong",
 				"Please refresh the page to try again.",
-			);
+			).content;
 		}
 	}
 });
