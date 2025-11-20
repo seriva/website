@@ -300,8 +300,22 @@ export const Reactive = {
 		signal(v) {
 			return Signals.create(v);
 		}
+		on(target, event, handler, options) {
+			const boundHandler = (e) => this.batch(() => handler.call(this, e));
+			target.addEventListener(event, boundHandler, options);
+			this.track(() =>
+				target.removeEventListener(event, boundHandler, options),
+			);
+			return boundHandler;
+		}
 		computed(fn) {
 			return this._c.computed(fn);
+		}
+		effect(fn) {
+			return this.computed(() => {
+				fn();
+				return undefined;
+			});
 		}
 		batch(fn) {
 			return Signals.batch(fn);
@@ -324,6 +338,11 @@ export const Reactive = {
 			});
 		}
 		scan(r) {
+			// Collect refs
+			r.querySelectorAll("[data-ref]").forEach((el) => {
+				const refName = el.getAttribute("data-ref");
+				if (refName) this.refs[refName] = el;
+			});
 			return this._c.scan(r, this);
 		}
 		render() {
@@ -363,9 +382,9 @@ export const Reactive = {
 			const element = this.render();
 			container.innerHTML = "";
 			container.appendChild(element);
+			if (this.onMount) this.onMount();
 			return element;
 		}
-
 		appendTo(containerId) {
 			// Special case for body element (no ID)
 			const container =
@@ -379,10 +398,13 @@ export const Reactive = {
 			}
 			const element = this.render();
 			container.appendChild(element);
+			if (this.onMount) this.onMount();
 			return element;
 		}
 		cleanup() {
+			if (this.onCleanup) this.onCleanup();
 			this._c.cleanup();
+			this.refs = {};
 		}
 	},
 };
