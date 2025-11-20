@@ -15,8 +15,6 @@ describe("Templates", () => {
 		assert.ok(result.includes("Test Error"), "Should include error title");
 		assert.ok(result.includes("Test Description"), "Should include description");
 	});
-	
-	test.skip("socialLink should generate external links - MOVED TO FooterController", () => {});
 
 	test("errorMessage should display error content", () => {
 		const result = getContent(Templates.errorMessage("Test Error", "Test message"));
@@ -84,9 +82,5 @@ describe("Templates", () => {
 		assert.ok(result.includes("&lt;script&gt;"), "Should escape script");
 		assert.ok(result.includes("&lt;iframe"), "Should escape iframe");
 	});
-
-	test.skip("XSS: pageLink should escape malicious page IDs - MOVED TO NavbarController", () => {});
-
-	test.skip("XSS: tagList should escape malicious tags - MOVED TO individual controllers", () => {});
 });
 

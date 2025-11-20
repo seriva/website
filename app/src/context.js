@@ -50,6 +50,10 @@ export const Context = {
 		return appContext;
 	},
 
+	// ===========================================
+	// PRIVATE METHODS
+	// ===========================================
+
 	// Set context manually (for testing)
 	_set(data) {
 		appContext = data;
