@@ -3,6 +3,7 @@
 // ===========================================
 // Reactive component for custom markdown pages
 
+import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
@@ -69,6 +70,11 @@ export class PageController extends Reactive.Component {
                 this.batch(() => {
                     this.content.set(content);
                     this.loading.set(false);
+                });
+
+                // Add copy buttons after content is rendered
+                requestAnimationFrame(() => {
+                    MarkdownLoader.initCopyCodeButtons();
                 });
             } else {
                 console.warn('Content is null or undefined for page:', this.pageId);

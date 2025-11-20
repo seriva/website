@@ -14,7 +14,6 @@ import { Router } from "./routing.js";
 import { SearchController } from "./search.js";
 import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // APPLICATION INITIALIZATION
@@ -105,9 +104,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		new NavbarController();
 		new FooterController();
 		new EmailController();
-
-		// Initialize UI components after DOM elements are ready
-		UI.init();
 
 		// Initialize search if enabled
 		const searchConfig = data?.site?.search;

@@ -3,12 +3,16 @@
 // ===========================================
 // Utilities for loading and parsing markdown files
 
+import { CONSTANTS } from "./constants.js";
 import { marked } from "./dependencies/marked.js";
-import { html } from "./reactive.js";
+import { i18n } from "./i18n.js";
+import { html, Reactive, Signals } from "./reactive.js";
 import { Templates } from "./templates.js";
 import { YAMLParser } from "./yaml-parser.js";
 
 export const MarkdownLoader = {
+	_copyButtonComponents: new Map(),
+
 	// ===========================================
 	// PUBLIC METHODS
 	// ===========================================
@@ -102,5 +106,74 @@ export const MarkdownLoader = {
 			metadata: result.metadata,
 			html: htmlResult.content || htmlResult,
 		};
+	},
+
+	// Add copy buttons to all code blocks in the current document
+	initCopyCodeButtons() {
+		const preBlocks = document.querySelectorAll("pre");
+
+		for (const pre of preBlocks) {
+			if (pre.querySelector(".copy-code-button")) continue;
+
+			const codeElement = pre.querySelector("code");
+			if (!codeElement) continue;
+
+			const button = document.createElement("button");
+			button.className = "copy-code-button";
+			button.setAttribute("aria-label", i18n.t("aria.copyCode"));
+
+			// Create component context for this copy button
+			const component = Reactive.createComponent();
+
+			// Create reactive button state
+			const buttonState = Signals.create("copy");
+			const buttonText = component.computed(
+				() => i18n.t(`code.${buttonState.get()}`),
+				[buttonState],
+			);
+
+			// Bind button text to signal
+			component.bindText(button, buttonText);
+
+			// Subscribe to state changes for CSS class updates
+			component.track(
+				buttonState.subscribe((state) => {
+					button.classList.toggle("copied", state === "copied");
+				}),
+			);
+
+			button.addEventListener("click", async () => {
+				try {
+					const code = codeElement.textContent || "";
+					await navigator.clipboard.writeText(code);
+
+					buttonState.set("copied");
+
+					setTimeout(() => {
+						buttonState.set("copy");
+					}, CONSTANTS.COPY_BUTTON_RESET_MS);
+				} catch (error) {
+					console.error("Failed to copy code:", error);
+					buttonState.set("copyFailed");
+					setTimeout(() => {
+						buttonState.set("copy");
+					}, CONSTANTS.COPY_BUTTON_RESET_MS);
+				}
+			});
+
+			pre.style.position = "relative";
+			pre.appendChild(button);
+
+			// Store component for cleanup
+			this._copyButtonComponents.set(button, component);
+		}
+	},
+
+	// Cleanup copy button components
+	cleanupCopyButtons() {
+		for (const component of this._copyButtonComponents.values()) {
+			component.cleanup();
+		}
+		this._copyButtonComponents.clear();
 	},
 };
