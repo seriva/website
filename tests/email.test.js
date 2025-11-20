@@ -102,17 +102,22 @@ describe("Email", () => {
 		const nameInput = document.createElement("input");
 		nameInput.id = "contact-name";
 		nameInput.classList.add("error");
+		nameInput.setAttribute("data-class-error", "errors.name");
 
 		const emailInput = document.createElement("input");
 		emailInput.id = "contact-email";
 		emailInput.classList.add("error");
+		emailInput.setAttribute("data-class-error", "errors.email");
 
 		const messageInput = document.createElement("textarea");
 		messageInput.id = "contact-message";
 		messageInput.classList.add("error");
+		messageInput.setAttribute("data-class-error", "errors.message");
 
 		document.body.append(nameInput, emailInput, messageInput);
 
+		Email.initState();
+		const cleanup = Email.scan(document.body);
 		Email._clearFieldErrors();
 
 		assert.ok(
@@ -128,6 +133,7 @@ describe("Email", () => {
 			"Should remove error from message",
 		);
 
+		cleanup();
 		document.body.removeChild(nameInput);
 		document.body.removeChild(emailInput);
 		document.body.removeChild(messageInput);
