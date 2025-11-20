@@ -112,6 +112,7 @@ export const Signals = {
 		let pendingRun = false;
 
 		const runComputationNow = () => {
+			if (computing) return; // Guard against re-entrance
 			computing = true;
 			pendingRun = false;
 
@@ -135,7 +136,7 @@ export const Signals = {
 				}
 
 				for (const dep of added) {
-					const unsub = dep.subscribeInternal(() => runComputation());
+					const unsub = dep.subscribeInternal(scheduler);
 					unsubscribers.push({ dep, unsub });
 				}
 
@@ -146,11 +147,11 @@ export const Signals = {
 			}
 		};
 
-		// Revised Computed Implementation for Stability:
-		const runComputation = () => {
+		// Scheduler that handles batching
+		const scheduler = () => {
 			if (computing) return;
 
-			// If batching, queue a single run
+			// If batching, queue a single run using the same function reference
 			if (batchPending) {
 				if (!pendingRun) {
 					pendingRun = true;
@@ -162,7 +163,7 @@ export const Signals = {
 			runComputationNow();
 		};
 
-		runComputation();
+		scheduler();
 
 		// Add cleanup method to signal
 		result.dispose = () => {
@@ -302,8 +303,9 @@ export const Reactive = {
 						// 1. Signal -> Element
 						unsubscribers.push(
 							signal.subscribe((val) => {
-								if (element.value !== val) {
-									element.value = val;
+								const value = val === undefined ? signal.get() : val;
+								if (element.value !== value) {
+									element.value = value || "";
 								}
 							}),
 						);
