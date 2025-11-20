@@ -31,9 +31,10 @@ export const MarkdownLoader = {
 					// If language is specified, add Prism-compatible class
 					const lang = language || "text";
 					const validLang = lang.match(/^[a-zA-Z0-9-]+$/) ? lang : "text";
-					
+
 					// Use html tagged template for automatic escaping
-					return html`<pre><code class="language-${validLang}">${code}</code></pre>`.content;
+					return html`<pre><code class="language-${validLang}">${code}</code></pre>`
+						.content;
 				},
 			},
 		});

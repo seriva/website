@@ -18,7 +18,7 @@ class EmailController extends Reactive.Component {
 		NAME: "contact-name",
 		EMAIL: "contact-email",
 		MESSAGE: "contact-message",
-		FORM: "contact-form"
+		FORM: "contact-form",
 	};
 
 	// Define component state
@@ -56,7 +56,7 @@ class EmailController extends Reactive.Component {
 				if (closing) return "contact-modal show closing";
 				if (visible) return "contact-modal show";
 				return "contact-modal";
-			}
+			},
 		};
 	}
 
@@ -175,8 +175,14 @@ class EmailController extends Reactive.Component {
 
 	// Helper methods expected by tests
 	_isValidEmail(email) {
-		const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-		return email && email.length <= 254 && emailRegex.test(email) && !email.includes(" ");
+		const emailRegex =
+			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+		return (
+			email &&
+			email.length <= 254 &&
+			emailRegex.test(email) &&
+			!email.includes(" ")
+		);
 	}
 
 	_clearFieldErrors() {

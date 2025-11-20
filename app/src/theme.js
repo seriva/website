@@ -24,7 +24,7 @@ class ThemeController extends Reactive.Component {
 			giscusTheme: () => {
 				const colors = this.colors.get();
 				return colors?.comments?.theme || this.current.get();
-			}
+			},
 		};
 	}
 
@@ -41,21 +41,29 @@ class ThemeController extends Reactive.Component {
 		this.bindAttr(document.documentElement, "data-theme", this.current);
 
 		// 2. Handle side effects via subscriptions
-		this.track(this.current.subscribe(theme => {
-			localStorage.setItem(this.storageKey, theme);
-		}));
+		this.track(
+			this.current.subscribe((theme) => {
+				localStorage.setItem(this.storageKey, theme);
+			}),
+		);
 
-		this.track(this.colors.subscribe(colors => {
-			this._applyColorScheme(colors);
-		}));
+		this.track(
+			this.colors.subscribe((colors) => {
+				this._applyColorScheme(colors);
+			}),
+		);
 
-		this.track(this.prismTheme.subscribe(theme => {
-			this._applyPrismTheme(theme);
-		}));
+		this.track(
+			this.prismTheme.subscribe((theme) => {
+				this._applyPrismTheme(theme);
+			}),
+		);
 
-		this.track(this.giscusTheme.subscribe(theme => {
-			this._updateGiscus(theme);
-		}));
+		this.track(
+			this.giscusTheme.subscribe((theme) => {
+				this._updateGiscus(theme);
+			}),
+		);
 
 		this._setupToggleListener();
 	}
@@ -82,7 +90,9 @@ class ThemeController extends Reactive.Component {
 
 		if (saved) return saved;
 		if (defaultTheme === "auto") {
-			return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+			return window.matchMedia("(prefers-color-scheme: dark)").matches
+				? "dark"
+				: "light";
 		}
 		return defaultTheme;
 	}
@@ -132,7 +142,7 @@ class ThemeController extends Reactive.Component {
 		if (iframe) {
 			iframe.contentWindow.postMessage(
 				{ giscus: { setConfig: { theme } } },
-				"https://giscus.app"
+				"https://giscus.app",
 			);
 		}
 	}
