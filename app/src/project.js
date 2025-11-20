@@ -75,10 +75,8 @@ export class ProjectController extends Reactive.Component {
                 return;
             }
 
-            this.batch(() => {
-                this.project.set(project);
-                this.loading.set(false);
-            });
+            // Set project data first but keep loading true
+            this.project.set(project);
 
             // Set page title
             document.title = `${project.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE
@@ -89,16 +87,20 @@ export class ProjectController extends Reactive.Component {
                 const readme = await Loaders.fetchGitHubReadme(project.github_repo);
                 if (readme) {
                     this.readmeContent.set(readme);
-                    // Highlight code blocks after render
-                    requestAnimationFrame(async () => {
-                        const readmeEl = document.getElementById("project-readme");
-                        if (readmeEl) {
-                            await PrismLoader.highlight(readmeEl);
-                            MarkdownLoader.initCopyCodeButtons();
-                        }
-                    });
                 }
             }
+
+            // Now set loading to false to show the complete page
+            this.loading.set(false);
+
+            // Highlight code blocks after render
+            requestAnimationFrame(async () => {
+                const readmeEl = document.getElementById("project-readme");
+                if (readmeEl) {
+                    await PrismLoader.highlight(readmeEl);
+                    MarkdownLoader.initCopyCodeButtons();
+                }
+            });
         } catch (error) {
             console.error(`Error loading project ${this.projectId}:`, error);
             this.batch(() => {
