@@ -11,7 +11,7 @@ import { FooterController } from "./footer.js";
 import { MarkdownLoader } from "./markdown.js";
 import { NavbarController } from "./navbar.js";
 import { Router } from "./routing.js";
-import { Search } from "./search.js";
+import { SearchController } from "./search.js";
 import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
 import { UI } from "./ui.js";
@@ -95,9 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const navLink = event.target.closest(".navbar-nav a, .navbar-nav button");
 			if (navLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
 				// Don't close menu if clicking dropdown toggle
-				if (
-					!navLink.classList.contains("dropdown-toggle")
-				) {
+				if (!navLink.classList.contains("dropdown-toggle")) {
 					window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
 				}
 			}
@@ -112,8 +110,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		UI.init();
 
 		// Initialize search if enabled
-		if (data?.site?.search?.enabled) {
-			Search.initUI(data.site.search);
+		const searchConfig = data?.site?.search;
+		if (searchConfig?.enabled) {
+			new SearchController();
 		}
 
 		// Initialize theme system (loads user preference from localStorage)
