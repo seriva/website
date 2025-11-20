@@ -27,18 +27,26 @@ export class Search extends Reactive.Component {
 		// Setup search toggle button
 		const searchToggle = document.getElementById("search-toggle");
 		if (searchToggle) {
-			searchToggle.addEventListener("click", (e) => {
+			const toggleHandler = (e) => {
 				e.preventDefault();
 				window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
 				this.show();
-			});
+			};
+			searchToggle.addEventListener("click", toggleHandler);
+			this.track(() =>
+				searchToggle.removeEventListener("click", toggleHandler),
+			);
 		}
 
 		// Listen for search events
-		window.addEventListener("search:show", () => this.show());
-		window.addEventListener("search:show-tag", (e) =>
-			this.showWithTag(e.detail.tag),
-		);
+		const showHandler = () => this.show();
+		const showTagHandler = (e) => this.showWithTag(e.detail.tag);
+		window.addEventListener("search:show", showHandler);
+		window.addEventListener("search:show-tag", showTagHandler);
+		this.track(() => {
+			window.removeEventListener("search:show", showHandler);
+			window.removeEventListener("search:show-tag", showTagHandler);
+		});
 
 		// Setup tag search delegation
 		this._setupTagSearch();
@@ -259,7 +267,7 @@ export class Search extends Reactive.Component {
 		// Handle input changes with debouncing
 		const searchInput = document.getElementById("search-page-input");
 		if (searchInput) {
-			searchInput.addEventListener("input", (e) => {
+			const inputHandler = (e) => {
 				const value = e.target.value;
 
 				if (this.searchTimeout) clearTimeout(this.searchTimeout);
@@ -267,17 +275,25 @@ export class Search extends Reactive.Component {
 				this.searchTimeout = setTimeout(() => {
 					this.query.set(value);
 				}, CONSTANTS.SEARCH_DEBOUNCE_MS);
-			});
+			};
+			searchInput.addEventListener("input", inputHandler);
+			this.track(() => searchInput.removeEventListener("input", inputHandler));
 
 			// Handle escape key
-			searchInput.addEventListener("keydown", (e) => {
+			const keydownHandler = (e) => {
 				if (e.key === "Escape") this.close();
-			});
+			};
+			searchInput.addEventListener("keydown", keydownHandler);
+			this.track(() =>
+				searchInput.removeEventListener("keydown", keydownHandler),
+			);
 		}
 
 		const clearButton = document.getElementById("search-page-clear");
 		if (clearButton) {
-			clearButton.addEventListener("click", () => this.clearSearch());
+			const clearHandler = () => this.clearSearch();
+			clearButton.addEventListener("click", clearHandler);
+			this.track(() => clearButton.removeEventListener("click", clearHandler));
 		}
 
 		// Handle result clicks
@@ -288,7 +304,7 @@ export class Search extends Reactive.Component {
 	}
 
 	_setupResultClickHandlers(resultsContainer) {
-		resultsContainer.addEventListener("click", (e) => {
+		const clickHandler = (e) => {
 			// Handle SPA links
 			const link = e.target.closest("[data-spa-route]");
 			if (link) {
@@ -305,7 +321,13 @@ export class Search extends Reactive.Component {
 				const href = link.getAttribute("href");
 				window.history.pushState({}, "", href);
 				// Dynamic import to avoid circular dependency
-				import("./routing.js").then(({ Router }) => Router.handleRoute());
+				import("./routing.js")
+					.then(({ Router }) => Router.handleRoute())
+					.catch((error) => {
+						console.error("Failed to load router:", error);
+						// Fallback: use window.location
+						window.location.href = href;
+					});
 				return;
 			}
 
@@ -324,14 +346,24 @@ export class Search extends Reactive.Component {
 
 					const href = cardLink.getAttribute("href");
 					window.history.pushState({}, "", href);
-					import("./routing.js").then(({ Router }) => Router.handleRoute());
+					import("./routing.js")
+						.then(({ Router }) => Router.handleRoute())
+						.catch((error) => {
+							console.error("Failed to load router:", error);
+							// Fallback: use window.location
+							window.location.href = href;
+						});
 				}
 			}
-		});
+		};
+		resultsContainer.addEventListener("click", clickHandler);
+		this.track(() =>
+			resultsContainer.removeEventListener("click", clickHandler),
+		);
 	}
 
 	_setupTagSearch() {
-		document.addEventListener("click", (event) => {
+		const tagClickHandler = (event) => {
 			const tagElement = event.target.closest("[data-search-tag]");
 			if (!tagElement) return;
 
@@ -342,7 +374,9 @@ export class Search extends Reactive.Component {
 			if (tag) {
 				this.showWithTag(tag);
 			}
-		});
+		};
+		document.addEventListener("click", tagClickHandler);
+		this.track(() => document.removeEventListener("click", tagClickHandler));
 	}
 
 	// ===========================================

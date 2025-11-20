@@ -33,6 +33,9 @@ let batchPending = false;
 const batchQueue = new Set();
 const batchWrappers = new WeakMap();
 
+// Circular dependency detection for computed values
+const _computeStack = [];
+
 export const Signals = {
 	create(value, equals = (a, b) => a === b) {
 		const subs = new Set();
@@ -324,12 +327,32 @@ export const Reactive = {
 			return this._c.scan(r, this);
 		}
 		render() {
-			const t = document.createElement("div");
-			t.innerHTML = this.template().content;
-			const el = t.firstElementChild;
-			if (!el) throw new Error("Template must return a single root element");
-			this.scan(el);
-			return el;
+			try {
+				const t = document.createElement("div");
+				const templateResult = this.template();
+				if (!templateResult || !templateResult.content) {
+					throw new Error("Template must return html`` tagged template");
+				}
+				t.innerHTML = templateResult.content;
+				const el = t.firstElementChild;
+				if (!el) {
+					throw new Error("Template must return a single root element");
+				}
+				this.scan(el);
+				return el;
+			} catch (error) {
+				console.error("Component render error:", error, this.constructor.name);
+				const errorEl = document.createElement("div");
+				errorEl.className = "component-error";
+				errorEl.style.cssText =
+					"padding: 20px; margin: 20px; border: 2px solid #ff6b6b; border-radius: 8px; background: #ffe0e0; color: #c92a2a;";
+				errorEl.innerHTML = `
+					<h3 style="margin-top: 0;">Failed to render component</h3>
+					<p><strong>Component:</strong> ${this.constructor.name}</p>
+					<p><strong>Error:</strong> ${error.message}</p>
+				`;
+				return errorEl;
+			}
 		}
 		mountTo(containerId) {
 			const container = document.getElementById(containerId);
