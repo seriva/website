@@ -149,7 +149,7 @@ export class BlogList extends Reactive.Component {
 		return html`
         <article class="blog-post-card" data-index="${index}" data-on-click="navigateToPost">
             <h2 class="blog-post-title">
-                <a href="?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
+                <a href="/blog/${post.slug}" data-spa-route="blog">${post.title}</a>
             </h2>
             <div class="blog-post-meta">
                 <span class="blog-post-date"><i class="fas fa-calendar"></i> ${post.date}</span>
@@ -180,7 +180,7 @@ export class BlogList extends Reactive.Component {
 
 				const activeClass = i === currentPage ? " active" : "";
 				pageNumbers.push(
-					html`<li class="page-item${activeClass}"><a class="page-link" href="?blog&p=${i}" data-spa-route="page">${i}</a></li>`
+					html`<li class="page-item${activeClass}"><a class="page-link" href="/blog/page/${i}" data-spa-route="page">${i}</a></li>`
 						.content,
 				);
 				lastAdded = i;
@@ -192,13 +192,13 @@ export class BlogList extends Reactive.Component {
 
 		return html`<nav class="blog-pagination" aria-label="Blog pagination"><ul class="pagination">
             <li class="page-item${prevDisabled}">
-                <a class="page-link" href="?blog&p=${currentPage - 1}" data-spa-route="page" aria-label="Previous">
+                <a class="page-link" href="/blog/page/${currentPage - 1}" data-spa-route="page" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
             ${trusted(pageNumbers.join(""))}
             <li class="page-item${nextDisabled}">
-                <a class="page-link" href="?blog&p=${currentPage + 1}" data-spa-route="page" aria-label="Next">
+                <a class="page-link" href="/blog/page/${currentPage + 1}" data-spa-route="page" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

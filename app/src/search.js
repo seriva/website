@@ -178,7 +178,7 @@ export class Search extends Reactive.Component {
 				tags: p.tags || [],
 				content: "",
 				type: "project",
-				url: `?project=${p.id}`,
+				url: `/project/${p.id}`,
 				github_repo: p.github_repo,
 			}));
 
@@ -191,7 +191,7 @@ export class Search extends Reactive.Component {
 					description: p.excerpt || "",
 					tags: p.tags || [],
 					type: "blog",
-					url: `/?blog=${slug}`,
+					url: `/blog/${slug}`,
 				};
 			});
 

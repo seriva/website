@@ -82,7 +82,7 @@ export const Loaders = {
 		if (!post.filename) return null;
 
 		const result = await MarkdownLoader.loadWithFrontmatter(
-			`data/blog/${post.filename}`,
+			`/data/blog/${post.filename}`,
 		);
 		return result?.content || null;
 	},

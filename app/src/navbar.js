@@ -26,25 +26,17 @@ export class Navbar extends Reactive.Component {
 
 	state() {
 		const data = Context.get();
-		const params = new URLSearchParams(window.location.search);
-
-		const currentRoute = Signals.create({
-			blog: params.get("blog"),
-			page: params.get("page"),
-			project: params.get("project"),
-		});
+		const currentRoute = Signals.create(window.location.pathname);
 
 		const getIsActive = (href) => {
-			if (!href?.startsWith("?")) return false;
-			const route = currentRoute.get();
-			const linkParams = new URLSearchParams(href);
+			const path = currentRoute.get();
+			if (!href) return false;
 
-			if (route.blog !== null && linkParams.get("blog") !== null) return true;
-			if (route.page !== null && linkParams.get("page") === route.page)
-				return true;
-			if (route.project !== null && linkParams.get("project") === route.project)
-				return true;
-			return false;
+			// Exact match for home/blog root
+			if (href === "/blog" && (path === "/" || path === "/blog")) return true;
+
+			// Prefix match for other routes
+			return path === href || (href !== "/" && path.startsWith(href));
 		};
 
 		const pagesData = data?.pages
@@ -58,15 +50,15 @@ export class Navbar extends Reactive.Component {
 			blogPage = {
 				id: "blog",
 				title: data.blog.title || "Blog",
-				href: "?blog",
+				href: "/blog",
 			};
-			activeSignals.blogActive = this.computed(() => getIsActive("?blog"));
+			activeSignals.blogActive = this.computed(() => getIsActive("/blog"));
 		}
 
 		const navPages = pagesData
 			.filter((page) => page.id !== "blog" && page.showInNav)
 			.sort((a, b) => (a.order || 0) - (b.order || 0))
-			.map((page) => ({ ...page, href: `?page=${page.id}` }));
+			.map((page) => ({ ...page, href: `/page/${page.id}` }));
 
 		navPages.forEach((page, i) => {
 			activeSignals[`page_${i}_active`] = this.computed(() =>
@@ -76,7 +68,7 @@ export class Navbar extends Reactive.Component {
 
 		const projects = (data?.projects || []).map((p) => ({
 			...p,
-			href: `?project=${p.id}`,
+			href: `/project/${p.id}`,
 		}));
 
 		projects.forEach((p, i) => {
@@ -85,8 +77,8 @@ export class Navbar extends Reactive.Component {
 			);
 		});
 
-		const isProjectActive = this.computed(
-			() => currentRoute.get().project !== null,
+		const isProjectActive = this.computed(() =>
+			currentRoute.get().startsWith("/project/"),
 		);
 
 		return {
@@ -170,12 +162,7 @@ export class Navbar extends Reactive.Component {
 
 	updateActiveNavLink() {
 		// Update the route signal which will trigger reactive updates
-		const params = new URLSearchParams(window.location.search);
-		this.currentRoute.set({
-			blog: params.get("blog"),
-			page: params.get("page"),
-			project: params.get("project"),
-		});
+		this.currentRoute.set(window.location.pathname);
 	}
 
 	toggleDropdown(e) {
