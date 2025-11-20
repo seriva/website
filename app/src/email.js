@@ -12,7 +12,14 @@ import { html, Reactive } from "./reactive.js";
 class EmailController extends Reactive.Component {
 	initialized = false;
 	_MODAL_ID = "contact-modal";
-	_NAME_ID = "contact-name";
+
+	// Constants expected by tests
+	_FIELD_IDS = {
+		NAME: "contact-name",
+		EMAIL: "contact-email",
+		MESSAGE: "contact-message",
+		FORM: "contact-form"
+	};
 
 	// Define component state
 	state() {
@@ -21,13 +28,15 @@ class EmailController extends Reactive.Component {
 			buttonState: "send",
 			buttonDisabled: false,
 			statusMessage: { text: "", type: "" },
+			modalVisible: false,
+			modalClosing: false,
 
 			// Form data (two-way bound)
 			name: "",
 			email: "",
 			message: "",
 
-			// Validation errors (explicit nested signals)
+			// Validation errors
 			errors: {
 				name: this.signal(false),
 				email: this.signal(false),
@@ -41,13 +50,20 @@ class EmailController extends Reactive.Component {
 				return status.type ? `form-status ${status.type}` : "form-status";
 			},
 			buttonText: () => i18n.t(`contact.${this.buttonState.get()}`),
+			modalClass: () => {
+				const visible = this.modalVisible.get();
+				const closing = this.modalClosing.get();
+				if (closing) return "contact-modal show closing";
+				if (visible) return "contact-modal show";
+				return "contact-modal";
+			}
 		};
 	}
 
 	// Template for the contact form
 	template() {
 		return html`
-		<div class="contact-modal" id="contact-modal" data-on-click="_handleModalClick">
+		<div class="contact-modal" id="${this._MODAL_ID}" data-class-show="modalVisible" data-class-closing="modalClosing" data-on-click="_handleModalClick">
 			<div class="contact-modal-content">
 				<div class="contact-modal-header">
 					<h2>${i18n.t("contact.title")}</h2>
@@ -55,12 +71,12 @@ class EmailController extends Reactive.Component {
 						<i class="fas fa-times"></i>
 					</button>
 				</div>
-				<form class="contact-form" id="contact-form" data-on-submit="_handleSubmit">
+				<form class="contact-form" id="${this._FIELD_IDS.FORM}" data-on-submit="_handleSubmit">
 					<div class="form-group">
-						<label for="contact-name">${i18n.t("contact.name")}*</label>
+						<label for="${this._FIELD_IDS.NAME}">${i18n.t("contact.name")}*</label>
 						<input 
 							type="text" 
-							id="contact-name" 
+							id="${this._FIELD_IDS.NAME}" 
 							name="name" 
 							required 
 							aria-required="true"
@@ -69,10 +85,10 @@ class EmailController extends Reactive.Component {
 						/>
 					</div>
 					<div class="form-group">
-						<label for="contact-email">${i18n.t("contact.email")}*</label>
+						<label for="${this._FIELD_IDS.EMAIL}">${i18n.t("contact.email")}*</label>
 						<input 
 							type="email" 
-							id="contact-email" 
+							id="${this._FIELD_IDS.EMAIL}" 
 							name="email" 
 							required 
 							aria-required="true"
@@ -81,9 +97,9 @@ class EmailController extends Reactive.Component {
 						/>
 					</div>
 					<div class="form-group">
-						<label for="contact-message">${i18n.t("contact.message")}*</label>
+						<label for="${this._FIELD_IDS.MESSAGE}">${i18n.t("contact.message")}*</label>
 						<textarea 
-							id="contact-message" 
+							id="${this._FIELD_IDS.MESSAGE}" 
 							name="message" 
 							rows="6" 
 							required 
@@ -106,64 +122,69 @@ class EmailController extends Reactive.Component {
 	// PUBLIC METHODS
 	// ===========================================
 
-	// Initialize EmailJS and inject contact form modal
 	init() {
 		const data = Context.get();
 		const config = data?.site?.emailjs;
 
-		// Only initialize if enabled
 		if (!config?.enabled) return;
 
-		// Initialize reactive state (now that i18n is ready)
 		this.initState();
 
-		// Inject the contact form modal if not already present
 		if (!document.getElementById(this._MODAL_ID)) {
 			const modal = this.render();
 			document.body.appendChild(modal);
 
-			// ESC key to close (must be global)
 			document.addEventListener("keydown", (e) => {
-				if (e.key === "Escape" && modal.classList.contains("show")) {
+				if (e.key === "Escape" && this.modalVisible.get()) {
 					this.hide();
 				}
 			});
 		}
 
-		// Initialize EmailJS only if public key is configured
 		if (config.publicKey) {
 			emailjs.init(config.publicKey);
 			this.initialized = true;
 		}
 	}
 
-	// Show contact form modal
 	show() {
-		const modal = document.getElementById(this._MODAL_ID);
-		if (!modal) return;
+		this.batch(() => {
+			this.modalClosing.set(false);
+			this.modalVisible.set(true);
+		});
 
-		modal.classList.remove("closing");
-		modal.classList.add("show");
-
-		// Focus first input after animation starts
-		const nameInput = document.getElementById(this._NAME_ID);
+		const nameInput = document.getElementById(this._FIELD_IDS.NAME);
 		if (nameInput) {
 			requestAnimationFrame(() => nameInput.focus());
 		}
 	}
 
-	// Hide contact form modal with animation
 	hide() {
-		const modal = document.getElementById(this._MODAL_ID);
-		if (!modal) return;
+		if (!this.modalVisible.get()) return;
 
-		modal.classList.add("closing");
+		this.modalClosing.set(true);
 
-		// Wait for animation to complete before hiding
 		setTimeout(() => {
-			modal.classList.remove("show", "closing");
-			this._resetForm();
-		}, 200); // Match animation duration
+			this.batch(() => {
+				this.modalVisible.set(false);
+				this.modalClosing.set(false);
+				this._resetForm();
+			});
+		}, 200);
+	}
+
+	// Helper methods expected by tests
+	_isValidEmail(email) {
+		const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+		return email && email.length <= 254 && emailRegex.test(email) && !email.includes(" ");
+	}
+
+	_clearFieldErrors() {
+		this.batch(() => {
+			this.errors.name.set(false);
+			this.errors.email.set(false);
+			this.errors.message.set(false);
+		});
 	}
 
 	// ===========================================
@@ -190,12 +211,10 @@ class EmailController extends Reactive.Component {
 			return;
 		}
 
-		// Validate
 		if (!this._validateForm()) {
 			return;
 		}
 
-		// Disable submit button and clear status reactively
 		this.buttonDisabled.set(true);
 		this.buttonState.set("sending");
 		this.statusMessage.set({ text: "", type: "" });
@@ -209,10 +228,8 @@ class EmailController extends Reactive.Component {
 				message: this.message.get(),
 			};
 
-			// Send email via EmailJS
 			await emailjs.send(config.serviceId, config.templateId, templateParams);
 
-			// Show success message
 			this.batch(() => {
 				this.statusMessage.set({
 					text: i18n.t("contact.success"),
@@ -221,7 +238,6 @@ class EmailController extends Reactive.Component {
 				this.buttonState.set("send");
 			});
 
-			// Reset form after delay
 			setTimeout(() => this.hide(), 2000);
 		} catch (error) {
 			console.error("Failed to send email:", error);
@@ -231,8 +247,6 @@ class EmailController extends Reactive.Component {
 					type: "error",
 				});
 				this.buttonState.set("send");
-
-				// Re-enable submit button only on error
 				this.buttonDisabled.set(false);
 			});
 		}
@@ -244,12 +258,8 @@ class EmailController extends Reactive.Component {
 		const email = this.email.get().trim();
 		const message = this.message.get().trim();
 
-		// Reset all errors first
-		this.errors.name.set(false);
-		this.errors.email.set(false);
-		this.errors.message.set(false);
+		this._clearFieldErrors();
 
-		// Validate name
 		if (!name) {
 			this.statusMessage.set({
 				text: `${i18n.t("contact.name")}: ${i18n.t("contact.required")}`,
@@ -257,10 +267,9 @@ class EmailController extends Reactive.Component {
 			});
 			this.errors.name.set(true);
 			isValid = false;
-			return isValid; // Stop at first error for status message clarity
+			return isValid;
 		}
 
-		// Validate email
 		if (!email) {
 			this.statusMessage.set({
 				text: `${i18n.t("contact.email")}: ${i18n.t("contact.required")}`,
@@ -271,10 +280,7 @@ class EmailController extends Reactive.Component {
 			return isValid;
 		}
 
-		// RFC 5322 compliant email validation with max length check
-		const emailRegex =
-			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-		if (!email || email.length > 254 || !emailRegex.test(email) || email.includes(" ")) {
+		if (!this._isValidEmail(email)) {
 			this.statusMessage.set({
 				text: i18n.t("contact.invalidEmail"),
 				type: "error",
@@ -284,7 +290,6 @@ class EmailController extends Reactive.Component {
 			return isValid;
 		}
 
-		// Validate message
 		if (!message) {
 			this.statusMessage.set({
 				text: `${i18n.t("contact.message")}: ${i18n.t("contact.required")}`,
@@ -303,9 +308,7 @@ class EmailController extends Reactive.Component {
 			this.name.set("");
 			this.email.set("");
 			this.message.set("");
-			this.errors.name.set(false);
-			this.errors.email.set(false);
-			this.errors.message.set(false);
+			this._clearFieldErrors();
 			this.statusMessage.set({ text: "", type: "" });
 			this.buttonState.set("send");
 			this.buttonDisabled.set(false);
