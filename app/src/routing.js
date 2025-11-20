@@ -8,11 +8,11 @@ import { BlogListController } from "./blog-list.js";
 import { BlogPostController } from "./blog-post.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
+import { MarkdownLoader } from "./markdown.js";
 import { PageController } from "./page.js";
 import { PrismLoader } from "./prism-loader.js";
 import { ProjectController } from "./project.js";
 import { Templates } from "./templates.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // ROUTER NAMESPACE
@@ -119,7 +119,7 @@ export const Router = {
 		// Schedule post-render tasks
 		requestAnimationFrame(async () => {
 			await PrismLoader.highlight(mainContent);
-			UI.initCopyCodeButtons();
+			MarkdownLoader.initCopyCodeButtons();
 		});
 
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });

@@ -8,6 +8,7 @@ import { Context } from "./context.js";
 import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
 import { Loaders } from "./loaders.js";
+import { MarkdownLoader } from "./markdown.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
@@ -87,6 +88,11 @@ export class BlogPostController extends Reactive.Component {
                 this.post.set(post);
                 this.content.set(content);
                 this.loading.set(false);
+            });
+
+            // Add copy buttons after content is rendered
+            requestAnimationFrame(() => {
+                MarkdownLoader.initCopyCodeButtons();
             });
 
             // Set page title

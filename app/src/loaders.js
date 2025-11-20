@@ -11,7 +11,6 @@ import { MarkdownLoader } from "./markdown.js";
 import { PrismLoader } from "./prism-loader.js";
 import { html, join, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // LOADERS NAMESPACE
@@ -152,7 +151,7 @@ export const Loaders = {
 				requestAnimationFrame(async () => {
 					await PrismLoader.highlight(element);
 					// Add copy buttons after syntax highlighting
-					UI.initCopyCodeButtons();
+					MarkdownLoader.initCopyCodeButtons();
 				});
 			} else {
 				console.warn(`Failed to load README for ${fullRepo}`);
