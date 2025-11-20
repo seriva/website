@@ -304,6 +304,17 @@ export const Reactive = {
 			this.scan(el);
 			return el;
 		}
+		mountTo(containerId) {
+			const container = document.getElementById(containerId);
+			if (!container) {
+				console.warn(`Container #${containerId} not found`);
+				return null;
+			}
+			const element = this.render();
+			container.innerHTML = "";
+			container.appendChild(element);
+			return element;
+		}
 		cleanup() {
 			this._c.cleanup();
 		}

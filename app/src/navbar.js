@@ -7,32 +7,26 @@ export class NavbarController extends Reactive.Component {
 	constructor() {
 		super();
 		this.initState();
+		this.mountTo("navbar-container");
 
-		const navbarContainer = document.getElementById("navbar-container");
-		if (navbarContainer) {
-			const navbarElement = this.render();
-			navbarContainer.innerHTML = "";
-			navbarContainer.appendChild(navbarElement);
-
-			// Inject search page into body if search is enabled
-			if (this.searchEnabled.get()) {
-				const existingSearchPage = document.getElementById("search-page");
-				if (!existingSearchPage) {
-					document.body.insertAdjacentHTML(
-						"beforeend",
-						this._tplSearchPage(this.searchPlaceholder.get()).content,
-					);
-				}
+		// Inject search page into body if search is enabled
+		if (this.searchEnabled.get()) {
+			const existingSearchPage = document.getElementById("search-page");
+			if (!existingSearchPage) {
+				document.body.insertAdjacentHTML(
+					"beforeend",
+					this._tplSearchPage(this.searchPlaceholder.get()).content,
+				);
 			}
-
-			// Setup outside click handler for mobile menu
-			this._setupOutsideClickHandler();
-
-			// Listen for route changes to update active link styling
-			const updateHandler = () => this.updateActiveNavLink();
-			window.addEventListener("popstate", updateHandler);
-			window.addEventListener("route-changed", updateHandler);
 		}
+
+		// Setup outside click handler for mobile menu
+		this._setupOutsideClickHandler();
+
+		// Listen for route changes to update active link styling
+		const updateHandler = () => this.updateActiveNavLink();
+		window.addEventListener("popstate", updateHandler);
+		window.addEventListener("route-changed", updateHandler);
 	}
 
 	state() {

@@ -6,13 +6,7 @@ export class FooterController extends Reactive.Component {
 	constructor() {
 		super();
 		this.initState();
-
-		const footerContainer = document.getElementById("footer-container");
-		if (footerContainer) {
-			const footerElement = this.render();
-			footerContainer.innerHTML = "";
-			footerContainer.appendChild(footerElement);
-		}
+		this.mountTo("footer-container");
 	}
 
 	state() {

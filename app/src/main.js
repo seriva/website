@@ -57,6 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (actionElement) {
 				const action = actionElement.dataset.action;
 				if (action === "fullscreen") {
+					// Handle code block fullscreen
 					const pre = actionElement.closest("pre");
 					if (pre) {
 						if (!document.fullscreenElement) {
@@ -67,6 +68,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 							});
 						} else {
 							document.exitFullscreen();
+						}
+					} else {
+						// Handle demo iframe fullscreen
+						const iframe = document.getElementById("demo");
+						if (iframe) {
+							try {
+								const request =
+									iframe.requestFullscreen ||
+									iframe.webkitRequestFullscreen ||
+									iframe.mozRequestFullScreen ||
+									iframe.msRequestFullscreen;
+
+								if (request) request.call(iframe);
+							} catch (error) {
+								console.error("Error requesting fullscreen:", error);
+							}
 						}
 					}
 				}
