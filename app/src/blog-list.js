@@ -21,9 +21,6 @@ export class BlogListController extends Reactive.Component {
 
 		// Load blog posts
 		this._loadPosts();
-
-		// Setup card click handlers after render
-		requestAnimationFrame(() => this._setupBlogCardClicks());
 	}
 
 	state() {
@@ -76,6 +73,27 @@ export class BlogListController extends Reactive.Component {
 	}
 
 	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
+
+	navigateToPost(e) {
+		// Ignore clicks on links and tags
+		if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
+
+		// Find the blog post link in the clicked card
+		const card = e.target.closest(".blog-post-card");
+		if (!card) return;
+
+		const link = card.querySelector(".blog-post-title a");
+		if (link) {
+			e.preventDefault();
+			const href = link.getAttribute("href");
+			window.history.pushState({}, "", href);
+			import("./routing.js").then(({ Router }) => Router.handleRoute());
+		}
+	}
+
+	// ===========================================
 	// PRIVATE METHODS
 	// ===========================================
 
@@ -123,29 +141,13 @@ export class BlogListController extends Reactive.Component {
 		return this._tplBlogPagination(currentPage, totalPages);
 	}
 
-	_setupBlogCardClicks() {
-		for (const card of document.querySelectorAll(".blog-post-card")) {
-			card.addEventListener("click", (e) => {
-				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
-
-				const link = card.querySelector(".blog-post-title a");
-				if (link) {
-					e.preventDefault();
-					const href = link.getAttribute("href");
-					window.history.pushState({}, "", href);
-					import("./routing.js").then(({ Router }) => Router.handleRoute());
-				}
-			});
-		}
-	}
-
 	// ===========================================
 	// TEMPLATE METHODS
 	// ===========================================
 
 	_tplBlogPostCard(post, index) {
 		return html`
-        <article class="blog-post-card" data-index="${index}">
+        <article class="blog-post-card" data-index="${index}" data-on-click="navigateToPost">
             <h2 class="blog-post-title">
                 <a href="?blog=${post.slug}" data-spa-route="blog">${post.title}</a>
             </h2>

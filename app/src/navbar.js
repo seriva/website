@@ -204,20 +204,9 @@ export class NavbarController extends Reactive.Component {
 		});
 	}
 
-	_isLinkActive(href) {
-		if (!href?.startsWith("?")) return false;
-		const route = this.currentRoute.get();
-		const linkParams = new URLSearchParams(href);
-
-		if (route.blog !== null && linkParams.get("blog") !== null) return true;
-		if (route.page !== null && linkParams.get("page") === route.page)
-			return true;
-		if (route.project !== null && linkParams.get("project") === route.project)
-			return true;
-		return false;
-	}
-
-	// TEMPLATES
+	// ===========================================
+	// PRIVATE TEMPLATES
+	// ===========================================
 
 	_tplPageLink(page, activeSignalName) {
 		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${page.href}" data-spa-route="page" data-class-active="${activeSignalName}">${page.title}</a></li>`;

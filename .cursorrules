@@ -3,14 +3,27 @@
 Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modular ES6 architecture.
 
 ### Core Principles
+- **Reactive System**: Use `reactive.js` for all interactive components and state management
+  - Create components with `Reactive.Component` base class or `Reactive.createComponent()`
+  - Use signals for reactive state: `this.signal(value)` or `Signals.create(value)`
+  - Computed values: `this.computed(() => ...)` or `Signals.computed(() => ...)`
+  - Batch updates: `this.batch(() => ...)` or `Signals.batch(() => ...)`
+  - Declarative binding: `data-text`, `data-html`, `data-attr-*`, `data-class-*`, `data-bool-*`, `data-model`, `data-on-click`
+  - Auto-batching: Event handlers with `data-on-*` are automatically batched
+  - Use reactive.js wherever possible for consistent, maintainable interactivity
 - **Namespace Pattern**: Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
   - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
   - All modules follow this pattern consistently
-  - **Method Organization**: Within namespace objects, organize methods in this order:
-    1. Utility methods (if any) at the top
-    2. Public methods (called from other modules)
-    3. Private methods (internal use only) at the bottom with `_` prefix
-  - Private method naming: Prefix with underscore `_privateMethod()`
+  - **Method Organization**: Within namespace objects and components, organize methods in this order:
+    1. Public methods first (called from other modules or templates)
+    2. Private methods last (internal use only) at the bottom with `_` prefix
+  - Private method naming: Always prefix with underscore `_privateMethod()`
+  - **Component Structure**: For `Reactive.Component` classes:
+    1. Constructor and lifecycle methods first
+    2. `state()` method defining reactive state
+    3. `template()` method for HTML
+    4. Public methods next
+    5. Private methods last with `_` prefix
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
 - Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
 - Call `await Context.init()` to load content; access via `Context.get()` (cached)
@@ -61,24 +74,33 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 
 ### Module Structure
 
+**Core Module**:
+- `app/src/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
+
 **Namespace Pattern Modules** (export single object):
-- `app/src/ui.js` - `UI` namespace for UI interactions, mobile menu, dropdowns
-- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
 - `app/src/context.js` - `Context` namespace for app state, data loading, theming
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
-- `app/src/navbar.js` - `NavbarController` component for navbar rendering
-- `app/src/footer.js` - `FooterController` component for footer rendering
+- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
 - `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
-- `app/src/search.js` - `Search` namespace for Fuse.js search implementation
-- `app/src/email.js` - `Email` namespace for EmailJS contact form integration
 - `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
 - `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
 - `app/src/prism-loader.js` - `PrismLoader` namespace for syntax highlighting
 - `app/src/i18n.js` - `i18n` namespace for internationalization
 - `app/src/constants.js` - `CONSTANTS` object for configuration
 
+**Reactive Components** (extend `Reactive.Component`):
+- `app/src/navbar.js` - `NavbarController` component for navbar rendering
+- `app/src/footer.js` - `FooterController` component for footer rendering
+- `app/src/search.js` - `SearchController` component for Fuse.js search implementation
+- `app/src/email.js` - `EmailController` component for EmailJS contact form integration
+- `app/src/theme.js` - `ThemeController` component for theme management
+- `app/src/blog.js` - `BlogListController`, `BlogPostController` for blog pages
+- `app/src/project.js` - `ProjectController` for project detail pages
+- `app/src/page.js` - `PageController` for custom markdown pages
+
 **Other Modules**:
 - `app/src/main.js` - entry point, initialization
+- `app/src/error-handler.js` - `ErrorHandler` for global error handling
 - `app/src/dependencies/` - bundled npm packages (managed by Microtastic)
 
 ### Files & Directories
