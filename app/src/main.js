@@ -47,10 +47,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Initialize theme system (loads user preference from localStorage)
 		Theme.init();
 
-		// Handle initial route
-		await Router.handleRoute();
+		// Handle 404.html redirect (for dev server and GitHub Pages)
+		const hash = window.location.hash;
+		if (hash.startsWith("#!redirect=")) {
+			const redirect = decodeURIComponent(hash.substring(11));
+			// Replace the URL with the original path
+			window.history.replaceState({}, "", redirect);
+		}
 
-		// Set up routing
+		// Handle initial route
+		await Router.handleRoute(); // Set up routing
 		window.addEventListener("popstate", Router.handleRoute);
 		Router.setupSpaRouting();
 	} catch (error) {

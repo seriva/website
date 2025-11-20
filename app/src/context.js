@@ -21,7 +21,7 @@ export const Context = {
 	async init() {
 		if (appContext) return appContext;
 
-		const yamlPath = "data/content.yaml";
+		const yamlPath = "/data/content.yaml";
 
 		try {
 			const response = await fetch(yamlPath);

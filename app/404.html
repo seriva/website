@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+        // SPA redirect for 404 pages
+        // Immediately redirect to index.html while preserving the current path
+        // The SPA router will handle the path client-side
+        (function() {
+            var path = window.location.pathname + window.location.search + window.location.hash;
+            // Replace current history entry to avoid back button issues
+            window.location.replace('/' + (path !== '/' ? '#!redirect=' + encodeURIComponent(path) : ''));
+        })();
+    </script>
+</head>
+<body>
+    <div id="navbar-container"></div>
+
+    <main id="main-content">
+        <!-- Content will be loaded dynamically here -->
+    </main>
+
+    <div id="footer-container"></div>
+
+    <!-- Main application entry point -->
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

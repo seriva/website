@@ -60,9 +60,8 @@ export class Page extends Reactive.Component {
 			document.title = data?.site?.title || "Portfolio";
 
 			const content = await MarkdownLoader.loadAsHtml(
-				`data/pages/${this.pageId}.md`,
+				`/data/pages/${this.pageId}.md`,
 			);
-
 			if (content !== null && content !== undefined) {
 				this.batch(() => {
 					this.content.set(content);
