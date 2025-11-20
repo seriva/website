@@ -4,10 +4,13 @@
 // SPA routing system - orchestrates page navigation
 
 import { CONSTANTS } from "./constants.js";
+import { BlogListController } from "./blog-list.js";
+import { BlogPostController } from "./blog-post.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
-import { Loaders } from "./loaders.js";
+import { PageController } from "./page.js";
 import { PrismLoader } from "./prism-loader.js";
+import { ProjectController } from "./project.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
 
@@ -41,27 +44,26 @@ export const Router = {
 		await Router._startTransition(mainContent);
 
 		try {
-			// Route to appropriate content loader
+			// Route to appropriate component
 			if (route.blog !== null) {
 				// Blog: either blog listing (empty string) or specific post (slug)
-				await (route.blog === ""
-					? Loaders.loadBlogPage(route.blogPage)
-					: Loaders.loadBlogPost(route.blog));
+				if (route.blog === "") {
+					new BlogListController(route.blogPage);
+				} else {
+					new BlogPostController(route.blog);
+				}
 			} else if (route.project) {
-				// Project: load project page then additional content (README, links)
-				await Loaders.loadProjectPage(route.project);
-				// Wait for next frame to ensure DOM updates before loading additional content
-				await new Promise((resolve) => requestAnimationFrame(resolve));
-				await Loaders.loadAdditionalContent();
+				// Project: render project detail page
+				new ProjectController(route.project);
 			} else if (route.page) {
-				// Custom page: load markdown page
-				await Loaders.loadPage(route.page);
+				// Custom page: render markdown page
+				new PageController(route.page);
 			} else {
-				// No route specified: redirect to default route and load blog
+				// No route specified: redirect to default route
 				const data = Context.get();
 				const defaultRoute = data?.site?.defaultRoute || "?blog";
 				window.history.replaceState({}, "", defaultRoute);
-				await Loaders.loadBlogPage(1);
+				new BlogListController(1);
 			}
 
 			// End transition and apply post-render tasks

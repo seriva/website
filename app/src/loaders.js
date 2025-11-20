@@ -9,7 +9,7 @@ import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
 import { PrismLoader } from "./prism-loader.js";
-import { trusted } from "./reactive.js";
+import { html, join, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
 
@@ -21,153 +21,6 @@ export const Loaders = {
 	// ===========================================
 	// PUBLIC METHODS
 	// ===========================================
-
-	// Load and display blog page with pagination
-	async loadBlogPage(page = 1) {
-		const mainContent = document.getElementById("main-content");
-		const data = Context.get();
-		document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
-
-		mainContent.innerHTML = Templates.loadingSpinner().content;
-
-		const posts = await Loaders._loadBlogPosts(data);
-		const postsPerPage = data?.blog?.postsPerPage || 5;
-		const totalPages = Math.ceil(posts.length / postsPerPage);
-		const currentPage = Math.max(1, Math.min(page, totalPages));
-		const startIndex = (currentPage - 1) * postsPerPage;
-		const endIndex = startIndex + postsPerPage;
-		const paginatedPosts = posts.slice(startIndex, endIndex);
-
-		if (paginatedPosts.length === 0) {
-			mainContent.innerHTML = Templates.blogEmpty().content;
-			return;
-		}
-
-		const postsHtml = trusted(
-			paginatedPosts
-				.map(
-					(post, index) =>
-						Templates.blogPostCard(post, startIndex + index).content,
-				)
-				.join(""),
-		);
-		mainContent.innerHTML = Templates.blogContainer(
-			postsHtml,
-			Templates.blogPagination(currentPage, totalPages),
-		).content;
-
-		Loaders._setupBlogCardClicks();
-		document.title = `${data.blog.title || "Blog"} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
-	},
-
-	// Load and display a single blog post
-	async loadBlogPost(slug) {
-		const mainContent = document.getElementById("main-content");
-		mainContent.innerHTML = Templates.loadingSpinner().content;
-		const data = Context.get();
-		const posts = await Loaders._loadBlogPosts(data);
-		const post = posts.find((p) => p.slug === slug || p.id === slug);
-
-		if (!post) {
-			mainContent.innerHTML = Templates.errorMessage(
-				i18n.t("general.blogNotFound"),
-				i18n.t("general.blogNotFoundMessage"),
-			).content;
-			return;
-		}
-
-		const content = await Loaders._loadBlogPostContent(post);
-
-		const commentsHtml = Templates.giscusComments(data?.site?.comments, "blog");
-		mainContent.innerHTML =
-			Templates.blogPost(post, content).content + commentsHtml.content;
-
-		document.title = `${post.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
-	},
-
-	// Load and display a project page
-	async loadProjectPage(projectId, _data) {
-		const mainContent = document.getElementById("main-content");
-		try {
-			const data = Context.get();
-			const project = data?.projects?.find((p) => p.id === projectId);
-
-			if (!project) {
-				mainContent.innerHTML = Templates.errorMessage(
-					i18n.t("general.projectNotFound"),
-					i18n.t("general.projectNotFoundMessage"),
-				).content;
-				return;
-			}
-
-			document.title = `${project.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
-
-			// Build project content sections
-			const sections = [
-				Templates.projectHeader(
-					project.title,
-					project.description,
-					project.tags,
-				),
-				project.github_repo &&
-					Templates._dynamicContainer(
-						"github-readme",
-						"repo",
-						project.github_repo,
-						i18n.t("project.loadingReadme"),
-					),
-				project.youtube_videos?.length &&
-					Templates.mediaSection(
-						trusted(
-							project.youtube_videos
-								.map((v) => Templates._youtubeVideo(v).content)
-								.join(""),
-						),
-					),
-				project.demo_url && Templates._demoIframe(project.demo_url),
-				Templates._dynamicContainer("project-links", "project", project.id, ""),
-				Templates.giscusComments(data?.site?.comments, "projects"),
-			];
-
-			mainContent.innerHTML = sections
-				.filter(Boolean)
-				.map((section) => section.content)
-				.join("");
-		} catch (error) {
-			console.error(`Error loading project page ${projectId}:`, error);
-			mainContent.innerHTML = Templates.errorMessage(
-				i18n.t("general.error"),
-				i18n.t("general.errorMessage"),
-			).content;
-		}
-	},
-
-	// Load and display a generic content page
-	async loadPage(pageId, _data) {
-		const mainContent = document.getElementById("main-content");
-		try {
-			const data = Context.get();
-			document.title = data?.site?.title || CONSTANTS.DEFAULT_TITLE;
-
-			// Load markdown content
-			const content = await MarkdownLoader.loadAsHtml(
-				`data/pages/${pageId}.md`,
-			);
-
-			mainContent.innerHTML =
-				content ||
-				Templates.errorMessage(
-					i18n.t("general.notFound"),
-					i18n.t("general.notFoundMessage"),
-				);
-		} catch (error) {
-			console.error(`Error loading page ${pageId}:`, error);
-			mainContent.innerHTML = Templates.errorMessage(
-				i18n.t("general.error"),
-				i18n.t("general.errorMessage"),
-			).content;
-		}
-	},
 
 	// Load additional dynamic content (READMEs, project links)
 	async loadAdditionalContent() {
@@ -238,24 +91,6 @@ export const Loaders = {
 		return result?.content || null;
 	},
 
-	// Setup click handlers for blog post cards
-	_setupBlogCardClicks() {
-		for (const card of document.querySelectorAll(".blog-post-card")) {
-			card.addEventListener("click", (e) => {
-				if (e.target.closest("a") || e.target.closest(".clickable-tag")) return;
-
-				const link = card.querySelector(".blog-post-title a");
-				if (link) {
-					e.preventDefault();
-					const href = link.getAttribute("href");
-					window.history.pushState({}, "", href);
-					// Dynamic import to avoid circular dependency
-					import("./routing.js").then(({ Router }) => Router.handleRoute());
-				}
-			});
-		}
-	},
-
 	// Load project links section
 	async _loadProjectLinks(projectId, containerId) {
 		if (!projectId || !containerId) return;
@@ -271,13 +106,14 @@ export const Loaders = {
 				return;
 			}
 
-			container.innerHTML = Templates.projectLinksSection(
-				trusted(
-					project.links
-						.map((link) => Templates.projectLink(link).content)
-						.join(""),
-				),
-			).content;
+			const links = project.links;
+			const linksHtml = trusted(
+				links
+					.map((link) => _tplProjectLink(link).content)
+					.join(""),
+			);
+
+			container.innerHTML = _tplProjectLinksSection(linksHtml).content;
 		} catch (error) {
 			console.error(`Error loading content for project ${projectId}`, error);
 		}
@@ -328,3 +164,20 @@ export const Loaders = {
 		}
 	},
 };
+
+// ===========================================
+// PRIVATE TEMPLATE HELPERS
+// ===========================================
+
+const _tplProjectLink = (link) => html`
+    <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn">
+        <i class="${link.icon}"></i>
+        <span>${link.title}</span>
+    </a>`;
+
+const _tplProjectLinksSection = (linksHtml) => html`
+    <div class="markdown-body">
+        <h2>${i18n.t("project.links")}</h2>
+        <div class="download-buttons">${linksHtml}</div>
+    </div>`;
+
