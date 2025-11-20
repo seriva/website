@@ -172,7 +172,6 @@ export class Navbar extends Reactive.Component {
 
 	toggleDropdown(e) {
 		e.preventDefault();
-		this.mobileMenuOpen.set(false);
 		this.dropdownOpen.set(!this.dropdownOpen.get());
 	}
 
