@@ -10,6 +10,7 @@ import { Loaders } from "./loaders.js";
 import { Navbar } from "./main.js";
 import { PrismLoader } from "./prism-loader.js";
 import { Templates } from "./templates.js";
+import { UI } from "./ui.js";
 
 // ===========================================
 // ROUTER NAMESPACE

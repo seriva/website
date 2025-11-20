@@ -111,10 +111,10 @@ export class NavbarController extends Reactive.Component {
 		<nav class="navbar">
 			<div class="navbar-container">
 				<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
-				<button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" data-on-click="toggleMobileMenu">
+				<button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen">
 					<span class="navbar-toggle-icon"></span>
 				</button>
-				<div class="navbar-collapse" id="navbarNav">
+				<div class="navbar-collapse" id="navbarNav" data-class-show="mobileMenuOpen">
 					<ul class="navbar-nav left">
 						${blogLink}
 						${this._tplProjectsDropdown()}
@@ -153,8 +153,7 @@ export class NavbarController extends Reactive.Component {
 				}
 			}
 
-			// Initialize dropdown behavior
-			this._initCustomDropdowns();
+
 
 			// Setup outside click handler for mobile menu
 			this._setupOutsideClickHandler();
@@ -167,34 +166,11 @@ export class NavbarController extends Reactive.Component {
 	}
 
 	toggleMobileMenu() {
-		const isOpen = !this.mobileMenuOpen.get();
-		this.mobileMenuOpen.set(isOpen);
-
-		const collapse = document.getElementById("navbarNav");
-		const toggle = document.getElementById("navbar-toggle");
-
-		if (collapse && toggle) {
-			collapse.classList.toggle("show", isOpen);
-			toggle.setAttribute("aria-expanded", isOpen);
-		}
+		this.mobileMenuOpen.set(!this.mobileMenuOpen.get());
 	}
 
 	closeMobileMenu() {
-		if (!this.mobileMenuOpen.get()) return;
-
 		this.mobileMenuOpen.set(false);
-
-		const collapse = document.getElementById("navbarNav");
-		const toggle = document.getElementById("navbar-toggle");
-
-		if (collapse) {
-			collapse.classList.remove("show");
-		}
-
-		if (toggle) {
-			toggle.classList.remove("active");
-			toggle.setAttribute("aria-expanded", "false");
-		}
 	}
 
 	updateActiveNavLink() {
@@ -207,39 +183,8 @@ export class NavbarController extends Reactive.Component {
 		});
 	}
 
-	_initCustomDropdowns() {
-		for (const toggle of document.querySelectorAll(".dropdown-toggle")) {
-			toggle.addEventListener("click", (e) => {
-				e.preventDefault();
-				const dropdown = toggle.closest(".dropdown");
-				const isOpen = dropdown.classList.contains("show");
-
-				// Close all other dropdowns
-				for (const d of document.querySelectorAll(".dropdown.show")) {
-					if (d !== dropdown) {
-						d.classList.remove("show");
-						const t = d.querySelector(".dropdown-toggle");
-						if (t) t.setAttribute("aria-expanded", "false");
-					}
-				}
-
-				dropdown.classList.toggle("show", !isOpen);
-				toggle.setAttribute("aria-expanded", !isOpen);
-			});
-		}
-
-		document.addEventListener("click", (e) => {
-			if (
-				e.target.closest(".dropdown-item") ||
-				!e.target.closest(".dropdown")
-			) {
-				for (const d of document.querySelectorAll(".dropdown.show")) {
-					d.classList.remove("show");
-					const toggle = d.querySelector(".dropdown-toggle");
-					if (toggle) toggle.setAttribute("aria-expanded", "false");
-				}
-			}
-		});
+	toggleDropdown(event) {
+		this.dropdownOpen.set(!this.dropdownOpen.get());
 	}
 
 	_setupOutsideClickHandler() {
@@ -250,6 +195,14 @@ export class NavbarController extends Reactive.Component {
 			const isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
 			if (isMobile && !navbar.contains(event.target)) {
 				this.closeMobileMenu();
+			}
+
+			// Close dropdown when clicking outside
+			if (
+				!event.target.closest(".dropdown") ||
+				event.target.closest(".dropdown-item")
+			) {
+				this.dropdownOpen.set(false);
 			}
 		});
 	}
@@ -292,8 +245,8 @@ export class NavbarController extends Reactive.Component {
 
 	_tplProjectsDropdown() {
 		return html`
-		<li class="nav-item dropdown">
-			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false" data-route-type="project" data-class-active="isProjectActive">
+		<li class="nav-item dropdown" data-class-show="dropdownOpen">
+			<a class="nav-link dropdown-toggle" href="#" role="button" data-route-type="project" data-class-active="isProjectActive" data-attr-aria-expanded="dropdownOpen" data-on-click="toggleDropdown">
 				${i18n.t("nav.projects")}
 			</a>
 			<ul class="dropdown-menu" id="projects-dropdown">
