@@ -35,7 +35,7 @@ export const Context = {
 				i18n.init(appContext.site.i18n, appContext.translations);
 			}
 
-			this._updateMetaTags();			
+			this._updateMetaTags();
 
 			return appContext;
 		} catch (error) {
@@ -79,6 +79,9 @@ export const Context = {
 		updateMeta('meta[property="og:title"]', appContext.site.title);
 		updateMeta('meta[property="twitter:title"]', appContext.site.title);
 		updateMeta('meta[property="og:description"]', appContext.site.description);
-		updateMeta('meta[property="twitter:description"]', appContext.site.description);
+		updateMeta(
+			'meta[property="twitter:description"]',
+			appContext.site.description,
+		);
 	},
 };

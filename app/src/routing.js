@@ -3,9 +3,9 @@
 // ===========================================
 // SPA routing system - orchestrates page navigation
 
-import { CONSTANTS } from "./constants.js";
 import { BlogListController } from "./blog-list.js";
 import { BlogPostController } from "./blog-post.js";
+import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";

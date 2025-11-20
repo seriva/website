@@ -28,6 +28,7 @@ export const join = (items, separator = "") => ({
 let activeContext = null;
 let batchPending = false;
 const batchQueue = new Set();
+const batchWrappers = new WeakMap();
 
 export const Signals = {
 	create(value, equals = (a, b) => a === b) {
@@ -41,7 +42,15 @@ export const Signals = {
 				if (equals(value, newVal)) return;
 				value = newVal;
 				if (batchPending) {
-					for (const fn of subs) batchQueue.add(() => fn(value));
+					for (const fn of subs) {
+						// Get or create wrapper function for this subscriber that reads latest value
+						let wrapper = batchWrappers.get(fn);
+						if (!wrapper) {
+							wrapper = () => fn(signal.get());
+							batchWrappers.set(fn, wrapper);
+						}
+						batchQueue.add(wrapper);
+					}
 				} else {
 					for (const fn of [...subs]) fn(value);
 				}
@@ -169,7 +178,7 @@ export const Reactive = {
 			"data-html": (el, val) => {
 				let cleanups = [];
 				const unsub = val.subscribe((v) => {
-					cleanups.forEach((f) => f && f());
+					for (const f of cleanups) f?.();
 					cleanups = [];
 					const res = v === undefined ? val.get() : v;
 					el.innerHTML = res?.__safe ? res.content : String(res);
@@ -180,7 +189,7 @@ export const Reactive = {
 					}
 				});
 				return () => {
-					cleanups.forEach((f) => f && f());
+					for (const f of cleanups) f?.();
 					unsub();
 				};
 			},
@@ -249,7 +258,9 @@ export const Reactive = {
 			},
 			scan: (r, s) => c.track(Reactive.scan(r, s)),
 			cleanup: () => {
-				for (const f of unsubs) f();
+				for (const f of unsubs) {
+					typeof f === "function" ? f() : f?.unsubscribe?.();
+				}
 				for (const s of computed) s.dispose();
 				unsubs.length = computed.length = 0;
 			},
@@ -331,9 +342,10 @@ export const Reactive = {
 
 		appendTo(containerId) {
 			// Special case for body element (no ID)
-			const container = containerId === "body"
-				? document.body
-				: document.getElementById(containerId);
+			const container =
+				containerId === "body"
+					? document.body
+					: document.getElementById(containerId);
 
 			if (!container) {
 				console.warn(`Container #${containerId} not found`);

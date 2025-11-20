@@ -162,7 +162,7 @@ class ThemeController extends Reactive.Component {
 
 	_setupToggleListener() {
 		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-		
+
 		const handler = (e) => {
 			const data = Context.get();
 			if (data?.site?.theme?.default === "auto") {
@@ -174,7 +174,7 @@ class ThemeController extends Reactive.Component {
 
 		// Track for cleanup
 		this.track({
-			unsubscribe: () => mediaQuery.removeEventListener("change", handler)
+			unsubscribe: () => mediaQuery.removeEventListener("change", handler),
 		});
 	}
 }
