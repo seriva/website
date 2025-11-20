@@ -18,6 +18,9 @@ import { Templates } from "./templates.js";
 // ROUTER NAMESPACE
 // ===========================================
 
+// Track current component for cleanup
+let currentComponent = null;
+
 export const Router = {
 	// ===========================================
 	// PUBLIC METHODS
@@ -27,6 +30,13 @@ export const Router = {
 	async handleRoute() {
 		// Close mobile menu on navigation
 		window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
+
+		// Cleanup previous component and copy buttons
+		if (currentComponent?.cleanup) {
+			currentComponent.cleanup();
+			currentComponent = null;
+		}
+		MarkdownLoader.cleanupCopyButtons();
 
 		// Parse URL path
 		const path = window.location.pathname;
@@ -41,30 +51,30 @@ export const Router = {
 			// Route to appropriate component
 			if (path === "/" || path === "/blog") {
 				// Blog listing (default)
-				new BlogList(1);
+				currentComponent = new BlogList(1);
 			} else if (path.startsWith("/blog/page/")) {
 				// Blog pagination
 				const page = parseInt(path.split("/").pop(), 10) || 1;
-				new BlogList(page);
+				currentComponent = new BlogList(page);
 			} else if (path.startsWith("/blog/")) {
 				// Blog post
 				const slug = path.split("/").pop();
-				new BlogPost(slug);
+				currentComponent = new BlogPost(slug);
 			} else if (path.startsWith("/project/")) {
 				// Project detail
 				const id = path.split("/").pop();
-				new Project(id);
+				currentComponent = new Project(id);
 			} else if (path.startsWith("/page/")) {
 				// Custom page
 				const id = path.split("/").pop();
-				new Page(id);
+				currentComponent = new Page(id);
 			} else {
 				// 404 or default fallback
 				// For now, redirect to home if unknown, or show error
 				// But since we might be on a static host with 404s, let's try to handle it gracefully
 				// If it's a hard 404 from server, we might not even get here unless we have a catch-all.
 				// Assuming SPA setup:
-				new BlogList(1);
+				currentComponent = new BlogList(1);
 			}
 
 			// End transition and apply post-render tasks
@@ -127,6 +137,12 @@ export const Router = {
 	// End page transition and finalize page load
 	_endTransition(mainContent) {
 		mainContent.classList.remove("page-transition-out");
+
+		// Move focus to main content for accessibility
+		mainContent.setAttribute("tabindex", "-1");
+		mainContent.focus();
+		// Remove tabindex after focus to prevent visual outline on subsequent clicks
+		setTimeout(() => mainContent.removeAttribute("tabindex"), 100);
 
 		// Schedule post-render tasks
 		requestAnimationFrame(async () => {

@@ -34,11 +34,13 @@ export class ContactForm extends Reactive.Component {
 		if (!document.getElementById(this._MODAL_ID)) {
 			this.appendTo("body");
 
-			document.addEventListener("keydown", (e) => {
+			const keydownHandler = (e) => {
 				if (e.key === "Escape" && this.modalVisible.get()) {
 					this.hide();
 				}
-			});
+			};
+			document.addEventListener("keydown", keydownHandler);
+			this.track(() => document.removeEventListener("keydown", keydownHandler));
 		}
 
 		// Initialize EmailJS if publicKey is available
@@ -48,7 +50,9 @@ export class ContactForm extends Reactive.Component {
 		}
 
 		// Listen for show event from other components
-		window.addEventListener("email:show", () => this.show());
+		const showHandler = () => this.show();
+		window.addEventListener("email:show", showHandler);
+		this.track(() => window.removeEventListener("email:show", showHandler));
 	}
 
 	// Define component state

@@ -22,10 +22,16 @@ export class Navbar extends Reactive.Component {
 		const updateHandler = () => this.updateActiveNavLink();
 		window.addEventListener("popstate", updateHandler);
 		window.addEventListener("route-changed", updateHandler);
+		this.track(() => {
+			window.removeEventListener("popstate", updateHandler);
+			window.removeEventListener("route-changed", updateHandler);
+		});
 
 		// Listen for close-mobile event from other components
-		window.addEventListener("navbar:close-mobile", () =>
-			this.closeMobileMenu(),
+		const closeMobileHandler = () => this.closeMobileMenu();
+		window.addEventListener("navbar:close-mobile", closeMobileHandler);
+		this.track(() =>
+			window.removeEventListener("navbar:close-mobile", closeMobileHandler),
 		);
 	}
 
@@ -176,7 +182,7 @@ export class Navbar extends Reactive.Component {
 	}
 
 	_setupOutsideClickHandler() {
-		document.addEventListener("click", (event) => {
+		const clickHandler = (event) => {
 			const navbar = document.getElementById("navbar-container");
 			if (!navbar) return;
 
@@ -192,7 +198,9 @@ export class Navbar extends Reactive.Component {
 			) {
 				this.dropdownOpen.set(false);
 			}
-		});
+		};
+		document.addEventListener("click", clickHandler);
+		this.track(() => document.removeEventListener("click", clickHandler));
 	}
 
 	// ===========================================
