@@ -64,8 +64,6 @@ export class PageController extends Reactive.Component {
                 `data/pages/${this.pageId}.md`,
             );
 
-            console.log('PageController loaded content:', { pageId: this.pageId, content, type: typeof content });
-
             if (content !== null && content !== undefined) {
                 this.batch(() => {
                     this.content.set(content);

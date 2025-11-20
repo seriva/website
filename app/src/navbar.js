@@ -2,6 +2,7 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive, Signals, trusted } from "./reactive.js";
+import { Theme } from "./theme.js";
 
 export class NavbarController extends Reactive.Component {
 	constructor() {
@@ -127,31 +128,40 @@ export class NavbarController extends Reactive.Component {
 
 		return html`
 		<nav class="navbar">
-			<div class="navbar-container">
-				<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
-				<button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen">
-					<span class="navbar-toggle-icon"></span>
-				</button>
-				<div class="navbar-collapse" id="navbarNav" data-class-show="mobileMenuOpen">
-					<ul class="navbar-nav left">
-						${blogLink}
-						${this._tplProjectsDropdown()}
-						${pageLinks}
-					</ul>
-					<ul class="navbar-nav right">
-						${searchBar}
-						${this._tplThemeToggle()}
-						${emailButton}
-						${socialLinksHtml}
-					</ul>
-				</div>
+		<div class="navbar-container">
+			<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
+			<button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen">
+				<span class="navbar-toggle-icon"></span>
+			</button>
+			<div class="navbar-collapse" id="navbarNav" data-class-show="mobileMenuOpen">
+				<ul class="navbar-nav left">
+					${blogLink}
+					${this._tplProjectsDropdown()}
+					${pageLinks}
+				</ul>
+				<ul class="navbar-nav right">
+					${searchBar}
+					${this._tplThemeToggle()}
+					${emailButton}
+					${socialLinksHtml}
+				</ul>
 			</div>
+		</div>
 		</nav>
-		`;
+	`;
 	}
 
 	toggleMobileMenu() {
 		this.mobileMenuOpen.set(!this.mobileMenuOpen.get());
+	}
+
+	toggleTheme() {
+		Theme.toggle();
+	}
+
+	toggleEmail() {
+		this.closeMobileMenu();
+		window.dispatchEvent(new CustomEvent("email:show"));
 	}
 
 	closeMobileMenu() {
@@ -168,7 +178,8 @@ export class NavbarController extends Reactive.Component {
 		});
 	}
 
-	toggleDropdown(_event) {
+	toggleDropdown(e) {
+		this.mobileMenuOpen.set(false);
 		this.dropdownOpen.set(!this.dropdownOpen.get());
 	}
 
@@ -233,21 +244,20 @@ export class NavbarController extends Reactive.Component {
 	_tplThemeToggle() {
 		return html`
 		<li class="nav-item navbar-icon">
-			<button id="theme-toggle" class="theme-toggle nav-link" aria-label="${i18n.t("aria.toggleTheme")}" title="${i18n.t("theme.toggleTitle")}">
-				<i class="fas fa-sun"></i>
+			<button id="theme-toggle" class="theme-toggle nav-link" aria-label="${i18n.t("aria.toggleTheme")}" title="${i18n.t("theme.toggleTitle")}" data-on-click="toggleTheme">
 				<i class="fas fa-moon"></i>
+				<i class="fas fa-sun"></i>
 			</button>
-		</li>
-	`;
+		</li>`;
 	}
 
 	_tplEmailButton() {
 		return html`
-        <li class="nav-item navbar-icon">
-            <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}">
-                <i class="fas fa-envelope"></i>
-            </button>
-        </li>`;
+		<li class="nav-item navbar-icon">
+			<button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}" data-on-click="toggleEmail">
+				<i class="fas fa-envelope"></i>
+			</button>
+		</li>`;
 	}
 
 	_tplProjectsDropdown() {
@@ -280,15 +290,15 @@ export class NavbarController extends Reactive.Component {
 	}
 
 	_tplProjectDropdownItem(project, activeSignalName) {
-		return html`<li><a class="dropdown-item" href="${project.href}" data-spa-route="project" data-class-active="${activeSignalName}">${project.title}</a></li>`;
+		return html`<li><a class="dropdown-item" href="${project.href}" data-spa-route="project" data-class-active="${activeSignalName}" data-on-click="closeMobileMenu">${project.title}</a></li>`;
 	}
 
 	_tplSearchBar() {
 		return html`
-        <li class="nav-item navbar-icon">
-            <button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}" title="${i18n.t("search.buttonTitle")}">
-                <i class="fas fa-search"></i>
-            </button>
-        </li>`;
+		<li class="nav-item navbar-icon">
+			<button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}" title="${i18n.t("search.buttonTitle")}">
+				<i class="fas fa-search"></i>
+			</button>
+		</li>`;
 	}
 }
