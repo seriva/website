@@ -5,153 +5,98 @@
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
-import { Reactive, Signals } from "./reactive.js";
+import { Reactive } from "./reactive.js";
 
-// ===========================================
-// THEME NAMESPACE
-// ===========================================
+class ThemeController extends Reactive.Component {
+	storageKey = "theme-preference";
 
-export const Theme = {
-	storageKey: "theme-preference",
-	_themeSignal: null,
-	_component: null,
+	state() {
+		return {
+			// Core state
+			current: this._getInitialTheme(),
 
-	// ===========================================
-	// PUBLIC METHODS
-	// ===========================================
+			// Computed derived state
+			colors: () => this._getThemeColors(this.current.get()),
+			prismTheme: () => {
+				const colors = this.colors.get();
+				return colors?.code?.theme || "prism-tomorrow";
+			},
+			giscusTheme: () => {
+				const colors = this.colors.get();
+				return colors?.comments?.theme || this.current.get();
+			}
+		};
+	}
 
-	// Initialize theme system
+	template() {
+		// Theme controller doesn't render its own UI, it manages global state
+		// But we need a template to be a valid component if we were to render it
+		return { __safe: true, content: "" };
+	}
+
 	init() {
-		const data = Context.get();
-		const defaultTheme = data?.site?.theme?.default || "dark";
+		this.initState();
 
-		// Load saved preference or use default
-		const savedTheme = localStorage.getItem(this.storageKey);
-		const theme = savedTheme || this._getAutoTheme(defaultTheme);
+		// 1. Bind global data-theme attribute
+		this.bindAttr(document.documentElement, "data-theme", this.current);
 
-		// Create component context
-		this._component = Reactive.createComponent();
+		// 2. Handle side effects via subscriptions
+		this.track(this.current.subscribe(theme => {
+			localStorage.setItem(this.storageKey, theme);
+		}));
 
-		// Create reactive theme signal
-		this._themeSignal = Signals.create(theme);
+		this.track(this.colors.subscribe(colors => {
+			this._applyColorScheme(colors);
+		}));
 
-		// Auto-update data-theme attribute
-		this._component.bindAttr(
-			document.documentElement,
-			"data-theme",
-			this._themeSignal,
-		);
+		this.track(this.prismTheme.subscribe(theme => {
+			this._applyPrismTheme(theme);
+		}));
 
-		// Subscribe to theme changes for side effects
-		this._component.track(
-			this._themeSignal.subscribe((newTheme) => {
-				localStorage.setItem(this.storageKey, newTheme);
-				const colors = this._getThemeColors(newTheme);
-				if (colors) {
-					this._applyColorScheme(colors);
-					this._applyPrismTheme(newTheme);
-					this._updateGiscus(newTheme);
-				}
-			}),
-		);
+		this.track(this.giscusTheme.subscribe(theme => {
+			this._updateGiscus(theme);
+		}));
 
 		this._setupToggleListener();
-	},
+	}
 
-	// Cleanup theme subscriptions
-	cleanup() {
-		this._component?.cleanup();
-		this._component = null;
-	},
-
-	// Toggle between light and dark theme
 	toggle() {
-		const newTheme = this._themeSignal.get() === "dark" ? "light" : "dark";
-		this._themeSignal.set(newTheme);
-	},
+		const newTheme = this.current.get() === "dark" ? "light" : "dark";
+		this.current.set(newTheme);
+	}
 
-	// Get current theme
-	getCurrent() {
-		return this._themeSignal?.get() || "dark";
-	},
-
-	// Get giscus theme for current or specified theme
-	getGiscusTheme(theme = null) {
-		const currentTheme = theme || this.getCurrent();
-		const colors = this._getThemeColors(currentTheme);
-		return colors?.comments?.theme || currentTheme;
-	},
-
-	// Get Prism theme for current or specified theme
-	getPrismTheme(theme = null) {
-		const currentTheme = theme || this.getCurrent();
-		const colors = this._getThemeColors(currentTheme);
-		return colors?.code?.theme || "prism-tomorrow";
-	},
-
-	// Apply a specific theme
 	apply(theme) {
-		const colors = this._getThemeColors(theme);
-		if (!colors) {
-			console.error(`Theme colors not found for: ${theme}`);
-			return;
+		if (this._getThemeColors(theme)) {
+			this.current.set(theme);
 		}
-
-		// Update signal - this triggers all side effects automatically
-		if (this._themeSignal) {
-			this._themeSignal.set(theme);
-		}
-	},
+	}
 
 	// ===========================================
-	// PRIVATE METHODS
+	// PRIVATE HELPERS
 	// ===========================================
 
-	// Get theme colors for specified theme (or current theme)
-	_getThemeColors(theme = null) {
-		const targetTheme = theme || this.getCurrent();
+	_getInitialTheme() {
 		const data = Context.get();
-		return targetTheme === "dark"
-			? data?.site?.theme?.dark
-			: data?.site?.theme?.light;
-	},
+		const defaultTheme = data?.site?.theme?.default || "dark";
+		const saved = localStorage.getItem(this.storageKey);
 
-	// Get theme based on system preference (if default is "auto")
-	_getAutoTheme(defaultTheme) {
+		if (saved) return saved;
 		if (defaultTheme === "auto") {
-			return window.matchMedia("(prefers-color-scheme: dark)").matches
-				? "dark"
-				: "light";
+			return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 		}
 		return defaultTheme;
-	},
+	}
 
-	// Setup click listener for toggle button
-	_setupToggleListener() {
-		document.addEventListener("click", (e) => {
-			const toggleBtn = e.target.closest("#theme-toggle");
-			if (toggleBtn) {
-				this.toggle();
-			}
-		});
+	_getThemeColors(theme) {
+		const data = Context.get();
+		if (theme === "dark") return data?.site?.theme?.dark;
+		if (theme === "light") return data?.site?.theme?.light;
+		return null;
+	}
 
-		// Listen for system theme changes if preference is "auto"
-		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-		mediaQuery.addEventListener("change", (e) => {
-			const data = Context.get();
-			if (data?.site?.theme?.default === "auto") {
-				const theme = e.matches ? "dark" : "light";
-				this._themeSignal.set(theme);
-			}
-		});
-	},
-
-	// Apply color scheme to CSS variables
 	_applyColorScheme(colors) {
 		if (!colors) return;
-
 		const root = document.documentElement;
-
 		const mappings = {
 			"--accent": colors.primary,
 			"--font-color": colors.text,
@@ -161,42 +106,52 @@ export const Theme = {
 			"--border-color": colors.border,
 			"--hover-color": colors.hover,
 		};
+		Object.entries(mappings).forEach(([prop, val]) => {
+			if (val) root.style.setProperty(prop, val);
+		});
+	}
 
-		for (const [property, value] of Object.entries(mappings)) {
-			if (value) root.style.setProperty(property, value);
-		}
-	},
-
-	// Apply Prism.js syntax highlighting theme
 	_applyPrismTheme(theme) {
-		const prismTheme = this.getPrismTheme(theme);
-		const themeId = "prism-theme";
+		const id = "prism-theme";
+		let link = document.getElementById(id);
+		const href = `${CONSTANTS.PRISM_CDN_BASE}${theme}.min.css`;
 
-		// Check if theme link already exists
-		let themeLink = document.getElementById(themeId);
-
-		if (themeLink) {
-			// Update existing link
-			themeLink.href = `${CONSTANTS.PRISM_CDN_BASE}${prismTheme}.min.css`;
+		if (link) {
+			link.href = href;
 		} else {
-			// Create new link element
-			themeLink = document.createElement("link");
-			themeLink.id = themeId;
-			themeLink.rel = "stylesheet";
-			themeLink.href = `${CONSTANTS.PRISM_CDN_BASE}${prismTheme}.min.css`;
-			document.head.appendChild(themeLink);
+			link = document.createElement("link");
+			link.id = id;
+			link.rel = "stylesheet";
+			link.href = href;
+			document.head.appendChild(link);
 		}
-	},
+	}
 
-	// Update giscus comments theme
 	_updateGiscus(theme) {
 		const iframe = document.querySelector("iframe.giscus-frame");
 		if (iframe) {
-			const giscusTheme = this.getGiscusTheme(theme);
 			iframe.contentWindow.postMessage(
-				{ giscus: { setConfig: { theme: giscusTheme } } },
-				"https://giscus.app",
+				{ giscus: { setConfig: { theme } } },
+				"https://giscus.app"
 			);
 		}
-	},
-};
+	}
+
+	_setupToggleListener() {
+		document.addEventListener("click", (e) => {
+			if (e.target.closest("#theme-toggle")) {
+				this.toggle();
+			}
+		});
+
+		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+		mediaQuery.addEventListener("change", (e) => {
+			const data = Context.get();
+			if (data?.site?.theme?.default === "auto") {
+				this.current.set(e.matches ? "dark" : "light");
+			}
+		});
+	}
+}
+
+export const Theme = new ThemeController();
