@@ -130,32 +130,6 @@ export const Templates = {
 				${videosHtml}
 			</div>`,
 
-	searchResult: (item, query, Search) => {
-		const isProject = item.type === "project";
-		const typeTag = isProject
-			? i18n.t("badges.project")
-			: i18n.t("badges.blog");
-		const allTags = [typeTag, ...item.tags];
-
-		return html`
-            <article class="search-result-item blog-post-card">
-                <h2 class="blog-post-title">
-                    <a href="${item.url}" data-spa-route="${item.type}">${trusted(Search.highlight(item.title, query))}</a>
-                </h2>
-                <div class="blog-post-meta">
-                    				<div class="blog-post-meta">
-					${allTags.length ? html`<span class="blog-post-tags">${trusted(allTags.map((tag) => html`<span class="item-tag">${tag}</span>`.content).join(" "))}</span>` : ""}
-                </div>
-                <p class="blog-post-excerpt">${trusted(Search.highlight(item.description, query))}</p>
-            </article>`;
-	},
-
-	searchNoResults: () => html`
-        <div class="search-no-results">
-            <i class="fas fa-search"></i>
-            <p>${i18n.t("search.noResults")}</p>
-        </div>`,
-
 	blogEmpty: () => html`
         <div class="blog-container">
             <p class="blog-empty">${i18n.t("blog.noPosts")}</p>

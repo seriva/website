@@ -9,17 +9,6 @@ export class NavbarController extends Reactive.Component {
 		this.initState();
 		this.mountTo("navbar-container");
 
-		// Inject search page into body if search is enabled
-		if (this.searchEnabled.get()) {
-			const existingSearchPage = document.getElementById("search-page");
-			if (!existingSearchPage) {
-				document.body.insertAdjacentHTML(
-					"beforeend",
-					this._tplSearchPage(this.searchPlaceholder.get()).content,
-				);
-			}
-		}
-
 		// Setup outside click handler for mobile menu
 		this._setupOutsideClickHandler();
 
@@ -29,7 +18,9 @@ export class NavbarController extends Reactive.Component {
 		window.addEventListener("route-changed", updateHandler);
 
 		// Listen for close-mobile event from other components
-		window.addEventListener("navbar:close-mobile", () => this.closeMobileMenu());
+		window.addEventListener("navbar:close-mobile", () =>
+			this.closeMobileMenu(),
+		);
 	}
 
 	state() {
@@ -250,6 +241,15 @@ export class NavbarController extends Reactive.Component {
 	`;
 	}
 
+	_tplEmailButton() {
+		return html`
+        <li class="nav-item navbar-icon">
+            <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}">
+                <i class="fas fa-envelope"></i>
+            </button>
+        </li>`;
+	}
+
 	_tplProjectsDropdown() {
 		return html`
 		<li class="nav-item dropdown" data-class-show="dropdownOpen">
@@ -290,41 +290,5 @@ export class NavbarController extends Reactive.Component {
                 <i class="fas fa-search"></i>
             </button>
         </li>`;
-	}
-
-	_tplEmailButton() {
-		return html`
-        <li class="nav-item navbar-icon">
-            <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}">
-                <i class="fas fa-envelope"></i>
-            </button>
-        </li>`;
-	}
-
-	_tplSearchPage(placeholder) {
-		return html`
-        <div class="search-page" id="search-page">
-            <div class="search-page-header">
-                <div class="search-page-header-content">
-                    <button class="search-page-back" id="search-page-back" aria-label="${i18n.t("aria.goBack")}">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div class="search-page-input-wrapper">
-                        ${this._tplSearchInput("search-page-input", "search-page-input", placeholder)}
-                    </div>
-                </div>
-            </div>
-            <div class="search-page-content">
-                <div class="search-page-results" id="search-page-results"></div>
-            </div>
-        </div>`;
-	}
-
-	_tplSearchInput(id, cssClass, placeholder) {
-		return html`
-        <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}"/>
-        <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="${i18n.t("aria.clearSearch")}">
-            <i class="fas fa-times"></i>
-        </button>`;
 	}
 }

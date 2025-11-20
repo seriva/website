@@ -20,7 +20,7 @@ describe("Theme", () => {
                 light: {
                     primary: "#fff",
                     text: "#000",
-                    code: { theme: "prism-light" },
+                    code: { theme: "prism-coy" },
                     comments: { theme: "light" }
                 }
             }
@@ -113,7 +113,7 @@ describe("Theme", () => {
         Theme.toggle();
 
         link = document.getElementById("prism-theme");
-        assert.ok(link.href.includes("prism-light"));
+        assert.ok(link.href.includes("prism-coy"));
     });
 
     test("should apply specific theme", () => {
