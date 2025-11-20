@@ -91,10 +91,7 @@ export const Router = {
 				const href = link.getAttribute("href");
 				if (href !== window.location.search) {
 					window.history.pushState({}, "", href);
-					// Update active link immediately for instant visual feedback
-					if (Navbar?.updateActiveNavLink) {
-						Navbar.updateActiveNavLink();
-					}
+					window.dispatchEvent(new CustomEvent("route-changed"));
 					Router.handleRoute();
 				}
 			}
@@ -122,9 +119,6 @@ export const Router = {
 		requestAnimationFrame(async () => {
 			await PrismLoader.highlight(mainContent);
 			UI.initCopyCodeButtons();
-			if (Navbar?.updateActiveNavLink) {
-				Navbar.updateActiveNavLink();
-			}
 		});
 
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });

@@ -158,6 +158,11 @@ export class NavbarController extends Reactive.Component {
 
 			// Setup outside click handler for mobile menu
 			this._setupOutsideClickHandler();
+
+			// Listen for route changes to update active link styling
+			const updateHandler = () => this.updateActiveNavLink();
+			window.addEventListener("popstate", updateHandler);
+			window.addEventListener("route-changed", updateHandler);
 		}
 	}
 
