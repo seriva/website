@@ -18,86 +18,6 @@ export const Templates = {
 	// PUBLIC METHODS - Template Functions
 	// ===========================================
 
-	navbar: (
-		blogLink,
-		projectsDropdown,
-		pageLinks,
-		socialLinksHtml,
-		searchBar,
-		emailButton,
-		themeToggle,
-		siteTitle,
-	) => html`
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a class="navbar-brand" href="#">${siteTitle}</a>
-            <button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggle-icon"></span>
-            </button>
-            <div class="navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav left">
-                    ${blogLink}
-                    ${projectsDropdown}
-                    ${pageLinks}
-                </ul>
-                <ul class="navbar-nav right">
-                    ${searchBar}
-                    ${themeToggle}
-                    ${emailButton}
-                    ${socialLinksHtml}
-                </ul>
-            </div>
-        </div>
-    </nav>
-    `,
-
-	pageLink: (pageId, pageTitle) => {
-		const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
-		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
-	},
-
-	socialLink: ({
-		href = "#",
-		"data-action": dataAction = "",
-		target = "",
-		rel = "",
-		"aria-label": ariaLabel = "",
-		icon,
-	}) => {
-		const attrs = [
-			dataAction && `data-action="${dataAction}"`,
-			target && `target="${target}"`,
-			rel && `rel="${rel}"`,
-			ariaLabel && `aria-label="${ariaLabel}"`,
-		]
-			.filter(Boolean)
-			.join(" ");
-		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${trusted(attrs)}><i class="${icon}"></i></a></li>`;
-	},
-
-	themeToggle: () => html`
-		<li class="nav-item navbar-icon">
-			<button id="theme-toggle" class="theme-toggle nav-link" aria-label="${i18n.t("aria.toggleTheme")}" title="${i18n.t("theme.toggleTitle")}">
-				<i class="fas fa-sun"></i>
-				<i class="fas fa-moon"></i>
-			</button>
-		</li>
-	`,
-
-	projectDropdownItem: (projectId, projectTitle) =>
-		html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`,
-
-	projectsDropdown: () => html`
-		<li class="nav-item dropdown">
-			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false">
-				${i18n.t("nav.projects")}
-			</a>
-			<ul class="dropdown-menu" id="projects-dropdown">
-				<li><a class="dropdown-item" href="#">${i18n.t("dropdown.loadingProjects")}</a></li>
-			</ul>
-		</li>
-	`,
-
 	projectLink: (link) => html`
         <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn">
             <i class="${link.icon}"></i>
@@ -209,45 +129,6 @@ export const Templates = {
 				<h2>${i18n.t("project.media")}</h2>
 				${videosHtml}
 			</div>`,
-	footer: (authorName, currentYear) => html`
-        <footer class="footer">
-            <div class="footer-container">
-                <p class="footer-text">
-                    &copy; ${currentYear} ${authorName}. ${i18n.t("footer.rights")}.
-                </p>
-            </div>
-        </footer>`,
-
-	searchBar: () => html`
-        <li class="nav-item navbar-icon">
-            <button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}" title="${i18n.t("search.buttonTitle")}">
-                <i class="fas fa-search"></i>
-            </button>
-        </li>`,
-
-	emailButton: () => html`
-        <li class="nav-item navbar-icon">
-            <button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}">
-                <i class="fas fa-envelope"></i>
-            </button>
-        </li>`,
-
-	searchPage: (placeholder) => html`
-        <div class="search-page" id="search-page">
-            <div class="search-page-header">
-                <div class="search-page-header-content">
-                    <button class="search-page-back" id="search-page-back" aria-label="${i18n.t("aria.goBack")}">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div class="search-page-input-wrapper">
-                        ${Templates._searchInput("search-page-input", "search-page-input", placeholder)}
-                    </div>
-                </div>
-            </div>
-            <div class="search-page-content">
-                <div class="search-page-results" id="search-page-results"></div>
-            </div>
-        </div>`,
 
 	searchResult: (item, query, Search) => {
 		const isProject = item.type === "project";
@@ -302,9 +183,7 @@ export const Templates = {
 			if (!container) return;
 
 			// Get giscus theme from Theme module
-			const currentTheme =
-				document.documentElement.getAttribute("data-theme") || "dark";
-			const giscusTheme = Theme.getGiscusTheme(currentTheme);
+			const giscusTheme = Theme.giscusTheme.get();
 
 			const script = document.createElement("script");
 			script.src = "https://giscus.app/client.js";
@@ -346,12 +225,6 @@ export const Templates = {
 
 		return join(tagElements, " ");
 	},
-
-	_searchInput: (id, cssClass, placeholder) => html`
-        <input type="search" id="${id}" class="${cssClass}" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}"/>
-        <button class="${cssClass.replace("input", "clear")}" id="${id.replace("input", "clear")}" aria-label="${i18n.t("aria.clearSearch")}">
-            <i class="fas fa-times"></i>
-        </button>`,
 
 	_youtubeVideo: (videoId) => html`
         <div class="youtube-video"><div class="iframeWrapper">

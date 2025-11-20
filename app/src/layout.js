@@ -3,133 +3,45 @@
 // ===========================================
 // Navbar, footer, and dropdown injection
 
-import { CONSTANTS } from "./constants.js";
-import { Context } from "./context.js";
-import { i18n } from "./i18n.js";
-import { trusted } from "./reactive.js";
-import { Templates } from "./templates.js";
+import { Reactive } from "./reactive.js";
+import { NavbarController } from "./navbar.js";
+import { FooterController } from "./footer.js";
 
-// ===========================================
-// LAYOUT NAMESPACE
-// ===========================================
+class LayoutController extends Reactive.Component {
+	constructor() {
+		super();
+		this.navbar = new NavbarController();
+		this.footer = new FooterController();
+	}
 
-export const Layout = {
-	// ===========================================
-	// PUBLIC METHODS
-	// ===========================================
+	state() {
+		return {};
+	}
 
-	// Initialize all layout components (navbar, footer, dropdowns)
+	template() {
+		return { __safe: true, content: "" };
+	}
+
 	async init() {
-		await this._injectNavbar();
-		await this._injectFooter();
-		await this._injectProjectsDropdown();
-	},
+		await this.navbar.init();
+		await this.footer.init();
+	}
 
-	// ===========================================
-	// PRIVATE METHODS
-	// ===========================================
+	// Delegate mobile menu toggle to navbar for backward compatibility if needed,
+	// or just expose navbar
+	get mobileMenuOpen() {
+		return this.navbar.mobileMenuOpen;
+	}
 
-	// Inject navbar into DOM
-	async _injectNavbar() {
-		const navbarContainer = document.getElementById("navbar-container");
-		if (!navbarContainer) return;
+	toggleMobileMenu() {
+		this.navbar.toggleMobileMenu();
+	}
 
-		const data = Context.get();
-		const pages = data?.pages
-			? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
-			: [];
+	cleanup() {
+		this.navbar.cleanup();
+		this.footer.cleanup();
+		super.cleanup();
+	}
+}
 
-		if (data?.blog?.showInNav) {
-			pages.push({
-				id: "blog",
-				title: data.blog.title || "Blog",
-				showInNav: true,
-			});
-		}
-
-		// Build navbar inline
-		const blogPage = pages.find((page) => page.id === "blog");
-		const blogLink = blogPage
-			? Templates.pageLink(blogPage.id, blogPage.title)
-			: "";
-		const pageLinks = trusted(
-			pages
-				.filter((page) => page.id !== "blog" && page.showInNav)
-				.sort((a, b) => a.order - b.order)
-				.map((page) => Templates.pageLink(page.id, page.title).content)
-				.join(""),
-		);
-		const socialLinksHtml = trusted(
-			(data?.site?.social || [])
-				.map((link) => Templates.socialLink(link).content)
-				.join(""),
-		);
-		const searchBar = data?.site?.search?.enabled ? Templates.searchBar() : "";
-		const emailButton = data?.site?.emailjs?.enabled
-			? Templates.emailButton()
-			: "";
-		const themeToggle = Templates.themeToggle();
-		const projectsDropdown = Templates.projectsDropdown();
-
-		navbarContainer.innerHTML = Templates.navbar(
-			blogLink,
-			projectsDropdown,
-			pageLinks,
-			socialLinksHtml,
-			searchBar,
-			emailButton,
-			themeToggle,
-			data?.site?.title || CONSTANTS.DEFAULT_TITLE,
-		).content;
-
-		// Inject search page into body if search is enabled
-		if (data?.site?.search?.enabled) {
-			const existingSearchPage = document.getElementById("search-page");
-			if (!existingSearchPage) {
-				document.body.insertAdjacentHTML(
-					"beforeend",
-					Templates.searchPage(
-						data.site.search.placeholder || i18n.t("search.placeholder"),
-					).content,
-				);
-			}
-		}
-	},
-
-	// Inject footer into DOM
-	async _injectFooter() {
-		const footerContainer = document.getElementById("footer-container");
-		if (!footerContainer) return;
-
-		try {
-			const data = Context.get();
-			const authorName = data?.site?.author || "Portfolio Owner";
-			const currentYear = new Date().getFullYear();
-
-			footerContainer.innerHTML = Templates.footer(
-				authorName,
-				currentYear,
-			).content;
-		} catch (error) {
-			console.error("Error injecting footer:", error);
-		}
-	},
-
-	// Inject projects into dropdown menu
-	async _injectProjectsDropdown() {
-		const data = Context.get();
-		const projectsDropdown = document.getElementById("projects-dropdown");
-		if (!projectsDropdown || !data?.projects) return;
-
-		const projectsHtml = trusted(
-			data.projects
-				.map(
-					(project) =>
-						Templates.projectDropdownItem(project.id, project.title).content,
-				)
-				.join(""),
-		);
-
-		projectsDropdown.innerHTML = projectsHtml.content;
-	},
-};
+export const Layout = new LayoutController();
