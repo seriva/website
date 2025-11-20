@@ -1,7 +1,7 @@
 // ===========================================
 // MARKDOWN LOADER
 // ===========================================
-// Utilities for loading and parsing markdown files
+// Markdown file loading and parsing with frontmatter support
 
 import { CONSTANTS } from "./constants.js";
 import { marked } from "./dependencies/marked.js";

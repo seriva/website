@@ -1,7 +1,7 @@
 // ===========================================
-// MAIN APPLICATION
+// MAIN
 // ===========================================
-// Entry point - orchestrates initialization
+// Application entry point and initialization
 
 import { Context } from "./context.js";
 import { ContactForm } from "./email.js";

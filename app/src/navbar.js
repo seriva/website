@@ -1,3 +1,8 @@
+// ===========================================
+// NAVBAR COMPONENT
+// ===========================================
+// Reactive navigation bar with mobile menu and dropdowns
+
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";

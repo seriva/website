@@ -1,11 +1,5 @@
 // ===========================================
-// MINIMAL YAML PARSER
-// ===========================================
-// Lightweight YAML parser for content.yaml
-// Supports: comments, objects, arrays (inline & multi-line), strings, numbers, booleans
-
-// ===========================================
-// MINIMAL YAML PARSER
+// YAML PARSER
 // ===========================================
 // Lightweight YAML parser for content.yaml
 // Supports: comments, objects, arrays (inline & multi-line), strings, numbers, booleans

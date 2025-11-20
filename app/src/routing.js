@@ -1,7 +1,7 @@
 // ===========================================
-// ROUTING
+// ROUTER
 // ===========================================
-// SPA routing system - orchestrates page navigation
+// Path-based SPA routing system
 
 import { BlogList } from "./blog-list.js";
 import { BlogPost } from "./blog-post.js";

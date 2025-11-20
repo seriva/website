@@ -1,7 +1,7 @@
 // ===========================================
-// THEME MANAGER
+// THEME MANAGER COMPONENT
 // ===========================================
-// Light/dark mode theme switching and visual theme application
+// Reactive light/dark mode theme switching and color scheme management
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";

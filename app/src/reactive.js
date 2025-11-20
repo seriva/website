@@ -1,8 +1,11 @@
 // ===========================================
 // REACTIVE SYSTEM
 // ===========================================
+// Signals-based reactive state management with declarative binding
 
+// ===========================================
 // HTML UTILITIES
+// ===========================================
 let escapeElement;
 export const html = (strings, ...values) => ({
 	__safe: true,

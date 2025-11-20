@@ -1,3 +1,8 @@
+// ===========================================
+// FOOTER COMPONENT
+// ===========================================
+// Reactive footer with copyright information
+
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive } from "./reactive.js";

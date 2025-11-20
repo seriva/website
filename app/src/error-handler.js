@@ -3,10 +3,6 @@
 // ===========================================
 // Global error handling and logging
 
-// ===========================================
-// ERROR HANDLER NAMESPACE
-// ===========================================
-
 export const ErrorHandler = {
 	initialized: false,
 	errorCount: 0,

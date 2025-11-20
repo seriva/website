@@ -1,7 +1,7 @@
 // ===========================================
-// PROJECT CONTROLLER
+// PROJECT COMPONENT
 // ===========================================
-// Reactive component for project detail view
+// Reactive project detail view with GitHub README loading
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
