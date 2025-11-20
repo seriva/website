@@ -7,9 +7,9 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { Loaders } from "./loaders.js";
+import { Navbar } from "./main.js";
 import { PrismLoader } from "./prism-loader.js";
 import { Templates } from "./templates.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // ROUTER NAMESPACE
@@ -22,7 +22,9 @@ export const Router = {
 
 	// Main routing handler - orchestrates page navigation
 	async handleRoute() {
-		UI.closeMobileMenu();
+		if (Navbar?.closeMobileMenu) {
+			Navbar.closeMobileMenu();
+		}
 
 		// Parse URL parameters into route object
 		const params = new URLSearchParams(window.location.search);
@@ -90,7 +92,9 @@ export const Router = {
 				if (href !== window.location.search) {
 					window.history.pushState({}, "", href);
 					// Update active link immediately for instant visual feedback
-					UI.updateActiveNavLink();
+					if (Navbar?.updateActiveNavLink) {
+						Navbar.updateActiveNavLink();
+					}
 					Router.handleRoute();
 				}
 			}
@@ -118,7 +122,9 @@ export const Router = {
 		requestAnimationFrame(async () => {
 			await PrismLoader.highlight(mainContent);
 			UI.initCopyCodeButtons();
-			UI.updateActiveNavLink();
+			if (Navbar?.updateActiveNavLink) {
+				Navbar.updateActiveNavLink();
+			}
 		});
 
 		window.scrollTo({ top: 0, left: 0, behavior: "instant" });

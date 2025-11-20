@@ -6,9 +6,9 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
+import { Navbar } from "./main.js";
 import { trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
-import { UI } from "./ui.js";
 
 // ===========================================
 // SEARCH CORE
@@ -54,7 +54,9 @@ export const Search = {
 		if (searchToggle) {
 			searchToggle.addEventListener("click", (e) => {
 				e.preventDefault();
-				UI.closeMobileMenu();
+				if (Navbar?.closeMobileMenu) {
+					Navbar.closeMobileMenu();
+				}
 				openSearchPage();
 			});
 		}
