@@ -1,54 +1,105 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
-import { html, Reactive, trusted } from "./reactive.js";
+import { html, Reactive, Signals, trusted } from "./reactive.js";
 
 export class NavbarController extends Reactive.Component {
 	state() {
 		const data = Context.get();
+		const params = new URLSearchParams(window.location.search);
+
+		const currentRoute = Signals.create({
+			blog: params.get("blog"),
+			page: params.get("page"),
+			project: params.get("project"),
+		});
+
+		const getIsActive = (href) => {
+			if (!href?.startsWith("?")) return false;
+			const route = currentRoute.get();
+			const linkParams = new URLSearchParams(href);
+
+			if (route.blog !== null && linkParams.get("blog") !== null) return true;
+			if (route.page !== null && linkParams.get("page") === route.page) return true;
+			if (route.project !== null && linkParams.get("project") === route.project)
+				return true;
+			return false;
+		};
+
+		const pagesData = data?.pages
+			? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
+			: [];
+
+		let blogPage = null;
+		const activeSignals = {};
+
+		if (data?.blog?.showInNav) {
+			blogPage = {
+				id: "blog",
+				title: data.blog.title || "Blog",
+				href: "?blog",
+			};
+			activeSignals.blogActive = this.computed(() => getIsActive("?blog"));
+		}
+
+		const navPages = pagesData
+			.filter((page) => page.id !== "blog" && page.showInNav)
+			.sort((a, b) => (a.order || 0) - (b.order || 0))
+			.map((page) => ({ ...page, href: `?page=${page.id}` }));
+
+		navPages.forEach((page, i) => {
+			activeSignals[`page_${i}_active`] = this.computed(() =>
+				getIsActive(page.href),
+			);
+		});
+
+		const projects = (data?.projects || []).map((p) => ({
+			...p,
+			href: `?project=${p.id}`,
+		}));
+
+		projects.forEach((p, i) => {
+			activeSignals[`project_${i}_active`] = this.computed(() =>
+				getIsActive(p.href),
+			);
+		});
+
+		const isProjectActive = this.computed(
+			() => currentRoute.get().project !== null,
+		);
 
 		return {
 			mobileMenuOpen: false,
 			dropdownOpen: false,
-			activeRoute: { type: null, id: null },
+			currentRoute,
 			siteTitle: data?.site?.title || CONSTANTS.DEFAULT_TITLE,
 			searchEnabled: data?.site?.search?.enabled || false,
 			emailEnabled: data?.site?.emailjs?.enabled || false,
 			searchPlaceholder:
 				data?.site?.search?.placeholder || i18n.t("search.placeholder"),
+			projects,
+			navPages,
+			blogPage,
+			isProjectActive,
+			...activeSignals,
 		};
 	}
 
 	template() {
-		const data = Context.get();
-		const pages = data?.pages
-			? Object.entries(data.pages).map(([id, page]) => ({ id, ...page }))
-			: [];
-
-		if (data?.blog?.showInNav) {
-			pages.push({
-				id: "blog",
-				title: data.blog.title || "Blog",
-				showInNav: true,
-				order: 999,
-			});
-		}
-
-		const blogPage = pages.find((page) => page.id === "blog");
+		const blogPage = this.blogPage ? this.blogPage.get() : null;
 		const blogLink = blogPage
-			? this._tplPageLink(blogPage.id, blogPage.title)
+			? this._tplPageLink(blogPage, "blogActive")
 			: "";
 
+		const navPages = this.navPages.get();
 		const pageLinks = trusted(
-			pages
-				.filter((page) => page.id !== "blog" && page.showInNav)
-				.sort((a, b) => (a.order || 0) - (b.order || 0))
-				.map((page) => this._tplPageLink(page.id, page.title).content)
+			navPages
+				.map((page, i) => this._tplPageLink(page, `page_${i}_active`).content)
 				.join(""),
 		);
 
 		const socialLinksHtml = trusted(
-			(data?.site?.social || [])
+			(Context.get()?.site?.social || [])
 				.map((link) => this._tplSocialLink(link).content)
 				.join(""),
 		);
@@ -90,9 +141,6 @@ export class NavbarController extends Reactive.Component {
 			const navbarElement = this.render();
 			navbarContainer.innerHTML = "";
 			navbarContainer.appendChild(navbarElement);
-
-			// Inject projects into dropdown
-			this._injectProjectsDropdown();
 
 			// Inject search page into body if search is enabled
 			if (this.searchEnabled.get()) {
@@ -145,71 +193,13 @@ export class NavbarController extends Reactive.Component {
 	}
 
 	updateActiveNavLink() {
+		// Update the route signal which will trigger reactive updates
 		const params = new URLSearchParams(window.location.search);
-		const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
-		const dropdownItems = document.querySelectorAll(".dropdown-item");
-
-		// Update navbar links
-		for (const link of navLinks) {
-			link.classList.remove("active");
-
-			const href = link.getAttribute("href");
-			if (href?.startsWith("?")) {
-				const linkParams = new URLSearchParams(href);
-
-				if (params.get("blog") !== null && linkParams.get("blog") !== null) {
-					link.classList.add("active");
-				} else if (
-					params.get("page") === linkParams.get("page") &&
-					params.get("page") !== null
-				) {
-					link.classList.add("active");
-				}
-			}
-		}
-
-		// Update dropdown items and highlight dropdown toggle if project is active
-		let isProjectActive = false;
-		for (const item of dropdownItems) {
-			item.classList.remove("active");
-
-			const href = item.getAttribute("href");
-			if (href?.startsWith("?project=")) {
-				const linkParams = new URLSearchParams(href);
-				const linkProject = linkParams.get("project");
-				const currentProject = params.get("project");
-
-				if (linkProject && linkProject === currentProject) {
-					item.classList.add("active");
-					isProjectActive = true;
-				}
-			}
-		}
-
-		// Highlight the projects dropdown toggle if any project is active
-		if (isProjectActive) {
-			const projectsToggle = document.querySelector(".dropdown-toggle");
-			if (projectsToggle) {
-				projectsToggle.classList.add("active");
-			}
-		}
-	}
-
-	async _injectProjectsDropdown() {
-		const data = Context.get();
-		const projectsDropdown = document.getElementById("projects-dropdown");
-		if (!projectsDropdown || !data?.projects) return;
-
-		const projectsHtml = trusted(
-			data.projects
-				.map(
-					(project) =>
-						this._tplProjectDropdownItem(project.id, project.title).content,
-				)
-				.join(""),
-		);
-
-		projectsDropdown.innerHTML = projectsHtml.content;
+		this.currentRoute.set({
+			blog: params.get("blog"),
+			page: params.get("page"),
+			project: params.get("project"),
+		});
 	}
 
 	_initCustomDropdowns() {
@@ -261,9 +251,8 @@ export class NavbarController extends Reactive.Component {
 
 	// TEMPLATES
 
-	_tplPageLink(pageId, pageTitle) {
-		const href = pageId === "blog" ? "?blog" : `?page=${pageId}`;
-		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${href}" data-spa-route="page">${pageTitle}</a></li>`;
+	_tplPageLink(page, activeSignalName) {
+		return html`<li class="nav-item navbar-menu"><a class="nav-link" href="${page.href}" data-spa-route="page" data-class-active="${activeSignalName}">${page.title}</a></li>`;
 	}
 
 	_tplSocialLink({
@@ -299,18 +288,33 @@ export class NavbarController extends Reactive.Component {
 	_tplProjectsDropdown() {
 		return html`
 		<li class="nav-item dropdown">
-			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false">
+			<a class="nav-link dropdown-toggle" href="#" role="button" aria-expanded="false" data-route-type="project" data-class-active="isProjectActive">
 				${i18n.t("nav.projects")}
 			</a>
 			<ul class="dropdown-menu" id="projects-dropdown">
-				<li><a class="dropdown-item" href="#">${i18n.t("dropdown.loadingProjects")}</a></li>
+				${this._getProjectsHtml()}
 			</ul>
 		</li>
 	`;
 	}
 
-	_tplProjectDropdownItem(projectId, projectTitle) {
-		return html`<li><a class="dropdown-item" href="?project=${projectId}" data-spa-route="project">${projectTitle}</a></li>`;
+	_getProjectsHtml() {
+		const projects = this.projects.get();
+		if (!projects.length) {
+			return html`<li><a class="dropdown-item" href="#">${i18n.t("dropdown.loadingProjects")}</a></li>`;
+		}
+		return trusted(
+			projects
+				.map(
+					(project, i) =>
+						this._tplProjectDropdownItem(project, `project_${i}_active`).content,
+				)
+				.join(""),
+		);
+	}
+
+	_tplProjectDropdownItem(project, activeSignalName) {
+		return html`<li><a class="dropdown-item" href="${project.href}" data-spa-route="project" data-class-active="${activeSignalName}">${project.title}</a></li>`;
 	}
 
 	_tplSearchBar() {

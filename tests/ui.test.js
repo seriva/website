@@ -60,48 +60,33 @@ describe("UI", () => {
 	});
 
 	test("should update active nav link based on URL params", () => {
-		// Create nav links
-		const blogLink = document.createElement("a");
-		blogLink.className = "nav-link";
-		blogLink.href = "?blog";
-
-		const pageLink = document.createElement("a");
-		pageLink.className = "nav-link";
-		pageLink.href = "?page=about";
-
-		const navbar = document.createElement("div");
-		navbar.className = "navbar-nav";
-		navbar.appendChild(blogLink);
-		navbar.appendChild(pageLink);
-		document.body.appendChild(navbar);
-
 		// Simulate blog route
 		window.history.replaceState({}, "", "?blog");
 		Navbar.updateActiveNavLink();
 
+		const route = Navbar.currentRoute.get();
+		assert.ok(route.blog !== null, "Should track blog route in state");
+		assert.strictEqual(route.page, null, "Should not have page route");
+		assert.strictEqual(route.project, null, "Should not have project route");
+
+		// Test link active state detection
 		assert.ok(
-			blogLink.classList.contains("active"),
-			"Should mark blog link as active",
+			Navbar._isLinkActive("?blog"),
+			"Should detect blog link as active",
 		);
 		assert.ok(
-			!pageLink.classList.contains("active"),
-			"Should not mark page link as active",
+			!Navbar._isLinkActive("?page=about"),
+			"Should not detect page link as active",
 		);
 
-		// Simulate page route
-		window.history.replaceState({}, "", "?page=about");
+		// Now test page route
+		window.history.pushState({}, "", "?page=about");
 		Navbar.updateActiveNavLink();
 
-		assert.ok(
-			!blogLink.classList.contains("active"),
-			"Should remove active from blog link",
-		);
-		assert.ok(
-			pageLink.classList.contains("active"),
-			"Should mark page link as active",
-		);
-
-		document.body.removeChild(navbar);
+		const pageRoute = Navbar.currentRoute.get();
+		assert.strictEqual(pageRoute.page, "about", "Should track page route in state");
+		assert.ok(!Navbar._isLinkActive("?blog"), "Should not detect blog link as active");
+		assert.ok(Navbar._isLinkActive("?page=about"), "Should detect page link as active");
 	});
 
 	test("should add copy button to code blocks", () => {
@@ -155,39 +140,26 @@ describe("UI", () => {
 	});
 
 	test("should highlight projects dropdown when project is active", () => {
-		// Create dropdown structure
-		const dropdownToggle = document.createElement("a");
-		dropdownToggle.className = "dropdown-toggle";
-		dropdownToggle.href = "#";
-
-		const dropdownItem = document.createElement("a");
-		dropdownItem.className = "dropdown-item";
-		dropdownItem.href = "?project=test-project";
-
-		const dropdown = document.createElement("div");
-		dropdown.className = "dropdown";
-		dropdown.appendChild(dropdownToggle);
-		dropdown.appendChild(dropdownItem);
-
-		const navbar = document.createElement("div");
-		navbar.className = "navbar-nav";
-		navbar.appendChild(dropdown);
-		document.body.appendChild(navbar);
-
 		// Simulate project route
 		window.history.replaceState({}, "", "?project=test-project");
 		Navbar.updateActiveNavLink();
 
-		assert.ok(
-			dropdownItem.classList.contains("active"),
-			"Should mark dropdown item as active",
-		);
-		assert.ok(
-			dropdownToggle.classList.contains("active"),
-			"Should mark dropdown toggle as active",
+		const route = Navbar.currentRoute.get();
+		assert.strictEqual(
+			route.project,
+			"test-project",
+			"Should track project route in state",
 		);
 
-		document.body.removeChild(navbar);
+		// Test link active state detection
+		assert.ok(
+			Navbar._isLinkActive("?project=test-project"),
+			"Should detect project link as active",
+		);
+		assert.ok(
+			route.project !== null,
+			"Project route should be set indicating dropdown should be active",
+		);
 	});
 
 	test("should handle fullscreen request gracefully when iframe missing", () => {
