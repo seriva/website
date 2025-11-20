@@ -240,7 +240,7 @@ export class Navbar extends Reactive.Component {
 	_tplProjectsDropdown() {
 		return html`
 		<li class="nav-item dropdown" data-class-show="dropdownOpen">
-			<a class="nav-link dropdown-toggle" href="#" role="button" data-route-type="project" data-class-active="isProjectActive" data-attr-aria-expanded="dropdownOpen" data-on-click="toggleDropdown">
+			<a class="nav-link dropdown-toggle" href="javascript:void(0)" role="button" data-route-type="project" data-class-active="isProjectActive" data-attr-aria-expanded="dropdownOpen" data-on-click="toggleDropdown">
 				${i18n.t("nav.projects")}
 			</a>
 			<ul class="dropdown-menu" id="projects-dropdown">
