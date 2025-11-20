@@ -8,7 +8,6 @@ import { Context } from "./context.js";
 import { EmailController } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
 import { FooterController } from "./footer.js";
-import { setEmail, setNavbar } from "./globals.js";
 import { MarkdownLoader } from "./markdown.js";
 import { NavbarController } from "./navbar.js";
 import { Router } from "./routing.js";
@@ -43,12 +42,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const emailToggle = event.target.closest("#email-toggle");
 			if (emailToggle) {
 				event.preventDefault();
-				if (Navbar?.closeMobileMenu) {
-					Navbar.closeMobileMenu();
-				}
-				if (Email?.show) {
-					Email.show();
-				}
+				window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
+				window.dispatchEvent(new CustomEvent("email:show"));
 				return;
 			}
 
@@ -101,18 +96,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (navLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
 				// Don't close menu if clicking dropdown toggle
 				if (
-					!navLink.classList.contains("dropdown-toggle") &&
-					Navbar?.closeMobileMenu
+					!navLink.classList.contains("dropdown-toggle")
 				) {
-					Navbar.closeMobileMenu();
+					window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
 				}
 			}
 		});
 
 		// Initialize navbar, footer, and email contact form
-		setNavbar(new NavbarController());
+		new NavbarController();
 		new FooterController();
-		setEmail(new EmailController());
+		new EmailController();
 
 		// Initialize UI components after DOM elements are ready
 		UI.init();

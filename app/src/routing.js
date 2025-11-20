@@ -5,7 +5,6 @@
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
-import { Navbar } from "./globals.js";
 import { i18n } from "./i18n.js";
 import { Loaders } from "./loaders.js";
 import { PrismLoader } from "./prism-loader.js";
@@ -23,9 +22,8 @@ export const Router = {
 
 	// Main routing handler - orchestrates page navigation
 	async handleRoute() {
-		if (Navbar?.closeMobileMenu) {
-			Navbar.closeMobileMenu();
-		}
+		// Close mobile menu on navigation
+		window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
 
 		// Parse URL parameters into route object
 		const params = new URLSearchParams(window.location.search);

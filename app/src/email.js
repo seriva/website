@@ -45,6 +45,9 @@ export class EmailController extends Reactive.Component {
 			emailjs.init(config.publicKey);
 			this.initialized = true;
 		}
+
+		// Listen for show event from other components
+		window.addEventListener("email:show", () => this.show());
 	}
 
 	// Define component state

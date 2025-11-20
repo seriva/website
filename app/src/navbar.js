@@ -27,6 +27,9 @@ export class NavbarController extends Reactive.Component {
 		const updateHandler = () => this.updateActiveNavLink();
 		window.addEventListener("popstate", updateHandler);
 		window.addEventListener("route-changed", updateHandler);
+
+		// Listen for close-mobile event from other components
+		window.addEventListener("navbar:close-mobile", () => this.closeMobileMenu());
 	}
 
 	state() {

@@ -6,7 +6,6 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
-import { Navbar } from "./globals.js";
 import { trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
@@ -54,9 +53,8 @@ export const Search = {
 		if (searchToggle) {
 			searchToggle.addEventListener("click", (e) => {
 				e.preventDefault();
-				if (Navbar?.closeMobileMenu) {
-					Navbar.closeMobileMenu();
-				}
+				// Close mobile menu via event
+				window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
 				openSearchPage();
 			});
 		}
