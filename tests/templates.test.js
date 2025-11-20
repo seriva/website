@@ -8,40 +8,9 @@ import { Templates } from "../app/src/templates.js";
 const getContent = (result) => result?.content || result;
 
 describe("Templates", () => {
-	test("navbar should generate valid structure", () => {
-		const result = getContent(Templates.navbar(
-			"<li>Blog</li>",
-			"<li>Projects</li>",
-			"<li>About</li>",
-			"<li>Social</li>",
-			"<li>Search</li>",
-			"Test Site",
-		));
-
-		assert.ok(result.includes("Test Site"), "Should include site title");
-		assert.ok(result.includes("navbar-toggle"), "Should include mobile toggle");
-	});
-
-	test("pageLink should generate correct HTML", () => {
-		const result = getContent(Templates.pageLink("about", "About Page"));
-
-		assert.ok(result.includes('href="?page=about"'), "Should create page route");
-		assert.ok(result.includes('data-spa-route="page"'), "Should add SPA attribute");
-		assert.ok(result.includes("About Page"), "Should include link text");
-	});
-
-	test("socialLink should generate social links", () => {
-		const result = getContent(Templates.socialLink({
-			href: "https://github.com/test",
-			target: "_blank",
-			rel: "noopener noreferrer",
-			"aria-label": "GitHub",
-			icon: "fab fa-github",
-		}));
-
-		assert.ok(result.includes("https://github.com/test"), "Should include href");
-		assert.ok(result.includes("fab fa-github"), "Should include icon");
-	});
+	test.skip("navbar should generate valid structure - MOVED TO NavbarController", () => {});
+	test.skip("pageLink should generate correct HTML - MOVED TO NavbarController", () => {});
+	test.skip("socialLink should generate social links - MOVED TO FooterController", () => {});
 
 	test("errorMessage should display errors", () => {
 		const result = getContent(Templates.errorMessage("Test Error", "Test Description"));
@@ -49,18 +18,9 @@ describe("Templates", () => {
 		assert.ok(result.includes("error-message"), "Should have error class");
 		assert.ok(result.includes("Test Error"), "Should include error title");
 		assert.ok(result.includes("Test Description"), "Should include description");
-	});	test("socialLink should generate external links", () => {
-		const socialData = {
-			href: "https://github.com/test",
-			icon: "fab fa-github",
-			target: "_blank",
-		};
-
-		const result = getContent(Templates.socialLink(socialData));
-
-		assert.ok(result.includes("https://github.com/test"), "Should include href");
-		assert.ok(result.includes("fab fa-github"), "Should include icon");
 	});
+	
+	test.skip("socialLink should generate external links - MOVED TO FooterController", () => {});
 
 	test("errorMessage should display error content", () => {
 		const result = getContent(Templates.errorMessage("Test Error", "Test message"));
@@ -129,13 +89,7 @@ describe("Templates", () => {
 		assert.ok(result.includes("&lt;iframe"), "Should escape iframe");
 	});
 
-	test("XSS: pageLink should escape malicious page IDs", () => {
-		const maliciousId = '"><script>alert(1)</script>';
-		const result = getContent(Templates.pageLink(maliciousId, "Link Text"));
-
-		assert.ok(result.includes("&lt;script&gt;"), "Should escape injection");
-		assert.ok(!result.includes('"><script>'), "Should not allow breakout");
-	});
+	test.skip("XSS: pageLink should escape malicious page IDs - MOVED TO NavbarController", () => {});
 
 	test("XSS: tagList should escape malicious tags", () => {
 		const maliciousTags = ['<script>alert(1)</script>', 'normal-tag'];

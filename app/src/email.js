@@ -118,11 +118,8 @@ class EmailController extends Reactive.Component {
 		`;
 	}
 
-	// ===========================================
-	// PUBLIC METHODS
-	// ===========================================
-
-	init() {
+	constructor() {
+		super();
 		const data = Context.get();
 		const config = data?.site?.emailjs;
 
@@ -146,6 +143,10 @@ class EmailController extends Reactive.Component {
 			this.initialized = true;
 		}
 	}
+
+	// ===========================================
+	// PUBLIC METHODS
+	// ===========================================
 
 	show() {
 		this.batch(() => {
@@ -322,4 +323,4 @@ class EmailController extends Reactive.Component {
 	}
 }
 
-export const Email = new EmailController();
+export { EmailController };

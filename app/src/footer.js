@@ -3,6 +3,18 @@ import { i18n } from "./i18n.js";
 import { html, Reactive } from "./reactive.js";
 
 export class FooterController extends Reactive.Component {
+	constructor() {
+		super();
+		this.initState();
+
+		const footerContainer = document.getElementById("footer-container");
+		if (footerContainer) {
+			const footerElement = this.render();
+			footerContainer.innerHTML = "";
+			footerContainer.appendChild(footerElement);
+		}
+	}
+
 	state() {
 		const data = Context.get();
 		return {
@@ -20,16 +32,5 @@ export class FooterController extends Reactive.Component {
 				<p class="footer-text" data-text="copyrightText"></p>
 			</div>
 		</footer>`;
-	}
-
-	init() {
-		this.initState();
-
-		const footerContainer = document.getElementById("footer-container");
-		if (!footerContainer) return;
-
-		const footerElement = this.render();
-		footerContainer.innerHTML = "";
-		footerContainer.appendChild(footerElement);
 	}
 }

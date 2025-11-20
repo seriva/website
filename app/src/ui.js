@@ -4,7 +4,6 @@
 // User interface utilities and event handlers
 
 import { CONSTANTS } from "./constants.js";
-import { Email } from "./email.js";
 import { i18n } from "./i18n.js";
 import { Reactive, Signals } from "./reactive.js";
 
@@ -47,59 +46,6 @@ export const UI = {
 			navbarToggle.classList.remove("active");
 			navbarToggle.setAttribute("aria-expanded", "false");
 		}
-	},
-
-	// Setup global event delegation for dynamic content
-	setupGlobalEventDelegation() {
-		// Use event delegation on document to handle dynamically added elements
-		document.addEventListener("click", (event) => {
-			// Handle email button
-			const emailToggle = event.target.closest("#email-toggle");
-			if (emailToggle) {
-				event.preventDefault();
-				UI.closeMobileMenu();
-				Email.show();
-				return;
-			}
-
-			// Handle data-action elements
-			const actionTarget = event.target.closest("[data-action]");
-			if (actionTarget) {
-				const action = actionTarget.getAttribute("data-action");
-
-				switch (action) {
-					case "email":
-						event.preventDefault();
-						Email.show();
-						break;
-					case "fullscreen":
-						event.preventDefault();
-						UI.fullscreen();
-						break;
-					default:
-						break;
-				}
-				return;
-			}
-
-			// Close mobile menu when social media links are clicked
-			const socialLink = event.target.closest(".social-links a");
-			if (socialLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
-				UI.closeMobileMenu();
-				return;
-			}
-
-			// Close mobile menu when navigation links are clicked (but not dropdown toggles)
-			const navLink = event.target.closest(
-				".navbar-nav .nav-link, .dropdown-item",
-			);
-			if (navLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
-				// Don't close menu if clicking dropdown toggle
-				if (!navLink.classList.contains("dropdown-toggle")) {
-					UI.closeMobileMenu();
-				}
-			}
-		});
 	},
 
 	// Add copy buttons to all code blocks

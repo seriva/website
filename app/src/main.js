@@ -3,16 +3,21 @@
 // ===========================================
 // Entry point - orchestrates initialization
 
+import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
-import { Email } from "./email.js";
+import { EmailController } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
-import { Layout } from "./layout.js";
+import { FooterController } from "./footer.js";
 import { MarkdownLoader } from "./markdown.js";
+import { NavbarController } from "./navbar.js";
 import { Router } from "./routing.js";
 import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
 import { UI } from "./ui.js";
+
+// Global reference for Email (needed by UI event handlers)
+export let Email = null;
 
 // ===========================================
 // APPLICATION INITIALIZATION
@@ -34,12 +39,58 @@ document.addEventListener("DOMContentLoaded", async () => {
 			Context.updateMetaTags(data.site);
 		}
 
-		// Initialize EmailJS contact form if enabled
-		Email.init();
-
 		// Setup global event delegation for dynamic content (email, fullscreen, etc.)
-		UI.setupGlobalEventDelegation(); // Inject layout components (navbar, footer, dropdowns)
-		await Layout.init();
+		document.addEventListener("click", (event) => {
+			// Handle email button
+			const emailToggle = event.target.closest("#email-toggle");
+			if (emailToggle) {
+				event.preventDefault();
+				UI.closeMobileMenu();
+				if (Email?.show) {
+					Email.show();
+				}
+				return;
+			}
+
+			// Handle data-action elements (e.g., fullscreen, etc.)
+			const actionElement = event.target.closest("[data-action]");
+			if (actionElement) {
+				const action = actionElement.dataset.action;
+				if (action === "fullscreen") {
+					const pre = actionElement.closest("pre");
+					if (pre) {
+						if (!document.fullscreenElement) {
+							pre.requestFullscreen().catch((err) => {
+								console.error(
+									`Error attempting to enable fullscreen: ${err.message}`,
+								);
+							});
+						} else {
+							document.exitFullscreen();
+						}
+					}
+				}
+				return;
+			}
+
+			// Handle social links from dynamically loaded content
+			const socialLink = event.target.closest(".social-icon, .social-icons a");
+			if (socialLink) {
+				return;
+			}
+
+			// Close mobile menu when clicking navigation links (not dropdowns)
+			const navLink = event.target.closest(".navbar-nav a, .navbar-nav button");
+			if (navLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
+				// Don't close menu if clicking dropdown toggle
+				if (!navLink.classList.contains("dropdown-toggle")) {
+					UI.closeMobileMenu();
+				}
+			}
+		}); // Initialize navbar, footer, and email contact form
+		new NavbarController();
+		new FooterController();
+		Email = new EmailController();
 
 		// Initialize UI components after DOM elements are ready
 		UI.init();
