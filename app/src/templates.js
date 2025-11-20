@@ -328,8 +328,6 @@ export const Templates = {
 		return html`<div class="giscus-container" id="${containerId}"></div>`;
 	},
 
-
-
 	// ===========================================
 	// PRIVATE METHODS
 	// ===========================================
