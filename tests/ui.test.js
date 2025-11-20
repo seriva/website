@@ -153,9 +153,12 @@ describe("UI", () => {
 	});
 
 	test("should handle fullscreen request gracefully when iframe missing", () => {
-		// Should not throw when iframe doesn't exist
-		assert.doesNotThrow(() => {
-			UI.fullscreen();
-		}, "Should handle missing iframe");
+		// Fullscreen functionality has been moved to main.js event delegation
+		// This test verifies the old method no longer exists
+		assert.strictEqual(
+			typeof UI.fullscreen,
+			"undefined",
+			"fullscreen should not exist on UI object (moved to main.js)",
+		);
 	});
 });

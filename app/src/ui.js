@@ -92,24 +92,6 @@ export const UI = {
 		}
 	},
 
-	// Request fullscreen for demo iframe
-	fullscreen() {
-		try {
-			const iframe = document.getElementById("demo");
-			if (!iframe) return;
-
-			const request =
-				iframe.requestFullscreen ||
-				iframe.webkitRequestFullscreen ||
-				iframe.mozRequestFullScreen ||
-				iframe.msRequestFullscreen;
-
-			if (request) request.call(iframe);
-		} catch (error) {
-			console.error("Error requesting fullscreen:", error);
-		}
-	},
-
 	// ===========================================
 	// PRIVATE METHODS
 	// ===========================================
