@@ -4,7 +4,7 @@ import { i18n } from "./i18n.js";
 import { html, Reactive, Signals, trusted } from "./reactive.js";
 import { Theme } from "./theme.js";
 
-export class NavbarController extends Reactive.Component {
+export class Navbar extends Reactive.Component {
 	constructor() {
 		super();
 		this.initState();

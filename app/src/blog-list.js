@@ -10,7 +10,7 @@ import { Loaders } from "./loaders.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
-export class BlogListController extends Reactive.Component {
+export class BlogList extends Reactive.Component {
 	currentPageNumber = 1;
 
 	constructor(page = 1) {

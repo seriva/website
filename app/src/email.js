@@ -9,7 +9,7 @@ import emailjs from "./dependencies/@emailjs/browser.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive } from "./reactive.js";
 
-export class EmailController extends Reactive.Component {
+export class ContactForm extends Reactive.Component {
 	initialized = false;
 	_MODAL_ID = "contact-modal";
 

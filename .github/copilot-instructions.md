@@ -7,7 +7,8 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
 ### Key Architecture Principles
 
 1. **ES6 Modules**: All code organized in modular files under `app/src/`
-2. **Reactive System**: Use `reactive.js` for all interactive components and state management
+2. **Component Naming**: Components extending `Reactive.Component` use simple names (e.g., `Navbar`, `Search`, `ContactForm`), not `*Controller` suffix
+3. **Reactive System**: Use `reactive.js` for all interactive components and state management
    - Create components with `Reactive.Component` base class for full-featured components
    - Use `Reactive.createComponent()` for lightweight component contexts
    - Signals for reactive state: `this.signal(value)` or `Signals.create(value)`
@@ -22,7 +23,7 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
      - `data-model` - two-way binding for inputs
      - `data-on-click`, `data-on-submit` - event handlers (auto-batched)
    - Prefer reactive.js for all interactive features - it provides consistency and maintainability
-3. **Namespace Pattern**: Use object exports for grouping related functions
+4. **Namespace Pattern**: Use object exports for grouping related functions
    - Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
    - Example: `Context.get()`, `Loaders.loadBlogPage()`, `Templates.errorMessage()`
    - All non-component modules follow this pattern consistently
@@ -36,11 +37,11 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
      3. `template()` method returning HTML
      4. Public methods next (called from templates or other components)
      5. Private methods last with `_` prefix (internal logic)
-4. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
-4. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
-5. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
-6. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
-7. **i18n (Internationalization)**: 
+5. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
+6. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
+7. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
+8. **Constants**: All magic numbers go in `CONSTANTS` object in `constants.js`
+9. **i18n (Internationalization)**: 
    - **ALWAYS** use `i18n.t('key')` for ALL user-facing text (labels, titles, messages, placeholders, aria-labels, tooltips)
    - **NEVER** hardcode user-facing strings in templates or code
    - Add new translation keys to `app/data/content.yaml` under `translations.en`
@@ -115,19 +116,33 @@ describe("My Module", () => {
 - `app/src/constants.js` - `CONSTANTS` object for configuration
 
 **Reactive Components** (extend `Reactive.Component`):
-- `app/src/navbar.js` - `NavbarController` component for navbar rendering
-- `app/src/footer.js` - `FooterController` component for footer rendering
-- `app/src/search.js` - `SearchController` component for Fuse.js search implementation
-- `app/src/email.js` - `EmailController` component for EmailJS contact form integration
-- `app/src/theme.js` - `ThemeController` component for theme management
-- `app/src/blog.js` - `BlogListController`, `BlogPostController` for blog pages
-- `app/src/project.js` - `ProjectController` for project detail pages
-- `app/src/page.js` - `PageController` for custom markdown pages
+- `app/src/navbar.js` - `Navbar` component for navbar rendering
+- `app/src/footer.js` - `Footer` component for footer rendering
+- `app/src/search.js` - `Search` component for Fuse.js search (conditionally initialized)
+- `app/src/email.js` - `ContactForm` component for EmailJS contact form (conditionally initialized)
+- `app/src/theme.js` - `ThemeManager` component for theme management
+- `app/src/blog-list.js` - `BlogList` for blog listing pages
+- `app/src/blog-post.js` - `BlogPost` for blog post detail pages
+- `app/src/project.js` - `Project` for project detail pages
+- `app/src/page.js` - `Page` for custom markdown pages
 
 **Other Modules**:
 - `app/src/main.js` - Entry point, initialization
 - `app/src/error-handler.js` - `ErrorHandler` for global error handling
 - `app/src/dependencies/` - Bundled npm packages (Fuse.js, Marked, Prism, EmailJS)
+
+### Component Initialization
+
+- Components are initialized in `main.js` after Context.init() loads data
+- Conditional initialization:
+  - `Search`: only if `data?.site?.search?.enabled`
+  - `ContactForm`: only if `data?.site?.emailjs?.enabled`
+- Core components (`Navbar`, `Footer`, `ThemeManager`) always initialize
+- Interactive components use reactive.js features:
+  - Declarative event binding with `data-on-click`
+  - Two-way binding with `data-model`
+  - Reactive state with signals and computed values
+  - Automatic batching for event handlers
 
 ### Don't
 

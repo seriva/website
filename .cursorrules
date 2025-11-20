@@ -3,6 +3,7 @@
 Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modular ES6 architecture.
 
 ### Core Principles
+- **Component Naming**: Components extending `Reactive.Component` use simple names (e.g., `Navbar`, `Search`, `ContactForm`), not `*Controller` suffix
 - **Reactive System**: Use `reactive.js` for all interactive components and state management
   - Create components with `Reactive.Component` base class or `Reactive.createComponent()`
   - Use signals for reactive state: `this.signal(value)` or `Signals.create(value)`
@@ -89,14 +90,15 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/src/constants.js` - `CONSTANTS` object for configuration
 
 **Reactive Components** (extend `Reactive.Component`):
-- `app/src/navbar.js` - `NavbarController` component for navbar rendering
-- `app/src/footer.js` - `FooterController` component for footer rendering
-- `app/src/search.js` - `SearchController` component for Fuse.js search implementation
-- `app/src/email.js` - `EmailController` component for EmailJS contact form integration
-- `app/src/theme.js` - `ThemeController` component for theme management
-- `app/src/blog.js` - `BlogListController`, `BlogPostController` for blog pages
-- `app/src/project.js` - `ProjectController` for project detail pages
-- `app/src/page.js` - `PageController` for custom markdown pages
+- `app/src/navbar.js` - `Navbar` component for navbar rendering
+- `app/src/footer.js` - `Footer` component for footer rendering
+- `app/src/search.js` - `Search` component for Fuse.js search (conditionally initialized)
+- `app/src/email.js` - `ContactForm` component for EmailJS contact form (conditionally initialized)
+- `app/src/theme.js` - `ThemeManager` component for theme management
+- `app/src/blog-list.js` - `BlogList` for blog listing pages
+- `app/src/blog-post.js` - `BlogPost` for blog post detail pages
+- `app/src/project.js` - `Project` for project detail pages
+- `app/src/page.js` - `Page` for custom markdown pages
 
 **Other Modules**:
 - `app/src/main.js` - entry point, initialization
