@@ -12,8 +12,8 @@ class ThemeController extends Reactive.Component {
 
 	state() {
 		return {
-			// Core state
-			current: this._getInitialTheme(),
+			// Core state - will be set during init()
+			current: null,
 
 			// Computed derived state
 			colors: () => this._getThemeColors(this.current.get()),
@@ -37,13 +37,26 @@ class ThemeController extends Reactive.Component {
 	init() {
 		this.initState();
 
+		// Set initial theme now that Context is loaded
+		const initialTheme = this._getInitialTheme();
+		this.current.set(initialTheme);
+
 		// 1. Bind global data-theme attribute
 		this.bindAttr(document.documentElement, "data-theme", this.current);
 
 		// 2. Handle side effects via subscriptions
+		// Subscribe after initial set to avoid saving initial theme twice
+		let isFirst = true;
 		this.track(
 			this.current.subscribe((theme) => {
-				localStorage.setItem(this.storageKey, theme);
+				// Skip the first immediate call since we just set initial theme
+				if (isFirst) {
+					isFirst = false;
+					return;
+				}
+				if (theme) {
+					localStorage.setItem(this.storageKey, theme);
+				}
 			}),
 		);
 
@@ -148,18 +161,20 @@ class ThemeController extends Reactive.Component {
 	}
 
 	_setupToggleListener() {
-		document.addEventListener("click", (e) => {
-			if (e.target.closest("#theme-toggle")) {
-				this.toggle();
-			}
-		});
-
 		const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-		mediaQuery.addEventListener("change", (e) => {
+		
+		const handler = (e) => {
 			const data = Context.get();
 			if (data?.site?.theme?.default === "auto") {
 				this.current.set(e.matches ? "dark" : "light");
 			}
+		};
+
+		mediaQuery.addEventListener("change", handler);
+
+		// Track for cleanup
+		this.track({
+			unsubscribe: () => mediaQuery.removeEventListener("change", handler)
 		});
 	}
 }

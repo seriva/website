@@ -41,7 +41,7 @@ export const Signals = {
 				if (equals(value, newVal)) return;
 				value = newVal;
 				if (batchPending) {
-					for (const fn of subs) batchQueue.add(fn);
+					for (const fn of subs) batchQueue.add(() => fn(value));
 				} else {
 					for (const fn of [...subs]) fn(value);
 				}
@@ -166,11 +166,24 @@ export const Reactive = {
 
 		const handlers = {
 			"data-text": (el, val) => Reactive.bindText(el, val),
-			"data-html": (el, val) =>
-				val.subscribe((v) => {
+			"data-html": (el, val) => {
+				let cleanups = [];
+				const unsub = val.subscribe((v) => {
+					cleanups.forEach((f) => f && f());
+					cleanups = [];
 					const res = v === undefined ? val.get() : v;
 					el.innerHTML = res?.__safe ? res.content : String(res);
-				}),
+
+					// Scan children only to avoid infinite recursion on self
+					for (const child of el.children) {
+						cleanups.push(Reactive.scan(child, scope));
+					}
+				});
+				return () => {
+					cleanups.forEach((f) => f && f());
+					unsub();
+				};
+			},
 			"data-visible": (el, val) =>
 				val.subscribe((v) => {
 					el.style.display = (v === undefined ? val.get() : v) ? "" : "none";

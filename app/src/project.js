@@ -6,7 +6,10 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
+import { marked } from "./dependencies/marked.js";
 import { Loaders } from "./loaders.js";
+import { MarkdownLoader } from "./markdown.js";
+import { PrismLoader } from "./prism-loader.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
@@ -30,6 +33,7 @@ export class ProjectController extends Reactive.Component {
             loading: true,
             project: null,
             error: null,
+            readmeContent: null,
             commentsConfig: data?.site?.comments,
 
             // Computed display content
@@ -77,10 +81,24 @@ export class ProjectController extends Reactive.Component {
             });
 
             // Set page title
-            document.title = `${project.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
+            document.title = `${project.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE
+                }`;
 
-            // Load additional content after render
-            requestAnimationFrame(() => this._loadAdditionalContent());
+            // Load README if repo exists
+            if (project.github_repo) {
+                const readme = await Loaders.fetchGitHubReadme(project.github_repo);
+                if (readme) {
+                    this.readmeContent.set(readme);
+                    // Highlight code blocks after render
+                    requestAnimationFrame(async () => {
+                        const readmeEl = document.getElementById("project-readme");
+                        if (readmeEl) {
+                            await PrismLoader.highlight(readmeEl);
+                            MarkdownLoader.initCopyCodeButtons();
+                        }
+                    });
+                }
+            }
         } catch (error) {
             console.error(`Error loading project ${this.projectId}:`, error);
             this.batch(() => {
@@ -100,13 +118,7 @@ export class ProjectController extends Reactive.Component {
                 project.description,
                 project.tags,
             ),
-            project.github_repo &&
-            this._tplDynamicContainer(
-                "github-readme",
-                "repo",
-                project.github_repo,
-                i18n.t("project.loadingReadme"),
-            ),
+            this._tplReadme(),
             project.youtube_videos?.length &&
             this._tplMediaSection(
                 trusted(
@@ -116,7 +128,7 @@ export class ProjectController extends Reactive.Component {
                 ),
             ),
             project.demo_url && this._tplDemoIframe(project.demo_url),
-            this._tplDynamicContainer("project-links", "project", project.id, ""),
+            this._tplProjectLinks(project.links),
             Templates.giscusComments(this.commentsConfig.get(), "projects"),
         ];
 
@@ -124,11 +136,6 @@ export class ProjectController extends Reactive.Component {
             .filter(Boolean)
             .map((section) => section.content)
             .join("");
-    }
-
-    async _loadAdditionalContent() {
-        // Load README and project links
-        await Loaders.loadAdditionalContent();
     }
 
     // ===========================================
@@ -163,17 +170,72 @@ export class ProjectController extends Reactive.Component {
             <p>${i18n.t("project.demoInstructions")}</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" class="download-btn" data-action="fullscreen"><i class="fas fa-expand"></i><span>${i18n.t("project.fullscreen")}</span></button></center>
+            </div><br><center><button id="fullscreen" class="download-btn" data-on-click="toggleFullscreen"><i class="fas fa-expand"></i><span>${i18n.t("project.fullscreen")}</span></button></center>
         </div>`;
     }
 
-    _tplDynamicContainer(id, dataAttr, dataValue, loadingText = null) {
-        return html`<div id="${id}" data-${dataAttr}="${dataValue}"><p>${loadingText || i18n.t("general.loading")}</p></div>`;
+    _tplReadme() {
+        const content = this.readmeContent.get();
+        const project = this.project.get();
+
+        if (!project?.github_repo) return "";
+
+        if (!content) {
+            return html`<div id="project-readme"><p>${i18n.t("project.loadingReadme")}</p></div>`;
+        }
+
+        return html`<div id="project-readme" class="markdown-body">${trusted(marked.parse(content))}</div>`;
     }
+
+    _tplProjectLinks(links) {
+        if (!links?.length) return "";
+
+        const linksHtml = trusted(
+            links
+                .map(
+                    (link) => html`
+            <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn">
+                <i class="${link.icon}"></i>
+                <span>${link.title}</span>
+            </a>`.content,
+                )
+                .join(""),
+        );
+
+        return html`
+            <div class="markdown-body">
+                <h2>${i18n.t("project.links")}</h2>
+                <div class="download-buttons">${linksHtml}</div>
+            </div>`;
+    }
+
+
 
     _tplTagList(tags) {
         if (!tags?.length) return html``;
         const tagElements = tags.map((tag) => html`<span class="item-tag clickable-tag" data-search-tag="${tag}">${tag}</span>`);
         return join(tagElements, " ");
+    }
+
+    toggleFullscreen() {
+        const iframe = document.getElementById("demo");
+        if (!iframe) return;
+
+        if (!document.fullscreenElement) {
+            const request = iframe.requestFullscreen ||
+                iframe.webkitRequestFullscreen ||
+                iframe.mozRequestFullScreen ||
+                iframe.msRequestFullscreen;
+
+            if (request) {
+                request.call(iframe).catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
     }
 }
