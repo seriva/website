@@ -1,10 +1,19 @@
 // Test ui module - DOM manipulation and state management
-import { describe, test } from "node:test";
+import { describe, test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
+import { NavbarController } from "../app/src/navbar.js";
 import { UI } from "../app/src/ui.js";
 
+let Navbar;
+
 describe("UI", () => {
+	beforeEach(() => {
+		// Create minimal navbar instance without full constructor
+		Navbar = Object.create(NavbarController.prototype);
+		Navbar.initState();
+	});
+
 	test("should close mobile menu by removing show class", () => {
 		// Setup DOM elements
 		const collapseElement = document.createElement("div");
@@ -19,7 +28,9 @@ describe("UI", () => {
 		document.body.appendChild(collapseElement);
 		document.body.appendChild(navbarToggle);
 
-		UI.closeMobileMenu();
+		// Set menu as open in state
+		Navbar.mobileMenuOpen.set(true);
+		Navbar.closeMobileMenu();
 
 		assert.ok(
 			!collapseElement.classList.contains("show"),
@@ -42,7 +53,9 @@ describe("UI", () => {
 	test("should handle missing elements gracefully in closeMobileMenu", () => {
 		// Should not throw when elements don't exist
 		assert.doesNotThrow(() => {
-			UI.closeMobileMenu();
+		// Set menu as open in state
+		Navbar.mobileMenuOpen.set(true);
+			Navbar.closeMobileMenu();
 		}, "Should handle missing elements");
 	});
 
@@ -64,7 +77,7 @@ describe("UI", () => {
 
 		// Simulate blog route
 		window.history.replaceState({}, "", "?blog");
-		UI.updateActiveNavLink();
+		Navbar.updateActiveNavLink();
 
 		assert.ok(
 			blogLink.classList.contains("active"),
@@ -77,7 +90,7 @@ describe("UI", () => {
 
 		// Simulate page route
 		window.history.replaceState({}, "", "?page=about");
-		UI.updateActiveNavLink();
+		Navbar.updateActiveNavLink();
 
 		assert.ok(
 			!blogLink.classList.contains("active"),
@@ -163,7 +176,7 @@ describe("UI", () => {
 
 		// Simulate project route
 		window.history.replaceState({}, "", "?project=test-project");
-		UI.updateActiveNavLink();
+		Navbar.updateActiveNavLink();
 
 		assert.ok(
 			dropdownItem.classList.contains("active"),

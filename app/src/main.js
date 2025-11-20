@@ -16,8 +16,9 @@ import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
 import { UI } from "./ui.js";
 
-// Global reference for Email (needed by UI event handlers)
+// Global references for components (needed by event handlers)
 export let Email = null;
+export let Navbar = null;
 
 // ===========================================
 // APPLICATION INITIALIZATION
@@ -45,7 +46,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const emailToggle = event.target.closest("#email-toggle");
 			if (emailToggle) {
 				event.preventDefault();
-				UI.closeMobileMenu();
+				if (Navbar?.closeMobileMenu) {
+					Navbar.closeMobileMenu();
+				}
 				if (Email?.show) {
 					Email.show();
 				}
@@ -83,12 +86,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const navLink = event.target.closest(".navbar-nav a, .navbar-nav button");
 			if (navLink && window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT) {
 				// Don't close menu if clicking dropdown toggle
-				if (!navLink.classList.contains("dropdown-toggle")) {
-					UI.closeMobileMenu();
+				if (
+					!navLink.classList.contains("dropdown-toggle") &&
+					Navbar?.closeMobileMenu
+				) {
+					Navbar.closeMobileMenu();
 				}
 			}
-		}); // Initialize navbar, footer, and email contact form
-		new NavbarController();
+		});
+
+		// Initialize navbar, footer, and email contact form
+		Navbar = new NavbarController();
 		new FooterController();
 		Email = new EmailController();
 
@@ -109,7 +117,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Set up routing
 		window.addEventListener("popstate", Router.handleRoute);
 		Router.setupSpaRouting();
-		UI.addMobileMenuOutsideClickHandler();
 	} catch (error) {
 		console.error("Failed to initialize application:", error);
 		// Show error in main content
