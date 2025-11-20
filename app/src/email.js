@@ -33,14 +33,6 @@ export class ContactForm extends Reactive.Component {
 		// Append email modal to body (doesn't clear like mountTo)
 		if (!document.getElementById(this._MODAL_ID)) {
 			this.appendTo("body");
-
-			const keydownHandler = (e) => {
-				if (e.key === "Escape" && this.modalVisible.get()) {
-					this.hide();
-				}
-			};
-			document.addEventListener("keydown", keydownHandler);
-			this.track(() => document.removeEventListener("keydown", keydownHandler));
 		}
 
 		// Initialize EmailJS if publicKey is available
@@ -48,11 +40,18 @@ export class ContactForm extends Reactive.Component {
 			emailjs.init(config.publicKey);
 			this.initialized = true;
 		}
+	}
+
+	onMount() {
+		// Handle escape key to close modal
+		this.on(document, "keydown", (e) => {
+			if (e.key === "Escape" && this.modalVisible.get()) {
+				this.hide();
+			}
+		});
 
 		// Listen for show event from other components
-		const showHandler = () => this.show();
-		window.addEventListener("email:show", showHandler);
-		this.track(() => window.removeEventListener("email:show", showHandler));
+		this.on(window, "email:show", () => this.show());
 	}
 
 	// Define component state

@@ -23,30 +23,22 @@ export class Search extends Reactive.Component {
 
 		// Append search overlay to body (doesn't clear like mountTo)
 		this.appendTo("body");
+	}
 
+	onMount() {
 		// Setup search toggle button
 		const searchToggle = document.getElementById("search-toggle");
 		if (searchToggle) {
-			const toggleHandler = (e) => {
+			this.on(searchToggle, "click", (e) => {
 				e.preventDefault();
 				window.dispatchEvent(new CustomEvent("navbar:close-mobile"));
 				this.show();
-			};
-			searchToggle.addEventListener("click", toggleHandler);
-			this.track(() =>
-				searchToggle.removeEventListener("click", toggleHandler),
-			);
+			});
 		}
 
 		// Listen for search events
-		const showHandler = () => this.show();
-		const showTagHandler = (e) => this.showWithTag(e.detail.tag);
-		window.addEventListener("search:show", showHandler);
-		window.addEventListener("search:show-tag", showTagHandler);
-		this.track(() => {
-			window.removeEventListener("search:show", showHandler);
-			window.removeEventListener("search:show-tag", showTagHandler);
-		});
+		this.on(window, "search:show", () => this.show());
+		this.on(window, "search:show-tag", (e) => this.showWithTag(e.detail.tag));
 
 		// Setup tag search delegation
 		this._setupTagSearch();
@@ -267,7 +259,7 @@ export class Search extends Reactive.Component {
 		// Handle input changes with debouncing
 		const searchInput = document.getElementById("search-page-input");
 		if (searchInput) {
-			const inputHandler = (e) => {
+			this.on(searchInput, "input", (e) => {
 				const value = e.target.value;
 
 				if (this.searchTimeout) clearTimeout(this.searchTimeout);
@@ -275,25 +267,17 @@ export class Search extends Reactive.Component {
 				this.searchTimeout = setTimeout(() => {
 					this.query.set(value);
 				}, CONSTANTS.SEARCH_DEBOUNCE_MS);
-			};
-			searchInput.addEventListener("input", inputHandler);
-			this.track(() => searchInput.removeEventListener("input", inputHandler));
+			});
 
 			// Handle escape key
-			const keydownHandler = (e) => {
+			this.on(searchInput, "keydown", (e) => {
 				if (e.key === "Escape") this.close();
-			};
-			searchInput.addEventListener("keydown", keydownHandler);
-			this.track(() =>
-				searchInput.removeEventListener("keydown", keydownHandler),
-			);
+			});
 		}
 
 		const clearButton = document.getElementById("search-page-clear");
 		if (clearButton) {
-			const clearHandler = () => this.clearSearch();
-			clearButton.addEventListener("click", clearHandler);
-			this.track(() => clearButton.removeEventListener("click", clearHandler));
+			this.on(clearButton, "click", () => this.clearSearch());
 		}
 
 		// Handle result clicks
@@ -356,27 +340,22 @@ export class Search extends Reactive.Component {
 				}
 			}
 		};
-		resultsContainer.addEventListener("click", clickHandler);
-		this.track(() =>
-			resultsContainer.removeEventListener("click", clickHandler),
-		);
+		this.on(resultsContainer, "click", clickHandler);
 	}
 
 	_setupTagSearch() {
-		const tagClickHandler = (event) => {
-			const tagElement = event.target.closest("[data-search-tag]");
+		this.on(document, "click", (e) => {
+			const tagElement = e.target.closest("[data-search-tag]");
 			if (!tagElement) return;
 
-			event.preventDefault();
-			event.stopPropagation();
+			e.preventDefault();
+			e.stopPropagation();
 
 			const tag = tagElement.getAttribute("data-search-tag");
 			if (tag) {
 				this.showWithTag(tag);
 			}
-		};
-		document.addEventListener("click", tagClickHandler);
-		this.track(() => document.removeEventListener("click", tagClickHandler));
+		});
 	}
 
 	// ===========================================
