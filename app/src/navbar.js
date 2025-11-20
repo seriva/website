@@ -4,6 +4,37 @@ import { i18n } from "./i18n.js";
 import { html, Reactive, Signals, trusted } from "./reactive.js";
 
 export class NavbarController extends Reactive.Component {
+	constructor() {
+		super();
+		this.initState();
+
+		const navbarContainer = document.getElementById("navbar-container");
+		if (navbarContainer) {
+			const navbarElement = this.render();
+			navbarContainer.innerHTML = "";
+			navbarContainer.appendChild(navbarElement);
+
+			// Inject search page into body if search is enabled
+			if (this.searchEnabled.get()) {
+				const existingSearchPage = document.getElementById("search-page");
+				if (!existingSearchPage) {
+					document.body.insertAdjacentHTML(
+						"beforeend",
+						this._tplSearchPage(this.searchPlaceholder.get()).content,
+					);
+				}
+			}
+
+			// Setup outside click handler for mobile menu
+			this._setupOutsideClickHandler();
+
+			// Listen for route changes to update active link styling
+			const updateHandler = () => this.updateActiveNavLink();
+			window.addEventListener("popstate", updateHandler);
+			window.addEventListener("route-changed", updateHandler);
+		}
+	}
+
 	state() {
 		const data = Context.get();
 		const params = new URLSearchParams(window.location.search);
@@ -20,7 +51,8 @@ export class NavbarController extends Reactive.Component {
 			const linkParams = new URLSearchParams(href);
 
 			if (route.blog !== null && linkParams.get("blog") !== null) return true;
-			if (route.page !== null && linkParams.get("page") === route.page) return true;
+			if (route.page !== null && linkParams.get("page") === route.page)
+				return true;
 			if (route.project !== null && linkParams.get("project") === route.project)
 				return true;
 			return false;
@@ -87,9 +119,7 @@ export class NavbarController extends Reactive.Component {
 
 	template() {
 		const blogPage = this.blogPage ? this.blogPage.get() : null;
-		const blogLink = blogPage
-			? this._tplPageLink(blogPage, "blogActive")
-			: "";
+		const blogLink = blogPage ? this._tplPageLink(blogPage, "blogActive") : "";
 
 		const navPages = this.navPages.get();
 		const pageLinks = trusted(
@@ -132,39 +162,6 @@ export class NavbarController extends Reactive.Component {
 		`;
 	}
 
-	constructor() {
-		super();
-		this.initState();
-
-		const navbarContainer = document.getElementById("navbar-container");
-		if (navbarContainer) {
-			const navbarElement = this.render();
-			navbarContainer.innerHTML = "";
-			navbarContainer.appendChild(navbarElement);
-
-			// Inject search page into body if search is enabled
-			if (this.searchEnabled.get()) {
-				const existingSearchPage = document.getElementById("search-page");
-				if (!existingSearchPage) {
-					document.body.insertAdjacentHTML(
-						"beforeend",
-						this._tplSearchPage(this.searchPlaceholder.get()).content,
-					);
-				}
-			}
-
-
-
-			// Setup outside click handler for mobile menu
-			this._setupOutsideClickHandler();
-
-			// Listen for route changes to update active link styling
-			const updateHandler = () => this.updateActiveNavLink();
-			window.addEventListener("popstate", updateHandler);
-			window.addEventListener("route-changed", updateHandler);
-		}
-	}
-
 	toggleMobileMenu() {
 		this.mobileMenuOpen.set(!this.mobileMenuOpen.get());
 	}
@@ -183,7 +180,7 @@ export class NavbarController extends Reactive.Component {
 		});
 	}
 
-	toggleDropdown(event) {
+	toggleDropdown(_event) {
 		this.dropdownOpen.set(!this.dropdownOpen.get());
 	}
 
@@ -205,6 +202,19 @@ export class NavbarController extends Reactive.Component {
 				this.dropdownOpen.set(false);
 			}
 		});
+	}
+
+	_isLinkActive(href) {
+		if (!href?.startsWith("?")) return false;
+		const route = this.currentRoute.get();
+		const linkParams = new URLSearchParams(href);
+
+		if (route.blog !== null && linkParams.get("blog") !== null) return true;
+		if (route.page !== null && linkParams.get("page") === route.page)
+			return true;
+		if (route.project !== null && linkParams.get("project") === route.project)
+			return true;
+		return false;
 	}
 
 	// TEMPLATES
@@ -265,7 +275,8 @@ export class NavbarController extends Reactive.Component {
 			projects
 				.map(
 					(project, i) =>
-						this._tplProjectDropdownItem(project, `project_${i}_active`).content,
+						this._tplProjectDropdownItem(project, `project_${i}_active`)
+							.content,
 				)
 				.join(""),
 		);

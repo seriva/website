@@ -5,9 +5,9 @@
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
+import { Navbar } from "./globals.js";
 import { i18n } from "./i18n.js";
 import { Loaders } from "./loaders.js";
-import { Navbar } from "./main.js";
 import { PrismLoader } from "./prism-loader.js";
 import { Templates } from "./templates.js";
 import { UI } from "./ui.js";
