@@ -5,12 +5,7 @@
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
-import { marked } from "./dependencies/marked.js";
-import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
-import { PrismLoader } from "./prism-loader.js";
-import { html, join, trusted } from "./reactive.js";
-import { Templates } from "./templates.js";
 
 // ===========================================
 // LOADERS NAMESPACE
@@ -91,13 +86,8 @@ export const Loaders = {
 		);
 		return result?.content || null;
 	},
-
-
 };
 
 // ===========================================
 // PRIVATE TEMPLATE HELPERS
 // ===========================================
-
-
-

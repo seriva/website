@@ -8,10 +8,6 @@ import { Templates } from "../app/src/templates.js";
 const getContent = (result) => result?.content || result;
 
 describe("Templates", () => {
-	test.skip("navbar should generate valid structure - MOVED TO NavbarController", () => {});
-	test.skip("pageLink should generate correct HTML - MOVED TO NavbarController", () => {});
-	test.skip("socialLink should generate social links - MOVED TO FooterController", () => {});
-
 	test("errorMessage should display errors", () => {
 		const result = getContent(Templates.errorMessage("Test Error", "Test Description"));
 
@@ -91,13 +87,6 @@ describe("Templates", () => {
 
 	test.skip("XSS: pageLink should escape malicious page IDs - MOVED TO NavbarController", () => {});
 
-	test("XSS: tagList should escape malicious tags", () => {
-		const maliciousTags = ['<script>alert(1)</script>', 'normal-tag'];
-		const result = getContent(Templates._tagList(maliciousTags));
-
-		assert.ok(!result.includes("<script>"), "Should not contain raw script");
-		assert.ok(result.includes("&lt;script&gt;"), "Should escape tag");
-		assert.ok(result.includes("normal-tag"), "Should include safe tags");
-	});
+	test.skip("XSS: tagList should escape malicious tags - MOVED TO individual controllers", () => {});
 });
 

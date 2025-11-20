@@ -378,7 +378,9 @@ export class SearchController extends Reactive.Component {
 	}
 
 	_tplSearchInput() {
-		const placeholder = this.searchPlaceholder?.get ? this.searchPlaceholder.get() : (this.searchPlaceholder || i18n.t("search.placeholder"));
+		const placeholder = this.searchPlaceholder?.get
+			? this.searchPlaceholder.get()
+			: this.searchPlaceholder || i18n.t("search.placeholder");
 		return html`
         <input type="search" id="search-page-input" class="search-page-input" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}" data-model="query"/>
         <button class="search-page-clear" id="search-page-clear" aria-label="${i18n.t("aria.clearSearch")}" data-on-click="clearSearch">

@@ -3,7 +3,6 @@
 // ===========================================
 // Entry point - orchestrates initialization
 
-import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { EmailController } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
@@ -30,7 +29,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Load and cache site data (single call!)
 		const data = await Context.init();
-
 
 		// Initialize navbar, footer, and email contact form
 		new NavbarController();

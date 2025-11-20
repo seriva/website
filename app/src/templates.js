@@ -4,9 +4,8 @@
 // HTML template generation using tagged template literals
 
 import { CONSTANTS } from "./constants.js";
-import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
-import { html, join, trusted } from "./reactive.js";
+import { html, trusted } from "./reactive.js";
 import { Theme } from "./theme.js";
 
 // ===========================================
@@ -59,7 +58,8 @@ export const Templates = {
 	},
 
 	// Loading spinner (shared by all content components)
-	loadingSpinner: () => html`<div class="loading-spinner">${i18n.t("general.loading")}</div>`,
+	loadingSpinner: () =>
+		html`<div class="loading-spinner">${i18n.t("general.loading")}</div>`,
 
 	// Error message (shared by all content components)
 	errorMessage: (title, message) => html`
@@ -85,5 +85,3 @@ export const Templates = {
 	// GitHub README error message
 	githubReadmeError: () => html`<p>${i18n.t("project.readmeError")}</p>`,
 };
-
-
