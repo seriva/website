@@ -1,7 +1,7 @@
 // ===========================================
-// SEARCH FUNCTIONALITY
+// SEARCH COMPONENT
 // ===========================================
-// Fuse.js powered search for projects and blog posts with reactive UI
+// Reactive fuzzy search with Fuse.js for projects and blog posts
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";

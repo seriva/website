@@ -1,7 +1,7 @@
 // ===========================================
-// APPLICATION CONTEXT & DATA MANAGEMENT
+// CONTEXT
 // ===========================================
-// Centralized state management and data loading
+// Global state management and data loading
 
 import { i18n } from "./i18n.js";
 import { YAMLParser } from "./yaml-parser.js";

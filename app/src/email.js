@@ -1,7 +1,7 @@
 // ===========================================
-// EMAIL / CONTACT FORM
+// CONTACT FORM COMPONENT
 // ===========================================
-// EmailJS integration for contact form
+// Reactive contact form modal with EmailJS integration
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";

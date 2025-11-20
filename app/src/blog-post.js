@@ -1,7 +1,7 @@
 // ===========================================
-// BLOG POST CONTROLLER
+// BLOG POST COMPONENT
 // ===========================================
-// Reactive component for single blog post view
+// Reactive single blog post view
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";

@@ -1,16 +1,12 @@
 // ===========================================
 // TEMPLATES
 // ===========================================
-// HTML template generation using tagged template literals
+// HTML template generation utilities
 
 import { CONSTANTS } from "./constants.js";
 import { i18n } from "./i18n.js";
 import { html, trusted } from "./reactive.js";
 import { Theme } from "./theme.js";
-
-// ===========================================
-// TEMPLATES NAMESPACE
-// ===========================================
 
 export const Templates = {
 	// ===========================================

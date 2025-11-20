@@ -1,7 +1,7 @@
 // ===========================================
-// BLOG LIST CONTROLLER
+// BLOG LIST COMPONENT
 // ===========================================
-// Reactive component for blog overview with pagination
+// Reactive blog overview with pagination
 
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";

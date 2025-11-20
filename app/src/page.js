@@ -1,7 +1,7 @@
 // ===========================================
-// PAGE CONTROLLER
+// PAGE COMPONENT
 // ===========================================
-// Reactive component for custom markdown pages
+// Reactive custom markdown page renderer
 
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
