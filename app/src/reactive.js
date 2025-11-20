@@ -315,6 +315,21 @@ export const Reactive = {
 			container.appendChild(element);
 			return element;
 		}
+
+		appendTo(containerId) {
+			// Special case for body element (no ID)
+			const container = containerId === "body"
+				? document.body
+				: document.getElementById(containerId);
+
+			if (!container) {
+				console.warn(`Container #${containerId} not found`);
+				return null;
+			}
+			const element = this.render();
+			container.appendChild(element);
+			return element;
+		}
 		cleanup() {
 			this._c.cleanup();
 		}

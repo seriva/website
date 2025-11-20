@@ -30,9 +30,9 @@ export class EmailController extends Reactive.Component {
 
 		this.initState();
 
+		// Append email modal to body (doesn't clear like mountTo)
 		if (!document.getElementById(this._MODAL_ID)) {
-			const modal = this.render();
-			document.body.appendChild(modal);
+			this.appendTo("body");
 
 			document.addEventListener("keydown", (e) => {
 				if (e.key === "Escape" && this.modalVisible.get()) {
@@ -41,6 +41,7 @@ export class EmailController extends Reactive.Component {
 			});
 		}
 
+		// Initialize EmailJS if publicKey is available
 		if (config.publicKey) {
 			emailjs.init(config.publicKey);
 			this.initialized = true;

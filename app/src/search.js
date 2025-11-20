@@ -21,9 +21,8 @@ export class SearchController extends Reactive.Component {
 		// Initialize search index
 		this._initSearchIndex();
 
-		// Render and append search page to body
-		const searchPage = this.render();
-		document.body.appendChild(searchPage);
+		// Append search overlay to body (doesn't clear like mountTo)
+		this.appendTo("body");
 
 		// Setup search toggle button
 		const searchToggle = document.getElementById("search-toggle");
@@ -379,7 +378,7 @@ export class SearchController extends Reactive.Component {
 	}
 
 	_tplSearchInput() {
-		const placeholder = this.searchPlaceholder || i18n.t("search.placeholder");
+		const placeholder = this.searchPlaceholder?.get ? this.searchPlaceholder.get() : (this.searchPlaceholder || i18n.t("search.placeholder"));
 		return html`
         <input type="search" id="search-page-input" class="search-page-input" placeholder="${placeholder}" autocomplete="off" aria-label="${i18n.t("aria.search")}"/>
         <button class="search-page-clear" id="search-page-clear" aria-label="${i18n.t("aria.clearSearch")}" data-on-click="clearSearch">
