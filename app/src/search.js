@@ -9,7 +9,7 @@ import Fuse from "./dependencies/fuse.js.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive, trusted } from "./reactive.js";
 
-export class SearchController extends Reactive.Component {
+export class Search extends Reactive.Component {
 	searchData = [];
 	fuse = null;
 	searchTimeout = null;
@@ -362,7 +362,6 @@ export class SearchController extends Reactive.Component {
                     <a href="${item.url}" data-spa-route="${item.type}">${trusted(this.highlight(item.title, query))}</a>
                 </h2>
                 <div class="blog-post-meta">
-                				<div class="blog-post-meta">
 					${allTags.length ? html`<span class="blog-post-tags">${trusted(allTags.map((tag) => html`<span class="item-tag">${tag}</span>`.content).join(" "))}</span>` : ""}
                 </div>
                 <p class="blog-post-excerpt">${trusted(this.highlight(item.description, query))}</p>
@@ -388,24 +387,3 @@ export class SearchController extends Reactive.Component {
         </button>`;
 	}
 }
-
-// Export legacy namespace for tests
-export const Search = {
-	data: [],
-	fuse: null,
-
-	_search(query) {
-		if (
-			!query ||
-			query.trim().length < CONSTANTS.SEARCH_MIN_CHARS ||
-			!this.fuse
-		) {
-			return [];
-		}
-
-		const results = this.fuse.search(query.trim());
-		return results
-			.slice(0, CONSTANTS.SEARCH_MAX_RESULTS)
-			.map((result) => result.item);
-	},
-};

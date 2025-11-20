@@ -12,7 +12,7 @@ import { MarkdownLoader } from "./markdown.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
-export class BlogPostController extends Reactive.Component {
+export class BlogPost extends Reactive.Component {
 	slug = null;
 
 	constructor(slug) {

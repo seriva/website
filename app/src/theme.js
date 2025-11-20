@@ -7,7 +7,7 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { Reactive } from "./reactive.js";
 
-class ThemeController extends Reactive.Component {
+class ThemeManager extends Reactive.Component {
 	storageKey = "theme-preference";
 
 	state() {
@@ -179,4 +179,4 @@ class ThemeController extends Reactive.Component {
 	}
 }
 
-export const Theme = new ThemeController();
+export const Theme = new ThemeManager();

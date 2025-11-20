@@ -4,13 +4,13 @@
 // Entry point - orchestrates initialization
 
 import { Context } from "./context.js";
-import { EmailController } from "./email.js";
+import { ContactForm } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
-import { FooterController } from "./footer.js";
+import { Footer } from "./footer.js";
 import { MarkdownLoader } from "./markdown.js";
-import { NavbarController } from "./navbar.js";
+import { Navbar } from "./navbar.js";
 import { Router } from "./routing.js";
-import { SearchController } from "./search.js";
+import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
 
@@ -30,15 +30,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Load and cache site data (single call!)
 		const data = await Context.init();
 
-		// Initialize navbar, footer, and email contact form
-		new NavbarController();
-		new FooterController();
-		new EmailController();
+		// Initialize navbar and footer
+		new Navbar();
+		new Footer();
+
+		// Initialize contact form if enabled
+		if (data?.site?.emailjs?.enabled) {
+			new ContactForm();
+		}
 
 		// Initialize search if enabled
-		const searchConfig = data?.site?.search;
-		if (searchConfig?.enabled) {
-			new SearchController();
+		if (data?.site?.search?.enabled) {
+			new Search();
 		}
 
 		// Initialize theme system (loads user preference from localStorage)

@@ -2,7 +2,7 @@ import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive } from "./reactive.js";
 
-export class FooterController extends Reactive.Component {
+export class Footer extends Reactive.Component {
 	constructor() {
 		super();
 		this.initState();

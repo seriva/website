@@ -9,7 +9,7 @@ import { MarkdownLoader } from "./markdown.js";
 import { html, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
-export class PageController extends Reactive.Component {
+export class Page extends Reactive.Component {
 	pageId = null;
 
 	constructor(pageId) {

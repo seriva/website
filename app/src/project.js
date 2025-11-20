@@ -13,7 +13,7 @@ import { PrismLoader } from "./prism-loader.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
-export class ProjectController extends Reactive.Component {
+export class Project extends Reactive.Component {
 	projectId = null;
 
 	constructor(projectId) {

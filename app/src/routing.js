@@ -3,15 +3,15 @@
 // ===========================================
 // SPA routing system - orchestrates page navigation
 
-import { BlogListController } from "./blog-list.js";
-import { BlogPostController } from "./blog-post.js";
+import { BlogList } from "./blog-list.js";
+import { BlogPost } from "./blog-post.js";
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
-import { PageController } from "./page.js";
+import { Page } from "./page.js";
 import { PrismLoader } from "./prism-loader.js";
-import { ProjectController } from "./project.js";
+import { Project } from "./project.js";
 import { Templates } from "./templates.js";
 
 // ===========================================
@@ -48,22 +48,22 @@ export const Router = {
 			if (route.blog !== null) {
 				// Blog: either blog listing (empty string) or specific post (slug)
 				if (route.blog === "") {
-					new BlogListController(route.blogPage);
+					new BlogList(route.blogPage);
 				} else {
-					new BlogPostController(route.blog);
+					new BlogPost(route.blog);
 				}
 			} else if (route.project) {
 				// Project: render project detail page
-				new ProjectController(route.project);
+				new Project(route.project);
 			} else if (route.page) {
 				// Custom page: render markdown page
-				new PageController(route.page);
+				new Page(route.page);
 			} else {
 				// No route specified: redirect to default route
 				const data = Context.get();
 				const defaultRoute = data?.site?.defaultRoute || "?blog";
 				window.history.replaceState({}, "", defaultRoute);
-				new BlogListController(1);
+				new BlogList(1);
 			}
 
 			// End transition and apply post-render tasks
