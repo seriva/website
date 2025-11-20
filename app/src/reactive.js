@@ -209,7 +209,12 @@ export const Reactive = {
 	},
 
 	Component: class {
-		constructor() { this._c = Reactive.createComponent(); }
+		constructor() {
+			this._c = Reactive.createComponent();
+			['bind', 'bindAttr', 'bindBoolAttr', 'bindClass', 'bindText', 'track'].forEach(m =>
+				this[m] = (...a) => this._c[m](...a)
+			);
+		}
 		signal(v) { return Signals.create(v); }
 		computed(fn) { return this._c.computed(fn); }
 		batch(fn) { return Signals.batch(fn); }

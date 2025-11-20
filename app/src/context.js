@@ -48,6 +48,11 @@ export const Context = {
 		return appContext;
 	},
 
+	// Set context manually (for testing)
+	_set(data) {
+		appContext = data;
+	},
+
 	// Update HTML meta tags with site data
 	updateMetaTags(siteData) {
 		if (!siteData) return;
