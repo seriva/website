@@ -6,7 +6,7 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
-import { Navbar } from "./main.js";
+import { Navbar } from "./globals.js";
 import { trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 

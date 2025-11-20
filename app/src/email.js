@@ -21,6 +21,32 @@ export class EmailController extends Reactive.Component {
 		FORM: "contact-form",
 	};
 
+	constructor() {
+		super();
+		const data = Context.get();
+		const config = data?.site?.emailjs;
+
+		if (!config?.enabled) return;
+
+		this.initState();
+
+		if (!document.getElementById(this._MODAL_ID)) {
+			const modal = this.render();
+			document.body.appendChild(modal);
+
+			document.addEventListener("keydown", (e) => {
+				if (e.key === "Escape" && this.modalVisible.get()) {
+					this.hide();
+				}
+			});
+		}
+
+		if (config.publicKey) {
+			emailjs.init(config.publicKey);
+			this.initialized = true;
+		}
+	}
+
 	// Define component state
 	state() {
 		return {
@@ -118,32 +144,6 @@ export class EmailController extends Reactive.Component {
 		`;
 	}
 
-	constructor() {
-		super();
-		const data = Context.get();
-		const config = data?.site?.emailjs;
-
-		if (!config?.enabled) return;
-
-		this.initState();
-
-		if (!document.getElementById(this._MODAL_ID)) {
-			const modal = this.render();
-			document.body.appendChild(modal);
-
-			document.addEventListener("keydown", (e) => {
-				if (e.key === "Escape" && this.modalVisible.get()) {
-					this.hide();
-				}
-			});
-		}
-
-		if (config.publicKey) {
-			emailjs.init(config.publicKey);
-			this.initialized = true;
-		}
-	}
-
 	// ===========================================
 	// PUBLIC METHODS
 	// ===========================================
@@ -172,26 +172,6 @@ export class EmailController extends Reactive.Component {
 				this._resetForm();
 			});
 		}, 200);
-	}
-
-	// Helper methods expected by tests
-	_isValidEmail(email) {
-		const emailRegex =
-			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-		return (
-			email &&
-			email.length <= 254 &&
-			emailRegex.test(email) &&
-			!email.includes(" ")
-		);
-	}
-
-	_clearFieldErrors() {
-		this.batch(() => {
-			this.errors.name.set(false);
-			this.errors.email.set(false);
-			this.errors.message.set(false);
-		});
 	}
 
 	// ===========================================
@@ -308,6 +288,25 @@ export class EmailController extends Reactive.Component {
 		}
 
 		return isValid;
+	}
+
+	_isValidEmail(email) {
+		const emailRegex =
+			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+		return (
+			email &&
+			email.length <= 254 &&
+			emailRegex.test(email) &&
+			!email.includes(" ")
+		);
+	}
+
+	_clearFieldErrors() {
+		this.batch(() => {
+			this.errors.name.set(false);
+			this.errors.email.set(false);
+			this.errors.message.set(false);
+		});
 	}
 
 	_resetForm() {

@@ -8,6 +8,7 @@ import { Context } from "./context.js";
 import { EmailController } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
 import { FooterController } from "./footer.js";
+import { setEmail, setNavbar } from "./globals.js";
 import { MarkdownLoader } from "./markdown.js";
 import { NavbarController } from "./navbar.js";
 import { Router } from "./routing.js";
@@ -15,10 +16,6 @@ import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
 import { UI } from "./ui.js";
-
-// Global references for components (needed by event handlers)
-export let Email = null;
-export let Navbar = null;
 
 // ===========================================
 // APPLICATION INITIALIZATION
@@ -96,9 +93,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		});
 
 		// Initialize navbar, footer, and email contact form
-		Navbar = new NavbarController();
+		setNavbar(new NavbarController());
 		new FooterController();
-		Email = new EmailController();
+		setEmail(new EmailController());
 
 		// Initialize UI components after DOM elements are ready
 		UI.init();
