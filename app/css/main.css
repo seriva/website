@@ -169,6 +169,13 @@ body {
 	text-rendering: optimizeLegibility;
 	overflow-x: hidden;
 	width: 100%;
+	/* Prevent FOUC - hide body until app is ready */
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+}
+
+body.app-ready {
+	opacity: 1;
 }
 
 main {
@@ -178,6 +185,10 @@ main {
 	max-width: 750px;
 	width: 100%;
 	animation: fadeIn 0.2s ease-in-out;
+}
+
+main:focus {
+	outline: none;
 }
 
 /* Page transition animations */

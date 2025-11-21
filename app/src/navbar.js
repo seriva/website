@@ -6,9 +6,9 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
+import { navbarStyles } from "./navbar.styles.js";
 import { html, Reactive, Signals, trusted } from "./reactive.js";
 import { Theme } from "./theme.js";
-import { navbarStyles } from "./navbar.styles.js";
 
 export class Navbar extends Reactive.Component {
 	constructor() {

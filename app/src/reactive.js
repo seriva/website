@@ -38,7 +38,7 @@ export const css = (strings, ...values) => {
 	let hash = 0;
 	for (let i = 0; i < content.length; i++)
 		hash = (hash << 5) - hash + content.charCodeAt(i);
-	const className = "s-" + (hash >>> 0).toString(36);
+	const className = `s-${(hash >>> 0).toString(36)}`;
 
 	if (!styleCache.has(className)) {
 		styleCache.add(className);
@@ -54,38 +54,48 @@ export const css = (strings, ...values) => {
 
 		// Then wrap root-level properties (properties before the first {)
 		// and prefix child selectors
-		const lines = processedContent.split('\n');
-		let result = [];
+		const lines = processedContent.split("\n");
+		const result = [];
 		let inBlock = 0;
-		let currentRule = '';
-		let rootProperties = '';
+		let currentRule = "";
+		let rootProperties = "";
 
-		for (let line of lines) {
+		for (const line of lines) {
 			const trimmed = line.trim();
 
 			// Count braces to track nesting
 			const openBraces = (line.match(/{/g) || []).length;
 			const closeBraces = (line.match(/}/g) || []).length;
 
-			if (inBlock === 0 && trimmed && !trimmed.startsWith('@') && !trimmed.includes('{') && trimmed.includes(':')) {
+			if (
+				inBlock === 0 &&
+				trimmed &&
+				!trimmed.startsWith("@") &&
+				!trimmed.includes("{") &&
+				trimmed.includes(":")
+			) {
 				// Root-level property
-				rootProperties += '\t' + trimmed + '\n';
-			} else if (trimmed.startsWith('.') || trimmed.startsWith('@') || trimmed.startsWith(':')) {
+				rootProperties += `\t${trimmed}\n`;
+			} else if (
+				trimmed.startsWith(".") ||
+				trimmed.startsWith("@") ||
+				trimmed.startsWith(":")
+			) {
 				// Selector or at-rule
 				if (rootProperties) {
 					result.push(`.${className} {\n${rootProperties}}\n`);
-					rootProperties = '';
+					rootProperties = "";
 				}
-				currentRule += line + '\n';
+				currentRule += `${line}\n`;
 			} else {
-				currentRule += line + '\n';
+				currentRule += `${line}\n`;
 			}
 
 			inBlock += openBraces - closeBraces;
 
 			if (inBlock === 0 && currentRule.trim()) {
 				result.push(currentRule);
-				currentRule = '';
+				currentRule = "";
 			}
 		}
 
@@ -96,7 +106,7 @@ export const css = (strings, ...values) => {
 			result.push(currentRule);
 		}
 
-		style.textContent = result.join('');
+		style.textContent = result.join("");
 		document.head.appendChild(style);
 	}
 	return className;
