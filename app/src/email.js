@@ -8,6 +8,7 @@ import { Context } from "./context.js";
 import emailjs from "./dependencies/@emailjs/browser.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive } from "./reactive.js";
+import { contactFormStyles } from "./email.styles.js";
 
 export class ContactForm extends Reactive.Component {
 	initialized = false;
@@ -87,6 +88,10 @@ export class ContactForm extends Reactive.Component {
 				return "contact-modal";
 			},
 		};
+	}
+
+	styles() {
+		return contactFormStyles;
 	}
 
 	// Template for the contact form

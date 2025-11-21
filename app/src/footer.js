@@ -5,7 +5,7 @@
 
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
-import { html, Reactive } from "./reactive.js";
+import { css, html, Reactive } from "./reactive.js";
 
 export class Footer extends Reactive.Component {
 	constructor() {
@@ -23,7 +23,22 @@ export class Footer extends Reactive.Component {
 		};
 	}
 
+	styles() {
+		return css`
+			margin-top: auto;
+			margin-bottom: 0;
+			padding: 1rem 0;
+			background-color: transparent;
+			flex-shrink: 0;
+			max-width: 1000px;
+			margin-inline: auto;
+			text-align: center;
+			color: var(--text-light);
+			font-size: 0.9em;
+		`;
+	}
+
 	template() {
-		return html`<footer class="footer" data-text="copyrightText"></footer>`;
+		return html`<footer data-text="copyrightText"></footer>`;
 	}
 }

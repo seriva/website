@@ -8,6 +8,7 @@ import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive, Signals, trusted } from "./reactive.js";
 import { Theme } from "./theme.js";
+import { navbarStyles } from "./navbar.styles.js";
 
 export class Navbar extends Reactive.Component {
 	constructor() {
@@ -101,6 +102,10 @@ export class Navbar extends Reactive.Component {
 		};
 	}
 
+	styles() {
+		return navbarStyles;
+	}
+
 	template() {
 		const blogPage = this.blogPage ? this.blogPage.get() : null;
 		const blogLink = blogPage ? this._tplPageLink(blogPage, "blogActive") : "";
@@ -122,7 +127,7 @@ export class Navbar extends Reactive.Component {
 		const emailButton = this.emailEnabled.get() ? this._tplEmailButton() : "";
 
 		return html`
-		<nav class="navbar">
+		<nav>
 			<div class="navbar-inner">
 				<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
 				<button class="navbar-toggle" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen">
@@ -175,7 +180,7 @@ export class Navbar extends Reactive.Component {
 
 	_setupOutsideClickHandler() {
 		this.on(document, "click", (event) => {
-			const navbar = document.querySelector(".navbar");
+			const navbar = document.querySelector("nav"); // Changed from .navbar to nav since class is removed
 			if (!navbar) return;
 
 			const isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;
