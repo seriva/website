@@ -14,7 +14,13 @@
 		"indentStyle": "tab",
 		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"]
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"],
@@ -26,5 +32,17 @@
 		"formatter": {
 			"quoteStyle": "double"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["app/src/styles/main.styles.js", "app/src/main.js"],
+			"assist": {
+				"actions": {
+					"source": {
+						"organizeImports": "off"
+					}
+				}
+			}
+		}
+	]
 }

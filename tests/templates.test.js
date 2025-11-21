@@ -2,7 +2,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { Templates } from "../app/src/templates.js";
+import { Templates } from "../app/src/utils/templates.js";
 
 // Helper to extract content from safe-marked objects
 const getContent = (result) => result?.content || result;

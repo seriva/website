@@ -2,7 +2,7 @@
 import { describe, test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { ContactForm } from "../app/src/email.js";
+import { ContactForm } from "../app/src/components/email.js";
 
 let Email;
 
@@ -69,7 +69,7 @@ describe("Email", () => {
 		document.body.appendChild(statusDiv);
 
 		// Import Signals to test reactive behavior
-		const { Signals } = await import("../app/src/reactive.js");
+		const { Signals } = await import("../app/src/core/reactive.js");
 
 		// Simulate Email's reactive status setup
 		const statusMessage = Signals.create({ text: "", type: "" });

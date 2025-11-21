@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { YAMLParser } from "../app/src/yaml-parser.js";
+import { YAMLParser } from "../app/src/utils/yaml-parser.js";
 
 describe("YAML Parser", () => {
 	test("should return an empty object if input is null or empty", () => {

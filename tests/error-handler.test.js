@@ -29,7 +29,7 @@ describe("ErrorHandler", () => {
 		};
 
 		// Import module after globals are set
-		const module = await import("../app/src/error-handler.js");
+		const module = await import("../app/src/services/error-handler.js");
 		ErrorHandler = module.ErrorHandler;
 
 		// Reset state

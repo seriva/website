@@ -16,7 +16,7 @@ export const sharedStyles = css`
 
 .clickable-tag {
 	cursor: pointer;
-	transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+	transition: all var(--transition-fast);
 }
 
 .clickable-tag:hover {

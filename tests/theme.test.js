@@ -2,8 +2,8 @@
 import { describe, test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { Theme } from "../app/src/theme.js";
-import { Context } from "../app/src/context.js";
+import { Theme } from "../app/src/services/theme.js";
+import { Context } from "../app/src/services/context.js";
 
 describe("Theme", () => {
     // Mock Context

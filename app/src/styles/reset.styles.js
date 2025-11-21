@@ -87,7 +87,10 @@ textarea,
 select,
 .nav-link,
 .dropdown-item {
-	transition: opacity var(--transition-fast),
+	transition: background-color var(--transition-fast),
+		color var(--transition-fast),
+		border-color var(--transition-fast),
+		opacity var(--transition-fast),
 		transform var(--transition-fast);
 }
 
