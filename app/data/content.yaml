@@ -132,6 +132,7 @@ projects:
       - "Machine Learning"
     order: 1
     github_repo: "snakeai"
+    github_branch: "master"  # Branch to load README from
     links:
       - title: "Github"
         icon: "fab fa-github"
@@ -150,6 +151,7 @@ projects:
       - "ES6"
     order: 2
     github_repo: "simplefps"
+    github_branch: "master"
     demo_url: "https://seriva.github.io/simplefps"
     youtube_videos:
       - "UInnHqqX2OQ"
@@ -170,6 +172,7 @@ projects:
       - "Javascript"
     order: 3
     github_repo: "microtastic"
+    github_branch: "master"
     links:
       - title: "Github"
         icon: "fab fa-github"
@@ -189,6 +192,7 @@ projects:
       - "SPA"
     order: 4
     github_repo: "website"
+    github_branch: "master"
     links:
       - title: "Github"
         icon: "fab fa-github"
@@ -203,6 +207,7 @@ projects:
       - "WebGL"
     order: 5
     github_repo: "qdfps"
+    github_branch: "master"
     youtube_videos:
       - "4dWciTdnTTQ"
     links:
@@ -226,6 +231,7 @@ projects:
       - "OpenAL"
     order: 6
     github_repo: "genesisdevice"
+    github_branch: "master"
     youtube_videos:
       - "3lrvRvn8EEE"
       - "GlelXcj9M0o"
@@ -246,6 +252,7 @@ projects:
       - "Cordova"
     order: 7
     github_repo: "astrohunter"
+    github_branch: "master"
     demo_url: "https://seriva.github.io/astrohunter/"
     links:
       - title: "Github"

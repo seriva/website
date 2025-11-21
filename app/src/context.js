@@ -7,6 +7,7 @@ import { i18n } from "./i18n.js";
 import { YAMLParser } from "./yaml-parser.js";
 
 let appContext = null;
+const readmeCache = new Map();
 
 // ===========================================
 // CONTEXT NAMESPACE
@@ -37,6 +38,13 @@ export const Context = {
 
 			this._updateMetaTags();
 
+			// Preload project READMEs in the background (non-blocking)
+			if (appContext?.projects?.length) {
+				this.preloadReadmes().catch((err) =>
+					console.warn("Failed to preload READMEs:", err),
+				);
+			}
+
 			return appContext;
 		} catch (error) {
 			console.error("Failed to load content:", error);
@@ -48,6 +56,11 @@ export const Context = {
 	// Get cached application context (must call init first)
 	get() {
 		return appContext;
+	},
+
+	// Get cached README for a project repo
+	getReadme(repo) {
+		return readmeCache.get(repo) || null;
 	},
 
 	// Get blog posts transformed into proper structure
@@ -109,5 +122,44 @@ export const Context = {
 			'meta[property="twitter:description"]',
 			appContext.site.description,
 		);
+	},
+
+	// Cache a README for a project repo
+	cacheReadme(repo, content) {
+		if (content) {
+			readmeCache.set(repo, content);
+		}
+	},
+
+	// Preload all project READMEs in parallel
+	async preloadReadmes() {
+		if (!appContext?.projects?.length) return;
+
+		const { CONSTANTS } = await import("./constants.js");
+		const { MarkdownLoader } = await import("./markdown.js");
+		const githubUsername = appContext.site?.github_username || "seriva";
+
+		const promises = appContext.projects
+			.filter((project) => project.github_repo)
+			.map(async (project) => {
+				const repo = project.github_repo;
+				const branch = project.github_branch || "main";
+				const fullRepo = repo.includes("/")
+					? repo
+					: `${githubUsername}/${repo}`;
+
+				try {
+					const url = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/${branch}/README.md`;
+					const content = await MarkdownLoader.loadFile(url);
+
+					if (content) {
+						readmeCache.set(repo, content);
+					}
+				} catch (error) {
+					console.warn(`Failed to preload README for ${repo}:`, error);
+				}
+			});
+
+		await Promise.all(promises);
 	},
 };
