@@ -27,6 +27,28 @@ export const join = (items, separator = "") => ({
 		.join(typeof separator === "string" ? separator : separator.content || ""),
 });
 
+// CSS-in-JS
+const styleCache = new Set();
+export const css = (strings, ...values) => {
+	const content = strings.reduce(
+		(acc, str, i) => acc + str + (values[i] || ""),
+		"",
+	);
+	// Simple hash for class name
+	let hash = 0;
+	for (let i = 0; i < content.length; i++)
+		hash = (hash << 5) - hash + content.charCodeAt(i);
+	const className = "s-" + (hash >>> 0).toString(36);
+
+	if (!styleCache.has(className)) {
+		styleCache.add(className);
+		const style = document.createElement("style");
+		style.textContent = `.${className} { ${content} }`;
+		document.head.appendChild(style);
+	}
+	return className;
+};
+
 // SIGNALS
 let activeContext = null;
 let batchPending = false;
@@ -356,6 +378,9 @@ export const Reactive = {
 				const el = t.firstElementChild;
 				if (!el) {
 					throw new Error("Template must return a single root element");
+				}
+				if (this.styles) {
+					el.classList.add(this.styles());
 				}
 				this.scan(el);
 				return el;

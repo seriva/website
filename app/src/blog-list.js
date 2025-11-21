@@ -6,8 +6,9 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
-import { html, join, Reactive, trusted } from "./reactive.js";
+import { css, html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
+import { blogListStyles } from "./blog-list.styles.js";
 
 export class BlogList extends Reactive.Component {
 	currentPageNumber = 1;
@@ -65,6 +66,10 @@ export class BlogList extends Reactive.Component {
                     </div>`;
 			},
 		};
+	}
+
+	styles() {
+		return blogListStyles;
 	}
 
 	template() {
