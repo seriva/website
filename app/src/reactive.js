@@ -43,7 +43,60 @@ export const css = (strings, ...values) => {
 	if (!styleCache.has(className)) {
 		styleCache.add(className);
 		const style = document.createElement("style");
-		style.textContent = `.${className} { ${content} }`;
+		// Split into rules and process each one
+		// For root-level properties (not in a selector), prefix with the class
+		// For & selectors, replace with the class
+		// For other selectors (like .child), prefix with the class
+		let processedContent = content;
+
+		// First, handle & references
+		processedContent = processedContent.replace(/&/g, `.${className}`);
+
+		// Then wrap root-level properties (properties before the first {)
+		// and prefix child selectors
+		const lines = processedContent.split('\n');
+		let result = [];
+		let inBlock = 0;
+		let currentRule = '';
+		let rootProperties = '';
+
+		for (let line of lines) {
+			const trimmed = line.trim();
+
+			// Count braces to track nesting
+			const openBraces = (line.match(/{/g) || []).length;
+			const closeBraces = (line.match(/}/g) || []).length;
+
+			if (inBlock === 0 && trimmed && !trimmed.startsWith('@') && !trimmed.includes('{') && trimmed.includes(':')) {
+				// Root-level property
+				rootProperties += '\t' + trimmed + '\n';
+			} else if (trimmed.startsWith('.') || trimmed.startsWith('@') || trimmed.startsWith(':')) {
+				// Selector or at-rule
+				if (rootProperties) {
+					result.push(`.${className} {\n${rootProperties}}\n`);
+					rootProperties = '';
+				}
+				currentRule += line + '\n';
+			} else {
+				currentRule += line + '\n';
+			}
+
+			inBlock += openBraces - closeBraces;
+
+			if (inBlock === 0 && currentRule.trim()) {
+				result.push(currentRule);
+				currentRule = '';
+			}
+		}
+
+		if (rootProperties) {
+			result.push(`.${className} {\n${rootProperties}}\n`);
+		}
+		if (currentRule.trim()) {
+			result.push(currentRule);
+		}
+
+		style.textContent = result.join('');
 		document.head.appendChild(style);
 	}
 	return className;

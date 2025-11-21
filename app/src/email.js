@@ -97,7 +97,7 @@ export class ContactForm extends Reactive.Component {
 	// Template for the contact form
 	template() {
 		return html`
-		<div class="contact-modal" id="${this._MODAL_ID}" data-class-show="modalVisible" data-class-closing="modalClosing" data-on-click="_handleModalClick">
+		<div id="${this._MODAL_ID}" data-class-show="modalVisible" data-class-closing="modalClosing" data-on-click="_handleModalClick">
 			<div class="contact-modal-content">
 				<div class="contact-modal-header">
 					<h2>${i18n.t("contact.title")}</h2>

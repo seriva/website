@@ -1,18 +1,16 @@
 import { css } from "./reactive.js";
 
 const modalStyles = `
-	& {
-		display: none;
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: rgba(0, 0, 0, 0.8);
-		z-index: 10000;
-		overflow-y: auto;
-		padding: 2rem 1rem;
-	}
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.8);
+	z-index: 10000;
+	overflow-y: auto;
+	padding: 2rem 1rem;
 
 	&.show {
 		display: flex;
@@ -188,9 +186,7 @@ const buttonStyles = `
 
 const mobileStyles = `
 	@media (max-width: 767px) {
-		& {
-			padding: 1rem 0.5rem;
-		}
+		padding: 1rem 0.5rem;
 
 		.contact-modal-content {
 			padding: 1.25rem;
@@ -210,9 +206,34 @@ const mobileStyles = `
 	}
 `;
 
+const animationStyles = `
+	@keyframes scaleFadeIn {
+		from {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes fadeOut {
+		from {
+			opacity: 1;
+		}
+
+		to {
+			opacity: 0;
+		}
+	}
+`;
+
 export const contactFormStyles = css`
 	${modalStyles}
 	${formStyles}
 	${buttonStyles}
 	${mobileStyles}
+	${animationStyles}
 `;
