@@ -177,7 +177,7 @@ export class Counter extends Reactive.Component {
 
 **GitHub Pages:** Custom `404.html` redirects via hash (`#!redirect=<path>`), `main.js` restores clean URL with `history.replaceState()`
 
-**Absolute Paths:** All resources use root-relative paths (`/css/main.css`, `/data/content.yaml`) to work from any route depth
+**Absolute Paths:** All resources use root-relative paths (`/src/main.js`, `/data/content.yaml`) to work from any route depth
 
 **Event Delegation:** Dynamic content uses `data-action` attributes (e.g., `<a data-action="email">`) handled globally in `main.js`
 

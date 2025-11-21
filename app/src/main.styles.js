@@ -1,10 +1,13 @@
+import { css } from "./reactive.js";
+
+const fontStyles = `
 /* Fonts - Optimized with system font fallbacks */
 @font-face {
 	font-family: Raleway;
 	font-style: normal;
 	font-weight: 400;
 	font-display: swap;
-	src: url("../fonts/raleway-latin-400-normal.woff2") format("woff2");
+	src: url("/fonts/raleway-latin-400-normal.woff2") format("woff2");
 }
 
 @font-face {
@@ -12,7 +15,7 @@
 	font-style: normal;
 	font-weight: 600;
 	font-display: swap;
-	src: url("../fonts/raleway-latin-600-normal.woff2") format("woff2");
+	src: url("/fonts/raleway-latin-600-normal.woff2") format("woff2");
 }
 
 @font-face {
@@ -20,9 +23,11 @@
 	font-style: normal;
 	font-weight: 700;
 	font-display: swap;
-	src: url("../fonts/raleway-latin-700-normal.woff2") format("woff2");
+	src: url("/fonts/raleway-latin-700-normal.woff2") format("woff2");
 }
+`;
 
+const variableStyles = `
 /* CSS Custom Properties */
 
 :root {
@@ -58,7 +63,9 @@
 	--z-navbar: 1030;
 	--z-dropdown: 1000;
 }
+`;
 
+const resetStyles = `
 /* Reset & Base Styles */
 
 html {
@@ -225,7 +232,9 @@ img {
 	opacity: 0;
 	animation: imageLoad 0.3s ease-in-out forwards;
 }
+`;
 
+const typographyStyles = `
 /* Typography & Links */
 
 a {
@@ -236,7 +245,9 @@ a {
 a.icon:hover {
 	text-decoration: none;
 }
+`;
 
+const iconStyles = `
 /* Icons - Font Awesome Subset */
 /* Only includes the icons used in this project */
 
@@ -245,7 +256,7 @@ a.icon:hover {
 	font-style: normal;
 	font-weight: 900;
 	font-display: block;
-	src: url("../fonts/fa-solid-900.woff2") format("woff2");
+	src: url("/fonts/fa-solid-900.woff2") format("woff2");
 }
 
 @font-face {
@@ -253,7 +264,7 @@ a.icon:hover {
 	font-style: normal;
 	font-weight: 400;
 	font-display: block;
-	src: url("../fonts/fa-brands-400.woff2") format("woff2");
+	src: url("/fonts/fa-brands-400.woff2") format("woff2");
 }
 
 .fas,
@@ -287,62 +298,64 @@ a.icon:hover {
 
 /* Solid Icons (fas) */
 .fa-expand::before {
-	content: "\f065";
+	content: "\\f065";
 }
 
 .fa-times::before {
-	content: "\f00d";
+	content: "\\f00d";
 }
 
 .fa-search::before {
-	content: "\f002";
+	content: "\\f002";
 }
 
 .fa-arrow-left::before {
-	content: "\f060";
+	content: "\\f060";
 }
 
 .fa-envelope::before {
-	content: "\f0e0";
+	content: "\\f0e0";
 }
 
 .fa-download::before {
-	content: "\f019";
+	content: "\\f019";
 }
 
 .fa-cube::before {
-	content: "\f1b2";
+	content: "\\f1b2";
 }
 
 .fa-external-link-alt::before {
-	content: "\f35d";
+	content: "\\f35d";
 }
 
 .fa-calendar::before {
-	content: "\f133";
+	content: "\\f133";
 }
 
 .fa-sun::before {
-	content: "\f185";
+	content: "\\f185";
 }
 
 .fa-moon::before {
-	content: "\f186";
+	content: "\\f186";
 }
 
 /* Brand Icons (fab) */
 .fa-github::before {
-	content: "\f09b";
+	content: "\\f09b";
 }
 
 .fa-youtube::before {
-	content: "\f167";
+	content: "\\f167";
 }
 
 .fa-linkedin::before {
-	content: "\f08c";
+	content: "\\f08c";
 }
+`;
 
+const componentStyles = `
 /* Components */
 
 /* Tags */
@@ -382,9 +395,6 @@ a.icon:hover {
 	transform: scale(1.05);
 }
 
-
-
-
 /* Shared mark styles for search and blog */
 .blog-post-card mark {
 	background-color: var(--accent);
@@ -394,6 +404,28 @@ a.icon:hover {
 	font-weight: bold;
 }
 
+/* Giscus Comments */
+.giscus-container {
+	max-width: 800px;
+	margin: 3rem auto;
+	padding: 2rem 1rem;
+	border-top: 2px solid var(--border-color);
+}
+
+/* Giscus widget styling overrides */
+.giscus-container iframe {
+	color-scheme: dark;
+}
+
+@media (max-width: 767px) {
+	.giscus-container {
+		margin: 2rem auto;
+		padding: 1.5rem 0.5rem;
+	}
+}
+`;
+
+const utilityStyles = `
 @keyframes imageLoad {
 	from {
 		opacity: 0;
@@ -405,10 +437,6 @@ a.icon:hover {
 		transform: scale(1);
 	}
 }
-
-/* Search styles moved to search.styles.js */
-
-/* Project styles moved to project.styles.js */
 
 /* Shared Loading & Error styles (used by Templates) */
 .loading-spinner {
@@ -449,6 +477,41 @@ a.icon:hover {
 	font-size: 1.1em;
 }
 
+/* Accessibility */
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+	outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms;
+		animation-iteration-count: 1;
+		transition-duration: 0.01ms;
+		scroll-behavior: auto;
+	}
+}
+
+@media (prefers-contrast: high) {
+	:root {
+		--border-width: 3px;
+		--accent: #66d9ff;
+	}
+}
+`;
+
+const markdownStyles = `
 /* Markdown body overrides for download buttons */
 .markdown-body .download-btn,
 .markdown-body .download-btn:link,
@@ -502,39 +565,6 @@ zero-md pre code:not([class*="language-"]) {
 	font-size: 0.85em;
 	display: block;
 	color: var(--text-light);
-}
-
-/* Accessibility */
-button:focus,
-a:focus,
-input:focus,
-select:focus,
-textarea:focus {
-	outline: 2px solid var(--accent);
-	outline-offset: 2px;
-}
-
-*:focus:not(:focus-visible) {
-	outline: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-	*,
-	*::before,
-	*::after {
-		animation-duration: 0.01ms;
-		animation-iteration-count: 1;
-		transition-duration: 0.01ms;
-		scroll-behavior: auto;
-	}
-}
-
-@media (prefers-contrast: high) {
-	:root {
-		--border-width: 3px;
-		--accent: #66d9ff;
-	}
 }
 
 /* Markdown */
@@ -731,34 +761,15 @@ textarea:focus {
 	border-top: 1px solid var(--border-color);
 	margin: 0.5em 0;
 }
+`;
 
-/* Blog styles moved to blog-list.js */
-
-/* ===========================================
-   GISCUS COMMENTS SECTION
-   ========================================== */
-
-.giscus-container {
-	max-width: 800px;
-	margin: 3rem auto;
-	padding: 2rem 1rem;
-	border-top: 2px solid var(--border-color);
-}
-
-/* Giscus widget styling overrides */
-.giscus-container iframe {
-	color-scheme: dark;
-}
-
-@media (max-width: 767px) {
-	.giscus-container {
-		margin: 2rem auto;
-		padding: 1.5rem 0.5rem;
-	}
-}
-
-/* ==========================================
-   CONTACT FORM MODAL
-   ========================================== */
-
-/* Contact form styles moved to email.styles.js */
+export const mainStyles = css`
+	${fontStyles}
+	${variableStyles}
+	${resetStyles}
+	${typographyStyles}
+	${iconStyles}
+	${componentStyles}
+	${utilityStyles}
+	${markdownStyles}
+`;
