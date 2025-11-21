@@ -32,17 +32,5 @@
 		"formatter": {
 			"quoteStyle": "double"
 		}
-	},
-	"overrides": [
-		{
-			"includes": ["app/src/styles/main.styles.js", "app/src/main.js"],
-			"assist": {
-				"actions": {
-					"source": {
-						"organizeImports": "off"
-					}
-				}
-			}
-		}
-	]
+	}
 }
