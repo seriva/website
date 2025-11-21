@@ -8,6 +8,7 @@ import { Context } from "./context.js";
 import Fuse from "./dependencies/fuse.js.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive, trusted } from "./reactive.js";
+import { searchStyles } from "./search.styles.js";
 
 export class Search extends Reactive.Component {
 	searchData = [];
@@ -73,9 +74,13 @@ export class Search extends Reactive.Component {
 		};
 	}
 
+	styles() {
+		return searchStyles;
+	}
+
 	template() {
 		return html`
-        <div class="search-page" id="search-page" data-class-show="pageVisible" data-class-closing="pageClosing" data-on-click="_handlePageClick">
+        <div id="search-page" data-class-show="pageVisible" data-class-closing="pageClosing" data-on-click="_handlePageClick">
             <div class="search-page-header">
                 <div class="search-page-header-content">
                     <button class="search-page-back" id="search-page-back" aria-label="${i18n.t("aria.goBack")}" data-on-click="close">
