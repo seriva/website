@@ -3,15 +3,15 @@
 // ===========================================
 // Reactive project detail view with GitHub README loading
 
-import { CONSTANTS } from "./constants.js";
-import { Context } from "./context.js";
-import { marked } from "./dependencies/marked.js";
-import { i18n } from "./i18n.js";
-import { MarkdownLoader } from "./markdown.js";
-import { PrismLoader } from "./prism-loader.js";
+import { html, join, Reactive, trusted } from "../core/reactive.js";
+import { marked } from "../dependencies/marked.js";
+import { Context } from "../services/context.js";
+import { i18n } from "../services/i18n.js";
+import { MarkdownLoader } from "../services/markdown.js";
+import { PrismLoader } from "../services/prism-loader.js";
+import { CONSTANTS } from "../utils/constants.js";
+import { Templates } from "../utils/templates.js";
 import { projectStyles } from "./project.styles.js";
-import { html, join, Reactive, trusted } from "./reactive.js";
-import { Templates } from "./templates.js";
 
 export class Project extends Reactive.Component {
 	projectId = null;

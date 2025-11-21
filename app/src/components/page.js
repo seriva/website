@@ -3,11 +3,11 @@
 // ===========================================
 // Reactive custom markdown page renderer
 
-import { Context } from "./context.js";
-import { i18n } from "./i18n.js";
-import { MarkdownLoader } from "./markdown.js";
-import { html, Reactive, trusted } from "./reactive.js";
-import { Templates } from "./templates.js";
+import { html, Reactive, trusted } from "../core/reactive.js";
+import { Context } from "../services/context.js";
+import { i18n } from "../services/i18n.js";
+import { MarkdownLoader } from "../services/markdown.js";
+import { Templates } from "../utils/templates.js";
 
 export class Page extends Reactive.Component {
 	pageId = null;

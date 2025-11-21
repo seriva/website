@@ -3,19 +3,19 @@
 // ===========================================
 // Application entry point and initialization
 
-import { Context } from "./context.js";
-import { ContactForm } from "./email.js";
-import { ErrorHandler } from "./error-handler.js";
-import { Footer } from "./footer.js";
+import { ContactForm } from "./components/email.js";
+import { Footer } from "./components/footer.js";
+import { MainContent } from "./components/main-content.js";
+import { Navbar } from "./components/navbar.js";
+import { Search } from "./components/search.js";
+import { Context } from "./services/context.js";
+import { ErrorHandler } from "./services/error-handler.js";
+import { MarkdownLoader } from "./services/markdown.js";
+import { Router } from "./services/routing.js";
+import { Theme } from "./services/theme.js";
 // Global styles (side-effect import)
-import { mainStyles } from "./main.styles.js";
-import { MainContent } from "./main-content.js";
-import { MarkdownLoader } from "./markdown.js";
-import { Navbar } from "./navbar.js";
-import { Router } from "./routing.js";
-import { Search } from "./search.js";
-import { Templates } from "./templates.js";
-import { Theme } from "./theme.js";
+import { mainStyles } from "./styles/main.styles.js";
+import { Templates } from "./utils/templates.js";
 
 // Explicitly use to prevent tree-shaking/unused import warning
 if (mainStyles) {

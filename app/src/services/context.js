@@ -3,8 +3,9 @@
 // ===========================================
 // Global state management and data loading
 
+import { CONSTANTS } from "../utils/constants.js";
+import { YAMLParser } from "../utils/yaml-parser.js";
 import { i18n } from "./i18n.js";
-import { YAMLParser } from "./yaml-parser.js";
 
 let appContext = null;
 const readmeCache = new Map();
@@ -135,7 +136,6 @@ export const Context = {
 	async preloadReadmes() {
 		if (!appContext?.projects?.length) return;
 
-		const { CONSTANTS } = await import("./constants.js");
 		const { MarkdownLoader } = await import("./markdown.js");
 		const githubUsername = appContext.site?.github_username || "seriva";
 

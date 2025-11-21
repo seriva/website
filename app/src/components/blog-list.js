@@ -3,12 +3,12 @@
 // ===========================================
 // Reactive blog overview with pagination
 
+import { html, join, Reactive, trusted } from "../core/reactive.js";
+import { Context } from "../services/context.js";
+import { i18n } from "../services/i18n.js";
+import { CONSTANTS } from "../utils/constants.js";
+import { Templates } from "../utils/templates.js";
 import { blogListStyles } from "./blog-list.styles.js";
-import { CONSTANTS } from "./constants.js";
-import { Context } from "./context.js";
-import { i18n } from "./i18n.js";
-import { html, join, Reactive, trusted } from "./reactive.js";
-import { Templates } from "./templates.js";
 
 export class BlogList extends Reactive.Component {
 	currentPageNumber = 1;
@@ -93,7 +93,9 @@ export class BlogList extends Reactive.Component {
 			e.preventDefault();
 			const href = link.getAttribute("href");
 			window.history.pushState({}, "", href);
-			import("./routing.js").then(({ Router }) => Router.handleRoute());
+			import("../services/routing.js").then(({ Router }) =>
+				Router.handleRoute(),
+			);
 		}
 	}
 

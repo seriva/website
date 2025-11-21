@@ -3,12 +3,18 @@
 // ===========================================
 // Markdown file loading and parsing with frontmatter support
 
-import { CONSTANTS } from "./constants.js";
-import { marked } from "./dependencies/marked.js";
+import { html, Reactive, Signals } from "../core/reactive.js";
+import { marked } from "../dependencies/marked.js";
+import { CONSTANTS } from "../utils/constants.js";
+import { Templates } from "../utils/templates.js";
+import { YAMLParser } from "../utils/yaml-parser.js";
 import { i18n } from "./i18n.js";
-import { html, Reactive, Signals } from "./reactive.js";
-import { Templates } from "./templates.js";
-import { YAMLParser } from "./yaml-parser.js";
+import { markdownStyles } from "./markdown.styles.js";
+
+// Prevent tree-shaking
+if (markdownStyles) {
+	/* no-op */
+}
 
 export const MarkdownLoader = {
 	_copyButtonComponents: new Map(),
