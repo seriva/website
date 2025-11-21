@@ -73,6 +73,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		await Router.handleRoute(); // Set up routing
 		window.addEventListener("popstate", Router.handleRoute);
 		Router.setupSpaRouting();
+
+		// Show the app now that everything is loaded
+		document.body.classList.add("app-ready");
 	} catch (error) {
 		console.error("Failed to initialize application:", error);
 		// Show error in main content
@@ -83,5 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				"Please refresh the page to try again.",
 			).content;
 		}
+		// Show the body even on error
+		document.body.classList.add("app-ready");
 	}
 });

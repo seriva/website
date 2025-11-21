@@ -6,9 +6,9 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import emailjs from "./dependencies/@emailjs/browser.js";
+import { contactFormStyles } from "./email.styles.js";
 import { i18n } from "./i18n.js";
 import { html, Reactive } from "./reactive.js";
-import { contactFormStyles } from "./email.styles.js";
 
 export class ContactForm extends Reactive.Component {
 	initialized = false;
