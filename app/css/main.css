@@ -1257,9 +1257,9 @@ textarea:focus {
 	font-family: var(--font-family-primary);
 }
 
-.navbar-container {
+.navbar-inner {
 	max-width: 1000px;
-	margin: 0 auto;
+	margin-inline: auto;
 	padding: 0 15px;
 	display: flex;
 	align-items: center;
@@ -1515,7 +1515,7 @@ button.nav-link:active {
 }
 
 @media (min-width: 768px) {
-	.navbar-container {
+	.navbar-inner {
 		padding-left: 20px;
 		padding-right: 20px;
 	}

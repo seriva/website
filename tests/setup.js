@@ -19,9 +19,8 @@ const dom = new JSDOM(
     </style>
 </head>
 <body>
-    <div id="navbar-container"></div>
-    <main id="main-content"></main>
-    <div id="footer-container"></div>
+    <!-- Components will append themselves to body -->
+    <!-- main-content element created by MainContent component -->
 </body>
 </html>`,
     {
