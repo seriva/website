@@ -383,7 +383,7 @@ export const Reactive = {
 			const element = this.render();
 			container.innerHTML = "";
 			container.appendChild(element);
-			if (this.onMount) this.onMount();
+			if (this.mount) this.mount();
 			return element;
 		}
 		appendTo(containerId) {
@@ -400,7 +400,7 @@ export const Reactive = {
 			this.initState();
 			const element = this.render();
 			container.appendChild(element);
-			if (this.onMount) this.onMount();
+			if (this.mount) this.mount();
 			return element;
 		}
 		cleanup() {

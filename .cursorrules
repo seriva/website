@@ -13,18 +13,19 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
   - Auto-batching: Event handlers with `data-on-*` are automatically batched
   - Use reactive.js wherever possible for consistent, maintainable interactivity
 - **Namespace Pattern**: Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
-  - Example: `UI.closeMobileMenu()`, `Context.get()`, `Loaders.loadBlogPage()`
+  - Example: `Context.get()`, `Context.getBlogPosts()`, `Templates.errorMessage()`
   - All modules follow this pattern consistently
   - **Method Organization**: Within namespace objects and components, organize methods in this order:
     1. Public methods first (called from other modules or templates)
     2. Private methods last (internal use only) at the bottom with `_` prefix
   - Private method naming: Always prefix with underscore `_privateMethod()`
   - **Component Structure**: For `Reactive.Component` classes:
-    1. Constructor and lifecycle methods first
-    2. `state()` method defining reactive state
-    3. `template()` method for HTML
-    4. Public methods next
-    5. Private methods last with `_` prefix
+    1. Constructor first
+    2. `mount()` lifecycle hook for post-render setup (data loading, event listeners)
+    3. `state()` method defining reactive state
+    4. `template()` method for HTML
+    5. Public methods next
+    6. Private methods last with `_` prefix
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
 - Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
 - Call `await Context.init()` to load content; access via `Context.get()` (cached)
@@ -79,9 +80,8 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
 - `app/src/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
 
 **Namespace Pattern Modules** (export single object):
-- `app/src/context.js` - `Context` namespace for app state, data loading, theming
+- `app/src/context.js` - `Context` namespace for app state, data loading, blog post utilities
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
-- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
 - `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
 - `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
 - `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading

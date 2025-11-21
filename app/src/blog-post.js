@@ -21,7 +21,7 @@ export class BlogPost extends Reactive.Component {
 		this.mountTo("main-content");
 	}
 
-	onMount() {
+	mount() {
 		this._loadPost();
 	}
 

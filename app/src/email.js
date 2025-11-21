@@ -40,7 +40,7 @@ export class ContactForm extends Reactive.Component {
 		}
 	}
 
-	onMount() {
+	mount() {
 		// Handle escape key to close modal
 		this.on(document, "keydown", (e) => {
 			if (e.key === "Escape" && this.modalVisible.get()) {

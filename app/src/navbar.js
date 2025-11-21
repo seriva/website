@@ -15,7 +15,7 @@ export class Navbar extends Reactive.Component {
 		this.mountTo("navbar-container");
 	}
 
-	onMount() {
+	mount() {
 		// Setup outside click handler for mobile menu
 		this._setupOutsideClickHandler();
 

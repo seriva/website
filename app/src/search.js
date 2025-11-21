@@ -24,7 +24,7 @@ export class Search extends Reactive.Component {
 		this.appendTo("body");
 	}
 
-	onMount() {
+	mount() {
 		// Setup search toggle button
 		const searchToggle = document.getElementById("search-toggle");
 		if (searchToggle) {
