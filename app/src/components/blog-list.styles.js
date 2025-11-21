@@ -1,4 +1,4 @@
-import { css } from "./reactive.js";
+import { css } from "../core/reactive.js";
 
 const layoutStyles = `
 	.blog-container {
@@ -90,6 +90,14 @@ const cardStyles = `
 		line-height: 1.5;
 		margin-bottom: 0;
 		font-size: 1.05em;
+	}
+
+	.blog-post-card mark {
+		background-color: var(--accent);
+		color: var(--background-color);
+		padding: 1px 3px;
+		border-radius: 2px;
+		font-weight: bold;
 	}
 `;
 

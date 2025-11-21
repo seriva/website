@@ -3,12 +3,12 @@
 // ===========================================
 // Reactive contact form modal with EmailJS integration
 
-import { CONSTANTS } from "./constants.js";
-import { Context } from "./context.js";
-import emailjs from "./dependencies/@emailjs/browser.js";
+import { html, Reactive } from "../core/reactive.js";
+import emailjs from "../dependencies/@emailjs/browser.js";
+import { Context } from "../services/context.js";
+import { i18n } from "../services/i18n.js";
+import { CONSTANTS } from "../utils/constants.js";
 import { contactFormStyles } from "./email.styles.js";
-import { i18n } from "./i18n.js";
-import { html, Reactive } from "./reactive.js";
 
 export class ContactForm extends Reactive.Component {
 	initialized = false;

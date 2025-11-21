@@ -1,4 +1,4 @@
-import { css } from "./reactive.js";
+import { css } from "../core/reactive.js";
 
 const pageStyles = `
 	display: none;

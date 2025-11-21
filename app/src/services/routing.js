@@ -3,16 +3,16 @@
 // ===========================================
 // Path-based SPA routing system
 
-import { BlogList } from "./blog-list.js";
-import { BlogPost } from "./blog-post.js";
-import { CONSTANTS } from "./constants.js";
+import { BlogList } from "../components/blog-list.js";
+import { BlogPost } from "../components/blog-post.js";
+import { Page } from "../components/page.js";
+import { Project } from "../components/project.js";
+import { CONSTANTS } from "../utils/constants.js";
+import { Templates } from "../utils/templates.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
 import { MarkdownLoader } from "./markdown.js";
-import { Page } from "./page.js";
 import { PrismLoader } from "./prism-loader.js";
-import { Project } from "./project.js";
-import { Templates } from "./templates.js";
 
 // ===========================================
 // ROUTER NAMESPACE

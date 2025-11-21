@@ -3,11 +3,11 @@
 // ===========================================
 // Reactive fuzzy search with Fuse.js for projects and blog posts
 
-import { CONSTANTS } from "./constants.js";
-import { Context } from "./context.js";
-import Fuse from "./dependencies/fuse.js.js";
-import { i18n } from "./i18n.js";
-import { html, Reactive, trusted } from "./reactive.js";
+import { html, Reactive, trusted } from "../core/reactive.js";
+import Fuse from "../dependencies/fuse.js.js";
+import { Context } from "../services/context.js";
+import { i18n } from "../services/i18n.js";
+import { CONSTANTS } from "../utils/constants.js";
 import { searchStyles } from "./search.styles.js";
 
 export class Search extends Reactive.Component {
@@ -309,7 +309,7 @@ export class Search extends Reactive.Component {
 				const href = link.getAttribute("href");
 				window.history.pushState({}, "", href);
 				// Dynamic import to avoid circular dependency
-				import("./routing.js")
+				import("../services/routing.js")
 					.then(({ Router }) => Router.handleRoute())
 					.catch((error) => {
 						console.error("Failed to load router:", error);
@@ -334,7 +334,7 @@ export class Search extends Reactive.Component {
 
 					const href = cardLink.getAttribute("href");
 					window.history.pushState({}, "", href);
-					import("./routing.js")
+					import("../services/routing.js")
 						.then(({ Router }) => Router.handleRoute())
 						.catch((error) => {
 							console.error("Failed to load router:", error);

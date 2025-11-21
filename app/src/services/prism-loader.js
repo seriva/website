@@ -3,7 +3,7 @@
 // ===========================================
 // Dynamic syntax highlighting language grammar loader
 
-import Prism from "./dependencies/prismjs.js";
+import Prism from "../dependencies/prismjs.js";
 
 const PRISM_CDN = "https://cdn.jsdelivr.net/npm/prismjs@1.30.0";
 
