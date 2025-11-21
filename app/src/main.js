@@ -7,6 +7,8 @@ import { Context } from "./context.js";
 import { ContactForm } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
 import { Footer } from "./footer.js";
+// Global styles (side-effect import)
+import { mainStyles } from "./main.styles.js";
 import { MainContent } from "./main-content.js";
 import { MarkdownLoader } from "./markdown.js";
 import { Navbar } from "./navbar.js";
@@ -14,6 +16,11 @@ import { Router } from "./routing.js";
 import { Search } from "./search.js";
 import { Templates } from "./templates.js";
 import { Theme } from "./theme.js";
+
+// Explicitly use to prevent tree-shaking/unused import warning
+if (mainStyles) {
+	/* no-op */
+}
 
 // ===========================================
 // APPLICATION INITIALIZATION
