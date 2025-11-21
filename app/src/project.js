@@ -21,7 +21,7 @@ export class Project extends Reactive.Component {
 		this.mountTo("main-content");
 	}
 
-	onMount() {
+	mount() {
 		this._loadProject();
 	}
 

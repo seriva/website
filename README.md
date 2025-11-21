@@ -33,12 +33,12 @@ The application follows a modular namespace pattern with reactive components:
                │                           │
     ┌──────────┼──────────┬────────────────┼──────────┐
     ▼          ▼          ▼                ▼          ▼
-┌────────┐ ┌────────┐ ┌─────────┐     ┌─────────┐ ┌────────┐
-│ Router │ │Loaders │ │  i18n   │     │ Navbar  │ │ Footer │
-│(Routes)│ │(Fetch) │ │ (Trans) │     │  (Nav)  │ │        │
-└────┬───┘ └───┬────┘ └─────────┘     └─────────┘ └────────┘
-     │         │                             
-     │    ┌────┴────────┬─────────────┬─────────────┐
+┌────────┐ ┌─────────┐              ┌─────────┐ ┌────────┐
+│ Router │ │  i18n   │              │ Navbar  │ │ Footer │
+│(Routes)│ │ (Trans) │              │  (Nav)  │ │        │
+└────┬───┘ └─────────┘              └─────────┘ └────────┘
+     │                                       
+     │    ┌─────────────┬─────────────┬─────────────┐
      │    ▼             ▼             ▼             ▼
      │ ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐
      └─│ BlogList │ │ BlogPost │ │ Project │ │   Page   │
@@ -63,10 +63,10 @@ The application follows a modular namespace pattern with reactive components:
 
 **Key Modules:**
 
-- **Core**: `main.js` (init, event delegation) • `reactive.js` (signals, components) • `Context` (state, data) • `Router` (SPA routing)
-- **Components**: `Navbar`, `Footer`, `BlogList`, `BlogPost`, `Project`, `Page` (reactive UI)
+- **Core**: `main.js` (init, event delegation) • `reactive.js` (signals, components) • `Context` (state, data, blog utilities) • `Router` (SPA routing)
+- **Components**: `Navbar`, `Footer`, `BlogList`, `BlogPost`, `Project`, `Page` (self-contained reactive UI - each loads its own data)
 - **Features**: `Search` (Fuse.js, conditional) • `ContactForm` (EmailJS, conditional) • `Theme` (light/dark)
-- **Utilities**: `Loaders` (fetch content) • `Templates` (HTML generation) • `MarkdownLoader` • `PrismLoader` • `YAMLParser` • `i18n`
+- **Utilities**: `Templates` (HTML generation) • `MarkdownLoader` • `PrismLoader` • `YAMLParser` • `i18n`
 
 ## Development
 

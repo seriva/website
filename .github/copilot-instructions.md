@@ -25,18 +25,19 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
    - Prefer reactive.js for all interactive features - it provides consistency and maintainability
 4. **Namespace Pattern**: Use object exports for grouping related functions
    - Export single object per module: `export const ModuleName = { method1() {}, method2() {} }`
-   - Example: `Context.get()`, `Loaders.loadBlogPage()`, `Templates.errorMessage()`
+   - Example: `Context.get()`, `Context.getBlogPosts()`, `Templates.errorMessage()`
    - All non-component modules follow this pattern consistently
    - **Method Organization**: Within namespace objects and components, organize methods in this order:
      1. **Public methods first** (called from other modules or templates)
      2. **Private methods last** (internal use only) at the bottom with `_` prefix
    - Private method naming: Always prefix with underscore `_privateMethod()`
    - **Component Structure**: For `Reactive.Component` classes:
-     1. Constructor and lifecycle methods first
-     2. `state()` method defining reactive state (signals, computed values)
-     3. `template()` method returning HTML
-     4. Public methods next (called from templates or other components)
-     5. Private methods last with `_` prefix (internal logic)
+     1. Constructor first
+     2. `mount()` lifecycle hook for post-render initialization (data loading, event listeners)
+     3. `state()` method defining reactive state (signals, computed values)
+     4. `template()` method returning HTML
+     5. Public methods next (called from templates or other components)
+     6. Private methods last with `_` prefix (internal logic)
 5. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
 6. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
 7. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
@@ -105,9 +106,8 @@ describe("My Module", () => {
 - `app/src/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
 
 **Namespace Pattern Modules** (export single object):
-- `app/src/context.js` - `Context` namespace for app state, data loading, theming
+- `app/src/context.js` - `Context` namespace for app state, data loading, blog post utilities
 - `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
-- `app/src/loaders.js` - `Loaders` namespace for content loaders (blog, projects, pages)
 - `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
 - `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
 - `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
@@ -138,6 +138,11 @@ describe("My Module", () => {
   - `Search`: only if `data?.site?.search?.enabled`
   - `ContactForm`: only if `data?.site?.emailjs?.enabled`
 - Core components (`Navbar`, `Footer`, `ThemeManager`) always initialize
+- Components are self-contained:
+  - Each component loads its own data in `mount()` lifecycle hook
+  - `mount()` runs after component is rendered to DOM
+  - Use `this.on(target, event, handler)` for auto-tracked event listeners
+  - Data loading moved from central Loaders module into individual components
 - Interactive components use reactive.js features:
   - Declarative event binding with `data-on-click`
   - Two-way binding with `data-model`
