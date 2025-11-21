@@ -11,6 +11,7 @@ import { MarkdownLoader } from "./markdown.js";
 import { PrismLoader } from "./prism-loader.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
+import { projectStyles } from "./project.styles.js";
 
 export class Project extends Reactive.Component {
 	projectId = null;
@@ -53,6 +54,10 @@ export class Project extends Reactive.Component {
 		};
 	}
 
+	styles() {
+		return projectStyles;
+	}
+
 	template() {
 		return html`<div data-html="displayContent"></div>`;
 	}
@@ -78,9 +83,8 @@ export class Project extends Reactive.Component {
 			this.project.set(project);
 
 			// Set page title
-			document.title = `${project.title} - ${
-				data.site?.title || CONSTANTS.DEFAULT_TITLE
-			}`;
+			document.title = `${project.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE
+				}`;
 
 			// Load README if repo exists
 			if (project.github_repo) {
@@ -118,13 +122,13 @@ export class Project extends Reactive.Component {
 			this._tplProjectHeader(project.title, project.description, project.tags),
 			this._tplReadme(),
 			project.youtube_videos?.length &&
-				this._tplMediaSection(
-					trusted(
-						project.youtube_videos
-							.map((v) => this._tplYoutubeVideo(v).content)
-							.join(""),
-					),
+			this._tplMediaSection(
+				trusted(
+					project.youtube_videos
+						.map((v) => this._tplYoutubeVideo(v).content)
+						.join(""),
 				),
+			),
 			project.demo_url && this._tplDemoIframe(project.demo_url),
 			this._tplProjectLinks(project.links),
 			Templates.giscusComments(this.commentsConfig.get(), "projects"),
