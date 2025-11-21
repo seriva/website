@@ -29,9 +29,7 @@ export class ContactForm extends Reactive.Component {
 		if (!config?.enabled) return;
 
 		// Append email modal to body (doesn't clear like mountTo)
-		if (!document.getElementById(this._MODAL_ID)) {
-			this.appendTo("body");
-		}
+		this.appendTo("body");
 
 		// Initialize EmailJS if publicKey is available
 		if (config.publicKey) {

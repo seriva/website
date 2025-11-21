@@ -12,7 +12,7 @@ import { Theme } from "./theme.js";
 export class Navbar extends Reactive.Component {
 	constructor() {
 		super();
-		this.mountTo("navbar-container");
+		this.appendTo("body");
 	}
 
 	mount() {
@@ -175,7 +175,7 @@ export class Navbar extends Reactive.Component {
 
 	_setupOutsideClickHandler() {
 		this.on(document, "click", (event) => {
-			const navbar = document.getElementById("navbar-container");
+			const navbar = document.querySelector(".navbar");
 			if (!navbar) return;
 
 			const isMobile = window.innerWidth <= CONSTANTS.MOBILE_BREAKPOINT;

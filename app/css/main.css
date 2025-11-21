@@ -1494,17 +1494,9 @@ button.nav-link:active {
 	padding: 1rem 0;
 	background-color: transparent;
 	flex-shrink: 0;
-}
-
-.footer-container {
 	max-width: 1000px;
-	margin: 0 auto;
-	padding: 0 15px;
-}
-
-.footer-text {
+	margin-inline: auto;
 	text-align: center;
-	margin: 0;
 	color: var(--text-light);
 	font-size: 0.9em;
 }

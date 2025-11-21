@@ -7,6 +7,7 @@ import { Context } from "./context.js";
 import { ContactForm } from "./email.js";
 import { ErrorHandler } from "./error-handler.js";
 import { Footer } from "./footer.js";
+import { MainContent } from "./main-content.js";
 import { MarkdownLoader } from "./markdown.js";
 import { Navbar } from "./navbar.js";
 import { Router } from "./routing.js";
@@ -30,8 +31,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		// Load and cache site data (single call!)
 		const data = await Context.init();
 
-		// Initialize navbar and footer
+		// Initialize layout components
 		new Navbar();
+		new MainContent();
 		new Footer();
 
 		// Initialize contact form if enabled
