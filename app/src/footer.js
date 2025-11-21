@@ -10,7 +10,7 @@ import { html, Reactive } from "./reactive.js";
 export class Footer extends Reactive.Component {
 	constructor() {
 		super();
-		this.mountTo("footer-container");
+		this.appendTo("body");
 	}
 
 	state() {
@@ -24,11 +24,6 @@ export class Footer extends Reactive.Component {
 	}
 
 	template() {
-		return html`
-		<footer class="footer">
-			<div class="footer-container">
-				<p class="footer-text" data-text="copyrightText"></p>
-			</div>
-		</footer>`;
+		return html`<footer class="footer" data-text="copyrightText"></footer>`;
 	}
 }
