@@ -1,7 +1,7 @@
 // Test i18n (internationalization) module - essentials only
 import { describe, test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { i18n } from "../app/src/i18n.js";
+import { i18n } from "../app/src/services/i18n.js";
 
 describe("Internationalization (i18n)", () => {
 	beforeEach(() => {

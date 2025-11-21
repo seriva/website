@@ -2,7 +2,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { CONSTANTS } from "../app/src/constants.js";
+import { CONSTANTS } from "../app/src/utils/constants.js";
 
 // Helper function to test search logic
 function performSearch(fuse, query, minChars = CONSTANTS.SEARCH_MIN_CHARS) {

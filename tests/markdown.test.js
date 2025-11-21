@@ -1,7 +1,7 @@
 // Test markdown loader module
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { MarkdownLoader } from "../app/src/markdown.js";
+import { MarkdownLoader } from "../app/src/services/markdown.js";
 
 describe("MarkdownLoader", () => {
 	describe("parseFrontmatter", () => {

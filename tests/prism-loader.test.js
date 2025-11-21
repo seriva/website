@@ -2,7 +2,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { PrismLoader } from "../app/src/prism-loader.js";
+import { PrismLoader } from "../app/src/services/prism-loader.js";
 
 describe("PrismLoader", () => {
 	test("should detect languages from code blocks", async () => {

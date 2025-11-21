@@ -2,7 +2,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { Signals, Reactive, html } from "../app/src/reactive.js";
+import { Signals, Reactive, html } from "../app/src/core/reactive.js";
 
 describe("Signals", () => {
 	test("should create signal with initial value", () => {

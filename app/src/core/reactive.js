@@ -42,6 +42,10 @@ export const css = (strings, ...values) => {
 
 	if (!styleCache.has(className)) {
 		styleCache.add(className);
+		// Skip style injection if document is not available (e.g., in Node.js test environment)
+		if (typeof document === "undefined") {
+			return className;
+		}
 		const style = document.createElement("style");
 		// Split into rules and process each one
 		// For root-level properties (not in a selector), prefix with the class
