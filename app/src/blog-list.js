@@ -6,7 +6,6 @@
 import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { i18n } from "./i18n.js";
-import { Loaders } from "./loaders.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
 import { Templates } from "./templates.js";
 
@@ -16,10 +15,10 @@ export class BlogList extends Reactive.Component {
 	constructor(page = 1) {
 		super();
 		this.currentPageNumber = page;
-		this.initState();
 		this.mountTo("main-content");
+	}
 
-		// Load blog posts
+	onMount() {
 		this._loadPosts();
 	}
 
@@ -100,7 +99,7 @@ export class BlogList extends Reactive.Component {
 	async _loadPosts() {
 		try {
 			const data = Context.get();
-			const posts = await Loaders._loadBlogPosts(data);
+			const posts = Context.getBlogPosts();
 
 			this.batch(() => {
 				this.posts.set(posts);

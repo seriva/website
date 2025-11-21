@@ -10,7 +10,6 @@ import { html, Reactive } from "./reactive.js";
 export class Footer extends Reactive.Component {
 	constructor() {
 		super();
-		this.initState();
 		this.mountTo("footer-container");
 	}
 

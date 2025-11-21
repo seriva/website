@@ -16,7 +16,6 @@ export class Search extends Reactive.Component {
 
 	constructor() {
 		super();
-		this.initState();
 
 		// Initialize search index
 		this._initSearchIndex();
