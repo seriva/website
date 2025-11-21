@@ -15,10 +15,10 @@ export class Page extends Reactive.Component {
 	constructor(pageId) {
 		super();
 		this.pageId = pageId;
-		this.initState();
 		this.mountTo("main-content");
+	}
 
-		// Load page content
+	onMount() {
 		this._loadContent();
 	}
 

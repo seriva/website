@@ -28,8 +28,6 @@ export class ContactForm extends Reactive.Component {
 
 		if (!config?.enabled) return;
 
-		this.initState();
-
 		// Append email modal to body (doesn't clear like mountTo)
 		if (!document.getElementById(this._MODAL_ID)) {
 			this.appendTo("body");

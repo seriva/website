@@ -7,7 +7,6 @@ import { CONSTANTS } from "./constants.js";
 import { Context } from "./context.js";
 import { marked } from "./dependencies/marked.js";
 import { i18n } from "./i18n.js";
-import { Loaders } from "./loaders.js";
 import { MarkdownLoader } from "./markdown.js";
 import { PrismLoader } from "./prism-loader.js";
 import { html, join, Reactive, trusted } from "./reactive.js";
@@ -19,10 +18,10 @@ export class Project extends Reactive.Component {
 	constructor(projectId) {
 		super();
 		this.projectId = projectId;
-		this.initState();
 		this.mountTo("main-content");
+	}
 
-		// Load project data
+	onMount() {
 		this._loadProject();
 	}
 
@@ -85,7 +84,7 @@ export class Project extends Reactive.Component {
 
 			// Load README if repo exists
 			if (project.github_repo) {
-				const readme = await Loaders.fetchGitHubReadme(project.github_repo);
+				const readme = await this._fetchGitHubReadme(project.github_repo);
 				if (readme) {
 					this.readmeContent.set(readme);
 				}
@@ -240,6 +239,34 @@ export class Project extends Reactive.Component {
 			if (document.exitFullscreen) {
 				document.exitFullscreen();
 			}
+		}
+	}
+
+	async _fetchGitHubReadme(repo) {
+		try {
+			const data = Context.get();
+			const githubUsername = data?.site?.github_username || "seriva";
+
+			// Add username prefix if not already present
+			const fullRepo = repo.includes("/") ? repo : `${githubUsername}/${repo}`;
+
+			// Use raw.githubusercontent.com to avoid API rate limits
+			// Try 'main' branch first, fallback to 'master' if needed
+			const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/main/README.md`;
+
+			// Load README using MarkdownLoader
+			let readmeContent = await MarkdownLoader.loadFile(rawUrl);
+
+			// Fallback to master branch if main doesn't exist
+			if (!readmeContent) {
+				const masterUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/master/README.md`;
+				readmeContent = await MarkdownLoader.loadFile(masterUrl);
+			}
+
+			return readmeContent;
+		} catch (error) {
+			console.warn(`Failed to load README for ${repo}:`, error);
+			return null;
 		}
 	}
 }

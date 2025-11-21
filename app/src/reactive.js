@@ -379,6 +379,7 @@ export const Reactive = {
 				console.warn(`Container #${containerId} not found`);
 				return null;
 			}
+			this.initState();
 			const element = this.render();
 			container.innerHTML = "";
 			container.appendChild(element);
@@ -396,6 +397,7 @@ export const Reactive = {
 				console.warn(`Container #${containerId} not found`);
 				return null;
 			}
+			this.initState();
 			const element = this.render();
 			container.appendChild(element);
 			if (this.onMount) this.onMount();

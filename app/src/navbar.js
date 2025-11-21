@@ -12,7 +12,6 @@ import { Theme } from "./theme.js";
 export class Navbar extends Reactive.Component {
 	constructor() {
 		super();
-		this.initState();
 		this.mountTo("navbar-container");
 	}
 
