@@ -123,25 +123,25 @@ export class Navbar extends Reactive.Component {
 
 		return html`
 		<nav class="navbar">
-		<div class="navbar-container">
-			<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
-			<button class="navbar-toggle" id="navbar-toggle" aria-controls="navbarNav" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen">
-				<span class="navbar-toggle-icon"></span>
-			</button>
-			<div class="navbar-collapse" id="navbarNav" data-class-show="mobileMenuOpen">
-				<ul class="navbar-nav left">
-					${blogLink}
-					${this._tplProjectsDropdown()}
-					${pageLinks}
-				</ul>
-				<ul class="navbar-nav right">
-					${searchBar}
-					${this._tplThemeToggle()}
-					${emailButton}
-					${socialLinksHtml}
-				</ul>
+			<div class="navbar-inner">
+				<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
+				<button class="navbar-toggle" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen">
+					<span class="navbar-toggle-icon"></span>
+				</button>
+				<div class="navbar-collapse" data-class-show="mobileMenuOpen">
+					<ul class="navbar-nav left">
+						${blogLink}
+						${this._tplProjectsDropdown()}
+						${pageLinks}
+					</ul>
+					<ul class="navbar-nav right">
+						${searchBar}
+						${this._tplThemeToggle()}
+						${emailButton}
+						${socialLinksHtml}
+					</ul>
+				</div>
 			</div>
-		</div>
 		</nav>
 	`;
 	}
