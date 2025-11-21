@@ -29,49 +29,10 @@ html::after {
 	box-sizing: border-box;
 }
 
-/* Smooth theme transitions - optimized to target elements that actually change */
-html,
-body,
-main,
-header,
-footer,
-nav,
-section,
-article,
-div,
-span,
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-a,
-button,
-input,
-textarea,
-select,
-label,
-svg,
-path,
-code,
-pre,
-blockquote,
-table,
-th,
-td,
-img,
-mark,
-.navbar,
-.nav-link,
-.dropdown,
-.dropdown-item,
-.blog-post-card,
-.search-result-item,
-.copy-code-button,
-.theme-toggle,
-.clickable-tag {
+/* Smooth theme transitions - apply to all elements */
+*,
+*::before,
+*::after {
 	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
 		color var(--theme-transition-duration) var(--theme-transition-timing),
 		border-color var(--theme-transition-duration) var(--theme-transition-timing),
@@ -79,7 +40,7 @@ mark,
 		stroke var(--theme-transition-duration) var(--theme-transition-timing);
 }
 
-/* Preserve existing transitions for interactive elements */
+/* Interactive elements: add fast transitions for transform and opacity while keeping theme transitions */
 a,
 button,
 input,
@@ -87,11 +48,13 @@ textarea,
 select,
 .nav-link,
 .dropdown-item {
-	transition: background-color var(--transition-fast),
-		color var(--transition-fast),
-		border-color var(--transition-fast),
+	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing),
+		border-color var(--theme-transition-duration) var(--theme-transition-timing),
 		opacity var(--transition-fast),
-		transform var(--transition-fast);
+		transform var(--transition-fast),
+		fill var(--theme-transition-duration) var(--theme-transition-timing),
+		stroke var(--theme-transition-duration) var(--theme-transition-timing);
 }
 
 body {
@@ -113,11 +76,17 @@ body {
 	width: 100%;
 	/* Prevent FOUC - hide body until app is ready */
 	opacity: 0;
+	/* Disable transitions on initial load to prevent flash */
 	transition: opacity 0.2s ease-in-out;
 }
 
+/* Enable theme transitions after initial load */
 body.app-ready {
 	opacity: 1;
+	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing),
+		border-color var(--theme-transition-duration) var(--theme-transition-timing),
+		opacity 0.2s ease-in-out;
 }
 
 main {
@@ -126,6 +95,8 @@ main {
 	flex: 1 0 auto;
 	max-width: 750px;
 	width: 100%;
+	background-color: var(--background-color);
+	color: var(--font-color);
 	animation: fadeIn 0.2s ease-in-out;
 }
 
@@ -172,7 +143,13 @@ img {
 
 a {
 	color: var(--accent);
-	transition: color var(--transition-fast);
+	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing),
+		border-color var(--theme-transition-duration) var(--theme-transition-timing),
+		opacity var(--transition-fast),
+		transform var(--transition-fast),
+		fill var(--theme-transition-duration) var(--theme-transition-timing),
+		stroke var(--theme-transition-duration) var(--theme-transition-timing);
 }
 
 a.icon:hover {

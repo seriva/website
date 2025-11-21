@@ -28,7 +28,7 @@ export const themeStyles = css`
 	--font-size-lg: 1.1em;
 
 	/* Theme transition */
-	--theme-transition-duration: 5s;
+	--theme-transition-duration: 0.25s;
 	--theme-transition-timing: ease-in-out;
 	--line-height-base: 1.6;
 	--transition-fast: 0.2s ease;
