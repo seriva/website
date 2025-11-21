@@ -89,7 +89,14 @@ export class Project extends Reactive.Component {
 
 			// Load README if repo exists
 			if (project.github_repo) {
-				const readme = await this._fetchGitHubReadme(project.github_repo);
+				// Try to get from cache first
+				let readme = Context.getReadme(project.github_repo);
+
+				// If not in cache, fetch it
+				if (!readme) {
+					readme = await this._fetchGitHubReadme(project.github_repo);
+				}
+
 				if (readme) {
 					this.readmeContent.set(readme);
 				}
@@ -251,22 +258,17 @@ export class Project extends Reactive.Component {
 		try {
 			const data = Context.get();
 			const githubUsername = data?.site?.github_username || "seriva";
+			const project = this.project.get();
+			const branch = project?.github_branch || "main"; // Default to main if not specified
 
 			// Add username prefix if not already present
 			const fullRepo = repo.includes("/") ? repo : `${githubUsername}/${repo}`;
 
 			// Use raw.githubusercontent.com to avoid API rate limits
-			// Try 'main' branch first, fallback to 'master' if needed
-			const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/main/README.md`;
+			const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/${branch}/README.md`;
 
 			// Load README using MarkdownLoader
-			let readmeContent = await MarkdownLoader.loadFile(rawUrl);
-
-			// Fallback to master branch if main doesn't exist
-			if (!readmeContent) {
-				const masterUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/master/README.md`;
-				readmeContent = await MarkdownLoader.loadFile(masterUrl);
-			}
+			const readmeContent = await MarkdownLoader.loadFile(rawUrl);
 
 			return readmeContent;
 		} catch (error) {
