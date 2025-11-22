@@ -1,6 +1,6 @@
 import { css } from "../core/reactive.js";
 
-const pageStyles = `
+const pageStyles = /* css */ `
 	display: none;
 	position: fixed;
 	top: 0;
@@ -24,7 +24,7 @@ const pageStyles = `
 	}
 `;
 
-const headerStyles = `
+const headerStyles = /* css */ `
 	.search-page-header {
 		display: flex;
 		align-items: center;
@@ -62,7 +62,7 @@ const headerStyles = `
 	}
 `;
 
-const inputStyles = `
+const inputStyles = /* css */ `
 	.search-page-input-wrapper {
 		flex: 1;
 		position: relative;
@@ -116,7 +116,7 @@ const inputStyles = `
 	}
 `;
 
-const resultsStyles = `
+const resultsStyles = /* css */ `
 	.search-page-content {
 		flex: 1;
 		overflow-y: auto;
@@ -162,7 +162,7 @@ const resultsStyles = `
 	}
 `;
 
-const animationStyles = `
+const animationStyles = /* css */ `
 	@keyframes fadeIn {
 		from {
 			opacity: 0;

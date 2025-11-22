@@ -1,6 +1,6 @@
 import { css } from "../core/reactive.js";
 
-const headerStyles = `
+const headerStyles = /* css */ `
 	.project-title {
 		color: var(--accent);
 		font-size: 1.5em;
@@ -21,7 +21,7 @@ const headerStyles = `
 	}
 `;
 
-const mediaStyles = `
+const mediaStyles = /* css */ `
 	.youtube-video {
 		margin: 20px 0;
 	}
@@ -43,7 +43,7 @@ const mediaStyles = `
 	}
 `;
 
-const downloadButtonStyles = `
+const downloadButtonStyles = /* css */ `
 	.download-buttons {
 		display: flex;
 		flex-wrap: wrap;

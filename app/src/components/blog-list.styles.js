@@ -1,6 +1,6 @@
 import { css } from "../core/reactive.js";
 
-const layoutStyles = `
+const layoutStyles = /* css */ `
 	.blog-container {
 		max-width: 750px;
 		margin: 0 auto;
@@ -29,7 +29,7 @@ const layoutStyles = `
 	}
 `;
 
-const cardStyles = `
+const cardStyles = /* css */ `
 	.blog-post-card {
 		padding: 1.5rem;
 		background-color: rgba(255, 255, 255, 0.02);
@@ -101,7 +101,7 @@ const cardStyles = `
 	}
 `;
 
-const paginationStyles = `
+const paginationStyles = /* css */ `
 	.blog-pagination {
 		margin: 2rem 0;
 		display: flex;
@@ -153,7 +153,7 @@ const paginationStyles = `
 	}
 `;
 
-const mobileStyles = `
+const mobileStyles = /* css */ `
 	/* Mobile */
 	@media (max-width: 767px) {
 		.blog-post-card {
