@@ -47,6 +47,17 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
    - **NEVER** hardcode user-facing strings in templates or code
    - Add new translation keys to `app/data/content.yaml` under `translations.en`
    - Examples: `i18n.t('aria.toggleTheme')`, `i18n.t('contact.title')`, `i18n.t('search.placeholder')`
+10. **CSS Architecture**:
+    - **CSS-in-JS**: Use `css` tagged template literals from `core/reactive.js`
+    - **Component Styles**: Defined in `[component].styles.js` files (e.g., `navbar.styles.js`)
+    - **Global Styles**: Defined in `app/src/styles/` directory:
+      - `reset.styles.js` - global CSS reset
+      - `shared.styles.js` - shared utility styles
+      - `theme.styles.js` - CSS variable definitions
+      - `fonts.styles.js` - font loading
+      - `main.styles.js` - main application styles
+    - **Service Styles**: `app/src/services/markdown.styles.js` for markdown content styles
+    - **No CSS Files**: Avoid creating `.css` files (except for `prism-themes/` which are auto-generated)
 
 ### Quality Requirements
 
@@ -71,7 +82,6 @@ Before any build or deployment, ALL of the following must pass:
      - Theme management (`tests/theme.test.js`)
      - Email controller (`tests/email.test.js`)
      - Error handler (`tests/error-handler.test.js`)
-     - UI utilities (`tests/ui.test.js`)
      - Prism loader (`tests/prism-loader.test.js`)
    - Uses Node.js built-in test runner (zero test framework dependencies)
    - All tests MUST pass before merging or deploying
@@ -103,32 +113,33 @@ describe("My Module", () => {
 ### Module Organization
 
 **Core Module**:
-- `app/src/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
+- `app/src/core/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
 
 **Namespace Pattern Modules** (export single object):
-- `app/src/context.js` - `Context` namespace for app state, data loading, blog post utilities
-- `app/src/routing.js` - `Router` namespace for SPA routing, page navigation
-- `app/src/templates.js` - `Templates` namespace for HTML utilities and template functions
-- `app/src/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
-- `app/src/markdown.js` - `MarkdownLoader` namespace for markdown loading
-- `app/src/prism-loader.js` - `PrismLoader` namespace for syntax highlighting
-- `app/src/i18n.js` - `i18n` namespace for internationalization
-- `app/src/constants.js` - `CONSTANTS` object for configuration
+- `app/src/services/context.js` - `Context` namespace for app state, data loading, blog post utilities
+- `app/src/services/routing.js` - `Router` namespace for SPA routing, page navigation
+- `app/src/utils/templates.js` - `Templates` namespace for HTML utilities and template functions
+- `app/src/utils/yaml-parser.js` - `YAMLParser` namespace for minimal YAML parser
+- `app/src/services/markdown.js` - `MarkdownLoader` namespace for markdown loading
+- `app/src/services/prism-loader.js` - `PrismLoader` namespace for syntax highlighting
+- `app/src/services/i18n.js` - `i18n` namespace for internationalization
+- `app/src/utils/constants.js` - `CONSTANTS` object for configuration
 
 **Reactive Components** (extend `Reactive.Component`):
-- `app/src/navbar.js` - `Navbar` component for navbar rendering
-- `app/src/footer.js` - `Footer` component for footer rendering
-- `app/src/search.js` - `Search` component for Fuse.js search (conditionally initialized)
-- `app/src/email.js` - `ContactForm` component for EmailJS contact form (conditionally initialized)
-- `app/src/theme.js` - `ThemeManager` component for theme management
-- `app/src/blog-list.js` - `BlogList` for blog listing pages
-- `app/src/blog-post.js` - `BlogPost` for blog post detail pages
-- `app/src/project.js` - `Project` for project detail pages
-- `app/src/page.js` - `Page` for custom markdown pages
+- `app/src/components/main-content.js` - `MainContent` component for main content container
+- `app/src/components/navbar.js` - `Navbar` component for navbar rendering
+- `app/src/components/footer.js` - `Footer` component for footer rendering
+- `app/src/components/search.js` - `Search` component for Fuse.js search (conditionally initialized)
+- `app/src/components/email.js` - `ContactForm` component for EmailJS contact form (conditionally initialized)
+- `app/src/services/theme.js` - `ThemeManager` component (exported as `Theme`) for theme management
+- `app/src/components/blog-list.js` - `BlogList` for blog listing pages
+- `app/src/components/blog-post.js` - `BlogPost` for blog post detail pages
+- `app/src/components/project.js` - `Project` for project detail pages
+- `app/src/components/page.js` - `Page` for custom markdown pages
 
 **Other Modules**:
 - `app/src/main.js` - Entry point, initialization
-- `app/src/error-handler.js` - `ErrorHandler` for global error handling
+- `app/src/services/error-handler.js` - `ErrorHandler` for global error handling
 - `app/src/dependencies/` - Bundled npm packages (Fuse.js, Marked, Prism, EmailJS)
 
 ### Component Initialization
@@ -137,7 +148,7 @@ describe("My Module", () => {
 - Conditional initialization:
   - `Search`: only if `data?.site?.search?.enabled`
   - `ContactForm`: only if `data?.site?.emailjs?.enabled`
-- Core components (`Navbar`, `Footer`, `ThemeManager`) always initialize
+- Core components (`MainContent`, `Navbar`, `Footer`, `Theme`) always initialize
 - Components are self-contained:
   - Each component loads its own data in `mount()` lifecycle hook
   - `mount()` runs after component is rendered to DOM
