@@ -1,6 +1,6 @@
 import { css } from "../core/reactive.js";
 
-const modalStyles = `
+const modalStyles = /* css */ `
 	display: none;
 	position: fixed;
 	top: 0;
@@ -71,7 +71,7 @@ const modalStyles = `
 	}
 `;
 
-const formStyles = `
+const formStyles = /* css */ `
 	.contact-form .form-group {
 		margin-bottom: 0.75rem;
 	}
@@ -145,7 +145,7 @@ const formStyles = `
 	}
 `;
 
-const buttonStyles = `
+const buttonStyles = /* css */ `
 	.contact-form .btn {
 		width: 100%;
 		padding: 12px 24px;
@@ -184,7 +184,7 @@ const buttonStyles = `
 	}
 `;
 
-const mobileStyles = `
+const mobileStyles = /* css */ `
 	@media (max-width: 767px) {
 		padding: 1rem 0.5rem;
 
@@ -206,7 +206,7 @@ const mobileStyles = `
 	}
 `;
 
-const animationStyles = `
+const animationStyles = /* css */ `
 	@keyframes scaleFadeIn {
 		from {
 			opacity: 0;

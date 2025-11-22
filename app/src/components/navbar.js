@@ -130,7 +130,7 @@ export class Navbar extends Reactive.Component {
 		<nav>
 			<div class="navbar-inner">
 				<a class="navbar-brand" href="#">${this.siteTitle.get()}</a>
-				<button class="navbar-toggle" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen">
+				<button class="navbar-toggle" aria-label="Toggle navigation" data-on-click="toggleMobileMenu" data-attr-aria-expanded="mobileMenuOpen" data-class-active="mobileMenuOpen">
 					<span class="navbar-toggle-icon"></span>
 				</button>
 				<div class="navbar-collapse" data-class-show="mobileMenuOpen">

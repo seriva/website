@@ -1,6 +1,6 @@
 import { css } from "../core/reactive.js";
 
-const baseStyles = `
+const baseStyles = /* css */ `
 	background-color: var(--header-color);
 	border-bottom: var(--border-width) solid var(--accent);
 	position: fixed;
@@ -138,7 +138,7 @@ const baseStyles = `
 	}
 `;
 
-const mobileToggleStyles = `
+const mobileToggleStyles = /* css */ `
 	.navbar-toggle {
 		display: none;
 		background: transparent;
@@ -148,6 +148,7 @@ const mobileToggleStyles = `
 		cursor: pointer;
 		padding: 11px 0.5rem;
 		transition: transform var(--transition-fast);
+		overflow: visible; /* Ensure pseudo-elements outside bounds are visible */
 	}
 
 	.navbar-toggle:focus {
@@ -170,26 +171,31 @@ const mobileToggleStyles = `
 		background-color: currentColor;
 		position: relative;
 		transition: background-color var(--transition-normal);
+		z-index: 1;
 	}
 
-	.navbar-toggle-icon::before,
-	.navbar-toggle-icon::after {
-		content: "";
+	.navbar-toggle-icon::before {
+		content: '';
 		display: block;
 		width: 24px;
 		height: 2px;
 		background-color: currentColor;
 		position: absolute;
 		left: 0;
+		top: -8px;
 		transition: all var(--transition-normal);
 	}
 
-	.navbar-toggle-icon::before {
-		top: -8px;
-	}
-
 	.navbar-toggle-icon::after {
+		content: '';
+		display: block;
+		width: 24px;
+		height: 2px;
+		background-color: currentColor;
+		position: absolute;
+		left: 0;
 		bottom: -8px;
+		transition: all var(--transition-normal);
 	}
 
 	.navbar-toggle.active .navbar-toggle-icon {
@@ -207,7 +213,7 @@ const mobileToggleStyles = `
 	}
 `;
 
-const dropdownStyles = `
+const dropdownStyles = /* css */ `
 	.dropdown {
 		position: relative;
 	}
@@ -283,7 +289,7 @@ const dropdownStyles = `
 	}
 `;
 
-const themeToggleStyles = `
+const themeToggleStyles = /* css */ `
 	/* Theme Toggle Button */
 	.theme-toggle {
 		background: none;
@@ -333,7 +339,7 @@ const themeToggleStyles = `
 	}
 `;
 
-const mobileLayoutStyles = `
+const mobileLayoutStyles = /* css */ `
 	/* Mobile */
 	@media (max-width: 767px) {
 		.search-nav-item {
