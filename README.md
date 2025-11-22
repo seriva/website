@@ -6,7 +6,7 @@ Personal portfolio website built with vanilla JavaScript (ES6 modules), custom r
 
 ## Tech Stack
 
-- **Core**: Vanilla HTML/CSS/JS (ES6 modules) • Custom reactive system (signals, computed, declarative binding)
+- **Core**: Vanilla HTML/JS (ES6 modules) • CSS-in-JS (via reactive.js) • Custom reactive system (signals, computed, declarative binding)
 - **Build**: Microtastic (SPA dev server) • Biome 2.3.6 (lint/format) • Node.js test runner (122 tests)
 - **Content**: YAML config + Markdown • Custom YAML parser (~4KB) • Marked.js v17 • Prism.js v1.30
 - **Features**: Fuse.js 7.1 (search) • EmailJS (contact form) • giscus (comments)
@@ -16,57 +16,12 @@ Personal portfolio website built with vanilla JavaScript (ES6 modules), custom r
 
 The application follows a modular namespace pattern with reactive components:
 
-```text
-                 ┌────────────────────┐
-                 │      main.js       │
-                 │   (Init + Events)  │
-                 └──────────┬─────────┘
-                            │
-              ┌─────────────┼─────────────┐
-              ▼             ▼             ▼
-         ┌──────────┐  ┌──────────┐  ┌──────────┐
-         │ Context  │◄─│YAMLParser│  │ Reactive │
-         │ (State)  │  │  (Parse) │  │ (System) │
-         └─────┬────┘  └──────────┘  └─────┬────┘
-               │                           │
-               │ provides data             │ powers
-               │                           │
-    ┌──────────┼──────────┬────────────────┼──────────┐
-    ▼          ▼          ▼                ▼          ▼
-┌────────┐ ┌─────────┐              ┌─────────┐ ┌────────┐
-│ Router │ │  i18n   │              │ Navbar  │ │ Footer │
-│(Routes)│ │ (Trans) │              │  (Nav)  │ │        │
-└────┬───┘ └─────────┘              └─────────┘ └────────┘
-     │                                       
-     │    ┌─────────────┬─────────────┬─────────────┐
-     │    ▼             ▼             ▼             ▼
-     │ ┌──────────┐ ┌──────────┐ ┌─────────┐ ┌──────────┐
-     └─│ BlogList │ │ BlogPost │ │ Project │ │   Page   │
-       │  (List)  │ │  (Post)  │ │ (Repo)  │ │ (Custom) │
-       └──────────┘ └──────────┘ └─────────┘ └──────────┘
-            │             │            │           │
-            └─────────────┴────────────┴───────────┘
-                          │
-         ┌────────────────┼────────────────┐
-         ▼                ▼                ▼
-    ┌──────────┐    ┌──────────┐    ┌──────────┐
-    │Templates │    │ Markdown │    │  Prism   │
-    │  (HTML)  │    │  Loader  │    │  Loader  │
-    └──────────┘    └──────────┘    └──────────┘
-         
-    Conditional Components:
-    ┌─────────┐  ┌─────────────┐  ┌──────────────┐
-    │ Search  │  │ ContactForm │  │ThemeManager  │
-    │ (Fuse)  │  │  (EmailJS)  │  │   (L/D)      │
-    └─────────┘  └─────────────┘  └──────────────┘
-```
-
 **Key Modules:**
-
-- **Core**: `main.js` (init, event delegation) • `reactive.js` (signals, components) • `Context` (state, data, blog utilities) • `Router` (SPA routing)
-- **Components**: `Navbar`, `Footer`, `BlogList`, `BlogPost`, `Project`, `Page` (self-contained reactive UI - each loads its own data)
+- **Core**: `main.js` (init, event delegation) • `core/reactive.js` (signals, components) • `Context` (state, data, blog utilities) • `Router` (SPA routing)
+- **Components**: `MainContent` (main container) • `Navbar`, `Footer`, `BlogList`, `BlogPost`, `Project`, `Page` (self-contained reactive UI - each loads its own data)
 - **Features**: `Search` (Fuse.js, conditional) • `ContactForm` (EmailJS, conditional) • `Theme` (light/dark)
-- **Utilities**: `Templates` (HTML generation) • `MarkdownLoader` • `PrismLoader` • `YAMLParser` • `i18n`
+- **Styles**: `styles/reset.styles.js` (global reset) • `styles/shared.styles.js` (shared utilities) • `styles/theme.styles.js` (CSS variables) • `styles/fonts.styles.js` (font loading) • `styles/main.styles.js` (main styles) • `[component].styles.js` (component-scoped)
+- **Utilities**: `Templates` (HTML generation) • `MarkdownLoader` (markdown parsing, copy code buttons) • `PrismLoader` • `YAMLParser` • `i18n`
 
 ## Development
 
@@ -96,18 +51,14 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
-- Run all tests (65 unit tests)
+- Run all tests (122 unit tests)
 - Copy assets (fonts, Prism themes) from node_modules
 - Bundle and minify dependencies
 - Output to `public/` directory
 
-### Manual Asset Copying
+### Asset Copying
 
-If you need to manually copy fonts and Prism themes:
-
-```bash
-npm run copy-assets
-```
+Fonts and Prism themes are automatically copied from npm packages when you run `npm run prepare`. The `assetCopy` configuration in `package.json` defines which assets to copy.
 
 Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they're auto-generated from npm packages.
 
