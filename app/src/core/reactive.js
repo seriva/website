@@ -76,7 +76,8 @@ export const css = (strings, ...values) => {
 				trimmed &&
 				!trimmed.startsWith("@") &&
 				!trimmed.includes("{") &&
-				trimmed.includes(":")
+				trimmed.includes(":") &&
+				!trimmed.endsWith(",")
 			) {
 				// Root-level property
 				rootProperties += `\t${trimmed}\n`;
