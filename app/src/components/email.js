@@ -3,11 +3,12 @@
 // ===========================================
 // Reactive contact form modal with EmailJS integration
 
-import { html, Reactive } from "../core/reactive.js";
+import { html, Reactive, trusted } from "../core/reactive.js";
 import emailjs from "../dependencies/@emailjs/browser.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { Icons } from "../utils/icons.js";
 import { contactFormStyles } from "./email.styles.js";
 
 export class ContactForm extends Reactive.Component {
@@ -102,7 +103,7 @@ export class ContactForm extends Reactive.Component {
 				<div class="contact-modal-header">
 					<h2>${i18n.t("contact.title")}</h2>
 					<button class="contact-modal-close" id="contact-modal-close" aria-label="${i18n.t("contact.close")}" data-on-click="hide">
-						<i class="fas fa-times"></i>
+						${trusted(Icons.get("times", { size: "1.2rem" }))}
 					</button>
 				</div>
 				<form class="contact-form" id="${this._FIELD_IDS.FORM}" data-on-submit="_handleSubmit">

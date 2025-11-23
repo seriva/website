@@ -22,7 +22,6 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.5",
 		"@fontsource/raleway": "^5.2.8",
-		"@fortawesome/fontawesome-free": "^7.1.0",
 		"husky": "^9.1.7",
 		"jsdom": "^27.2.0",
 		"microtastic": "^0.0.52"
@@ -45,14 +44,6 @@
 		{
 			"source": "node_modules/@fontsource/raleway/files/raleway-latin-700-normal.woff2",
 			"dest": "app/fonts/raleway-latin-700-normal.woff2"
-		},
-		{
-			"source": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2",
-			"dest": "app/fonts/fa-solid-900.woff2"
-		},
-		{
-			"source": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2",
-			"dest": "app/fonts/fa-brands-400.woff2"
 		},
 		{
 			"source": "node_modules/prismjs/themes/prism.min.css",

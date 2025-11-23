@@ -8,6 +8,7 @@ import Fuse from "../dependencies/fuse.js.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { Icons } from "../utils/icons.js";
 import { searchStyles } from "./search.styles.js";
 
 export class Search extends Reactive.Component {
@@ -84,7 +85,7 @@ export class Search extends Reactive.Component {
             <div class="search-page-header">
                 <div class="search-page-header-content">
                     <button class="search-page-back" id="search-page-back" aria-label="${i18n.t("aria.goBack")}" data-on-click="close">
-                        <i class="fas fa-arrow-left"></i>
+                        ${trusted(Icons.get("arrow-left", { size: "1.2rem" }))}
                     </button>
                     <div class="search-page-input-wrapper">
                         ${this._tplSearchInput()}
@@ -388,7 +389,7 @@ export class Search extends Reactive.Component {
 	_tplSearchNoResults() {
 		return html`
         <div class="search-no-results">
-            <i class="fas fa-search"></i>
+            ${trusted(Icons.get("search", { size: "3rem" }))}
             <p>${i18n.t("search.noResults")}</p>
         </div>`;
 	}
@@ -397,7 +398,7 @@ export class Search extends Reactive.Component {
 		return html`
         <input type="search" id="search-page-input" class="search-page-input" data-attr-placeholder="searchPlaceholder" autocomplete="off" aria-label="${i18n.t("aria.search")}" data-model="query"/>
         <button class="search-page-clear" id="search-page-clear" aria-label="${i18n.t("aria.clearSearch")}" data-on-click="clearSearch">
-            <i class="fas fa-times"></i>
+            ${trusted(Icons.get("times", { size: "1.2rem" }))}
         </button>`;
 	}
 }

@@ -7,6 +7,7 @@ import { html, join, Reactive, trusted } from "../core/reactive.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { Icons } from "../utils/icons.js";
 import { Templates } from "../utils/templates.js";
 import { blogListStyles } from "./blog-list.styles.js";
 
@@ -158,7 +159,7 @@ export class BlogList extends Reactive.Component {
                 <a href="/blog/${post.slug}" data-spa-route="blog">${post.title}</a>
             </h2>
             <div class="blog-post-meta">
-                <span class="blog-post-date"><i class="fas fa-calendar"></i> ${post.date}</span>
+                <span class="blog-post-date">${trusted(Icons.get("calendar", { size: "1rem" }))} ${post.date}</span>
                 ${post.tags?.length ? html`<span class="blog-post-tags">${this._tplTagList(post.tags)}</span>` : ""}
             </div>
             <p class="blog-post-excerpt">${post.excerpt}</p>

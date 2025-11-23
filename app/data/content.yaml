@@ -81,17 +81,17 @@ site:
   
   # Social media links
   social:
-    - icon: "fab fa-github"
+    - icon: "github"
       href: "https://github.com/seriva/"
       target: "_blank"
       rel: "noopener noreferrer"
     
-    - icon: "fab fa-youtube"
+    - icon: "youtube"
       href: "https://www.youtube.com/user/seriva"
       target: "_blank"
       rel: "noopener noreferrer"
     
-    - icon: "fab fa-linkedin"
+    - icon: "linkedin"
       href: "https://www.linkedin.com/in/luuk-van-venrooij/"
       target: "_blank"
       rel: "noopener noreferrer"
@@ -135,10 +135,10 @@ projects:
     github_branch: "master"  # Branch to load README from
     links:
       - title: "Github"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/seriva/snakeai"
       - title: "Download"
-        icon: "fas fa-download"
+        icon: "download"
         href: "https://github.com/seriva/snakeai/archive/master.zip"
 
   # First Person Shooter Game
@@ -157,10 +157,10 @@ projects:
       - "UInnHqqX2OQ"
     links:
       - title: "Github"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/seriva/simplefps"
       - title: "Download"
-        icon: "fas fa-download"
+        icon: "download"
         href: "https://github.com/seriva/simplefps/archive/master.zip"
 
   # Node.js Framework
@@ -175,10 +175,10 @@ projects:
     github_branch: "master"
     links:
       - title: "Github"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/seriva/microtastic"
       - title: "NPM"
-        icon: "fas fa-cube"
+        icon: "cube"
         href: "https://www.npmjs.com/package/microtastic"
 
   # Portfolio Website
@@ -195,7 +195,7 @@ projects:
     github_branch: "master"
     links:
       - title: "Github"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/seriva/website"
 
   # WebGL FPS Game
@@ -212,10 +212,10 @@ projects:
       - "4dWciTdnTTQ"
     links:
       - title: "Github"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/seriva/qdfps"
       - title: "Download"
-        icon: "fas fa-download"
+        icon: "download"
         href: "https://github.com/seriva/qdfps/archive/master.zip"
 
   # Game Engine Project
@@ -237,10 +237,10 @@ projects:
       - "GlelXcj9M0o"
     links:
       - title: "Github"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/seriva/genesisdevice"
       - title: "Download"
-        icon: "fas fa-download"
+        icon: "download"
         href: "https://github.com/seriva/genesisdevice/archive/master.zip"
 
   # Asteroid Game
@@ -256,10 +256,10 @@ projects:
     demo_url: "https://seriva.github.io/astrohunter/"
     links:
       - title: "Github"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/seriva/astrohunter"
       - title: "Download"
-        icon: "fas fa-download"
+        icon: "download"
         href: "https://github.com/seriva/astrohunter/archive/master.zip"
 
 # Website Pages
