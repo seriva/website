@@ -69,7 +69,7 @@ describe("Email", () => {
 		document.body.appendChild(statusDiv);
 
 		// Import Signals to test reactive behavior
-		const { Signals } = await import("../app/src/core/reactive.js");
+		const { Signals } = await import("../app/src/utils/reactive.js");
 
 		// Simulate Email's reactive status setup
 		const statusMessage = Signals.create({ text: "", type: "" });

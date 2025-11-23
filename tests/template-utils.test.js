@@ -2,7 +2,7 @@
 import { describe, test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import "./setup.js";
-import { html, trusted, join } from "../app/src/core/reactive.js";
+import { html, trusted, join } from "../app/src/utils/reactive.js";
 
 describe("Template Utility Functions", () => {
 	test("html should escape HTML characters in interpolated values", () => {

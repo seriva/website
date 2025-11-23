@@ -3,8 +3,8 @@
 // ===========================================
 // Reactive light/dark mode theme switching and color scheme management
 
-import { Reactive } from "../core/reactive.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { Reactive } from "../utils/reactive.js";
 import { Context } from "./context.js";
 
 class ThemeManager extends Reactive.Component {

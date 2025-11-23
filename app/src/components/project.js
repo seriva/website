@@ -3,7 +3,6 @@
 // ===========================================
 // Reactive project detail view with GitHub README loading
 
-import { html, join, Reactive, trusted } from "../core/reactive.js";
 import { marked } from "../dependencies/marked.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
@@ -11,6 +10,7 @@ import { MarkdownLoader } from "../services/markdown.js";
 import { PrismLoader } from "../services/prism-loader.js";
 import { CONSTANTS } from "../utils/constants.js";
 import { Icons } from "../utils/icons.js";
+import { html, join, Reactive, trusted } from "../utils/reactive.js";
 import { Templates } from "../utils/templates.js";
 import { projectStyles } from "./project.styles.js";
 

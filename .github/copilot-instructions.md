@@ -48,7 +48,7 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
    - Add new translation keys to `app/data/content.yaml` under `translations.en`
    - Examples: `i18n.t('aria.toggleTheme')`, `i18n.t('contact.title')`, `i18n.t('search.placeholder')`
 10. **CSS Architecture**:
-    - **CSS-in-JS**: Use `css` tagged template literals from `core/reactive.js`
+    - **CSS-in-JS**: Use `css` tagged template literals from `utils/reactive.js`
     - **Component Styles**: Defined in `[component].styles.js` files (e.g., `navbar.styles.js`)
     - **Global Styles**: Defined in `app/src/styles/` directory:
       - `reset.styles.js` - global CSS reset
@@ -70,8 +70,7 @@ Before any build or deployment, ALL of the following must pass:
    - Uses Biome to catch errors and enforce code quality
    
 3. **Tests**: `npm test`
-   - 122 unit tests covering:
-     - Reactive system (signals, computed, batching, components) (`tests/reactive.test.js`)
+   - 81 unit tests covering:
      - HTML escaping and template utilities (`tests/template-utils.test.js`)
      - Template generation (`tests/templates.test.js`)
      - Search functionality (`tests/search.test.js`)
@@ -113,7 +112,7 @@ describe("My Module", () => {
 ### Module Organization
 
 **Core Module**:
-- `app/src/core/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
+- `app/src/utils/reactive.js` - `Reactive` namespace + `Signals` for reactive state management, components, and declarative binding
 
 **Namespace Pattern Modules** (export single object):
 - `app/src/services/context.js` - `Context` namespace for app state, data loading, blog post utilities

@@ -3,7 +3,7 @@
 // ===========================================
 // Main content container for route components
 
-import { html, Reactive } from "../core/reactive.js";
+import { html, Reactive } from "../utils/reactive.js";
 
 export class MainContent extends Reactive.Component {
 	constructor() {

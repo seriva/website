@@ -3,12 +3,12 @@
 // ===========================================
 // Reactive navigation bar with mobile menu and dropdowns
 
-import { html, Reactive, Signals, trusted } from "../core/reactive.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { Theme } from "../services/theme.js";
 import { CONSTANTS } from "../utils/constants.js";
 import { Icons } from "../utils/icons.js";
+import { html, Reactive, Signals, trusted } from "../utils/reactive.js";
 import { navbarStyles } from "./navbar.styles.js";
 
 export class Navbar extends Reactive.Component {

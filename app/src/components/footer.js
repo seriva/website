@@ -3,9 +3,9 @@
 // ===========================================
 // Reactive footer with copyright information
 
-import { css, html, Reactive } from "../core/reactive.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
+import { css, html, Reactive } from "../utils/reactive.js";
 
 export class Footer extends Reactive.Component {
 	constructor() {

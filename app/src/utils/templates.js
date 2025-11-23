@@ -3,10 +3,10 @@
 // ===========================================
 // HTML template generation utilities
 
-import { html, trusted } from "../core/reactive.js";
 import { i18n } from "../services/i18n.js";
 import { Theme } from "../services/theme.js";
 import { CONSTANTS } from "./constants.js";
+import { html, trusted } from "./reactive.js";
 
 export const Templates = {
 	// ===========================================

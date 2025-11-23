@@ -3,11 +3,11 @@
 // ===========================================
 // Reactive blog overview with pagination
 
-import { html, join, Reactive, trusted } from "../core/reactive.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { CONSTANTS } from "../utils/constants.js";
 import { Icons } from "../utils/icons.js";
+import { html, join, Reactive, trusted } from "../utils/reactive.js";
 import { Templates } from "../utils/templates.js";
 import { blogListStyles } from "./blog-list.styles.js";
 
