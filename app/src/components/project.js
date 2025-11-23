@@ -10,6 +10,7 @@ import { i18n } from "../services/i18n.js";
 import { MarkdownLoader } from "../services/markdown.js";
 import { PrismLoader } from "../services/prism-loader.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { Icons } from "../utils/icons.js";
 import { Templates } from "../utils/templates.js";
 import { projectStyles } from "./project.styles.js";
 
@@ -180,7 +181,7 @@ export class Project extends Reactive.Component {
             <p>${i18n.t("project.demoInstructions")}</p>
             <div class="iframeWrapper">
                 <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" class="download-btn" data-on-click="toggleFullscreen"><i class="fas fa-expand"></i><span>${i18n.t("project.fullscreen")}</span></button></center>
+            </div><br><center><button id="fullscreen" class="download-btn" data-on-click="toggleFullscreen">${trusted(Icons.get("expand", { size: "1rem" }))}<span>${i18n.t("project.fullscreen")}</span></button></center>
         </div>`;
 	}
 
@@ -202,14 +203,14 @@ export class Project extends Reactive.Component {
 
 		const linksHtml = trusted(
 			links
-				.map(
-					(link) =>
-						html`
+				.map((link) => {
+					const iconSvg = Icons.get(link.icon, { size: "1rem" });
+					return html`
             <a href="${link.href}" target="_blank" rel="noopener noreferrer" class="download-btn">
-                <i class="${link.icon}"></i>
+                ${trusted(iconSvg)}
                 <span>${link.title}</span>
-            </a>`.content,
-				)
+            </a>`.content;
+				})
 				.join(""),
 		);
 

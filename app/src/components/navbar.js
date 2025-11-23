@@ -8,6 +8,7 @@ import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { Theme } from "../services/theme.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { Icons } from "../utils/icons.js";
 import { navbarStyles } from "./navbar.styles.js";
 
 export class Navbar extends Reactive.Component {
@@ -222,33 +223,41 @@ export class Navbar extends Reactive.Component {
 		]
 			.filter(Boolean)
 			.join(" ");
-		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${trusted(attrs)}><i class="${icon}"></i></a></li>`;
+		const iconSvg = Icons.get(icon, { size: "1.35rem" });
+		return html`<li class="nav-item navbar-icon"><a class="nav-link" href="${href}" ${trusted(attrs)}>${trusted(iconSvg)}</a></li>`;
 	}
 
 	_tplThemeToggle() {
+		const moonIcon = Icons.get("moon", { size: "1.35rem" });
+		const sunIcon = Icons.get("sun", { size: "1.35rem" });
 		return html`
 		<li class="nav-item navbar-icon">
 			<button id="theme-toggle" class="theme-toggle nav-link" aria-label="${i18n.t("aria.toggleTheme")}" title="${i18n.t("theme.toggleTitle")}" data-on-click="toggleTheme">
-				<i class="fas fa-moon"></i>
-				<i class="fas fa-sun"></i>
+				${trusted(moonIcon)}
+				${trusted(sunIcon)}
 			</button>
 		</li>`;
 	}
 
 	_tplEmailButton() {
+		const envelopeIcon = Icons.get("envelope", { size: "1.35rem" });
 		return html`
 		<li class="nav-item navbar-icon">
 			<button class="nav-link email-toggle" id="email-toggle" aria-label="${i18n.t("contact.title")}" title="${i18n.t("contact.buttonTitle")}" data-on-click="toggleEmail">
-				<i class="fas fa-envelope"></i>
+				${trusted(envelopeIcon)}
 			</button>
 		</li>`;
 	}
 
 	_tplProjectsDropdown() {
+		const chevronDown = Icons.get("chevron-down", { size: "0.8em" });
+		const chevronUp = Icons.get("chevron-up", { size: "0.8em" });
 		return html`
 		<li class="nav-item dropdown" data-class-show="dropdownOpen">
 			<a class="nav-link dropdown-toggle" href="javascript:void(0)" role="button" data-route-type="project" data-class-active="isProjectActive" data-attr-aria-expanded="dropdownOpen" data-on-click="toggleDropdown">
 				${i18n.t("nav.projects")}
+				<span class="dropdown-chevron dropdown-chevron-down">${trusted(chevronDown)}</span>
+				<span class="dropdown-chevron dropdown-chevron-up">${trusted(chevronUp)}</span>
 			</a>
 			<ul class="dropdown-menu" id="projects-dropdown">
 				${this._getProjectsHtml()}
@@ -278,10 +287,11 @@ export class Navbar extends Reactive.Component {
 	}
 
 	_tplSearchBar() {
+		const searchIcon = Icons.get("search", { size: "1.35rem" });
 		return html`
 		<li class="nav-item navbar-icon">
 			<button class="nav-link search-toggle" id="search-toggle" aria-label="${i18n.t("aria.search")}" title="${i18n.t("search.buttonTitle")}">
-				<i class="fas fa-search"></i>
+				${trusted(searchIcon)}
 			</button>
 		</li>`;
 	}

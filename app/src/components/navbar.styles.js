@@ -96,6 +96,22 @@ const baseStyles = /* css */ `
 		font-weight: 700;
 	}
 
+	/* Enhanced hover animations for navbar icons */
+	.navbar-icon .nav-link svg {
+		transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+					rotate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+		transform-origin: center;
+	}
+
+	.navbar-icon .nav-link:hover svg,
+	.navbar-icon .nav-link:focus svg {
+		transform: rotate(8deg) scale(1.25);
+	}
+
+	.navbar-icon .nav-link:active svg {
+		transform: rotate(4deg) scale(1.1);
+	}
+
 	.nav-link:hover,
 	.nav-link:focus,
 	.nav-link:active {
@@ -224,17 +240,32 @@ const dropdownStyles = /* css */ `
 		gap: 0.3rem;
 	}
 
-	.dropdown-toggle::after {
-		content: "\\f107";
-		font-family: "Font Awesome 6 Free", sans-serif;
-		font-weight: 900;
-		font-size: 0.8em;
+	.dropdown-chevron {
+		display: inline-flex;
+		align-items: center;
 		transition: transform var(--transition-fast);
 		transform-origin: center;
 	}
 
-	.dropdown.show .dropdown-toggle::after {
-		transform: rotate(180deg);
+	.dropdown-chevron svg {
+		width: 0.8em;
+		height: 0.8em;
+	}
+
+	.dropdown-chevron-down {
+		display: inline-flex;
+	}
+
+	.dropdown-chevron-up {
+		display: none;
+	}
+
+	.dropdown.show .dropdown-chevron-down {
+		display: none;
+	}
+
+	.dropdown.show .dropdown-chevron-up {
+		display: inline-flex;
 	}
 
 	.dropdown-menu {
@@ -300,41 +331,53 @@ const themeToggleStyles = /* css */ `
 		display: flex;
 		align-items: center;
 		font-size: 1.35rem;
-		transition: color var(--transition-fast), transform var(--transition-fast);
+		transition: color var(--transition-fast), background-color var(--transition-fast);
 	}
 
-	.theme-toggle:hover {
+	.theme-toggle:hover,
+	.theme-toggle:focus {
 		color: var(--accent);
-		transform: scale(1.1);
+		background-color: var(--hover-color);
+	}
+
+	.theme-toggle:hover svg,
+	.theme-toggle:focus svg {
+		transform: rotate(8deg) scale(1.25);
 	}
 
 	.theme-toggle:active {
-		transform: scale(0.95);
+		color: var(--accent);
 	}
 
-	.theme-toggle i {
+	.theme-toggle:active svg {
+		transform: rotate(4deg) scale(1.1);
+	}
+
+	.theme-toggle svg {
 		transition: opacity var(--theme-transition-duration) var(--theme-transition-timing),
-					transform var(--theme-transition-duration) var(--theme-transition-timing);
+					transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+					fill var(--transition-fast);
+		fill: currentColor;
 	}
 
 	/* Show/hide icons based on theme with fade */
-	:root[data-theme="dark"] & .theme-toggle .fa-sun {
-		display: inline;
+	:root[data-theme="dark"] & .theme-toggle .icon-sun {
+		display: inline-block;
 		opacity: 1;
 	}
 
-	:root[data-theme="dark"] & .theme-toggle .fa-moon {
+	:root[data-theme="dark"] & .theme-toggle .icon-moon {
 		display: none;
 		opacity: 0;
 	}
 
-	:root[data-theme="light"] & .theme-toggle .fa-sun {
+	:root[data-theme="light"] & .theme-toggle .icon-sun {
 		display: none;
 		opacity: 0;
 	}
 
-	:root[data-theme="light"] & .theme-toggle .fa-moon {
-		display: inline;
+	:root[data-theme="light"] & .theme-toggle .icon-moon {
+		display: inline-block;
 		opacity: 1;
 	}
 `;
