@@ -139,6 +139,12 @@ const baseStyles = /* css */ `
 		outline: none;
 	}
 
+	/* Ensure hover styles persist even when focused (overriding the rule above) */
+	.nav-link:focus:not(:focus-visible):hover {
+		background-color: var(--hover-color);
+		color: var(--accent);
+	}
+
 	/* Search */
 	.search-nav-item {
 		position: relative;
