@@ -1,4 +1,4 @@
-import { css } from "../core/reactive.js";
+import { css } from "../utils/reactive.js";
 
 export const fontStyles = css`
 /* Fonts - Optimized with system font fallbacks */

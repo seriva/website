@@ -3,12 +3,12 @@
 // ===========================================
 // Reactive fuzzy search with Fuse.js for projects and blog posts
 
-import { html, Reactive, trusted } from "../core/reactive.js";
 import Fuse from "../dependencies/fuse.js.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { CONSTANTS } from "../utils/constants.js";
 import { Icons } from "../utils/icons.js";
+import { html, Reactive, trusted } from "../utils/reactive.js";
 import { searchStyles } from "./search.styles.js";
 
 export class Search extends Reactive.Component {

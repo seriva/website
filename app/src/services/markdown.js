@@ -3,9 +3,9 @@
 // ===========================================
 // Markdown file loading and parsing with frontmatter support
 
-import { html, Reactive, Signals } from "../core/reactive.js";
 import { marked } from "../dependencies/marked.js";
 import { CONSTANTS } from "../utils/constants.js";
+import { html, Reactive, Signals } from "../utils/reactive.js";
 import { Templates } from "../utils/templates.js";
 import { YAMLParser } from "../utils/yaml-parser.js";
 import { i18n } from "./i18n.js";
