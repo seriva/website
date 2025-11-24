@@ -11,7 +11,7 @@
 	},
 	"customizations": {
 		"vscode": {
-			"extensions": ["biomejs.biome", "pushqrdx.inline-html"],
+			"extensions": ["biomejs.biome", "tobermory.es6-string-html"],
 			"settings": {
 				"editor.codeActionsOnSave": {
 					"quickfix.biome": "explicit",
