@@ -32,9 +32,14 @@ export class ContactForm extends Reactive.Component {
 
 		// Append email modal to body (doesn't clear like mountTo)
 		this.appendTo("body");
+	}
 
-		// Initialize EmailJS if publicKey is available
-		if (config.publicKey) {
+	init() {
+		// Initialize EmailJS after state is ready
+		const data = Context.get();
+		const config = data?.site?.emailjs;
+
+		if (config?.publicKey) {
 			emailjs.init(config.publicKey);
 			this.initialized = true;
 		}
