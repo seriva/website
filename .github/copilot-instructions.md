@@ -33,11 +33,12 @@ This is a modern portfolio website built with vanilla JavaScript (ES6 modules), 
    - Private method naming: Always prefix with underscore `_privateMethod()`
    - **Component Structure**: For `Reactive.Component` classes:
      1. Constructor first
-     2. `mount()` lifecycle hook for post-render initialization (data loading, event listeners)
-     3. `state()` method defining reactive state (signals, computed values)
+     2. `state()` method defining reactive state (signals, computed values)
+     3. `init()` lifecycle hook (optional) for setup after state initialization (setting initial values, effects, bindings)
      4. `template()` method returning HTML
-     5. Public methods next (called from templates or other components)
-     6. Private methods last with `_` prefix (internal logic)
+     5. `mount()` lifecycle hook (optional) for post-render setup (data loading, event listeners, refs)
+     6. Public methods next (called from templates or other components)
+     7. Private methods last with `_` prefix (internal logic)
 5. **Template Literals**: Use `html\`...\`` tagged templates for secure HTML generation (auto-escaping)
 6. **Security**: Only use `${safe(trustedHtml)}` for trusted, internal HTML strings
 7. **Routing**: SPA routing with URLSearchParams (`?blog`, `?project=id`, `?page=id`)
@@ -148,11 +149,19 @@ describe("My Module", () => {
   - `Search`: only if `data?.site?.search?.enabled`
   - `ContactForm`: only if `data?.site?.emailjs?.enabled`
 - Core components (`MainContent`, `Navbar`, `Footer`, `Theme`) always initialize
-- Components are self-contained:
-  - Each component loads its own data in `mount()` lifecycle hook
-  - `mount()` runs after component is rendered to DOM
-  - Use `this.on(target, event, handler)` for auto-tracked event listeners
-  - Data loading moved from central Loaders module into individual components
+
+### Component Lifecycle
+
+Execution order: `constructor()` → `initState()` → `state()` + `init()` → `render()` → `template()` + `styles()` → `mount()`
+
+1. **`constructor()`**: Set instance properties, call `mountTo()` or `appendTo()`. Don't access Context or create signals here.
+2. **`state()`** (optional): Return object with signal/computed definitions. Use closure variables, not `this.property`.
+3. **`init()`** (optional): Called after state initialization, before rendering. Perfect for setting initial values, creating effects, binding attributes. Can access `this.signals` and `Context.get()`.
+4. **`template()`**: Return `html`` template. Access state via `this.property.get()`.
+5. **`mount()`** (optional): Called after mounted to DOM. Perfect for loading async data, accessing `this.refs`, setting up event listeners.
+
+- Components are self-contained and load their own data in `mount()` lifecycle hook
+- Use `this.on(target, event, handler)` for auto-tracked event listeners
 - Interactive components use reactive.js features:
   - Declarative event binding with `data-on-click`
   - Two-way binding with `data-model`

@@ -116,7 +116,7 @@ export class Counter extends Reactive.Component {
 }
 ```
 
-**Declarative Bindings:** `data-text`, `data-html`, `data-attr-*`, `data-class-*`, `data-bool-*`, `data-model`, `data-on-click/submit`
+**Declarative Bindings:** `data-text`, `data-html`, `data-attr-*`, `data-class-*`, `data-bool-*`, `data-visible`, `data-model`, `data-on-click/submit`
 
 **Benefits:** Direct DOM updates • Auto-batching • Computed values • No virtual DOM • No build step required
 

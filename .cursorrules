@@ -21,11 +21,12 @@ Keep it fast, simple, and secure. Minimal build tooling with Microtastic. Modula
   - Private method naming: Always prefix with underscore `_privateMethod()`
   - **Component Structure**: For `Reactive.Component` classes:
     1. Constructor first
-    2. `mount()` lifecycle hook for post-render setup (data loading, event listeners)
-    3. `state()` method defining reactive state
+    2. `state()` method defining reactive state (signals, computed values)
+    3. `init()` lifecycle hook (optional) for setup after state initialization (setting initial values, effects, bindings)
     4. `template()` method for HTML
-    5. Public methods next
-    6. Private methods last with `_` prefix
+    5. `mount()` lifecycle hook (optional) for post-render setup (data loading, event listeners, refs)
+    6. Public methods next
+    7. Private methods last with `_` prefix
 - Use `html\`...\`` templates everywhere; all user content auto-escapes
 - Use `${safe(trustedHtml)}` only for trusted, internal HTML strings
 - Call `await Context.init()` to load content; access via `Context.get()` (cached)

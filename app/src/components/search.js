@@ -18,15 +18,13 @@ export class Search extends Reactive.Component {
 
 	constructor() {
 		super();
-
-		// Initialize search index
-		this._initSearchIndex();
-
 		// Append search overlay to body (doesn't clear like mountTo)
 		this.appendTo("body");
 	}
 
 	mount() {
+		// Initialize search index after component is mounted
+		this._initSearchIndex();
 		// Setup search toggle button
 		const searchToggle = document.getElementById("search-toggle");
 		if (searchToggle) {
@@ -65,13 +63,7 @@ export class Search extends Reactive.Component {
 			// Computed values
 			results: () => this._performSearch(this.query.get()),
 			resultsHtml: () => this._renderResults(),
-			pageClass: () => {
-				const visible = this.pageVisible.get();
-				const closing = this.pageClosing.get();
-				if (closing) return "search-page show closing";
-				if (visible) return "search-page show";
-				return "search-page";
-			},
+			hasClearButton: () => this.query.get().length > 0,
 		};
 	}
 
@@ -396,7 +388,7 @@ export class Search extends Reactive.Component {
 	_tplSearchInput() {
 		return html`
         <input type="search" id="search-page-input" class="search-page-input" data-ref="searchInput" data-attr-placeholder="searchPlaceholder" autocomplete="off" aria-label="${i18n.t("aria.search")}" data-model="query"/>
-        <button class="search-page-clear" id="search-page-clear" data-ref="clearButton" aria-label="${i18n.t("aria.clearSearch")}" data-on-click="clearSearch">
+        <button class="search-page-clear" id="search-page-clear" data-ref="clearButton" data-visible="hasClearButton" aria-label="${i18n.t("aria.clearSearch")}" data-on-click="clearSearch">
             ${trusted(Icons.get("times", { size: "1.2rem" }))}
         </button>`;
 	}
