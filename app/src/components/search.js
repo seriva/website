@@ -93,7 +93,7 @@ export class Search extends Reactive.Component {
                 </div>
             </div>
             <div class="search-page-content">
-                <div class="search-page-results" id="search-page-results" data-html="resultsHtml"></div>
+                <div class="search-page-results" id="search-page-results" data-ref="resultsContainer" data-html="resultsHtml"></div>
             </div>
         </div>`;
 	}
@@ -148,7 +148,9 @@ export class Search extends Reactive.Component {
 		if (this.refs.searchInput) {
 			requestAnimationFrame(() => {
 				this.refs.searchInput.focus();
-				this.refs.searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+				this.refs.searchInput.dispatchEvent(
+					new Event("input", { bubbles: true }),
+				);
 			});
 		}
 	}
@@ -393,8 +395,8 @@ export class Search extends Reactive.Component {
 
 	_tplSearchInput() {
 		return html`
-        <input type="search" id="search-page-input" class="search-page-input" data-attr-placeholder="searchPlaceholder" autocomplete="off" aria-label="${i18n.t("aria.search")}" data-model="query"/>
-        <button class="search-page-clear" id="search-page-clear" aria-label="${i18n.t("aria.clearSearch")}" data-on-click="clearSearch">
+        <input type="search" id="search-page-input" class="search-page-input" data-ref="searchInput" data-attr-placeholder="searchPlaceholder" autocomplete="off" aria-label="${i18n.t("aria.search")}" data-model="query"/>
+        <button class="search-page-clear" id="search-page-clear" data-ref="clearButton" aria-label="${i18n.t("aria.clearSearch")}" data-on-click="clearSearch">
             ${trusted(Icons.get("times", { size: "1.2rem" }))}
         </button>`;
 	}
