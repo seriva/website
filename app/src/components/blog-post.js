@@ -97,7 +97,7 @@ export class BlogPost extends Reactive.Component {
 
 			// Use RAF to ensure browser has processed the HTML
 			//requestAnimationFrame(() => {
-				PrismLoader.highlight(container);
+			PrismLoader.highlight(container);
 			//});
 		});
 	}
