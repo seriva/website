@@ -108,9 +108,8 @@ export class Search extends Reactive.Component {
 			this.pageVisible.set(true);
 		});
 
-		const searchInput = document.getElementById("search-page-input");
-		if (searchInput) {
-			requestAnimationFrame(() => searchInput.focus());
+		if (this.refs.searchInput) {
+			requestAnimationFrame(() => this.refs.searchInput.focus());
 		}
 	}
 
@@ -135,9 +134,8 @@ export class Search extends Reactive.Component {
 
 	clearSearch() {
 		this.query.set("");
-		const searchInput = document.getElementById("search-page-input");
-		if (searchInput) {
-			searchInput.focus();
+		if (this.refs.searchInput) {
+			this.refs.searchInput.focus();
 		}
 	}
 
@@ -147,11 +145,10 @@ export class Search extends Reactive.Component {
 		this.query.set(tag);
 		this.show();
 
-		const searchInput = document.getElementById("search-page-input");
-		if (searchInput) {
+		if (this.refs.searchInput) {
 			requestAnimationFrame(() => {
-				searchInput.focus();
-				searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+				this.refs.searchInput.focus();
+				this.refs.searchInput.dispatchEvent(new Event("input", { bubbles: true }));
 			});
 		}
 	}
@@ -262,7 +259,7 @@ export class Search extends Reactive.Component {
 
 	_setupEventHandlers() {
 		// Handle input changes with debouncing
-		const searchInput = document.getElementById("search-page-input");
+		const searchInput = this.refs.searchInput;
 		if (searchInput) {
 			this.on(searchInput, "input", (e) => {
 				const value = e.target.value;
@@ -280,13 +277,13 @@ export class Search extends Reactive.Component {
 			});
 		}
 
-		const clearButton = document.getElementById("search-page-clear");
+		const clearButton = this.refs.clearButton;
 		if (clearButton) {
 			this.on(clearButton, "click", () => this.clearSearch());
 		}
 
 		// Handle result clicks
-		const resultsContainer = document.getElementById("search-page-results");
+		const resultsContainer = this.refs.resultsContainer;
 		if (resultsContainer) {
 			this._setupResultClickHandlers(resultsContainer);
 		}

@@ -164,14 +164,12 @@ export const MarkdownLoader = {
 			// Bind button text to signal
 			component.bindText(button, buttonText);
 
-			// Subscribe to state changes for CSS class updates
-			component.track(
-				buttonState.subscribe((state) => {
-					button.classList.toggle("copied", state === "copied");
-				}),
-			);
+			// Bind "copied" class reactively
+			const isCopied = component.computed(() => buttonState.get() === "copied");
+			component.track(component.bindClass(button, "copied", isCopied));
 
-			button.addEventListener("click", async () => {
+			// Use component.on() for auto-cleanup
+			const clickHandler = async () => {
 				try {
 					const code = codeElement.textContent || "";
 					await navigator.clipboard.writeText(code);
@@ -188,7 +186,9 @@ export const MarkdownLoader = {
 						buttonState.set("copy");
 					}, CONSTANTS.COPY_BUTTON_RESET_MS);
 				}
-			});
+			};
+			button.addEventListener("click", clickHandler);
+			component.track(() => button.removeEventListener("click", clickHandler));
 
 			pre.style.position = "relative";
 			pre.appendChild(button);
