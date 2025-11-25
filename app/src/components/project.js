@@ -23,36 +23,79 @@ export class Project extends Reactive.Component {
 		this.mountTo("main-content");
 	}
 
-	mount() {
-		this._loadProject();
-	}
-
 	state() {
 		const data = Context.get();
+		const project = data?.projects?.find((p) => p.id === this.projectId);
 
 		return {
-			loading: true,
-			project: null,
-			error: null,
-			readmeContent: null,
+			project,
 			commentsConfig: data?.site?.comments,
+
+			// Async computed for README loading with cancellation
+			readmeData: this.computedAsync(async (cancelToken) => {
+				if (!project?.github_repo) return null;
+
+				// Try to get from cache first
+				let readme = Context.getReadme(project.github_repo);
+
+				// If not in cache, fetch it
+				if (!readme) {
+					readme = await this._fetchGitHubReadme(
+						project.github_repo,
+						cancelToken,
+					);
+				}
+
+				if (cancelToken?.cancelled) return null;
+				return readme;
+			}, "readmeData"),
 
 			// Computed display content
 			displayContent: () => {
-				if (this.loading.get()) {
-					return Templates.loadingSpinner();
-				}
+				const readmeState = this.readmeData.get();
+				const currentProject = this.project.get();
 
-				if (this.error.get()) {
+				if (!currentProject) {
 					return Templates.errorMessage(
 						i18n.t("general.projectNotFound"),
 						i18n.t("general.projectNotFoundMessage"),
 					);
 				}
 
-				return trusted(this._renderSections());
+				// Show loading spinner while README is loading
+				if (readmeState.loading && currentProject.github_repo) {
+					return trusted(
+						this._renderSections(readmeState) +
+							Templates.loadingSpinner().content,
+					);
+				}
+
+				return trusted(this._renderSections(readmeState));
 			},
 		};
+	}
+
+	mount() {
+		const data = Context.get();
+		const project = this.project.get();
+
+		if (project) {
+			// Set page title
+			document.title = `${project.title} - ${
+				data.site?.title || CONSTANTS.DEFAULT_TITLE
+			}`;
+		}
+
+		// Reactive effect: Apply syntax highlighting when README loads
+		this.effect(() => {
+			const state = this.readmeData.get();
+			if (state.data) {
+				const container = document.querySelector(".project-sections");
+				if (container) {
+					PrismLoader.highlight(container);
+				}
+			}
+		});
 	}
 
 	styles() {
@@ -67,69 +110,13 @@ export class Project extends Reactive.Component {
 	// PRIVATE METHODS
 	// ===========================================
 
-	async _loadProject() {
-		try {
-			const data = Context.get();
-			const project = data?.projects?.find((p) => p.id === this.projectId);
-
-			if (!project) {
-				this.batch(() => {
-					this.error.set(true);
-					this.loading.set(false);
-				});
-				return;
-			}
-
-			// Set project data first but keep loading true
-			this.project.set(project);
-
-			// Set page title
-			document.title = `${project.title} - ${
-				data.site?.title || CONSTANTS.DEFAULT_TITLE
-			}`;
-
-			// Load README if repo exists
-			if (project.github_repo) {
-				// Try to get from cache first
-				let readme = Context.getReadme(project.github_repo);
-
-				// If not in cache, fetch it
-				if (!readme) {
-					readme = await this._fetchGitHubReadme(project.github_repo);
-				}
-
-				if (readme) {
-					this.readmeContent.set(readme);
-				}
-			}
-
-			// Now set loading to false to show the complete page
-			this.loading.set(false);
-
-			// Highlight code blocks after render
-			requestAnimationFrame(async () => {
-				const readmeEl = document.getElementById("project-readme");
-				if (readmeEl) {
-					await PrismLoader.highlight(readmeEl);
-					MarkdownLoader.initCopyCodeButtons();
-				}
-			});
-		} catch (error) {
-			console.error(`Error loading project ${this.projectId}:`, error);
-			this.batch(() => {
-				this.error.set(true);
-				this.loading.set(false);
-			});
-		}
-	}
-
-	_renderSections() {
+	_renderSections(readmeState) {
 		const project = this.project.get();
 		if (!project) return "";
 
 		const sections = [
 			this._tplProjectHeader(project.title, project.description, project.tags),
-			this._tplReadme(),
+			this._tplReadme(readmeState),
 			project.youtube_videos?.length &&
 				this._tplMediaSection(
 					trusted(
@@ -185,17 +172,24 @@ export class Project extends Reactive.Component {
         </div>`;
 	}
 
-	_tplReadme() {
-		const content = this.readmeContent.get();
+	_tplReadme(readmeState) {
 		const project = this.project.get();
 
 		if (!project?.github_repo) return "";
 
-		if (!content) {
-			return html`<div id="project-readme"><p>${i18n.t("project.loadingReadme")}</p></div>`;
+		// Show loading or error state
+		if (readmeState?.loading) {
+			return html`<div id="project-readme" data-ref="readme"><p>${i18n.t("project.loadingReadme")}</p></div>`;
 		}
 
-		return html`<div id="project-readme" class="markdown-body">${trusted(marked.parse(content))}</div>`;
+		if (readmeState?.error) {
+			return html`<div id="project-readme" data-ref="readme"><p>${i18n.t("project.readmeError")}</p></div>`;
+		}
+
+		const content = readmeState?.data;
+		if (!content) return "";
+
+		return html`<div id="project-readme" data-ref="readme" class="markdown-body">${trusted(marked.parse(content))}</div>`;
 	}
 
 	_tplProjectLinks(links) {
@@ -255,7 +249,7 @@ export class Project extends Reactive.Component {
 		}
 	}
 
-	async _fetchGitHubReadme(repo) {
+	async _fetchGitHubReadme(repo, cancelToken = null) {
 		try {
 			const data = Context.get();
 			const githubUsername = data?.site?.github_username || "seriva";
@@ -268,11 +262,17 @@ export class Project extends Reactive.Component {
 			// Use raw.githubusercontent.com to avoid API rate limits
 			const rawUrl = `${CONSTANTS.GITHUB_RAW_BASE}/${fullRepo}/${branch}/README.md`;
 
-			// Load README using MarkdownLoader
-			const readmeContent = await MarkdownLoader.loadFile(rawUrl);
+			// Load README using MarkdownLoader with cancellation support
+			const readmeContent = await MarkdownLoader.loadFile(
+				rawUrl,
+				{},
+				cancelToken,
+			);
 
+			if (cancelToken?.cancelled) return null;
 			return readmeContent;
 		} catch (error) {
+			if (cancelToken?.cancelled) return null;
 			console.warn(`Failed to load README for ${repo}:`, error);
 			return null;
 		}

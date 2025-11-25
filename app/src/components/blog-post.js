@@ -27,46 +27,83 @@ export class BlogPost extends Reactive.Component {
 		this.mountTo("main-content");
 	}
 
-	mount() {
-		this._loadPost();
-	}
-
 	state() {
 		const data = Context.get();
+		const posts = Context.getBlogPosts();
+		const post = posts.find((p) => p.slug === this.slug || p.id === this.slug);
 
 		return {
-			loading: true,
-			post: null,
-			content: "",
-			error: null,
+			post,
 			commentsConfig: data?.site?.comments,
+
+			// Async computed for blog post content with cancellation
+			postData: this.computedAsync(async (cancelToken) => {
+				if (!post) {
+					throw new Error("Post not found");
+				}
+
+				const content = await this._loadBlogPostContent(post, cancelToken);
+				if (cancelToken?.cancelled) return null;
+
+				return { post, content };
+			}, "postData"),
 
 			// Computed display content
 			displayContent: () => {
-				if (this.loading.get()) {
-					return Templates.loadingSpinner();
-				}
+				const state = this.postData.get();
+				const currentPost = this.post.get();
 
-				if (this.error.get()) {
+				if (!currentPost) {
 					return Templates.errorMessage(
 						i18n.t("general.blogNotFound"),
 						i18n.t("general.blogNotFoundMessage"),
 					);
 				}
 
-				const post = this.post.get();
-				const content = this.content.get();
+				if (state.loading) {
+					return Templates.loadingSpinner();
+				}
+
+				if (state.error) {
+					return Templates.errorMessage(
+						i18n.t("general.blogNotFound"),
+						i18n.t("general.blogNotFoundMessage"),
+					);
+				}
+
+				const { content } = state.data;
 				const commentsHtml = Templates.giscusComments(
 					this.commentsConfig.get(),
 					"blog",
 				);
 
 				return html`
-                    ${this._tplBlogPost(post, content)}
+                    ${this._tplBlogPost(currentPost, content)}
                     ${commentsHtml}
                 `;
 			},
 		};
+	}
+
+	mount() {
+		const data = Context.get();
+		const post = this.post.get();
+
+		if (post) {
+			// Set page title
+			document.title = `${post.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
+		}
+
+		// Reactive effect: Apply syntax highlighting when content loads
+		this.effect(() => {
+			const state = this.postData.get();
+			if (state.data?.content) {
+				const container = document.querySelector(".blog-post-content");
+				if (container) {
+					PrismLoader.highlight(container);
+				}
+			}
+		});
 	}
 
 	template() {
@@ -77,61 +114,18 @@ export class BlogPost extends Reactive.Component {
 	// PRIVATE METHODS
 	// ===========================================
 
-	async _loadPost() {
-		try {
-			const data = Context.get();
-			const posts = Context.getBlogPosts();
-			const post = posts.find(
-				(p) => p.slug === this.slug || p.id === this.slug,
-			);
-
-			if (!post) {
-				this.batch(() => {
-					this.error.set(true);
-					this.loading.set(false);
-				});
-				return;
-			}
-
-			const content = await this._loadBlogPostContent(post);
-
-			this.batch(() => {
-				this.post.set(post);
-				this.content.set(content);
-				this.loading.set(false);
-			});
-
-			// Apply syntax highlighting and add copy buttons after content is rendered
-			requestAnimationFrame(async () => {
-				const container = document.querySelector(".blog-post-content");
-				if (container) {
-					await PrismLoader.highlight(container);
-				}
-				MarkdownLoader.initCopyCodeButtons();
-			});
-
-			// Set page title
-			document.title = `${post.title} - ${data.site?.title || CONSTANTS.DEFAULT_TITLE}`;
-		} catch (error) {
-			console.error("Error loading blog post:", error);
-			this.batch(() => {
-				this.error.set(true);
-				this.loading.set(false);
-			});
-		}
-	}
-
-	// ===========================================
-	// PRIVATE METHODS
-	// ===========================================
-
-	async _loadBlogPostContent(post) {
+	async _loadBlogPostContent(post, cancelToken = null) {
 		try {
 			// Load markdown content and parse frontmatter
 			const markdownPath = `/data/blog/${post.filename}`;
-			const result = await MarkdownLoader.loadWithFrontmatter(markdownPath);
+			const result = await MarkdownLoader.loadWithFrontmatter(
+				markdownPath,
+				cancelToken,
+			);
+			if (cancelToken?.cancelled) return "";
 			return result?.content || "";
 		} catch (error) {
+			if (cancelToken?.cancelled) return "";
 			console.error("Error loading blog post content:", error);
 			return "";
 		}
