@@ -176,12 +176,8 @@ class ThemeManager extends Reactive.Component {
 			}
 		};
 
-		mediaQuery.addEventListener("change", handler);
-
-		// Track for cleanup
-		this.track({
-			unsubscribe: () => mediaQuery.removeEventListener("change", handler),
-		});
+		// Use this.on() for auto-cleanup (mediaQuery supports addEventListener interface)
+		this.on(mediaQuery, "change", handler);
 	}
 }
 

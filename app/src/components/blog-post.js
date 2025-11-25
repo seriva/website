@@ -97,17 +97,14 @@ export class BlogPost extends Reactive.Component {
 		// Reactive effect: Apply syntax highlighting when content loads
 		this.effect(() => {
 			const state = this.postData.get();
-			if (state.data?.content) {
-				const container = document.querySelector(".blog-post-content");
-				if (container) {
-					PrismLoader.highlight(container);
-				}
+			if (state.data?.content && this.refs.container) {
+				PrismLoader.highlight(this.refs.container);
 			}
 		});
 	}
 
 	template() {
-		return html`<div data-html="displayContent"></div>`;
+		return html`<div data-html="displayContent" data-ref="container"></div>`;
 	}
 
 	// ===========================================

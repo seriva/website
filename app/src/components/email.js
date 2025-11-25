@@ -163,9 +163,8 @@ export class ContactForm extends Reactive.Component {
 			this.modalVisible.set(true);
 		});
 
-		const nameInput = document.getElementById(this._FIELD_IDS.NAME);
-		if (nameInput) {
-			requestAnimationFrame(() => nameInput.focus());
+		if (this.refs.nameInput) {
+			requestAnimationFrame(() => this.refs.nameInput.focus());
 		}
 	}
 
