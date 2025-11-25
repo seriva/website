@@ -71,16 +71,7 @@ export class BlogPost extends Reactive.Component {
 					);
 				}
 
-				const { content } = state.data;
-				const commentsHtml = Templates.giscusComments(
-					this.commentsConfig.get(),
-					"blog",
-				);
-
-				return html`
-                    ${this._tplBlogPost(currentPost, content)}
-                    ${commentsHtml}
-                `;
+				return trusted(this._renderSections(state));
 			},
 		};
 	}
@@ -97,9 +88,17 @@ export class BlogPost extends Reactive.Component {
 		// Reactive effect: Apply syntax highlighting when content loads
 		this.effect(() => {
 			const state = this.postData.get();
-			if (state.data?.content && this.refs.container) {
-				PrismLoader.highlight(this.refs.container);
-			}
+			if (!state.data?.content) return;
+
+			// Find container element directly from DOM
+			const mainContent = document.getElementById("main-content");
+			const container = mainContent?.querySelector('[data-ref="container"]');
+			if (!container) return;
+
+			// Use RAF to ensure browser has processed the HTML
+			//requestAnimationFrame(() => {
+				PrismLoader.highlight(container);
+			//});
 		});
 	}
 
@@ -128,27 +127,47 @@ export class BlogPost extends Reactive.Component {
 		}
 	}
 
+	_renderSections(state) {
+		const post = this.post.get();
+		if (!post) return "";
+
+		const { content } = state.data;
+		const sections = [
+			this._tplBlogPostHeader(post.title, post.date, post.tags),
+			this._tplMarkdown(content),
+			Templates.giscusComments(this.commentsConfig.get(), "blog"),
+		];
+
+		return sections
+			.filter(Boolean)
+			.map((section) => section.content)
+			.join("");
+	}
+
 	// ===========================================
 	// TEMPLATE METHODS
 	// ===========================================
 
-	_tplBlogPost(post, content) {
+	_tplBlogPostHeader(title, date, tags) {
+		const tagsHtml = tags?.length
+			? html`<div class="project-tags">${this._tplTagList(tags)}</div>`
+			: "";
 		return html`
-            <h1 class="project-title">${post.title}</h1>
-            <p class="project-description">${post.date}</p>
-            ${post.tags?.length ? html`<div class="project-tags">${this._tplTagList(post.tags)}</div>` : ""}
-            <div class="blog-post-content">
-                ${this._tplMarkdown(content)}
-            </div>`;
+            <h1 class="project-title">${title}</h1>
+            <p class="project-description">${date}</p>
+            ${tagsHtml}
+            <div class="blog-post-content">`;
 	}
 
 	_tplMarkdown(content) {
 		try {
 			const htmlContent = marked.parse(content);
-			return trusted(`<div class="markdown-body">${htmlContent}</div>`);
+			return trusted(`<div class="markdown-body">${htmlContent}</div></div>`);
 		} catch (error) {
 			console.error("Error rendering markdown:", error);
-			return html`<div class="markdown-body"><p>Error rendering markdown</p></div>`;
+			return trusted(
+				'<div class="markdown-body"><p>Error rendering markdown</p></div></div>',
+			);
 		}
 	}
 
