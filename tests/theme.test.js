@@ -64,20 +64,20 @@ describe("Theme", () => {
     });
 
     test("should initialize with default theme", () => {
-        Theme.init();
+        Theme.initState();
         assert.equal(Theme.current.get(), "dark");
         assert.equal(document.documentElement.getAttribute("data-theme"), "dark");
     });
 
     test("should load theme from local storage", () => {
         localStorage.setItem("theme-preference", "light");
-        Theme.init();
+        Theme.initState();
         assert.equal(Theme.current.get(), "light");
         assert.equal(document.documentElement.getAttribute("data-theme"), "light");
     });
 
     test("should toggle theme", () => {
-        Theme.init();
+        Theme.initState();
         assert.equal(Theme.current.get(), "dark");
 
         Theme.toggle();
@@ -90,34 +90,47 @@ describe("Theme", () => {
         assert.equal(document.documentElement.getAttribute("data-theme"), "dark");
     });
 
-    test("should apply CSS variables", () => {
-        Theme.init();
+	test("should apply CSS variables", () => {
+		Theme.initState();
 
-        // Check initial dark mode vars
-        assert.equal(document.documentElement.style.getPropertyValue("--accent"), "#000");
-        assert.equal(document.documentElement.style.getPropertyValue("--font-color"), "#fff");
+		// Verify computed is working - check dark theme colors
+		let colors = Theme.colors.get();
+		assert.equal(colors.primary, "#000");
+		assert.equal(colors.text, "#fff");
 
-        Theme.toggle(); // Switch to light
+		// Check initial dark mode vars
+		assert.equal(document.documentElement.style.getPropertyValue("--accent"), "#000");
+		assert.equal(document.documentElement.style.getPropertyValue("--font-color"), "#fff");
 
-        assert.equal(document.documentElement.style.getPropertyValue("--accent"), "#fff");
-        assert.equal(document.documentElement.style.getPropertyValue("--font-color"), "#000");
-    });
+		Theme.toggle(); // Switch to light
 
-    test("should update prism theme", () => {
-        Theme.init();
+		// Verify computed updated - check light theme colors
+		colors = Theme.colors.get();
+		assert.equal(colors.primary, "#fff");
+		assert.equal(colors.text, "#000");
+
+		// Now check if CSS vars were updated
+		assert.equal(document.documentElement.style.getPropertyValue("--accent"), "#fff");
+		assert.equal(document.documentElement.style.getPropertyValue("--font-color"), "#000");
+	});    test("should update prism theme", () => {
+        Theme.initState();
+        // Force subscriptions to fire by reading computed values
+        Theme.prismTheme.get();
 
         let link = document.getElementById("prism-theme");
         assert.ok(link);
         assert.ok(link.href.includes("prism-dark"));
 
         Theme.toggle();
+        // Force subscriptions to fire again
+        Theme.prismTheme.get();
 
         link = document.getElementById("prism-theme");
         assert.ok(link.href.includes("prism-coy"));
     });
 
     test("should apply specific theme", () => {
-        Theme.init();
+        Theme.initState();
         Theme.apply("light");
         assert.equal(Theme.current.get(), "light");
 
@@ -126,7 +139,7 @@ describe("Theme", () => {
     });
 
     test("should ignore invalid theme application", () => {
-        Theme.init();
+        Theme.initState();
         Theme.apply("invalid-theme");
         assert.equal(Theme.current.get(), "dark"); // Should remain unchanged
     });

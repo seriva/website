@@ -52,28 +52,51 @@ export const MarkdownLoader = {
 
 	// Load markdown file from path
 	// Supports optional fetch options (e.g., headers for GitHub API)
-	async loadFile(path, fetchOptions = {}) {
+	// cancelToken: { cancelled: boolean } for cancellation support
+	async loadFile(path, fetchOptions = {}, cancelToken = null) {
+		const abortController = new AbortController();
+		let checkInterval = null;
+
+		// Connect cancelToken to AbortController
+		if (cancelToken) {
+			checkInterval = setInterval(() => {
+				if (cancelToken.cancelled) {
+					abortController.abort();
+					if (checkInterval) clearInterval(checkInterval);
+				}
+			}, 100);
+		}
+
 		try {
-			const response = await fetch(path, fetchOptions);
+			const response = await fetch(path, {
+				...fetchOptions,
+				signal: abortController.signal,
+			});
+			if (checkInterval) clearInterval(checkInterval);
+			if (cancelToken?.cancelled) return null;
 			if (!response.ok) return null;
 			return response.text();
 		} catch (error) {
+			if (checkInterval) clearInterval(checkInterval);
+			if (error.name === "AbortError" || cancelToken?.cancelled) {
+				return null;
+			}
 			console.error(`Error loading markdown file: ${path}`, error);
 			return null;
 		}
 	},
 
 	// Load markdown file with frontmatter
-	async loadWithFrontmatter(path) {
-		const markdown = await this.loadFile(path);
-		if (!markdown) return null;
+	async loadWithFrontmatter(path, cancelToken = null) {
+		const markdown = await this.loadFile(path, {}, cancelToken);
+		if (!markdown || cancelToken?.cancelled) return null;
 		return this._parseFrontmatter(markdown);
 	},
 
 	// Load markdown file and render to HTML
-	async loadAsHtml(path) {
-		const markdown = await this.loadFile(path);
-		if (!markdown) return null;
+	async loadAsHtml(path, cancelToken = null) {
+		const markdown = await this.loadFile(path, {}, cancelToken);
+		if (!markdown || cancelToken?.cancelled) return null;
 		const result = Templates.markdown(markdown, marked);
 		return result.content || result;
 	},

@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		// Initialize theme system (loads user preference from localStorage)
-		Theme.init();
+		Theme.initState();
 
 		// Handle 404.html redirect (for dev server and GitHub Pages)
 		const hash = window.location.hash;

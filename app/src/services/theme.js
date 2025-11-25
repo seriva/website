@@ -35,48 +35,45 @@ class ThemeManager extends Reactive.Component {
 	}
 
 	init() {
-		this.initState();
-
+		// Called automatically after initState() processes state()
 		// Set initial theme now that Context is loaded
 		const initialTheme = this._getInitialTheme();
 		this.current.set(initialTheme);
 
-		// 1. Bind global data-theme attribute
+		// Bind global data-theme attribute
 		this.bindAttr(document.documentElement, "data-theme", this.current);
 
-		// 2. Handle side effects via subscriptions
-		// Subscribe after initial set to avoid saving initial theme twice
+		// 2. Handle side effects via reactive effects
+		// Skip saving initial theme (only save on changes)
 		let isFirst = true;
-		this.track(
-			this.current.subscribe((theme) => {
-				// Skip the first immediate call since we just set initial theme
-				if (isFirst) {
-					isFirst = false;
-					return;
-				}
-				if (theme) {
-					localStorage.setItem(this.storageKey, theme);
-				}
-			}),
-		);
+		this.effect(() => {
+			const theme = this.current.get();
+			if (isFirst) {
+				isFirst = false;
+				return;
+			}
+			if (theme) {
+				localStorage.setItem(this.storageKey, theme);
+			}
+		});
 
-		this.track(
-			this.colors.subscribe((colors) => {
-				this._applyColorScheme(colors);
-			}),
-		);
+		// Apply color scheme reactively
+		this.effect(() => {
+			const colors = this.colors.get();
+			this._applyColorScheme(colors);
+		});
 
-		this.track(
-			this.prismTheme.subscribe((theme) => {
-				this._applyPrismTheme(theme);
-			}),
-		);
+		// Apply prism theme reactively
+		this.effect(() => {
+			const theme = this.prismTheme.get();
+			this._applyPrismTheme(theme);
+		});
 
-		this.track(
-			this.giscusTheme.subscribe((theme) => {
-				this._updateGiscus(theme);
-			}),
-		);
+		// Update giscus theme reactively
+		this.effect(() => {
+			const theme = this.giscusTheme.get();
+			this._updateGiscus(theme);
+		});
 
 		this._setupToggleListener();
 	}
@@ -90,6 +87,15 @@ class ThemeManager extends Reactive.Component {
 		if (this._getThemeColors(theme)) {
 			this.current.set(theme);
 		}
+	}
+
+	cleanup() {
+		this._c.cleanup();
+		// Reset state so next init() will reinitialize
+		this.current = null;
+		this.colors = null;
+		this.prismTheme = null;
+		this.giscusTheme = null;
 	}
 
 	// ===========================================
