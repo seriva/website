@@ -93,7 +93,7 @@ main {
 	margin: auto;
 	padding: var(--spacing-lg);
 	flex: 1 0 auto;
-	max-width: 750px;
+	max-width: 900px;
 	width: 100%;
 	background-color: var(--background-color);
 	color: var(--font-color);

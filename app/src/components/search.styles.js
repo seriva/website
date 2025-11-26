@@ -41,7 +41,7 @@ const headerStyles = /* css */ `
 		align-items: center;
 		gap: 0.75rem;
 		width: 100%;
-		max-width: 750px;
+		max-width: 900px;
 	}
 
 	.search-page-back {
@@ -131,7 +131,7 @@ const resultsStyles = /* css */ `
 		flex-direction: column;
 		gap: 1.5rem;
 		width: 100%;
-		max-width: 750px;
+		max-width: 900px;
 		text-align: left;
 	}
 
