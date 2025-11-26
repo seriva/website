@@ -10,6 +10,23 @@ const PRISM_CDN = "https://cdn.jsdelivr.net/npm/prismjs@1.30.0";
 // Languages included in core Prism bundle
 const loadedLanguages = new Set(["markup", "css", "clike", "javascript"]);
 
+// Language aliases (map common aliases to actual Prism language names)
+const languageAliases = {
+	html: "markup",
+	xml: "markup",
+	svg: "markup",
+	mathml: "markup",
+	ssml: "markup",
+	atom: "markup",
+	rss: "markup",
+	js: "javascript",
+	ts: "typescript",
+	py: "python",
+	rb: "ruby",
+	sh: "bash",
+	yml: "yaml",
+};
+
 // Track in-flight language loads to prevent duplicate requests
 const loadingLanguages = new Map();
 
@@ -63,8 +80,9 @@ export const PrismLoader = {
 
 	// Load a specific language grammar from CDN
 	async _loadLanguage(language) {
-		// Normalize language name
-		const lang = language.toLowerCase();
+		// Normalize language name and resolve aliases
+		let lang = language.toLowerCase();
+		lang = languageAliases[lang] || lang;
 
 		// Already loaded
 		if (loadedLanguages.has(lang)) {

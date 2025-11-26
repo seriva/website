@@ -32,7 +32,7 @@ export class Project extends Reactive.Component {
 			commentsConfig: data?.site?.comments,
 
 			// Async computed for README loading with cancellation
-			readmeData: this.computedAsync(async (cancelToken) => {
+			projectData: this.computedAsync(async (cancelToken) => {
 				if (!project?.github_repo) return null;
 
 				// Try to get from cache first
@@ -52,7 +52,7 @@ export class Project extends Reactive.Component {
 
 			// Computed display content
 			displayContent: () => {
-				const readmeState = this.readmeData.get();
+				const readmeState = this.projectData.get();
 				const currentProject = this.project.get();
 
 				if (!currentProject) {
@@ -88,9 +88,11 @@ export class Project extends Reactive.Component {
 
 		// Reactive effect: Apply syntax highlighting when README loads
 		this.effect(() => {
-			const state = this.readmeData.get();
+			const state = this.projectData.get();
 			if (state.data && this.refs.container) {
-				PrismLoader.highlight(this.refs.container);
+				requestAnimationFrame(() => {
+					PrismLoader.highlight(this.refs.container);
+				});
 			}
 		});
 	}
