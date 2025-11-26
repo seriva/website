@@ -64,16 +64,15 @@ export class Page extends Reactive.Component {
 		// Reactive effect: Apply syntax highlighting when content loads
 		this.effect(() => {
 			const state = this.pageData.get();
-			if (state.data) {
-				const container = this.refs.content;
-				if (container) {
-					PrismLoader.highlight(container);
-				}
+			if (state.data && this.refs.container) {
+				requestAnimationFrame(() => {
+					PrismLoader.highlight(this.refs.container);
+				});
 			}
 		});
 	}
 
 	template() {
-		return html`<div data-html="displayContent" data-ref="content"></div>`;
+		return html`<div data-html="displayContent" data-ref="container"></div>`;
 	}
 }

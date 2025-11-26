@@ -88,17 +88,11 @@ export class BlogPost extends Reactive.Component {
 		// Reactive effect: Apply syntax highlighting when content loads
 		this.effect(() => {
 			const state = this.postData.get();
-			if (!state.data?.content) return;
-
-			// Find container element directly from DOM
-			const mainContent = document.getElementById("main-content");
-			const container = mainContent?.querySelector('[data-ref="container"]');
-			if (!container) return;
-
-			// Use RAF to ensure browser has processed the HTML
-			//requestAnimationFrame(() => {
-			PrismLoader.highlight(container);
-			//});
+			if (state.data && this.refs.container) {
+				requestAnimationFrame(() => {
+					PrismLoader.highlight(this.refs.container);
+				});
+			}
 		});
 	}
 
