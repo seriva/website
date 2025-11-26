@@ -2,7 +2,7 @@ import { css } from "../utils/reactive.js";
 
 const layoutStyles = /* css */ `
 	.blog-container {
-		max-width: 750px;
+		max-width: 900px;
 		margin: 0 auto;
 		text-align: left;
 	}
