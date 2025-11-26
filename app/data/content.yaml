@@ -104,6 +104,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2025-11-26-building-reactive-js.md"
+      title: "Building Reactive.js: A Minimal Signals-Based Library"
+      date: "2025-11-26"
+      excerpt: "How I built a lightweight reactive state management library inspired by modern frameworks, and converted this portfolio website to use it."
+      tags: ["JavaScript", "Web Development", "Reactive Programming", "Microtastic"]
     - filename: "2025-11-01-migrating-to-microtastic.md"
       title: "Adding Minimal Build Tooling with Microtastic"
       date: "2025-11-01"
@@ -249,7 +254,8 @@ projects:
     description: "A simple Asteroid game for web and Android."
     tags:
       - "Javascript"
-      - "Cordova"
+      - "PWA"
+      - "ES6"
     order: 7
     github_repo: "astrohunter"
     github_branch: "master"
