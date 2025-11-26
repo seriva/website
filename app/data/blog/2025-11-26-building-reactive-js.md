@@ -228,7 +228,3 @@ The beauty is you can use reactive.js in two ways:
 2. **Bundled**: Let Microtastic bundle it with your deps for production
 
 Either way, you get the same lightweight reactive system.
-
----
-
-*Want to see it in action? View source on this page or check out the [GitHub repo](https://github.com/seriva/website). The entire reactive system is in one file, and it's also included in [Microtastic](https://github.com/seriva/microtastic) for anyone who wants to use it.*
