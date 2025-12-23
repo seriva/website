@@ -1,4 +1,22 @@
 // Test environment setup
+// Mock localStorage before any imports (Node.js v25 requires --localstorage-file flag)
+// EmailJS library accesses localStorage at import time, so we need this stub early
+global.localStorage = {
+    _data: {},
+    getItem(key) {
+        return this._data[key] ?? null;
+    },
+    setItem(key, value) {
+        this._data[key] = String(value);
+    },
+    removeItem(key) {
+        delete this._data[key];
+    },
+    clear() {
+        this._data = {};
+    },
+};
+
 import { JSDOM } from "jsdom";
 
 // Create a minimal DOM environment
