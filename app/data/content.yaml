@@ -104,6 +104,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2025-12-23-quake-bsp-simplefps.md"
+      title: "Stealing From id Software: BSP Maps in SimpleFPS"
+      date: "2025-12-23"
+      excerpt: "Creating game content is hard. So I built a Quake 3 BSP converter and ended up redesigning my rendering pipeline."
+      tags: ["Game Development", "WebGL", "JavaScript"]
     - filename: "2025-11-26-building-reactive-js.md"
       title: "Building Reactive.js: A Minimal Signals-Based Library"
       date: "2025-11-26"
