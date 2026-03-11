@@ -104,6 +104,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2026-03-11-simplefps-updates.md"
+      title: "SimpleFPS Gets WebGPU, Raycast Physics, and More"
+      date: "2026-03-11"
+      excerpt: "A look at the latest major updates: experimental WebGPU, raycast physics, animated particles, and GPU skinning via a custom MD5 model pipeline."
+      tags: ["Game Development", "WebGPU", "JavaScript", "Physics"]
     - filename: "2025-12-23-quake-bsp-simplefps.md"
       title: "Stealing From id Software: BSP Maps in SimpleFPS"
       date: "2025-12-23"
