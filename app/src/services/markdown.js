@@ -3,7 +3,10 @@
 // ===========================================
 // Markdown file loading and parsing with frontmatter support
 
-import { marked } from "../dependencies/marked.js";
+import markedLib from "../dependencies/marked.js";
+
+const { marked } = markedLib;
+
 import { CONSTANTS } from "../utils/constants.js";
 import { html, Reactive, Signals } from "../utils/reactive.js";
 import { Templates } from "../utils/templates.js";
