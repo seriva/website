@@ -3,7 +3,10 @@
 // ===========================================
 // Reactive project detail view with GitHub README loading
 
-import { marked } from "../dependencies/marked.js";
+import markedLib from "../dependencies/marked.js";
+
+const { marked } = markedLib;
+
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
 import { MarkdownLoader } from "../services/markdown.js";
