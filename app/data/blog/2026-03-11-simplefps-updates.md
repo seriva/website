@@ -17,7 +17,7 @@ WebGL has served us well, and we will continue to maintain both backend paths si
 
 ## Rebuilt Physics: Raycasting & Octrees
 
-Physics was completely overhauled. We moved away from `cannon.es` and generic broadphase collision toward a highly optimized custom raycasting approach. While broadphase physics engines are great for many applications, simulating rigid bodies for fast-paced FPS character movement often introduces subtle, unpredictable behaviors. Additionally, generic physics state is notoriously difficult to synchronize across a network, which is critical since multiplayer support is a core goal for the engine's future.
+Physics was completely overhauled. We moved away from [`cannon-es`](https://github.com/pmndrs/cannon-es) and generic broadphase collision toward a highly optimized custom raycasting approach. While broadphase physics engines are great for many applications, simulating rigid bodies for fast-paced FPS character movement often introduces subtle, unpredictable behaviors. Additionally, generic physics state is notoriously difficult to synchronize across a network, which is critical since multiplayer support is a core goal for the engine's future.
 
 The player FPS controller moved entirely to a raycasting approach, ensuring responsive and tight movement through the arena. For projectile physics, we now utilize a custom trajectory system with raycast bounces rather than relying purely on discrete body steps. To make this fast, I extracted ray-AABB intersections into shared utilities and implemented the Slab method for efficient ray-octree intersection. By reusing temporary objects and arrays, the GC pressure is drastically minimized.
 
@@ -25,7 +25,7 @@ We also refined player collision filtering and implemented anti-tunneling using 
 
 ## Particles and Billboards
 
-A game needs juice. The last few months finally saw the addition of a robust particle and temporal effects system.
+A game needs juice. The last few months finally saw the addition of a dedicated particle system to bring the action to life.
 
 For particles, I implemented instanced billboard rendering with a new WGSL shader, completely offloading matrix calculations (like scaling and rotation) to the GPU. This single-draw rendering approach for animated billboards and emitters keeps performance high while allowing for effects like explosion sounds, cooldowns, and rotating particles.
 
@@ -41,7 +41,7 @@ Once loaded, our new `SkinnedMesh` class handles the rendering. By fully support
 
 Lighting received a major facelift. 
 
-In the previous update, we relied on baked lightmaps alongside deferred dynamic lights. We've now implemented per-material lightmap handling and refined how static Q3 lighting integrates with dynamic elements. By moving to a separate directional and point light rendering pipeline, the system blends baked ambient data with real-time spotlights, muzzle flashes, and dynamic emissive materials seamlessly.
+In the previous update, we relied on baked lightmaps alongside deferred dynamic lights. We've now implemented per-material lightmap handling and refined how static Q3 lighting integrates with dynamic elements. To ground dynamic entities in the world, we integrated a Q3-style lightgrid. This allows moving objects like players and projectiles to sample local ambient light volumes, ensuring they blend into the baked environment instead of popping against it.
 
 We also added half-resolution SSAO with a dedicated ping-pong bilateral blur pass, giving everything much better grounded shading without killing the framerate. 
 
