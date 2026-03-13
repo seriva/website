@@ -6,8 +6,8 @@
 	"author": "Portfolio Owner",
 	"license": "MIT",
 	"engines": {
-		"node": ">=20.0.0",
-		"npm": ">=9.0.0"
+		"node": ">=24.0.0",
+		"npm": ">=11.0.0"
 	},
 	"scripts": {
 		"prepare": "husky && microtastic prep",
@@ -24,7 +24,7 @@
 		"@fontsource/raleway": "^5.2.8",
 		"husky": "^9.1.7",
 		"jsdom": "^28.1.0",
-		"microtastic": "^0.0.68"
+		"microtastic": "^0.0.70"
 	},
 	"dependencies": {
 		"@emailjs/browser": "^4.4.1",
