@@ -6,6 +6,7 @@
 import { CONSTANTS } from "../utils/constants.js";
 import { YAMLParser } from "../utils/yaml-parser.js";
 import { i18n } from "./i18n.js";
+import { MarkdownLoader } from "./markdown.js";
 
 let appContext = null;
 const readmeCache = new Map();
@@ -136,7 +137,6 @@ export const Context = {
 	async preloadReadmes() {
 		if (!appContext?.projects?.length) return;
 
-		const { MarkdownLoader } = await import("./markdown.js");
 		const githubUsername = appContext.site?.github_username || "seriva";
 
 		const promises = appContext.projects

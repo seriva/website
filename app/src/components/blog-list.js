@@ -5,6 +5,7 @@
 
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
+import { Router } from "../services/routing.js";
 import { CONSTANTS } from "../utils/constants.js";
 import { Icons } from "../utils/icons.js";
 import { html, join, Reactive, trusted } from "../utils/reactive.js";
@@ -94,9 +95,7 @@ export class BlogList extends Reactive.Component {
 			e.preventDefault();
 			const href = link.getAttribute("href");
 			window.history.pushState({}, "", href);
-			import("../services/routing.js").then(({ Router }) =>
-				Router.handleRoute(),
-			);
+			Router.handleRoute();
 		}
 	}
 
