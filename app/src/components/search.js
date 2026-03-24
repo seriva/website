@@ -6,6 +6,7 @@
 import Fuse from "../dependencies/fuse.js.js";
 import { Context } from "../services/context.js";
 import { i18n } from "../services/i18n.js";
+import { Router } from "../services/routing.js";
 import { CONSTANTS } from "../utils/constants.js";
 import { Icons } from "../utils/icons.js";
 import { html, Reactive, trusted } from "../utils/reactive.js";
@@ -300,14 +301,7 @@ export class Search extends Reactive.Component {
 
 				const href = link.getAttribute("href");
 				window.history.pushState({}, "", href);
-				// Dynamic import to avoid circular dependency
-				import("../services/routing.js")
-					.then(({ Router }) => Router.handleRoute())
-					.catch((error) => {
-						console.error("Failed to load router:", error);
-						// Fallback: use window.location
-						window.location.href = href;
-					});
+				Router.handleRoute();
 				return;
 			}
 
@@ -326,13 +320,7 @@ export class Search extends Reactive.Component {
 
 					const href = cardLink.getAttribute("href");
 					window.history.pushState({}, "", href);
-					import("../services/routing.js")
-						.then(({ Router }) => Router.handleRoute())
-						.catch((error) => {
-							console.error("Failed to load router:", error);
-							// Fallback: use window.location
-							window.location.href = href;
-						});
+					Router.handleRoute();
 				}
 			}
 		};
