@@ -20,11 +20,11 @@
 		"seo": "node scripts/generate-seo.js"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.8",
+		"@biomejs/biome": "^2.4.10",
 		"@fontsource/raleway": "^5.2.8",
 		"husky": "^9.1.7",
 		"jsdom": "^29.0.1",
-		"microtastic": "^0.0.70"
+		"microtastic": "^0.0.71"
 	},
 	"dependencies": {
 		"@emailjs/browser": "^4.4.1",
