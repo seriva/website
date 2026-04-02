@@ -1079,7 +1079,7 @@ export const Reactive = {
 			try {
 				const t = document.createElement("div");
 				const templateResult = this.template();
-				if (!templateResult || !templateResult.content) {
+				if (!templateResult?.content) {
 					throw new Error("Template must return html`` tagged template");
 				}
 				t.innerHTML = templateResult.content;

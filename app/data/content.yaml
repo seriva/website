@@ -104,6 +104,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2026-04-02-rust-powered-toolchain.md"
+      title: "Going Full Rust: Microtastic Upgrades to Rolldown"
+      date: "2026-04-02"
+      excerpt: "A small dependency bump that quietly made the entire toolchain Rust-powered — from bundling with Rolldown to linting with Biome."
+      tags: ["Web Development", "JavaScript", "Microtastic", "Performance"]
     - filename: "2026-03-11-simplefps-updates.md"
       title: "SimpleFPS Gets WebGPU, Raycast Physics, and More"
       date: "2026-03-11"
