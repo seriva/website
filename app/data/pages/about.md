@@ -7,12 +7,14 @@
 
 <div style="text-align: center; color: var(--text-light);">
 
-Hey there! Welcome to my little corner of the web. I'm Luuk van Venrooij, and I live and breathe code—both at work and in my spare time.
+Hey there! I'm Luuk van Venrooij — a developer who lives and breathes code, both at work and in my spare time.
 
-Over the years, I've had my hands in everything from building game engines and mobile apps (Android & iOS) to developing large-scale industrial asset management systems. I spent some great years as a full-time open-source developer working on the [Epiphany Platform](https://github.com/hitachienergy/epiphany)—an industrialized automation platform for Kubernetes and its ecosystem. These days, I'm in a senior architecture role where I design and build cloud infrastructure across AWS, Azure, and GCP.
+I've built game engines, mobile apps, and large-scale industrial systems. I spent some great years as a full-time open-source developer on the [Epiphany Platform](https://github.com/hitachienergy/epiphany), an automation platform for Kubernetes.
 
-When I'm not working, you'll find me tinkering with graphics and game development using OpenGL and WebGL. This site showcases some of those passion projects. I'm also a bit of a hardware enthusiast, so who knows—maybe I'll dive into electronics and IoT projects down the road!
+These days I'm in a senior architecture role designing cloud infrastructure across AWS, Azure, and GCP. I'm driving AI adoption within my organization — integrating AI into our development workflows and rethinking how we approach the SDLC. I'm also exploring agentic coding at work, with a focus on quality and security.
 
-Got questions, ideas, or just want to chat? Feel free to <a href="javascript:void(0)" data-action="email">reach out</a>—I'd love to hear from you.
+Outside of work, I tinker with graphics and game development like [SimpleFPS](/?project=simplefps), build tools like [GoFront](/?project=gofront) and [Microtastic](/?project=microtastic), and experiment with agentic coding on my own projects. This site showcases some of those passion projects.
+
+Got questions, ideas, or just want to chat? Feel free to <a href="javascript:void(0)" data-action="email">reach out</a> — I'd love to hear from you.
 
 </div>

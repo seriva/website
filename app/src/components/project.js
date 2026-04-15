@@ -127,7 +127,7 @@ export class Project extends Reactive.Component {
 							.join(""),
 					),
 				),
-			project.demo_url && this._tplDemoIframe(project.demo_url),
+			project.demo_url && this._tplDemoIframe(project),
 			this._tplProjectLinks(project.links),
 			Templates.giscusComments(this.commentsConfig.get(), "projects"),
 		];
@@ -164,13 +164,28 @@ export class Project extends Reactive.Component {
         </div></div>`;
 	}
 
-	_tplDemoIframe(demoUrl) {
+	_tplDemoIframe(project) {
+		const label = project.demo_label || i18n.t("project.demo");
+		const instructions =
+			project.demo_instructions || i18n.t("project.demoInstructions");
+		const instructionsParagraph = instructions
+			? html`<p>${instructions}</p>`
+			: "";
+		const fullscreenButton = project.demo_fullscreen
+			? html`<br><center><button id="fullscreen" class="download-btn" data-on-click="toggleFullscreen">${trusted(Icons.get("expand", { size: "1rem" }))}<span>${i18n.t("project.fullscreen")}</span></button></center>`
+			: "";
+		const wrapperClass = project.demo_height
+			? "demo-iframe-wrapper"
+			: "iframeWrapper";
+		const heightStyle = project.demo_height
+			? `style="height: ${project.demo_height}"`
+			: "";
 		return html`
-        <div class="markdown-body"><h2>${i18n.t("project.demo")}</h2>
-            <p>${i18n.t("project.demoInstructions")}</p>
-            <div class="iframeWrapper">
-                <iframe id="demo" width="900" height="700" src="${demoUrl}" frameborder="0" allowfullscreen></iframe>
-            </div><br><center><button id="fullscreen" class="download-btn" data-on-click="toggleFullscreen">${trusted(Icons.get("expand", { size: "1rem" }))}<span>${i18n.t("project.fullscreen")}</span></button></center>
+        <div class="markdown-body"><h2>${label}</h2>
+            ${instructionsParagraph}
+            <div class="${wrapperClass}">
+                <iframe id="demo" ${trusted(heightStyle)} src="${project.demo_url}" frameborder="0" scrolling="no" allowfullscreen></iframe>
+            </div>${fullscreenButton}
         </div>`;
 	}
 

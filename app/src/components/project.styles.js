@@ -40,6 +40,20 @@ const mediaStyles = /* css */ `
 		width: 100%;
 		height: 100%;
 		max-width: 100%;
+		overflow: hidden;
+	}
+
+	.demo-iframe-wrapper {
+		width: 100%;
+		margin: 20px 0;
+	}
+
+	.demo-iframe-wrapper iframe {
+		width: 100%;
+		height: 700px;
+		max-width: 100%;
+		border: none;
+		overflow: hidden;
 	}
 `;
 
