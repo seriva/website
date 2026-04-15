@@ -104,6 +104,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2026-04-15-gofront-go-to-javascript.md"
+      title: "GoFront: Because TypeScript Wasn't Controversial Enough"
+      date: "2026-04-15"
+      excerpt: "I like Go for the backend. I like JavaScript for the frontend. I don't like TypeScript. So I built a compiler that turns Go into JavaScript."
+      tags: ["Go", "JavaScript", "Compilers", "GoFront"]
     - filename: "2026-04-02-rust-powered-toolchain.md"
       title: "Going Full Rust: Microtastic Upgrades to Rolldown"
       date: "2026-04-02"
@@ -142,6 +147,29 @@ blog:
 
 # Project Portfolio
 projects:
+  # Go-to-JavaScript Compiler
+  - id: "gofront"
+    title: "GoFront"
+    description: "Go syntax, type-safe, compiles to plain ES modules. Same language front and back, no runtime, no framework."
+    tags:
+      - "Node.js"
+      - "Javascript"
+      - "Go"
+    order: 1
+    github_repo: "gofront"
+    github_branch: "master"
+    demo_url: "https://seriva.github.io/gofront/"
+    demo_label: "Todo App Demo"
+    demo_instructions: "A fully functional todo app written in Go and compiled to JavaScript with GoFront."
+    demo_height: "650px"
+    links:
+      - title: "Github"
+        icon: "github"
+        href: "https://github.com/seriva/gofront"
+      - title: "NPM"
+        icon: "cube"
+        href: "https://www.npmjs.com/package/gofront"
+
   # AI-powered Snake Game
   - id: "snakeai"
     title: "SnakeAI"
@@ -150,7 +178,7 @@ projects:
       - "Python"
       - "AI"
       - "Machine Learning"
-    order: 1
+    order: 2
     github_repo: "snakeai"
     github_branch: "master"  # Branch to load README from
     links:
@@ -169,10 +197,13 @@ projects:
       - "Javascript"
       - "PWA"
       - "ES6"
-    order: 2
+    order: 3
     github_repo: "simplefps"
     github_branch: "master"
     demo_url: "https://seriva.github.io/simplefps"
+    demo_label: "Play!"
+    demo_instructions: "On desktop use WASD to move, mouse to look around, and left-click to shoot. On mobile it should present onscreen controls."
+    demo_fullscreen: true
     youtube_videos:
       - "UInnHqqX2OQ"
     links:
@@ -190,7 +221,7 @@ projects:
     tags:
       - "Node.js"
       - "Javascript"
-    order: 3
+    order: 4
     github_repo: "microtastic"
     github_branch: "master"
     links:
@@ -210,7 +241,7 @@ projects:
       - "CSS"
       - "Javascript"
       - "SPA"
-    order: 4
+    order: 5
     github_repo: "website"
     github_branch: "master"
     links:
@@ -225,7 +256,7 @@ projects:
     tags:
       - "Javascript"
       - "WebGL"
-    order: 5
+    order: 6
     github_repo: "qdfps"
     github_branch: "master"
     youtube_videos:
@@ -249,7 +280,7 @@ projects:
       - "SDL"
       - "Newton"
       - "OpenAL"
-    order: 6
+    order: 7
     github_repo: "genesisdevice"
     github_branch: "master"
     youtube_videos:
@@ -271,10 +302,13 @@ projects:
       - "Javascript"
       - "PWA"
       - "ES6"
-    order: 7
+    order: 8
     github_repo: "astrohunter"
     github_branch: "master"
     demo_url: "https://seriva.github.io/astrohunter/"
+    demo_label: "Play!"
+    demo_instructions: "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls."
+    demo_fullscreen: true
     links:
       - title: "Github"
         icon: "github"
@@ -306,8 +340,8 @@ translations:
     "blog.next": "Next"
     "project.links": "Links"
     "project.media": "Media"
-    "project.demo": "Play!"
-    "project.demoInstructions": "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls."
+    "project.demo": "Demo"
+    "project.demoInstructions": ""
     "project.fullscreen": "Go Fullscreen"
     "project.loadingReadme": "Loading README from GitHub..."
     "project.readmeError": "Error loading README from GitHub."

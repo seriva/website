@@ -114,7 +114,7 @@ describe("YAML Parser", () => {
 		// Test projects
 		assert.ok(Array.isArray(result.projects));
 		assert.ok(result.projects.length > 0);
-		assert.equal(result.projects[0].id, "snakeai");
+		assert.equal(result.projects[0].id, "gofront");
 		assert.ok(Array.isArray(result.projects[0].tags));
 
 		// Test translations
