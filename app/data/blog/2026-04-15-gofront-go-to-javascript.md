@@ -1,5 +1,5 @@
 ---
-title: "GoFront: Because TypeScript Wasn't Controversial Enough"
+title: "Writing Go for the Frontend"
 date: "2026-04-15"
 excerpt: "I wanted Go's type safety on the frontend without TypeScript's ceremony. So I built a compiler that turns Go into plain JavaScript."
 tags: ["Go", "JavaScript", "Compilers", "GoFront"]
