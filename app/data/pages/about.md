@@ -11,9 +11,9 @@ Hey there! I'm Luuk van Venrooij — a developer who lives and breathes code, bo
 
 I've built game engines, mobile apps, and large-scale industrial systems. I spent some great years as a full-time open-source developer on the [Epiphany Platform](https://github.com/hitachienergy/epiphany), an automation platform for Kubernetes.
 
-These days I'm in a senior architecture role designing cloud infrastructure across AWS, Azure, and GCP. I'm driving AI adoption within my organization — integrating AI into our development workflows and rethinking how we approach the SDLC. I'm also exploring agentic coding at work, with a focus on quality and security.
+These days I'm in a senior architecture role designing cloud infrastructure across AWS, Azure, and GCP. I also spend a fair amount of time figuring out how AI tooling fits into real development workflows — mostly through trial and error.
 
-Outside of work, I tinker with graphics and game development like [SimpleFPS](/?project=simplefps), build tools like [GoFront](/?project=gofront) and [Microtastic](/?project=microtastic), and experiment with agentic coding on my own projects. This site showcases some of those passion projects.
+Outside of work, I tinker with graphics and game development like [SimpleFPS](/?project=simplefps), build tools like [GoFront](/?project=gofront) and [Microtastic](/?project=microtastic), and poke at whatever catches my interest. This site showcases some of those projects.
 
 Got questions, ideas, or just want to chat? Feel free to <a href="javascript:void(0)" data-action="email">reach out</a> — I'd love to hear from you.
 
