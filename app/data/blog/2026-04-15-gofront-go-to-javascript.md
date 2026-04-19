@@ -1,23 +1,25 @@
 ---
 title: "GoFront: Because TypeScript Wasn't Controversial Enough"
 date: "2026-04-15"
-excerpt: "I like Go for the backend. I like JavaScript for the frontend. I don't like TypeScript. So I built a compiler that turns Go into JavaScript."
+excerpt: "I wanted Go's type safety on the frontend without TypeScript's ceremony. So I built a compiler that turns Go into plain JavaScript."
 tags: ["Go", "JavaScript", "Compilers", "GoFront"]
 ---
 
-I love Go for the backend — simple, type-safe, no nonsense. I like JavaScript for the frontend — runs everywhere, no setup. What I *don't* like is JavaScript's loose typing. And I don't like TypeScript either. I know, controversial. It's fine, I just don't enjoy it.
+I write Go at the backend and I like it. Simple, type-safe, no nonsense. For the frontend I reach for JavaScript — it runs everywhere, needs no setup, and gets out of your way. The problem is loose typing. You rename a field, forget to update a call site, and find out at runtime.
 
-So I did the perfectly reasonable thing and built my own compiler.
+TypeScript is the obvious answer, but it never felt right to me. The config overhead, the decorator soup, the way it gradually turns into a second language bolted onto the first. I wanted type safety without the ceremony.
 
-## The Idea
+So I did what any reasonable person would do and built a compiler.
 
-What if I could write Go syntax, get real type checking at compile time, and have it spit out clean, readable ES modules? Same language front and back, no runtime, no framework, no `tsconfig.json`.
+## The idea
+
+What if you could write Go syntax, get real type checking at compile time, and have it emit clean, readable ES modules? Same language front and back. No runtime, no framework, no `tsconfig.json`. Your `.go` files get Go syntax highlighting and bracket matching for free in any editor — no plugin required.
 
 That's [GoFront](/?project=gofront).
 
-## How It Works
+## How it works
 
-GoFront is a four-stage compiler written in pure Node.js with zero dependencies:
+The compiler is four stages, written in pure Node.js with zero dependencies:
 
 ```
 source text (.go files)
@@ -27,15 +29,9 @@ source text (.go files)
   → Code Gen       AST → JavaScript string
 ```
 
-Every Go construct maps to a specific JavaScript pattern. No name mangling, no opaque wrappers — the output is designed to be readable.
-
-### A Quick Example
-
-This Go code:
+Every Go construct maps to a specific JavaScript pattern. Take a simple struct and a function:
 
 ```go
-package main
-
 type Todo struct {
     id   int
     text string
@@ -50,7 +46,7 @@ func addTodo(text string) {
 }
 ```
 
-Compiles to something you can actually read:
+That compiles to:
 
 ```javascript
 class Todo {
@@ -69,37 +65,43 @@ function addTodo(text) {
 }
 ```
 
-Structs become classes. Slices become arrays. `append` becomes spread. Types are erased at runtime because JavaScript doesn't need them — the compiler already checked everything.
+Structs become classes. Slices become arrays. `append` becomes spread. Types are erased at runtime because JavaScript doesn't need them — the compiler already caught any mistakes.
 
-## What's Supported
+## The type checker
 
-Quite a lot, actually. Structs, methods, interfaces, embedded structs, slices, maps, closures, `for range`, `switch`, `defer`/`recover`, `async`/`await`, multiple return values, named returns, variadic functions, cross-package imports — the whole list is in the [README](https://github.com/seriva/gofront).
-
-What's *not* supported: goroutines, channels, and generics. Goroutines and channels don't have a JavaScript equivalent without a runtime scheduler, which defeats the "no runtime" goal. Generics are theoretically possible but a huge effort for limited payoff when everything is `any` at runtime anyway.
-
-## The Type Checker
-
-This is the part I'm most happy with. It's a three-pass type checker that catches real errors:
+This is the part I spent the most time on. It's a three-pass type checker that resolves types across multiple files, catches real errors, and reports them with accurate source locations:
 
 ```go
 func greet(name string) {
     console.log("Hello, " + name)
 }
 
-greet(42)   // → Type error in main.go at line 5: cannot use int as string
+greet(42)   // → Type error in src/main.go at line 5: cannot use int as string
 ```
 
-It resolves types across multiple files in the same package, supports external `.d.ts` type declarations for JavaScript libraries, and even auto-resolves npm package types from `node_modules/` and `@types/`.
+It also understands external TypeScript type declarations via `js:` imports and auto-resolves npm package types from `node_modules/` and `@types/`. So you can use any JS library and still get type checking on the Go side.
 
-## The Todo App
+## What grew over time
 
-There's a [live demo](/?project=gofront) on the project page — a fully functional todo app written entirely in Go and compiled to JavaScript. It covers structs, methods, closures, slices, `for range`, `switch`, `defer`/`recover`, `async`/`await`, and DOM APIs. Everything compiles to a single plain ES module.
+The core was straightforward. Then the rabbit hole opened.
 
-## Is This Useful?
+Generics turned out to be surprisingly clean — type erasure means `func Map[T, U any](...)` just compiles to `function Map(...)`. The type checker enforces constraints; JavaScript never needs to know they existed.
 
-Probably not. But it was genuinely fun to build. Writing a compiler from scratch — lexer, parser, type checker, code generator — is one of those projects where you learn something new at every stage. And there's something satisfying about writing `func main()` and seeing clean JavaScript come out the other end.
+Pointers were trickier. JS has no memory model, so address-taken scalar locals get boxed as `{ value: T }` to make shared mutation work. Structs, slices, and maps are already reference types, so they're fine as-is.
 
-If you want to try it:
+Error handling got a full implementation: `error` as a proper interface, custom error types, `errors.Is`, `errors.Unwrap`, and `%w` wrapping. Range over iterator functions (Go 1.23's `yield` protocol) is there too, with correct `break`/`continue`/`return` propagation. Arrays have compile-time enforcement — bounds checking, `append` rejected on fixed arrays, `[...]T` size inference.
+
+The standard library grew to cover the packages you actually reach for: `fmt`, `strings`, `bytes`, `strconv`, `sort`, `math`, `errors`, `time`, `unicode`, `os`. Enough to write real code without dropping into JS.
+
+The CLI picked up a watch mode, a dev server with live reload, inline source maps, and a built-in minifier with optional local identifier mangling — no external tools needed.
+
+What's not there: goroutines, channels, `goto`, `unsafe`, `reflect`. Goroutines need a scheduler, which defeats the no-runtime goal. The rest have no clean JS equivalent.
+
+## Does it work?
+
+There are two example apps in the repo — both implement the same todo app. One uses vanilla DOM manipulation, compiled to a single ES module with no dependencies. The other integrates with a signals-based reactive framework, with the type declarations written as a hand-crafted `.d.ts` shim so GoFront knows about `Signal`, `Signals.create()`, and `Reactive.bind()`.
+
+There's a [live demo](/?project=gofront) on the project page.
 
 ```bash
 npm install -g gofront
@@ -107,4 +109,4 @@ gofront init myapp
 gofront myapp -o myapp/app.js
 ```
 
-The source is on [GitHub](https://github.com/seriva/gofront). It has 474 tests and compiles itself in about 15ms. Not bad for a weekend project that got slightly out of hand.
+Source on [GitHub](https://github.com/seriva/gofront). 869 tests. Compiles itself in ~15ms. A weekend project that got slightly out of hand.
