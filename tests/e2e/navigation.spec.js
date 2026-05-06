@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Navigation", () => {
     test("navbar renders with brand and nav links", async ({ page }) => {
         await page.goto("/");
-        await expect(page.locator("nav")).toBeVisible();
+        await expect(page.locator("nav:has(.navbar-brand)")).toBeVisible();
         await expect(page.locator(".navbar-brand")).toBeAttached();
         await expect(page.locator('a[href="/blog"]')).toBeVisible();
     });
