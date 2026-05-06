@@ -13,7 +13,9 @@ test.describe("Search", () => {
 
     test("search input is focused when overlay opens", async ({ page }) => {
         await page.click("#search-toggle");
-        await expect(page.locator("#search-page-input")).toBeFocused();
+        await expect(page.locator("#search-page-input")).toBeFocused({
+            timeout: 2000,
+        });
     });
 
     test("typing a query shows matching results", async ({ page }) => {

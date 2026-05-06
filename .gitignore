@@ -12,9 +12,13 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+.vscode/
+.claude/
 
 # Logs
 *.log
+npm-debug.log*
+
 
 node_modules/
 public/
@@ -23,3 +27,23 @@ app/src/dependencies/
 # Generated assets (copied from node_modules via npm run copy-assets)
 app/fonts/
 app/css/prism-themes/
+
+# Dependencies
+/node_modules/
+/example/node_modules/
+
+# Test fixture packages (tracked intentionally)
+!/test/fixtures/node_modules/
+
+# Coverage
+coverage/
+
+# Environment
+.env
+.env.local
+
+# Playwright
+/test-results/
+/playwright-report/
+
+
