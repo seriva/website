@@ -111,7 +111,7 @@ export class ContactForm extends Reactive.Component {
 						${trusted(Icons.get("times", { size: "1.2rem" }))}
 					</button>
 				</div>
-				<form class="contact-form" id="${this._FIELD_IDS.FORM}" data-on-submit="_handleSubmit">
+				<form class="contact-form" id="${this._FIELD_IDS.FORM}" novalidate data-on-submit="_handleSubmit">
 					<div class="form-group">
 						<label for="${this._FIELD_IDS.NAME}">${i18n.t("contact.name")}*</label>
 						<input 
