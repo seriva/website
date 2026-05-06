@@ -15,6 +15,8 @@
 		"dev": "microtastic dev",
 		"prod": "npm run check && npm test && microtastic prod && npm run seo",
 		"test": "node --test tests/unit/*.test.js",
+		"test:e2e": "playwright test",
+		"test:all": "npm test && npm run test:e2e",
 		"format": "biome format --write .",
 		"check": "biome check .",
 		"seo": "node scripts/generate-seo.js"
