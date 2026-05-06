@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
     testDir: "tests/e2e",
     fullyParallel: true,
-    reporter: "html",
+    reporter: process.env.CI ? "list" : "html",
     use: {
         baseURL: "http://localhost:8181",
         trace: "on-first-retry",
