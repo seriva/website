@@ -15,7 +15,7 @@ A modern, modular personal portfolio website built with vanilla JavaScript (ES6 
 - **Quality**: Biome (`npm run format`, `npm run check`), Node.js test runner (`npm run test:unit`)
 
 ## Core Standards
-1. **Always use TDD** — core logic must have tests in `/tests/` using the native Node.js test runner. `npm run test:unit` must pass before pushing.
+1. **Always use TDD** — core logic must have tests in `/tests/unit/` using the native Node.js test runner. `npm run test:unit` must pass before pushing. New user-facing features (routes, components, flows) must also have corresponding e2e tests in `/tests/e2e/`.
 2. **Lint & format every change** — run `npm run format` then `npm run check` (Biome) before committing. Use the `/verify` workflow.
 3. **Root-relative paths only** — always use root-relative paths for modules (e.g., `/src/main.js`) so SPA routing works at any depth.
 4. **Reactive component pattern** — extend `Reactive.Component`; use `this.signal()` / `this.computed()` in `state()`; declare bindings in `template()` via `data-text`, `data-class-*`, `data-on-click`, etc.
