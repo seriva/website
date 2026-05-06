@@ -4,7 +4,7 @@
 
 **Goal:** Add Playwright e2e tests covering all major user flows, move unit tests to `tests/unit/`, and gate deployment on e2e pass.
 
-**Architecture:** Playwright `webServer` auto-starts `npm run dev` on port 8081 before running tests. Five spec files each own a user flow. The existing `deploy.yml` gains an `e2e` job; the `deploy` job gains `needs: [e2e]`.
+**Architecture:** Playwright `webServer` auto-starts `npm run dev` on port 8181 before running tests. Five spec files each own a user flow. The existing `deploy.yml` gains an `e2e` job; the `deploy` job gains `needs: [e2e]`.
 
 **Tech Stack:** `@playwright/test`, Chromium + Firefox, Node.js native test runner (unit), GitHub Actions.
 
@@ -123,12 +123,12 @@ export default defineConfig({
     fullyParallel: true,
     reporter: "html",
     use: {
-        baseURL: "http://localhost:8081",
+        baseURL: "http://localhost:8181",
         trace: "on-first-retry",
     },
     webServer: {
         command: "npm run dev",
-        port: 8081,
+        port: 8181,
         reuseExistingServer: !process.env.CI,
     },
     projects: [
@@ -169,7 +169,7 @@ Run:
 npx playwright test tests/e2e/smoke.spec.js
 ```
 
-Expected: `2 passed` (1 per browser). If the dev server doesn't auto-start, check that `npm run dev` works and starts on port 8081.
+Expected: `2 passed` (1 per browser). If the dev server doesn't auto-start, check that `npm run dev` works and starts on port 8181.
 
 - [ ] **Step 6: Delete the smoke spec**
 
@@ -235,14 +235,14 @@ Update to:
 Also update the build/dev line in the Tech Stack section from:
 
 ```
-- **Build / Dev**: Microtastic (`npm run dev` on port 8081, `npm run prod`)
+- **Build / Dev**: Microtastic (`npm run dev` on port 8181, `npm run prod`)
 ```
 
 to:
 
 ```
-- **Build / Dev**: Microtastic (`npm run dev` on port 8081, `npm run prod`)
-- **E2E Tests**: Playwright (`npm run test:e2e`) — tests/e2e/, requires dev server on port 8081
+- **Build / Dev**: Microtastic (`npm run dev` on port 8181, `npm run prod`)
+- **E2E Tests**: Playwright (`npm run test:e2e`) — tests/e2e/, requires dev server on port 8181
 ```
 
 - [ ] **Step 3: Run format + check to keep Biome happy**

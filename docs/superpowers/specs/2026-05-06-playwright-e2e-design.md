@@ -28,11 +28,11 @@ export default {
   testDir: 'tests/e2e',
   webServer: {
     command: 'npm run dev',
-    port: 8081,
+    port: 8181,
     reuseExistingServer: !process.env.CI,
   },
   use: {
-    baseURL: 'http://localhost:8081',
+    baseURL: 'http://localhost:8181',
   },
   projects: [
     { name: 'chromium', use: { browserName: 'chromium' } },
