@@ -1,13 +1,17 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Theme", () => {
-    test("theme toggle button is visible", async ({ page }) => {
+    test.beforeEach(async ({ page }) => {
         await page.goto("/");
+        await page.evaluate(() => localStorage.removeItem("theme-preference"));
+        await page.reload();
+    });
+
+    test("theme toggle button is visible", async ({ page }) => {
         await expect(page.locator("#theme-toggle")).toBeVisible();
     });
 
     test("clicking toggle switches data-theme attribute", async ({ page }) => {
-        await page.goto("/");
         const initialTheme = await page
             .locator("html")
             .getAttribute("data-theme");
@@ -19,7 +23,6 @@ test.describe("Theme", () => {
     test("clicking toggle changes --background-color CSS variable", async ({
         page,
     }) => {
-        await page.goto("/");
         const initialBg = await page.evaluate(() =>
             getComputedStyle(document.documentElement)
                 .getPropertyValue("--background-color")
@@ -36,7 +39,6 @@ test.describe("Theme", () => {
     });
 
     test("theme preference persists after page reload", async ({ page }) => {
-        await page.goto("/");
         // Toggle away from the default
         await page.click("#theme-toggle");
         const themeAfterToggle = await page
@@ -51,7 +53,6 @@ test.describe("Theme", () => {
     });
 
     test("toggling twice returns to original theme", async ({ page }) => {
-        await page.goto("/");
         const original = await page.locator("html").getAttribute("data-theme");
         await page.click("#theme-toggle");
         await page.click("#theme-toggle");
