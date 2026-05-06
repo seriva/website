@@ -1,64 +1,31 @@
-# Portfolio Website — Antigravity Agent File
+# Portfolio Website
 
-## Project Overview
-This is a modern, modular personal portfolio website built with vanilla JavaScript (ES6 modules) and a custom reactive system. It uses Microtastic for minimal build tooling and a dev server, and relies on YAML and Markdown for content management.
+## Project Identity
+A modern, modular personal portfolio website built with vanilla JavaScript (ES6 modules), a custom signals-based reactive system, and YAML/Markdown-driven content. Microtastic handles build tooling and dev serving.
 
 ## Tech Stack
-- **Language**: ES6 Modules (Vanilla JS)
-- **UI / Reactivity**: Custom signals-based reactive system (`utils/reactive.js`), declarative DOM binding
-- **Routing**: Path-based SPA routing with Microtastic support
-- **Content**: YAML parsing + Marked.js + Prism.js (Markdown)
-- **Search**: Fuse.js (Fuzzy search)
-- **Features**: EmailJS (Contact form), giscus (GitHub Discussions comments)
-- **Build / Dev**: Microtastic (`npm run dev`, `npm run prod`)
-- **Linting / Formatting**: Biome (`npm run format`, `npm run check`)
-- **Testing**: Node.js built-in test runner (`npm test`)
+- **Runtime**: ES6 Modules (Vanilla JS) — no TypeScript, no virtual DOM
+- **Reactivity**: Custom signals system (`utils/reactive.js`) with declarative DOM binding
+- **Routing**: Path-based SPA routing (Microtastic)
+- **Content**: YAML + Marked.js + Prism.js for Markdown rendering
+- **Search**: Fuse.js (fuzzy search)
+- **Integrations**: EmailJS (contact form), giscus (GitHub Discussions comments)
+- **Build / Dev**: Microtastic (`npm run dev` on port 8081, `npm run prod`)
+- **Quality**: Biome (`npm run format`, `npm run check`), Node.js test runner (`npm test`)
 
-## Project Structure
-```text
-app/
-├── data/
-│   ├── blog/          # Markdown blog posts
-│   ├── pages/         # Markdown pages
-│   └── content.yaml   # Core site configuration, projects, i18n
-├── fonts/             # Hosted locally (auto-copied via prepare)
-├── css/
-│   └── prism-themes/  # Bundled Prism themes
-└── src/
-    ├── main.js        # Entry point and global event delegation
-    ├── components/    # Reactive UI components (Navbar, BlogList, Project, etc)
-    ├── styles/        # CSS-in-JS style definitions
-    └── utils/         # Core utilities (reactive.js, Router, MarkdownLoader)
-scripts/
-└── generate-seo.js    # SEO generator script
-tests/                 # Node.js tests for all modules
-```
+## Core Standards
+1. **Always use TDD** — core logic must have tests in `/tests/` using the native Node.js test runner. `npm test` must pass before pushing.
+2. **Lint & format every change** — run `npm run format` then `npm run check` (Biome) before committing. Use the `/verify` workflow.
+3. **Root-relative paths only** — always use root-relative paths for modules (e.g., `/src/main.js`) so SPA routing works at any depth.
+4. **Reactive component pattern** — extend `Reactive.Component`; use `this.signal()` / `this.computed()` in `state()`; declare bindings in `template()` via `data-text`, `data-class-*`, `data-on-click`, etc.
+5. **Content lives in data** — all site content (projects, blog metadata, theme settings, i18n) belongs in `app/data/content.yaml` and `app/data/blog/` / `app/data/pages/` Markdown files, never hard-coded in components.
 
-## Key Conventions & Patterns
-- **No TypeScript or Virtual DOM**: Pure ES6 modules with direct DOM manipulation via the custom reactive signal system.
-- **Reactivity**: Extend `Reactive.Component`. Use `this.signal()` and `this.computed()` in `state()`. Declare bindings in `template()` using `data-text`, `data-class-*`, `data-on-click`, etc.
-- **Data Configuration**: All site content (projects, blog metadata, theme settings) lives in `app/data/content.yaml`.
-- **Absolute / Root-Relative Paths**: Always use root-relative paths for modules (`/src/main.js`) so the SPA routing handles them correctly on any depth.
-- **Event Delegation**: Centralize global interactions in `main.js` using `data-action` attributes instead of attaching standard event listeners everywhere.
-- **Lint & Format**: Always run `npm run format` and `npm run check` using Biome.
-- **Tests**: Core logic must have tests inside `/tests/`. Tests use the native Node.js test runner. Ensure `npm test` passes before pushing.
+## Architecture
+The entry point is `app/src/main.js`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `app/src/components/`, each pairing a class extending `Reactive.Component` with a co-located `*.styles.js` file for CSS-in-JS definitions. Shared utilities — the reactive system, the router, and `MarkdownLoader` — live in `app/src/utils/`. Static assets (fonts, Prism themes) are under `app/fonts/` and `app/css/`. The `scripts/` directory holds build-time helpers like `generate-seo.js`, and all tests reside in `tests/`.
 
-## Naming Conventions
-- **Classes / Components**: PascalCase (e.g., `MarkdownLoader`, `ContactForm`)
-- **Functions / variables**: camelCase
-- **Private class fields**: Prefix with `#` (e.g., `#config`, `#compiler`)
-- **Style Files**: `[component/module].styles.js`
-
-## Commands
-```bash
-npm run dev        # Run Microtastic dev server on port 8081
-npm run prod       # Run checks, tests, and build for production
-npm test           # Run unit tests
-npm run check      # Lint with Biome
-npm run format     # Format with Biome
-npm run prepare    # Install Husky hooks and run microtastic prep
-```
-
-## Workflows
-The `.agent/workflows/` directory contains standard operating procedures.
-- **/verify**: Run `npm run format`, `npm run check`, `npm test` and `npm run prod` to ensure codebase health before finishing a task.
+## Anti-Patterns
+- **No TypeScript or virtual DOM** — this project uses pure ES6 modules with direct DOM manipulation; do not introduce frameworks or transpilers.
+- **No scattered event listeners** — use `data-action` delegation in `main.js` instead of attaching `addEventListener` calls throughout components.
+- **No hard-coded content in components** — all copy, metadata, and configuration goes through `content.yaml` or Markdown files.
+- **No ad-hoc naming** — classes/components are PascalCase, functions/variables are camelCase, private fields use `#` prefix, style files follow `[name].styles.js`.
+- **No skipping quality gates** — never push without running `npm run format`, `npm run check`, `npm test`, and `npm run prod`.
