@@ -14,6 +14,6 @@ npm run check || exit 1
 
 # Run tests
 echo "🧪 Running tests..."
-npm test || exit 1
+npm run test:unit || exit 1
 
 echo "✅ Pre-commit checks passed!"
