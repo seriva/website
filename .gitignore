@@ -46,4 +46,8 @@ coverage/
 /test-results/
 /playwright-report/
 
+# Agentic session artifacts
+docs/superpowers/
+.worktrees/
+
 

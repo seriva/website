@@ -20,6 +20,7 @@ A modern, modular personal portfolio website built with vanilla JavaScript (ES6 
 3. **Root-relative paths only** — always use root-relative paths for modules (e.g., `/src/main.js`) so SPA routing works at any depth.
 4. **Reactive component pattern** — extend `Reactive.Component`; use `this.signal()` / `this.computed()` in `state()`; declare bindings in `template()` via `data-text`, `data-class-*`, `data-on-click`, etc.
 5. **Content lives in data** — all site content (projects, blog metadata, theme settings, i18n) belongs in `app/data/content.yaml` and `app/data/blog/` / `app/data/pages/` Markdown files, never hard-coded in components.
+6. **Docs-first.** Before implementing any non-trivial feature (new component, route, integration), create `docs/vX.Y.Z/<feature>-plan.md` covering: Goal, Approach, Edge Cases, and Test Plan. Write the plan, get it right, then write code.
 
 ## Architecture
 The entry point is `app/src/main.js`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `app/src/components/`, each pairing a class extending `Reactive.Component` with a co-located `*.styles.js` file for CSS-in-JS definitions. Shared utilities — the reactive system, the router, and `MarkdownLoader` — live in `app/src/utils/`. Static assets (fonts, Prism themes) are under `app/fonts/` and `app/css/`. The `scripts/` directory holds build-time helpers like `generate-seo.js`, and all tests reside in `tests/`.
@@ -30,3 +31,4 @@ The entry point is `app/src/main.js`, which bootstraps the app and centralises g
 - **No hard-coded content in components** — all copy, metadata, and configuration goes through `content.yaml` or Markdown files.
 - **No ad-hoc naming** — classes/components are PascalCase, functions/variables are camelCase, private fields use `#` prefix, style files follow `[name].styles.js`.
 - **No skipping quality gates** — never push without running `npm run format`, `npm run check`, `npm run test:unit`, `npm run test:e2e`, and `npm run prod`.
+- **No superpowers session artifacts** — checkbox-driven plan files and `docs/superpowers/` are session-local only; never commit them. Design docs belong in `docs/vX.Y.Z/<feature>-plan.md`.

@@ -315,11 +315,9 @@ export class ContactForm extends Reactive.Component {
 	}
 
 	_clearFieldErrors() {
-		this.batch(() => {
-			this.errors.name.set(false);
-			this.errors.email.set(false);
-			this.errors.message.set(false);
-		});
+		this.errors.name.set(false);
+		this.errors.email.set(false);
+		this.errors.message.set(false);
 	}
 
 	_resetForm() {
