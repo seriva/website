@@ -47,15 +47,22 @@ test.describe("Contact Form", () => {
     });
 
     test("successful submission shows success status", async ({ page }) => {
-        // Intercept the EmailJS API call and return a fake success response
-        await page.route(/api\.emailjs\.com/, (route) =>
+        // Intercept the EmailJS API call before any navigation
+        await page.route("https://api.emailjs.com/**", (route) =>
             route.fulfill({
                 status: 200,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST, OPTIONS",
+                    "Access-Control-Allow-Headers": "Content-Type",
+                },
                 contentType: "application/json",
                 body: JSON.stringify({ status: 200, text: "OK" }),
             }),
         );
 
+        await page.goto("/");
+        await expect(page.locator("#email-toggle")).toBeVisible();
         await page.click("#email-toggle");
         await page.fill("#contact-name", "Test User");
         await page.fill("#contact-email", "test@example.com");
