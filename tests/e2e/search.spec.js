@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
 
+const fillSearch = async (page, value) => {
+    const input = page.locator("#search-page-input");
+    await input.click();
+    await input.fill(value);
+    await input.dispatchEvent("input");
+};
+
 test.describe("Search", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto("/");
@@ -20,7 +27,7 @@ test.describe("Search", () => {
 
     test("typing a query shows matching results", async ({ page }) => {
         await page.click("#search-toggle");
-        await page.fill("#search-page-input", "Go");
+        await fillSearch(page, "Go");
         // Wait for 300ms debounce + render
         await expect(page.locator(".search-result-item").first()).toBeVisible({
             timeout: 2000,
@@ -29,11 +36,11 @@ test.describe("Search", () => {
 
     test("clearing input removes results", async ({ page }) => {
         await page.click("#search-toggle");
-        await page.fill("#search-page-input", "Go");
+        await fillSearch(page, "Go");
         await expect(page.locator(".search-result-item").first()).toBeVisible({
             timeout: 2000,
         });
-        await page.fill("#search-page-input", "");
+        await fillSearch(page, "");
         await expect(page.locator(".search-result-item")).toHaveCount(0);
     });
 
@@ -50,7 +57,7 @@ test.describe("Search", () => {
         page,
     }) => {
         await page.click("#search-toggle");
-        await page.fill("#search-page-input", "GoFront");
+        await fillSearch(page, "GoFront");
         await expect(page.locator(".search-result-item").first()).toBeVisible({
             timeout: 2000,
         });
