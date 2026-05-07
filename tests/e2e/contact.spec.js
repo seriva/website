@@ -48,7 +48,7 @@ test.describe("Contact Form", () => {
 
     test("successful submission shows success status", async ({ page }) => {
         // Intercept the EmailJS API call and return a fake success response
-        await page.route("**/api.emailjs.com/**", (route) =>
+        await page.route(/api\.emailjs\.com/, (route) =>
             route.fulfill({
                 status: 200,
                 contentType: "application/json",
