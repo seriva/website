@@ -7,6 +7,7 @@ This workflow is required by the project guidelines to ensure the code follows B
 // turbo-all
 
 1. Format the codebase
+
 ```bash
 npm run format
 ```
@@ -16,12 +17,12 @@ npm run format
 npm run check
 ```
 
-3. Run tests
+3. Run unit tests
 ```bash
-npm test
+npm run test:unit
 ```
 
 4. Create the production build
 ```bash
 npm run prod
-`
+```
