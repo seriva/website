@@ -47,19 +47,21 @@ test.describe("Contact Form", () => {
     });
 
     test("successful submission shows success status", async ({ page }) => {
-        // Intercept the EmailJS API call before any navigation
-        await page.route("https://api.emailjs.com/**", (route) =>
-            route.fulfill({
-                status: 200,
-                headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Methods": "POST, OPTIONS",
-                    "Access-Control-Allow-Headers": "Content-Type",
-                },
-                contentType: "application/json",
-                body: JSON.stringify({ status: 200, text: "OK" }),
-            }),
-        );
+        // Patch fetch before page scripts load so emailjs uses the stub
+        await page.addInitScript(() => {
+            const _fetch = window.fetch;
+            window.fetch = (url, ...args) => {
+                if (typeof url === "string" && url.includes("emailjs.com")) {
+                    return Promise.resolve(
+                        new Response(JSON.stringify({ status: 200, text: "OK" }), {
+                            status: 200,
+                            headers: { "Content-Type": "application/json" },
+                        }),
+                    );
+                }
+                return _fetch(url, ...args);
+            };
+        });
 
         await page.goto("/");
         await expect(page.locator("#email-toggle")).toBeVisible();
