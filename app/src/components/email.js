@@ -265,7 +265,7 @@ export class ContactForm extends Reactive.Component {
 				text: `${i18n.t("contact.name")}: ${i18n.t("contact.required")}`,
 				type: "error",
 			});
-			this.errors.name.set(true);
+			queueMicrotask(() => this.errors.name.set(true));
 			isValid = false;
 			return isValid;
 		}
@@ -275,7 +275,7 @@ export class ContactForm extends Reactive.Component {
 				text: `${i18n.t("contact.email")}: ${i18n.t("contact.required")}`,
 				type: "error",
 			});
-			this.errors.email.set(true);
+			queueMicrotask(() => this.errors.email.set(true));
 			isValid = false;
 			return isValid;
 		}
@@ -285,7 +285,7 @@ export class ContactForm extends Reactive.Component {
 				text: i18n.t("contact.invalidEmail"),
 				type: "error",
 			});
-			this.errors.email.set(true);
+			queueMicrotask(() => this.errors.email.set(true));
 			isValid = false;
 			return isValid;
 		}
@@ -295,7 +295,7 @@ export class ContactForm extends Reactive.Component {
 				text: `${i18n.t("contact.message")}: ${i18n.t("contact.required")}`,
 				type: "error",
 			});
-			this.errors.message.set(true);
+			queueMicrotask(() => this.errors.message.set(true));
 			isValid = false;
 			return isValid;
 		}
