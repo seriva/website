@@ -102,9 +102,7 @@ export class Search extends Reactive.Component {
 		});
 
 		if (this.refs.searchInput) {
-			requestAnimationFrame(() =>
-				requestAnimationFrame(() => this.refs.searchInput.focus()),
-			);
+			setTimeout(() => this.refs.searchInput.focus(), 300);
 		}
 	}
 

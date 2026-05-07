@@ -51,3 +51,6 @@ docs/superpowers/
 .worktrees/
 
 
+
+# Lefthook generated hooks
+.lefthook/
