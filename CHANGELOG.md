@@ -9,7 +9,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 <!-- Add changes here as you work. Move to a versioned section on release. -->
 
-## [1.0.0] - YYYY-MM-DD
+## [1.0.0] - 2026-05-07
 
 ### Added
+
 - Initial release.
