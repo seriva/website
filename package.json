@@ -22,11 +22,11 @@
 		"seo": "node scripts/generate-seo.js"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.12",
+		"@biomejs/biome": "^2.4.15",
 		"@fontsource/raleway": "^5.2.8",
 		"@playwright/test": "^1.59.1",
-		"lefthook": "^1.11.13",
 		"jsdom": "^29.0.2",
+		"lefthook": "^2.1.6",
 		"microtastic": "^0.0.71"
 	},
 	"dependencies": {
