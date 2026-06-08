@@ -31,8 +31,8 @@
 	},
 	"dependencies": {
 		"@emailjs/browser": "^4.4.1",
-		"fuse.js": "^7.3.0",
-		"marked": "^18.0.0",
+		"fuse.js": "^7.4.2",
+		"marked": "^18.0.5",
 		"prismjs": "^1.30.0"
 	},
 	"assetCopy": [
