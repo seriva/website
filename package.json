@@ -22,17 +22,17 @@
 		"seo": "node scripts/generate-seo.js"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.15",
+		"@biomejs/biome": "^2.5.0",
 		"@fontsource/raleway": "^5.2.8",
-		"@playwright/test": "^1.59.1",
+		"@playwright/test": "^1.61.0",
 		"jsdom": "^29.0.2",
 		"lefthook": "^2.1.6",
 		"microtastic": "^0.0.72"
 	},
 	"dependencies": {
 		"@emailjs/browser": "^4.4.1",
-		"fuse.js": "^7.3.0",
-		"marked": "^18.0.0",
+		"fuse.js": "^7.4.2",
+		"marked": "^18.0.5",
 		"prismjs": "^1.30.0"
 	},
 	"assetCopy": [
