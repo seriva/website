@@ -8,11 +8,9 @@ ehthumbs.db
 Thumbs.db
 
 # IDE files
-.vscode/settings.json
 .idea/
 *.swp
 *.swo
-.vscode/
 .claude/
 
 # Logs
