@@ -7,10 +7,10 @@ Personal portfolio website built with vanilla JavaScript (ES6 modules), custom r
 ## Tech Stack
 
 - **Core**: Vanilla HTML/JS (ES6 modules) • CSS-in-JS (via reactive.js) • Custom reactive system (signals, computed, declarative binding)
-- **Build**: Microtastic (SPA dev server) • Biome 2.3.7 (lint/format) • Node.js test runner (81 tests)
-- **Content**: YAML config + Markdown • Custom YAML parser (~4KB) • Marked.js v17 • Prism.js v1.30
-- **Features**: Fuse.js 7.1 (search) • EmailJS (contact form) • giscus (comments)
-- **Assets**: Raleway fonts • Font Awesome subset (local, no CDNs)
+- **Build**: Microtastic (SPA dev server) • Biome (lint/format) • Node.js test runner (91 tests)
+- **Content**: YAML config + Markdown • Custom YAML parser (~4KB) • Marked.js • Prism.js v1.30
+- **Features**: Fuse.js (search) • EmailJS (contact form) • giscus (comments)
+- **Assets**: Raleway fonts • Inline SVG icons (local, no CDNs)
 
 ## Architecture
 
@@ -25,21 +25,17 @@ The application follows a modular namespace pattern with reactive components:
 
 ## Development
 
-**Prerequisites:** Node.js >= 20.0.0, npm >= 9.0.0
-
-**Optional:** VS Code devcontainer (Alpine Linux, port 8081 auto-forwarded)
+**Prerequisites:** Node.js >= 24.0.0, npm >= 11.0.0
 
 ## Getting Started
 
 ```bash
 npm install        # Install dependencies
 npm run prepare    # Bundle fonts, themes, dependencies
-npm run dev        # Start dev server (http://localhost:8081)
+npm run dev        # Start dev server (http://localhost:8181)
 ```
 
-**Dev Container:** Open in VS Code → "Reopen in Container" → `npm install` → `npm run prepare` → `npm run dev`
-
-4. Open `http://localhost:8081`
+Open `http://localhost:8181` in your browser.
 
 ### Build for Production
 
@@ -51,7 +47,7 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
-- Run all tests (81 unit tests)
+- Run all tests (91 unit tests)
 - Copy assets (fonts, Prism themes) from node_modules
 - Bundle and minify dependencies
 - Output to `public/` directory
@@ -74,10 +70,12 @@ All code changes must pass linting before deployment.
 
 ### Testing
 
-Uses Node.js built-in test runner (81 tests):
+Uses Node.js built-in test runner (91 tests):
 
 ```bash
-npm test    # Run all tests
+npm run test:unit    # Run unit tests
+npm run test:e2e     # Run E2E tests (requires dev server)
+npm run test:all     # Run all tests
 ```
 
 Tests cover:
@@ -143,17 +141,17 @@ projects:
   - id: "my-project"
     title: "Cool Project"
     tags: ["JavaScript"]
-    weight: 1
+    order: 1
     github_repo: "my-project"  # Auto-loads README
     demo_url: "https://example.com"
     youtube_videos: ["videoId"]
     links:
       - title: "GitHub"
-        icon: "fab fa-github"
+        icon: "github"
         href: "https://github.com/user/repo"
 ```
 
-**Features:** Auto-load GitHub READMEs • YouTube embeds • Font Awesome icons • Tag organization
+**Features:** Auto-load GitHub READMEs • YouTube embeds • SVG icons • Tag organization
 
 ### Blog
 
