@@ -3,14 +3,12 @@
 The guiding principle is **content over complexity** — features must serve the portfolio
 content, not add framework overhead or maintenance burden.
 
-Each release has a subfolder in `docs/` containing design documents for the planned
-features (e.g. `docs/v1.1.0/`).
+Design documents for planned features live in `docs/plans/`
+(e.g. `docs/plans/<feature>-plan.md`).
 
 ---
 
-## [v1.1.0]
-
-**Theme: TBD.**
+## Upcoming
 
 | Feature    | Difficulty | Status | Notes |
 |------------|------------|--------|-------|
