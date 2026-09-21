@@ -104,6 +104,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2026-09-21-bootstrapping-agentic-development.md"
+      title: "Bootstrapping Agentic Development"
+      date: "2026-09-21"
+      excerpt: "AI coding assistants are great until every repo ends up with conflicting instructions, messy session artifacts, and broken quality gates. Here is how I standardized my workflow with Bootstrap."
+      tags: ["AI", "DevOps", "Workflow"]
     - filename: "2026-04-15-gofront-go-to-javascript.md"
       title: "Writing Go for the Frontend"
       date: "2026-04-15"
@@ -316,6 +321,27 @@ projects:
       - title: "Download"
         icon: "download"
         href: "https://github.com/seriva/astrohunter/archive/master.zip"
+
+  # Agentic Development Bootstrap
+  - id: "bootstrap"
+    title: "Bootstrap"
+    description: "Generic project scaffold for agentic development."
+    tags:
+      - "AI"
+      - "DevOps"
+      - "Workflow"
+      - "Shell"
+    order: 9
+    github_repo: "bootstrap"
+    github_branch: "main"
+    links:
+      - title: "Github"
+        icon: "github"
+        href: "https://github.com/seriva/bootstrap"
+      - title: "Download"
+        icon: "download"
+        href: "https://github.com/seriva/bootstrap/archive/main.zip"
+
 
 # Website Pages
 pages:
