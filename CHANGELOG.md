@@ -4,6 +4,8 @@ All notable changes to this project will be documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [2026-09]
+
 ### Added
 
 - Added `bootstrap` project entry and blog post.
