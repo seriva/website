@@ -43,4 +43,26 @@ test.describe("Project page", () => {
             timeout: 5000,
         });
     });
+
+    test("highlights active project in dropdown menu", async ({ page }) => {
+        await page.goto("/project/gofront");
+        await expect(page.locator(".project-title")).toBeVisible();
+
+        // Check dropdown toggle is active
+        await expect(page.locator(".dropdown-toggle")).toHaveClass(/active/);
+
+        // Open dropdown
+        await page.click(".dropdown-toggle");
+        await expect(page.locator("#projects-dropdown")).toBeVisible();
+
+        // Check selected project item has active class
+        const activeItem = page.locator('.dropdown-item[href="/project/gofront"]');
+        await expect(activeItem).toHaveClass(/active/);
+
+        // Check other project items do not have active class
+        const inactiveItem = page.locator('.dropdown-item:not([href="/project/gofront"])').first();
+        if (await inactiveItem.count() > 0) {
+            await expect(inactiveItem).not.toHaveClass(/active/);
+        }
+    });
 });

@@ -1,0 +1,29 @@
+package main
+
+import "strings"
+
+templ AppStyles() {
+	@templ.Raw("<style id=\"app-styles\">" + appCSS() + "</style>")
+}
+
+templ AppShell() {
+	<div class="app-root">
+		@Navbar()
+		<main id="main-content">
+			if currentRoute == "/blog" {
+				@BlogList()
+			} else if strings.HasPrefix(currentRoute, "/blog/") {
+				@BlogPostView()
+			} else if strings.HasPrefix(currentRoute, "/project/") {
+				@ProjectDetail()
+			} else if strings.HasPrefix(currentRoute, "/page/") {
+				@PageView()
+			} else {
+				@BlogList()
+			}
+		</main>
+		@Footer()
+		@SearchModal()
+		@ContactModal()
+	</div>
+}

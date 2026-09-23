@@ -1,0 +1,97 @@
+package main
+
+import "strings"
+
+func searchPageClass(open bool, closing bool) string {
+	if closing {
+		return "show closing"
+	}
+	if open {
+		return "show"
+	}
+	return ""
+}
+
+func searchClearClass(q string) string {
+	if q != "" {
+		return "search-page-clear show"
+	}
+	return "search-page-clear"
+}
+
+func searchPlaceholderText() string {
+	if site.Search.Placeholder != "" && site.Search.Placeholder != "undefined" {
+		return site.Search.Placeholder
+	}
+	res := t("search.placeholder")
+	if res == "search.placeholder" || res == "" || res == "undefined" {
+		return "Search..."
+	}
+	return res
+}
+
+func highlightMatch(text string, query string) string {
+	if query == "" {
+		return text
+	}
+	lowerText := strings.ToLower(text)
+	lowerQuery := strings.ToLower(query)
+	idx := strings.Index(lowerText, lowerQuery)
+	if idx == -1 {
+		return text
+	}
+	return text[:idx] + "<mark>" + text[idx:idx+len(query)] + "</mark>" + text[idx+len(query):]
+}
+
+templ SearchResultsList() {
+	if searchQuery != "" && len(searchResults) == 0 {
+		<div class="search-no-results">
+			@IconSearch("3rem")
+			<p>{ t("search.noResults") }</p>
+		</div>
+	} else {
+		for _, item := range searchResults {
+			<article class="search-result-item blog-post-card" data-action="open-post" data-href={ item.Url }>
+				<h2 class="blog-post-title">
+					<a href={ item.Url } data-action="nav">@templ.Raw(highlightMatch(item.Title, searchQuery))</a>
+				</h2>
+				<div class="blog-post-meta">
+					<span class="blog-post-tags">
+						if item.ItemType == "project" {
+							<span class="item-tag">{ t("badges.project") }</span>
+						} else {
+							<span class="item-tag">{ t("badges.blog") }</span>
+						}
+						for _, tag := range item.Tags {
+							<span class="item-tag">{ tag }</span>
+						}
+					</span>
+				</div>
+				<p class="blog-post-excerpt">@templ.Raw(highlightMatch(item.Description, searchQuery))</p>
+			</article>
+		}
+	}
+}
+
+templ SearchModal() {
+	<div id="search-page" class={ searchPageClass(searchOpen, searchClosing) }>
+		<div class="search-page-header">
+			<div class="search-page-header-content">
+				<button class="search-page-back" id="search-page-back" aria-label={ t("aria.goBack") } data-action="close-search">
+					@IconArrowLeft("1.2rem")
+				</button>
+				<div class="search-page-input-wrapper">
+					<input type="search" id="search-page-input" class="search-page-input" placeholder={ searchPlaceholderText() } autocomplete="off" aria-label={ t("aria.search") } value={ searchQuery }/>
+					<button class={ searchClearClass(searchQuery) } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
+						@IconTimes("1.2rem")
+					</button>
+				</div>
+			</div>
+		</div>
+		<div class="search-page-content">
+			<div class="search-page-results" id="search-page-results">
+				@SearchResultsList()
+			</div>
+		</div>
+	</div>
+}

@@ -7,12 +7,12 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"]
+		"includes": ["scripts/**/*.js", "tests/unit/**/*.js"]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"]
+		"includes": ["scripts/**/*.js", "tests/unit/**/*.js"]
 	},
 	"assist": {
 		"actions": {
@@ -23,7 +23,7 @@
 	},
 	"linter": {
 		"enabled": true,
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"],
+		"includes": ["scripts/**/*.js", "tests/unit/**/*.js"],
 		"rules": {
 			"preset": "recommended"
 		}

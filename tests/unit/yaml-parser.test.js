@@ -1,7 +1,7 @@
-import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { YAMLParser } from "../../app/src/utils/yaml-parser.js";
+import { describe, test } from "node:test";
+import { YAMLParser } from "../../scripts/yaml-parser.js";
 
 describe("YAML Parser", () => {
 	test("should return an empty object if input is null or empty", () => {
@@ -36,7 +36,8 @@ describe("YAML Parser", () => {
 	});
 
 	test("should parse arrays of objects", () => {
-		const yaml = "users:\n  - name: John\n    age: 30\n  - name: Jane\n    age: 25";
+		const yaml =
+			"users:\n  - name: John\n    age: 30\n  - name: Jane\n    age: 25";
 		const result = YAMLParser.parse(yaml);
 		assert.equal(result.users.length, 2);
 		assert.equal(result.users[0].name, "John");
@@ -73,26 +74,26 @@ describe("YAML Parser", () => {
 		const yaml = readFileSync("app/data/content.yaml", "utf8");
 		const result = YAMLParser.parse(yaml);
 
-	// Test site config
-	assert.equal(result.site.title, "luukvanvenrooij.nl");
-	assert.equal(result.site.author, "Luuk van Venrooij");
-	assert.equal(result.site.github_username, "seriva");
+		// Test site config
+		assert.equal(result.site.title, "luukvanvenrooij.nl");
+		assert.equal(result.site.author, "Luuk van Venrooij");
+		assert.equal(result.site.github_username, "seriva");
 
-	// Test theme config structure
-	assert.equal(result.site.theme.default, "dark");
-	assert.equal(result.site.theme.dark.primary, "#10B981");
-	assert.equal(result.site.theme.dark.background, "#0D1117");
+		// Test theme config structure
+		assert.equal(result.site.theme.default, "dark");
+		assert.equal(result.site.theme.dark.primary, "#10B981");
+		assert.equal(result.site.theme.dark.background, "#0D1117");
 
-	// Test light theme exists
-	assert.ok(result.site.theme.light);
-	assert.equal(result.site.theme.light.primary, "#047857");
+		// Test light theme exists
+		assert.ok(result.site.theme.light);
+		assert.equal(result.site.theme.light.primary, "#047857");
 
-	// Test comments theme config (nested under each theme)
-	assert.equal(result.site.theme.dark.comments.theme, "dark");
-	assert.equal(result.site.theme.light.comments.theme, "light");
+		// Test comments theme config (nested under each theme)
+		assert.equal(result.site.theme.dark.comments.theme, "dark");
+		assert.equal(result.site.theme.light.comments.theme, "light");
 
-	// Test nested config
-	assert.equal(result.site.i18n.defaultLanguage, "en");
+		// Test nested config
+		assert.equal(result.site.i18n.defaultLanguage, "en");
 		assert.deepEqual(result.site.i18n.availableLanguages, ["en"]);
 
 		// Test social array
@@ -122,4 +123,3 @@ describe("YAML Parser", () => {
 		assert.equal(result.translations.en["nav.projects"], "Projects");
 	});
 });
-

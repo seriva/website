@@ -1,0 +1,99 @@
+package main
+
+func demoLabel(p Project) string {
+	if p.DemoLabel != "" {
+		return p.DemoLabel
+	}
+	return t("project.demo")
+}
+
+func demoWrapperClass(height string) string {
+	if height != "" {
+		return "demo-iframe-wrapper"
+	}
+	return "iframeWrapper"
+}
+
+templ ProjectDetail() {
+	if projectReadmeError && currentProject.ID == "" {
+		<div class="error-message">
+			<h1>{ t("general.projectNotFound") }</h1>
+			<p>{ t("general.projectNotFoundMessage") }</p>
+		</div>
+	} else {
+		<div class="project-detail">
+			<h1 class="project-title">{ currentProject.Title }</h1>
+			<p class="project-description">{ currentProject.Description }</p>
+			if len(currentProject.Tags) > 0 {
+				<div class="project-tags">
+					for _, tag := range currentProject.Tags {
+						<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
+					}
+				</div>
+			}
+			if currentProject.GithubRepo != "" {
+				if projectReadmeLoading {
+					<div id="project-readme">
+						<p>{ t("project.loadingReadme") }</p>
+					</div>
+				} else if projectReadmeError {
+					<div id="project-readme">
+						<p>{ t("project.readmeError") }</p>
+					</div>
+				} else if projectReadmeHtml != "" {
+					<div id="project-readme" class="markdown-body">
+						@templ.Raw(projectReadmeHtml)
+					</div>
+				}
+			}
+			if len(currentProject.YoutubeVideos) > 0 {
+				<div class="markdown-body">
+					<h2>{ t("project.media") }</h2>
+					for _, v := range currentProject.YoutubeVideos {
+						<div class="youtube-video">
+							<div class="iframeWrapper">
+								<iframe width="560" height="349" src={ "https://www.youtube.com/embed/" + v + "?rel=0&hd=1" } frameborder="0" allowfullscreen></iframe>
+							</div>
+						</div>
+					}
+				</div>
+			}
+			if currentProject.DemoUrl != "" {
+				<div class="markdown-body">
+					<h2>{ demoLabel(currentProject) }</h2>
+					if currentProject.DemoInstructions != "" {
+						<p>{ currentProject.DemoInstructions }</p>
+					}
+					<div class={ demoWrapperClass(currentProject.DemoHeight) }>
+						<iframe id="demo" src={ currentProject.DemoUrl } frameborder="0" scrolling="no" allowfullscreen></iframe>
+					</div>
+					if currentProject.DemoFullscreen {
+						<br/>
+						<center>
+							<button id="fullscreen" class="download-btn" data-action="toggle-fullscreen">
+								@IconExpand("1rem")
+								<span>{ t("project.fullscreen") }</span>
+							</button>
+						</center>
+					}
+				</div>
+			}
+			if len(currentProject.Links) > 0 {
+				<div class="markdown-body">
+					<h2>{ t("project.links") }</h2>
+					<div class="download-buttons">
+						for _, link := range currentProject.Links {
+							<a href={ link.Href } target="_blank" rel="noopener noreferrer" class="download-btn">
+								@DynamicIcon(link.Icon, "1rem")
+								<span>{ link.Title }</span>
+							</a>
+						}
+					</div>
+				</div>
+			}
+			if site.Comments.ProjectsEnabled {
+				<div class="giscus-container"></div>
+			}
+		</div>
+	}
+}

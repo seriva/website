@@ -1,0 +1,111 @@
+package main
+
+import "strings"
+
+func toggleBtnClass(open bool) string {
+	if open {
+		return "navbar-toggle active"
+	}
+	return "navbar-toggle"
+}
+
+func navbarCollapseClass(open bool) string {
+	if open {
+		return "navbar-collapse show"
+	}
+	return "navbar-collapse"
+}
+
+func dropdownClass(open bool) string {
+	if open {
+		return "nav-item dropdown show"
+	}
+	return "nav-item dropdown"
+}
+
+func navLinkClass(active bool) string {
+	if active {
+		return "nav-link active"
+	}
+	return "nav-link"
+}
+
+func dropdownToggleClass(active bool) string {
+	if active {
+		return "nav-link dropdown-toggle active"
+	}
+	return "nav-link dropdown-toggle"
+}
+
+func dropdownItemClass(active bool) string {
+	if active {
+		return "dropdown-item active"
+	}
+	return "dropdown-item"
+}
+
+templ Navbar() {
+	<nav class="navbar">
+		<div class="navbar-inner">
+			<a class="navbar-brand" href="/" data-action="nav">{ site.Title }</a>
+			<button class={ toggleBtnClass(mobileMenuOpen) } aria-label="Toggle navigation" data-action="toggle-mobile-nav">
+				<span class="navbar-toggle-icon"></span>
+			</button>
+			<div class={ navbarCollapseClass(mobileMenuOpen) }>
+				<ul class="navbar-nav left">
+					<li class="nav-item navbar-menu">
+						<a class={ navLinkClass(currentRoute == "/blog") } href="/blog" data-action="nav">{ t("nav.blog") }</a>
+					</li>
+					<li class={ dropdownClass(projectsDropdownOpen) }>
+						<a class={ dropdownToggleClass(strings.HasPrefix(currentRoute, "/project/")) } href="javascript:void(0)" role="button" data-action="toggle-projects-dropdown">
+							{ t("nav.projects") }
+							<span class="dropdown-chevron dropdown-chevron-down">@IconChevronDown("0.8em")</span>
+							<span class="dropdown-chevron dropdown-chevron-up">@IconChevronUp("0.8em")</span>
+						</a>
+						<ul class="dropdown-menu" id="projects-dropdown">
+							for _, p := range projects {
+								<li><a class={ dropdownItemClass(currentRoute == p.Href) } href={ p.Href } data-action="nav">{ p.Title }</a></li>
+							}
+						</ul>
+					</li>
+					for _, page := range navPages {
+						if page.ShowInNav {
+							<li class="nav-item navbar-menu">
+								<a class={ navLinkClass(currentRoute == page.Href) } href={ page.Href } data-action="nav">{ page.Title }</a>
+							</li>
+						}
+					}
+				</ul>
+				<ul class="navbar-nav right">
+					if site.Search.Enabled {
+						<li class="nav-item navbar-icon">
+							<button class="nav-link search-toggle" id="search-toggle" aria-label={ t("aria.search") } title={ t("search.buttonTitle") } data-action="open-search">
+								@IconSearch("1.35rem")
+							</button>
+						</li>
+					}
+					<li class="nav-item navbar-icon">
+						<button id="theme-toggle" class="theme-toggle nav-link" aria-label={ t("aria.toggleTheme") } title={ t("theme.toggleTitle") } data-action="toggle-theme">
+							@IconSun("1.35rem")
+							@IconMoon("1.35rem")
+						</button>
+					</li>
+					if site.EmailJS.Enabled {
+						<li class="nav-item navbar-icon">
+							<button class="nav-link email-toggle" id="email-toggle" aria-label={ t("contact.title") } title={ t("contact.buttonTitle") } data-action="open-contact">
+								@IconEnvelope("1.35rem")
+							</button>
+						</li>
+					}
+					for _, s := range site.Social {
+						<li class="nav-item navbar-icon">
+							<a class="nav-link" href={ s.Href } target={ s.Target } rel={ s.Rel }>
+								@DynamicIcon(s.Icon, "1.35rem")
+							</a>
+						</li>
+					}
+				</ul>
+			</div>
+		</div>
+	</nav>
+}

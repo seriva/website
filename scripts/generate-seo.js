@@ -6,9 +6,9 @@
 // Generates sitemap.xml and rss.xml from content.yaml
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { YAMLParser } from "../app/src/utils/yaml-parser.js";
+import { YAMLParser } from "./yaml-parser.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -128,7 +128,9 @@ function generateRssFeed(contentData, baseUrl) {
 		);
 
 		if (post.excerpt) {
-			parts.push(`      <description>${escapeXml(post.excerpt)}</description>\n`);
+			parts.push(
+				`      <description>${escapeXml(post.excerpt)}</description>\n`,
+			);
 		}
 
 		// Add categories/tags
