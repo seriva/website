@@ -127,6 +127,74 @@ func sortPostsByDate(list []BlogPost) {
 	})
 }
 
+// projectFromYAML maps one raw `projects[]` entry to a Project.
+func projectFromYAML(p any) Project {
+	tags := []string{}
+	if p.tags != nil {
+		for _, tg := range p.tags {
+			tags = append(tags, strVal(tg))
+		}
+	}
+	videos := []string{}
+	if p.youtube_videos != nil {
+		for _, v := range p.youtube_videos {
+			videos = append(videos, strVal(v))
+		}
+	}
+	links := []ProjectLink{}
+	if p.links != nil {
+		for _, l := range p.links {
+			links = append(links, ProjectLink{
+				Title: strVal(l.title),
+				Icon:  strVal(l.icon),
+				Href:  strVal(l.href),
+			})
+		}
+	}
+
+	id := strVal(p.id)
+	return Project{
+		ID:               id,
+		Title:            strVal(p.title),
+		Description:      strVal(p.description),
+		Tags:             tags,
+		Order:            intVal(p.order),
+		GithubRepo:       strVal(p.github_repo),
+		GithubBranch:     strVal(p.github_branch),
+		DemoUrl:          strVal(p.demo_url),
+		DemoLabel:        strVal(p.demo_label),
+		DemoInstructions: strVal(p.demo_instructions),
+		DemoHeight:       strVal(p.demo_height),
+		DemoFullscreen:   boolVal(p.demo_fullscreen),
+		YoutubeVideos:    videos,
+		Links:            links,
+		Href:             "/project/" + id,
+	}
+}
+
+func sortProjectsByOrder(list []Project) {
+	slices.SortFunc(list, func(a Project, b Project) int {
+		return a.Order - b.Order
+	})
+}
+
+// pageFromYAML maps one `pages.<id>` entry to a NavPage.
+func pageFromYAML(id string, p any) NavPage {
+	return NavPage{
+		ID:        id,
+		Title:     strVal(p.title),
+		Order:     intVal(p.order),
+		ShowInNav: boolVal(p.showInNav),
+		Href:      "/page/" + id,
+	}
+}
+
+func sortPagesByOrder(list []NavPage) {
+	slices.SortFunc(list, func(a NavPage, b NavPage) int {
+		return a.Order - b.Order
+	})
+}
+
 async func initData() error {
 	res := await fetch("/data/content.yaml")
 	if res == nil || !res.ok {
@@ -258,67 +326,17 @@ async func initData() error {
 	// Projects
 	if data.projects != nil {
 		for _, p := range data.projects {
-			tags := []string{}
-			if p.tags != nil {
-				for _, tg := range p.tags {
-					tags = append(tags, strVal(tg))
-				}
-			}
-			videos := []string{}
-			if p.youtube_videos != nil {
-				for _, v := range p.youtube_videos {
-					videos = append(videos, strVal(v))
-				}
-			}
-			links := []ProjectLink{}
-			if p.links != nil {
-				for _, l := range p.links {
-					links = append(links, ProjectLink{
-						Title: strVal(l.title),
-						Icon:  strVal(l.icon),
-						Href:  strVal(l.href),
-					})
-				}
-			}
-
-			id := strVal(p.id)
-			projects = append(projects, Project{
-				ID:               id,
-				Title:            strVal(p.title),
-				Description:      strVal(p.description),
-				Tags:             tags,
-				Order:            intVal(p.order),
-				GithubRepo:       strVal(p.github_repo),
-				GithubBranch:     strVal(p.github_branch),
-				DemoUrl:          strVal(p.demo_url),
-				DemoLabel:        strVal(p.demo_label),
-				DemoInstructions: strVal(p.demo_instructions),
-				DemoHeight:       strVal(p.demo_height),
-				DemoFullscreen:   boolVal(p.demo_fullscreen),
-				YoutubeVideos:    videos,
-				Links:            links,
-				Href:             "/project/" + id,
-			})
+			projects = append(projects, projectFromYAML(p))
 		}
-		slices.SortFunc(projects, func(a Project, b Project) int {
-			return a.Order - b.Order
-		})
+		sortProjectsByOrder(projects)
 	}
 
 	// Pages
 	if data.pages != nil {
 		for id, p := range data.pages.(map[string]any) {
-			navPages = append(navPages, NavPage{
-				ID:        id,
-				Title:     strVal(p.title),
-				Order:     intVal(p.order),
-				ShowInNav: boolVal(p.showInNav),
-				Href:      "/page/" + id,
-			})
+			navPages = append(navPages, pageFromYAML(id, p))
 		}
-		slices.SortFunc(navPages, func(a NavPage, b NavPage) int {
-			return a.Order - b.Order
-		})
+		sortPagesByOrder(navPages)
 	}
 
 	updateMetaTags()

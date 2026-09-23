@@ -67,8 +67,8 @@ type NavPage struct {
 type LoadStatus int
 
 const (
-	LoadReady LoadStatus = iota // content available or nothing to load
-	LoadPending
+	LoadReady   LoadStatus = iota // content available or nothing to load
+	LoadPending                   // resolver wants a fetch; never rendered (routes paint once, after the fetch)
 	LoadFailed
 	LoadNotFound
 )

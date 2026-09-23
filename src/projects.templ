@@ -2,11 +2,7 @@ package main
 
 templ ProjectReadme(v ViewState) {
 	if v.Proj.GithubRepo != "" {
-		if v.Status == LoadPending {
-			<div id="project-readme">
-				<p>{ t("project.loadingReadme") }</p>
-			</div>
-		} else if v.Status == LoadFailed {
+		if v.Status == LoadFailed {
 			<div id="project-readme">
 				<p>{ t("project.readmeError") }</p>
 			</div>

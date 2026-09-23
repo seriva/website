@@ -265,24 +265,7 @@ a.icon:hover {
 	}
 }
 
-/* Shared Loading & Error styles */
-.loading-spinner {
-	text-align: center;
-	padding: 2rem;
-	color: var(--accent);
-	font-size: 1.2em;
-	animation: pulse 1.5s ease-in-out infinite;
-}
-@keyframes pulse {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.5;
-	}
-}
-
+/* Shared Error styles */
 .error-message {
 	text-align: center;
 	padding: 2rem;
