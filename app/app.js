@@ -628,47 +628,42 @@ function BlogPostView(v, commentsEnabled) {
       ___e31.appendChild(document.createTextNode(String(t("general.blogNotFoundMessage"))));
       ___e29.appendChild(___e31);
       ___p.appendChild(___e29);
-    } else if (v.Status === LoadPending) {
-      const ___e32 = document.createElement("div");
-      ___e32.className = "loading-spinner";
-      ___e32.appendChild(document.createTextNode(String(t("general.loading"))));
-      ___p.appendChild(___e32);
     } else {
-      const ___e33 = document.createElement("div");
-      ___e33.className = "blog-post-view";
-      const ___e34 = document.createElement("h1");
-      ___e34.className = "project-title";
-      ___e34.appendChild(document.createTextNode(String(v.Post.Title)));
-      ___e33.appendChild(___e34);
-      const ___e35 = document.createElement("p");
-      ___e35.className = "project-description";
-      ___e35.appendChild(document.createTextNode(String(v.Post.Date)));
-      ___e33.appendChild(___e35);
+      const ___e32 = document.createElement("div");
+      ___e32.className = "blog-post-view";
+      const ___e33 = document.createElement("h1");
+      ___e33.className = "project-title";
+      ___e33.appendChild(document.createTextNode(String(v.Post.Title)));
+      ___e32.appendChild(___e33);
+      const ___e34 = document.createElement("p");
+      ___e34.className = "project-description";
+      ___e34.appendChild(document.createTextNode(String(v.Post.Date)));
+      ___e32.appendChild(___e34);
       if (__len(v.Post.Tags) > 0) {
-        const ___e36 = document.createElement("div");
-        ___e36.className = "project-tags";
+        const ___e35 = document.createElement("div");
+        ___e35.className = "project-tags";
         for (const tag of v.Post.Tags) {
-          const ___e37 = document.createElement("span");
-          ___e37.className = "item-tag clickable-tag";
-          ___e37.setAttribute("data-search-tag", String(tag));
-          ___e37.appendChild(document.createTextNode(String(tag)));
-          ___e36.appendChild(___e37);
+          const ___e36 = document.createElement("span");
+          ___e36.className = "item-tag clickable-tag";
+          ___e36.setAttribute("data-search-tag", String(tag));
+          ___e36.appendChild(document.createTextNode(String(tag)));
+          ___e35.appendChild(___e36);
         }
-        ___e33.appendChild(___e36);
+        ___e32.appendChild(___e35);
       }
+      const ___e37 = document.createElement("div");
+      ___e37.className = "blog-post-content";
       const ___e38 = document.createElement("div");
-      ___e38.className = "blog-post-content";
-      const ___e39 = document.createElement("div");
-      ___e39.className = "markdown-body";
-      ___e39.insertAdjacentHTML("beforeend", v.HTML);
-      ___e38.appendChild(___e39);
-      ___e33.appendChild(___e38);
+      ___e38.className = "markdown-body";
+      ___e38.insertAdjacentHTML("beforeend", v.HTML);
+      ___e37.appendChild(___e38);
+      ___e32.appendChild(___e37);
       if (commentsEnabled) {
-        const ___e40 = document.createElement("div");
-        ___e40.className = "giscus-container";
-        ___e33.appendChild(___e40);
+        const ___e39 = document.createElement("div");
+        ___e39.className = "giscus-container";
+        ___e32.appendChild(___e39);
       }
-      ___p.appendChild(___e33);
+      ___p.appendChild(___e32);
     }
   }};
 }
@@ -717,108 +712,108 @@ function updateGiscusTheme() {
 
 function ContactFormFields(form) {
   return {Mount(___p) {
-    const ___e41 = document.createElement("div");
-    ___e41.className = "form-group";
-    const ___e42 = document.createElement("label");
-    ___e42.setAttribute("for", "contact-name");
-    ___e42.appendChild(document.createTextNode(String(t("contact.name"))));
-    ___e42.appendChild(document.createTextNode("*"));
-    ___e41.appendChild(___e42);
-    const ___e43 = document.createElement("input");
-    ___e43.setAttribute("type", "text");
-    ___e43.setAttribute("id", "contact-name");
-    ___e43.setAttribute("name", "name");
-    ___e43.setAttribute("required", "");
-    ___e43.className = inputErrorClass(form.ErrName);
-    ___e43.setAttribute("aria-invalid", String(String(form.ErrName)));
-    ___e43.setAttribute("value", String(form.Name));
-    ___e41.appendChild(___e43);
-    ___p.appendChild(___e41);
-    const ___e44 = document.createElement("div");
-    ___e44.className = "form-group";
-    const ___e45 = document.createElement("label");
-    ___e45.setAttribute("for", "contact-email");
-    ___e45.appendChild(document.createTextNode(String(t("contact.email"))));
-    ___e45.appendChild(document.createTextNode("*"));
-    ___e44.appendChild(___e45);
-    const ___e46 = document.createElement("input");
-    ___e46.setAttribute("type", "email");
-    ___e46.setAttribute("id", "contact-email");
-    ___e46.setAttribute("name", "email");
-    ___e46.setAttribute("required", "");
-    ___e46.className = inputErrorClass(form.ErrEmail);
-    ___e46.setAttribute("aria-invalid", String(String(form.ErrEmail)));
-    ___e46.setAttribute("value", String(form.Email));
-    ___e44.appendChild(___e46);
-    ___p.appendChild(___e44);
-    const ___e47 = document.createElement("div");
-    ___e47.className = "form-group";
-    const ___e48 = document.createElement("label");
-    ___e48.setAttribute("for", "contact-message");
-    ___e48.appendChild(document.createTextNode(String(t("contact.message"))));
-    ___e48.appendChild(document.createTextNode("*"));
-    ___e47.appendChild(___e48);
-    const ___e49 = document.createElement("textarea");
-    ___e49.setAttribute("id", "contact-message");
-    ___e49.setAttribute("name", "message");
-    ___e49.setAttribute("rows", "6");
-    ___e49.setAttribute("required", "");
-    ___e49.className = inputErrorClass(form.ErrMessage);
-    ___e49.setAttribute("aria-invalid", String(String(form.ErrMessage)));
-    ___e49.appendChild(document.createTextNode(String(form.Message)));
-    ___e47.appendChild(___e49);
-    ___p.appendChild(___e47);
-    const ___e50 = document.createElement("div");
-    ___e50.className = formStatusClass(form.StatusType);
-    ___e50.setAttribute("id", "contact-status");
-    ___e50.setAttribute("aria-live", "polite");
-    const ___e51 = document.createElement("span");
-    ___e51.appendChild(document.createTextNode(String(form.StatusText)));
-    ___e50.appendChild(___e51);
-    ___p.appendChild(___e50);
-    const ___e52 = document.createElement("button");
-    ___e52.setAttribute("type", "submit");
-    ___e52.className = "btn btn-primary";
-    ___e52.setAttribute("id", "contact-submit");
-    if(form.ButtonDisabled)___e52.setAttribute("disabled", "");
-    ___e52.appendChild(document.createTextNode(String(t("contact." + form.ButtonState))));
-    ___p.appendChild(___e52);
+    const ___e40 = document.createElement("div");
+    ___e40.className = "form-group";
+    const ___e41 = document.createElement("label");
+    ___e41.setAttribute("for", "contact-name");
+    ___e41.appendChild(document.createTextNode(String(t("contact.name"))));
+    ___e41.appendChild(document.createTextNode("*"));
+    ___e40.appendChild(___e41);
+    const ___e42 = document.createElement("input");
+    ___e42.setAttribute("type", "text");
+    ___e42.setAttribute("id", "contact-name");
+    ___e42.setAttribute("name", "name");
+    ___e42.setAttribute("required", "");
+    ___e42.className = inputErrorClass(form.ErrName);
+    ___e42.setAttribute("aria-invalid", String(String(form.ErrName)));
+    ___e42.setAttribute("value", String(form.Name));
+    ___e40.appendChild(___e42);
+    ___p.appendChild(___e40);
+    const ___e43 = document.createElement("div");
+    ___e43.className = "form-group";
+    const ___e44 = document.createElement("label");
+    ___e44.setAttribute("for", "contact-email");
+    ___e44.appendChild(document.createTextNode(String(t("contact.email"))));
+    ___e44.appendChild(document.createTextNode("*"));
+    ___e43.appendChild(___e44);
+    const ___e45 = document.createElement("input");
+    ___e45.setAttribute("type", "email");
+    ___e45.setAttribute("id", "contact-email");
+    ___e45.setAttribute("name", "email");
+    ___e45.setAttribute("required", "");
+    ___e45.className = inputErrorClass(form.ErrEmail);
+    ___e45.setAttribute("aria-invalid", String(String(form.ErrEmail)));
+    ___e45.setAttribute("value", String(form.Email));
+    ___e43.appendChild(___e45);
+    ___p.appendChild(___e43);
+    const ___e46 = document.createElement("div");
+    ___e46.className = "form-group";
+    const ___e47 = document.createElement("label");
+    ___e47.setAttribute("for", "contact-message");
+    ___e47.appendChild(document.createTextNode(String(t("contact.message"))));
+    ___e47.appendChild(document.createTextNode("*"));
+    ___e46.appendChild(___e47);
+    const ___e48 = document.createElement("textarea");
+    ___e48.setAttribute("id", "contact-message");
+    ___e48.setAttribute("name", "message");
+    ___e48.setAttribute("rows", "6");
+    ___e48.setAttribute("required", "");
+    ___e48.className = inputErrorClass(form.ErrMessage);
+    ___e48.setAttribute("aria-invalid", String(String(form.ErrMessage)));
+    ___e48.appendChild(document.createTextNode(String(form.Message)));
+    ___e46.appendChild(___e48);
+    ___p.appendChild(___e46);
+    const ___e49 = document.createElement("div");
+    ___e49.className = formStatusClass(form.StatusType);
+    ___e49.setAttribute("id", "contact-status");
+    ___e49.setAttribute("aria-live", "polite");
+    const ___e50 = document.createElement("span");
+    ___e50.appendChild(document.createTextNode(String(form.StatusText)));
+    ___e49.appendChild(___e50);
+    ___p.appendChild(___e49);
+    const ___e51 = document.createElement("button");
+    ___e51.setAttribute("type", "submit");
+    ___e51.className = "btn btn-primary";
+    ___e51.setAttribute("id", "contact-submit");
+    if(form.ButtonDisabled)___e51.setAttribute("disabled", "");
+    ___e51.appendChild(document.createTextNode(String(t("contact." + form.ButtonState))));
+    ___p.appendChild(___e51);
   }};
 }
 
 function ContactModal(open, closing, form) {
   return {Mount(___p) {
+    const ___e52 = document.createElement("div");
+    ___e52.setAttribute("id", "contact-modal");
+    ___e52.className = overlayClass(open, closing);
+    ___e52.setAttribute("role", "dialog");
+    ___e52.setAttribute("aria-modal", "true");
+    ___e52.setAttribute("aria-labelledby", "contact-modal-title");
     const ___e53 = document.createElement("div");
-    ___e53.setAttribute("id", "contact-modal");
-    ___e53.className = overlayClass(open, closing);
-    ___e53.setAttribute("role", "dialog");
-    ___e53.setAttribute("aria-modal", "true");
-    ___e53.setAttribute("aria-labelledby", "contact-modal-title");
+    ___e53.className = "contact-modal-content";
     const ___e54 = document.createElement("div");
-    ___e54.className = "contact-modal-content";
-    const ___e55 = document.createElement("div");
-    ___e55.className = "contact-modal-header";
-    const ___e56 = document.createElement("h2");
-    ___e56.setAttribute("id", "contact-modal-title");
-    ___e56.appendChild(document.createTextNode(String(t("contact.title"))));
-    ___e55.appendChild(___e56);
-    const ___e57 = document.createElement("button");
-    ___e57.setAttribute("type", "button");
-    ___e57.className = "contact-modal-close";
-    ___e57.setAttribute("id", "contact-modal-close");
-    ___e57.setAttribute("aria-label", String(t("contact.close")));
-    ___e57.setAttribute("data-action", "close-contact");
-    (Icon("times", "1.2rem")).Mount(___e57);
-    ___e55.appendChild(___e57);
+    ___e54.className = "contact-modal-header";
+    const ___e55 = document.createElement("h2");
+    ___e55.setAttribute("id", "contact-modal-title");
+    ___e55.appendChild(document.createTextNode(String(t("contact.title"))));
     ___e54.appendChild(___e55);
-    const ___e58 = document.createElement("form");
-    ___e58.className = "contact-form";
-    ___e58.setAttribute("id", "contact-form");
-    ___e58.setAttribute("novalidate", "");
-    (ContactFormFields(form)).Mount(___e58);
-    ___e54.appendChild(___e58);
+    const ___e56 = document.createElement("button");
+    ___e56.setAttribute("type", "button");
+    ___e56.className = "contact-modal-close";
+    ___e56.setAttribute("id", "contact-modal-close");
+    ___e56.setAttribute("aria-label", String(t("contact.close")));
+    ___e56.setAttribute("data-action", "close-contact");
+    (Icon("times", "1.2rem")).Mount(___e56);
+    ___e54.appendChild(___e56);
     ___e53.appendChild(___e54);
-    ___p.appendChild(___e53);
+    const ___e57 = document.createElement("form");
+    ___e57.className = "contact-form";
+    ___e57.setAttribute("id", "contact-form");
+    ___e57.setAttribute("novalidate", "");
+    (ContactFormFields(form)).Mount(___e57);
+    ___e53.appendChild(___e57);
+    ___e52.appendChild(___e53);
+    ___p.appendChild(___e52);
   }};
 }
 
@@ -966,9 +961,9 @@ async function submitContact() {
 
 function Footer(year, author) {
   return {Mount(___p) {
-    const ___e59 = document.createElement("footer");
-    ___e59.appendChild(document.createTextNode(String(__sprintf("© %d %s. %s.", year, author, t("footer.rights")))));
-    ___p.appendChild(___e59);
+    const ___e58 = document.createElement("footer");
+    ___e58.appendChild(document.createTextNode(String(__sprintf("© %d %s. %s.", year, author, t("footer.rights")))));
+    ___p.appendChild(___e58);
   }};
 }
 
@@ -1353,174 +1348,169 @@ function highlightCode() {
 
 function Navbar(r, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
   return {Mount(___p) {
-    const ___e60 = document.createElement("nav");
-    ___e60.className = "navbar";
-    const ___e61 = document.createElement("div");
-    ___e61.className = "navbar-inner";
-    const ___e62 = document.createElement("a");
-    ___e62.className = "navbar-brand";
-    ___e62.setAttribute("href", "/");
-    ___e62.setAttribute("data-action", "nav");
-    ___e62.appendChild(document.createTextNode(String(siteConfig.Title)));
-    ___e61.appendChild(___e62);
-    const ___e63 = document.createElement("button");
-    ___e63.setAttribute("type", "button");
-    ___e63.className = toggleBtnClass(mobileOpen);
-    ___e63.setAttribute("aria-label", "Toggle navigation");
-    ___e63.setAttribute("aria-expanded", String(String(mobileOpen)));
-    ___e63.setAttribute("data-action", "toggle-mobile-nav");
-    const ___e64 = document.createElement("span");
-    ___e64.className = "navbar-toggle-icon";
-    ___e63.appendChild(___e64);
-    ___e61.appendChild(___e63);
-    const ___e65 = document.createElement("div");
-    ___e65.className = navbarCollapseClass(mobileOpen);
-    const ___e66 = document.createElement("ul");
-    ___e66.className = "navbar-nav left";
-    const ___e67 = document.createElement("li");
-    ___e67.className = "nav-item navbar-menu";
-    const ___e68 = document.createElement("a");
-    ___e68.className = navLinkClass(r.Kind === RouteBlog);
-    ___e68.setAttribute("href", "/blog");
-    ___e68.setAttribute("data-action", "nav");
-    ___e68.appendChild(document.createTextNode(String(t("nav.blog"))));
-    ___e67.appendChild(___e68);
+    const ___e59 = document.createElement("nav");
+    ___e59.className = "navbar";
+    const ___e60 = document.createElement("div");
+    ___e60.className = "navbar-inner";
+    const ___e61 = document.createElement("a");
+    ___e61.className = "navbar-brand";
+    ___e61.setAttribute("href", "/");
+    ___e61.setAttribute("data-action", "nav");
+    ___e61.appendChild(document.createTextNode(String(siteConfig.Title)));
+    ___e60.appendChild(___e61);
+    const ___e62 = document.createElement("button");
+    ___e62.setAttribute("type", "button");
+    ___e62.className = toggleBtnClass(mobileOpen);
+    ___e62.setAttribute("aria-label", "Toggle navigation");
+    ___e62.setAttribute("aria-expanded", String(String(mobileOpen)));
+    ___e62.setAttribute("data-action", "toggle-mobile-nav");
+    const ___e63 = document.createElement("span");
+    ___e63.className = "navbar-toggle-icon";
+    ___e62.appendChild(___e63);
+    ___e60.appendChild(___e62);
+    const ___e64 = document.createElement("div");
+    ___e64.className = navbarCollapseClass(mobileOpen);
+    const ___e65 = document.createElement("ul");
+    ___e65.className = "navbar-nav left";
+    const ___e66 = document.createElement("li");
+    ___e66.className = "nav-item navbar-menu";
+    const ___e67 = document.createElement("a");
+    ___e67.className = navLinkClass(r.Kind === RouteBlog);
+    ___e67.setAttribute("href", "/blog");
+    ___e67.setAttribute("data-action", "nav");
+    ___e67.appendChild(document.createTextNode(String(t("nav.blog"))));
     ___e66.appendChild(___e67);
-    const ___e69 = document.createElement("li");
-    ___e69.className = dropdownClass(dropdownOpen);
-    const ___e70 = document.createElement("button");
-    ___e70.setAttribute("type", "button");
-    ___e70.className = dropdownToggleClass(r.Kind === RouteProject);
-    ___e70.setAttribute("aria-haspopup", "true");
-    ___e70.setAttribute("aria-controls", "projects-dropdown");
-    ___e70.setAttribute("aria-expanded", String(String(dropdownOpen)));
-    ___e70.setAttribute("data-action", "toggle-projects-dropdown");
-    ___e70.appendChild(document.createTextNode(String(t("nav.projects"))));
-    const ___e71 = document.createElement("span");
-    ___e71.className = "dropdown-chevron dropdown-chevron-down";
-    (Icon("chevron-down", "0.8em")).Mount(___e71);
-    ___e70.appendChild(___e71);
-    const ___e72 = document.createElement("span");
-    ___e72.className = "dropdown-chevron dropdown-chevron-up";
-    (Icon("chevron-up", "0.8em")).Mount(___e72);
-    ___e70.appendChild(___e72);
+    ___e65.appendChild(___e66);
+    const ___e68 = document.createElement("li");
+    ___e68.className = dropdownClass(dropdownOpen);
+    const ___e69 = document.createElement("button");
+    ___e69.setAttribute("type", "button");
+    ___e69.className = dropdownToggleClass(r.Kind === RouteProject);
+    ___e69.setAttribute("aria-haspopup", "true");
+    ___e69.setAttribute("aria-controls", "projects-dropdown");
+    ___e69.setAttribute("aria-expanded", String(String(dropdownOpen)));
+    ___e69.setAttribute("data-action", "toggle-projects-dropdown");
+    ___e69.appendChild(document.createTextNode(String(t("nav.projects"))));
+    const ___e70 = document.createElement("span");
+    ___e70.className = "dropdown-chevron dropdown-chevron-down";
+    (Icon("chevron-down", "0.8em")).Mount(___e70);
     ___e69.appendChild(___e70);
-    const ___e73 = document.createElement("ul");
-    ___e73.className = "dropdown-menu";
-    ___e73.setAttribute("id", "projects-dropdown");
+    const ___e71 = document.createElement("span");
+    ___e71.className = "dropdown-chevron dropdown-chevron-up";
+    (Icon("chevron-up", "0.8em")).Mount(___e71);
+    ___e69.appendChild(___e71);
+    ___e68.appendChild(___e69);
+    const ___e72 = document.createElement("ul");
+    ___e72.className = "dropdown-menu";
+    ___e72.setAttribute("id", "projects-dropdown");
     for (const p of projects) {
-      const ___e74 = document.createElement("li");
-      const ___e75 = document.createElement("a");
-      ___e75.className = dropdownItemClass(isActiveRoute(r, RouteProject, p.ID));
-      ___e75.setAttribute("href", String(p.Href));
-      ___e75.setAttribute("data-action", "nav");
-      ___e75.appendChild(document.createTextNode(String(p.Title)));
-      ___e74.appendChild(___e75);
+      const ___e73 = document.createElement("li");
+      const ___e74 = document.createElement("a");
+      ___e74.className = dropdownItemClass(isActiveRoute(r, RouteProject, p.ID));
+      ___e74.setAttribute("href", String(p.Href));
+      ___e74.setAttribute("data-action", "nav");
+      ___e74.appendChild(document.createTextNode(String(p.Title)));
       ___e73.appendChild(___e74);
+      ___e72.appendChild(___e73);
     }
-    ___e69.appendChild(___e73);
-    ___e66.appendChild(___e69);
+    ___e68.appendChild(___e72);
+    ___e65.appendChild(___e68);
     for (const page of pages) {
       if (page.ShowInNav) {
-        const ___e76 = document.createElement("li");
-        ___e76.className = "nav-item navbar-menu";
-        const ___e77 = document.createElement("a");
-        ___e77.className = navLinkClass(isActiveRoute(r, RoutePage, page.ID));
-        ___e77.setAttribute("href", String(page.Href));
-        ___e77.setAttribute("data-action", "nav");
-        ___e77.appendChild(document.createTextNode(String(page.Title)));
-        ___e76.appendChild(___e77);
-        ___e66.appendChild(___e76);
+        const ___e75 = document.createElement("li");
+        ___e75.className = "nav-item navbar-menu";
+        const ___e76 = document.createElement("a");
+        ___e76.className = navLinkClass(isActiveRoute(r, RoutePage, page.ID));
+        ___e76.setAttribute("href", String(page.Href));
+        ___e76.setAttribute("data-action", "nav");
+        ___e76.appendChild(document.createTextNode(String(page.Title)));
+        ___e75.appendChild(___e76);
+        ___e65.appendChild(___e75);
       }
     }
-    ___e65.appendChild(___e66);
-    const ___e78 = document.createElement("ul");
-    ___e78.className = "navbar-nav right";
+    ___e64.appendChild(___e65);
+    const ___e77 = document.createElement("ul");
+    ___e77.className = "navbar-nav right";
     if (siteConfig.Search.Enabled) {
-      const ___e79 = document.createElement("li");
-      ___e79.className = "nav-item navbar-icon";
-      const ___e80 = document.createElement("button");
-      ___e80.setAttribute("type", "button");
-      ___e80.className = "nav-link search-toggle";
-      ___e80.setAttribute("id", "search-toggle");
-      ___e80.setAttribute("aria-label", String(t("aria.search")));
-      ___e80.setAttribute("title", String(t("search.buttonTitle")));
-      ___e80.setAttribute("data-action", "open-search");
-      (Icon("search", "1.35rem")).Mount(___e80);
-      ___e79.appendChild(___e80);
+      const ___e78 = document.createElement("li");
+      ___e78.className = "nav-item navbar-icon";
+      const ___e79 = document.createElement("button");
+      ___e79.setAttribute("type", "button");
+      ___e79.className = "nav-link search-toggle";
+      ___e79.setAttribute("id", "search-toggle");
+      ___e79.setAttribute("aria-label", String(t("aria.search")));
+      ___e79.setAttribute("title", String(t("search.buttonTitle")));
+      ___e79.setAttribute("data-action", "open-search");
+      (Icon("search", "1.35rem")).Mount(___e79);
       ___e78.appendChild(___e79);
+      ___e77.appendChild(___e78);
     }
-    const ___e81 = document.createElement("li");
-    ___e81.className = "nav-item navbar-icon";
-    const ___e82 = document.createElement("button");
-    ___e82.setAttribute("type", "button");
-    ___e82.setAttribute("id", "theme-toggle");
-    ___e82.className = "theme-toggle nav-link";
-    ___e82.setAttribute("aria-label", String(t("aria.toggleTheme")));
-    ___e82.setAttribute("title", String(t("theme.toggleTitle")));
-    ___e82.setAttribute("data-action", "toggle-theme");
-    (Icon("sun", "1.35rem")).Mount(___e82);
-    (Icon("moon", "1.35rem")).Mount(___e82);
-    ___e81.appendChild(___e82);
-    ___e78.appendChild(___e81);
+    const ___e80 = document.createElement("li");
+    ___e80.className = "nav-item navbar-icon";
+    const ___e81 = document.createElement("button");
+    ___e81.setAttribute("type", "button");
+    ___e81.setAttribute("id", "theme-toggle");
+    ___e81.className = "theme-toggle nav-link";
+    ___e81.setAttribute("aria-label", String(t("aria.toggleTheme")));
+    ___e81.setAttribute("title", String(t("theme.toggleTitle")));
+    ___e81.setAttribute("data-action", "toggle-theme");
+    (Icon("sun", "1.35rem")).Mount(___e81);
+    (Icon("moon", "1.35rem")).Mount(___e81);
+    ___e80.appendChild(___e81);
+    ___e77.appendChild(___e80);
     if (siteConfig.EmailJS.Enabled) {
-      const ___e83 = document.createElement("li");
-      ___e83.className = "nav-item navbar-icon";
-      const ___e84 = document.createElement("button");
-      ___e84.setAttribute("type", "button");
-      ___e84.className = "nav-link email-toggle";
-      ___e84.setAttribute("id", "email-toggle");
-      ___e84.setAttribute("aria-label", String(t("contact.title")));
-      ___e84.setAttribute("title", String(t("contact.buttonTitle")));
-      ___e84.setAttribute("data-action", "open-contact");
-      (Icon("envelope", "1.35rem")).Mount(___e84);
-      ___e83.appendChild(___e84);
-      ___e78.appendChild(___e83);
+      const ___e82 = document.createElement("li");
+      ___e82.className = "nav-item navbar-icon";
+      const ___e83 = document.createElement("button");
+      ___e83.setAttribute("type", "button");
+      ___e83.className = "nav-link email-toggle";
+      ___e83.setAttribute("id", "email-toggle");
+      ___e83.setAttribute("aria-label", String(t("contact.title")));
+      ___e83.setAttribute("title", String(t("contact.buttonTitle")));
+      ___e83.setAttribute("data-action", "open-contact");
+      (Icon("envelope", "1.35rem")).Mount(___e83);
+      ___e82.appendChild(___e83);
+      ___e77.appendChild(___e82);
     }
     for (const s of siteConfig.Social) {
-      const ___e85 = document.createElement("li");
-      ___e85.className = "nav-item navbar-icon";
-      const ___e86 = document.createElement("a");
-      ___e86.className = "nav-link";
-      ___e86.setAttribute("href", String(s.Href));
-      ___e86.setAttribute("target", String(s.Target));
-      ___e86.setAttribute("rel", String(s.Rel));
-      (Icon(s.Icon, "1.35rem")).Mount(___e86);
-      ___e85.appendChild(___e86);
-      ___e78.appendChild(___e85);
+      const ___e84 = document.createElement("li");
+      ___e84.className = "nav-item navbar-icon";
+      const ___e85 = document.createElement("a");
+      ___e85.className = "nav-link";
+      ___e85.setAttribute("href", String(s.Href));
+      ___e85.setAttribute("target", String(s.Target));
+      ___e85.setAttribute("rel", String(s.Rel));
+      (Icon(s.Icon, "1.35rem")).Mount(___e85);
+      ___e84.appendChild(___e85);
+      ___e77.appendChild(___e84);
     }
-    ___e65.appendChild(___e78);
-    ___e61.appendChild(___e65);
-    ___e60.appendChild(___e61);
-    ___p.appendChild(___e60);
+    ___e64.appendChild(___e77);
+    ___e60.appendChild(___e64);
+    ___e59.appendChild(___e60);
+    ___p.appendChild(___e59);
   }};
 }
 
 function PageView(v) {
   return {Mount(___p) {
     if (v.Status === LoadFailed) {
-      const ___e87 = document.createElement("div");
-      ___e87.className = "error-message";
-      const ___e88 = document.createElement("h1");
-      ___e88.appendChild(document.createTextNode(String(t("general.notFound"))));
-      ___e87.appendChild(___e88);
-      const ___e89 = document.createElement("p");
-      ___e89.appendChild(document.createTextNode(String(t("general.notFoundMessage"))));
-      ___e87.appendChild(___e89);
-      ___p.appendChild(___e87);
-    } else if (v.Status === LoadPending) {
-      const ___e90 = document.createElement("div");
-      ___e90.className = "loading-spinner";
-      ___e90.appendChild(document.createTextNode(String(t("general.loading"))));
-      ___p.appendChild(___e90);
+      const ___e86 = document.createElement("div");
+      ___e86.className = "error-message";
+      const ___e87 = document.createElement("h1");
+      ___e87.appendChild(document.createTextNode(String(t("general.notFound"))));
+      ___e86.appendChild(___e87);
+      const ___e88 = document.createElement("p");
+      ___e88.appendChild(document.createTextNode(String(t("general.notFoundMessage"))));
+      ___e86.appendChild(___e88);
+      ___p.appendChild(___e86);
     } else {
-      const ___e91 = document.createElement("div");
-      ___e91.className = "page-view";
-      const ___e92 = document.createElement("div");
-      ___e92.className = "markdown-body";
-      ___e92.insertAdjacentHTML("beforeend", v.HTML);
-      ___e91.appendChild(___e92);
-      ___p.appendChild(___e91);
+      const ___e89 = document.createElement("div");
+      ___e89.className = "page-view";
+      const ___e90 = document.createElement("div");
+      ___e90.className = "markdown-body";
+      ___e90.insertAdjacentHTML("beforeend", v.HTML);
+      ___e89.appendChild(___e90);
+      ___p.appendChild(___e89);
     }
   }};
 }
@@ -1528,26 +1518,19 @@ function PageView(v) {
 function ProjectReadme(v) {
   return {Mount(___p) {
     if (v.Proj.GithubRepo !== "") {
-      if (v.Status === LoadPending) {
+      if (v.Status === LoadFailed) {
+        const ___e91 = document.createElement("div");
+        ___e91.setAttribute("id", "project-readme");
+        const ___e92 = document.createElement("p");
+        ___e92.appendChild(document.createTextNode(String(t("project.readmeError"))));
+        ___e91.appendChild(___e92);
+        ___p.appendChild(___e91);
+      } else if (v.HTML !== "") {
         const ___e93 = document.createElement("div");
         ___e93.setAttribute("id", "project-readme");
-        const ___e94 = document.createElement("p");
-        ___e94.appendChild(document.createTextNode(String(t("project.loadingReadme"))));
-        ___e93.appendChild(___e94);
+        ___e93.className = "markdown-body";
+        ___e93.insertAdjacentHTML("beforeend", v.HTML);
         ___p.appendChild(___e93);
-      } else if (v.Status === LoadFailed) {
-        const ___e95 = document.createElement("div");
-        ___e95.setAttribute("id", "project-readme");
-        const ___e96 = document.createElement("p");
-        ___e96.appendChild(document.createTextNode(String(t("project.readmeError"))));
-        ___e95.appendChild(___e96);
-        ___p.appendChild(___e95);
-      } else if (v.HTML !== "") {
-        const ___e97 = document.createElement("div");
-        ___e97.setAttribute("id", "project-readme");
-        ___e97.className = "markdown-body";
-        ___e97.insertAdjacentHTML("beforeend", v.HTML);
-        ___p.appendChild(___e97);
       }
     }
   }};
@@ -1556,27 +1539,27 @@ function ProjectReadme(v) {
 function ProjectMedia(videos) {
   return {Mount(___p) {
     if (__len(videos) > 0) {
-      const ___e98 = document.createElement("div");
-      ___e98.className = "markdown-body";
-      const ___e99 = document.createElement("h2");
-      ___e99.appendChild(document.createTextNode(String(t("project.media"))));
-      ___e98.appendChild(___e99);
+      const ___e94 = document.createElement("div");
+      ___e94.className = "markdown-body";
+      const ___e95 = document.createElement("h2");
+      ___e95.appendChild(document.createTextNode(String(t("project.media"))));
+      ___e94.appendChild(___e95);
       for (const v of videos) {
-        const ___e100 = document.createElement("div");
-        ___e100.className = "youtube-video";
-        const ___e101 = document.createElement("div");
-        ___e101.className = "iframeWrapper";
-        const ___e102 = document.createElement("iframe");
-        ___e102.setAttribute("width", "560");
-        ___e102.setAttribute("height", "349");
-        ___e102.setAttribute("src", String("https://www.youtube.com/embed/" + v + "?rel=0&hd=1"));
-        ___e102.setAttribute("title", "YouTube video player");
-        ___e102.setAttribute("allowfullscreen", "");
-        ___e101.appendChild(___e102);
-        ___e100.appendChild(___e101);
-        ___e98.appendChild(___e100);
+        const ___e96 = document.createElement("div");
+        ___e96.className = "youtube-video";
+        const ___e97 = document.createElement("div");
+        ___e97.className = "iframeWrapper";
+        const ___e98 = document.createElement("iframe");
+        ___e98.setAttribute("width", "560");
+        ___e98.setAttribute("height", "349");
+        ___e98.setAttribute("src", String("https://www.youtube.com/embed/" + v + "?rel=0&hd=1"));
+        ___e98.setAttribute("title", "YouTube video player");
+        ___e98.setAttribute("allowfullscreen", "");
+        ___e97.appendChild(___e98);
+        ___e96.appendChild(___e97);
+        ___e94.appendChild(___e96);
       }
-      ___p.appendChild(___e98);
+      ___p.appendChild(___e94);
     }
   }};
 }
@@ -1584,43 +1567,43 @@ function ProjectMedia(videos) {
 function ProjectDemo(p) {
   return {Mount(___p) {
     if (p.DemoUrl !== "") {
-      const ___e103 = document.createElement("div");
-      ___e103.className = "markdown-body";
-      const ___e104 = document.createElement("h2");
-      ___e104.appendChild(document.createTextNode(String(demoLabel(p))));
-      ___e103.appendChild(___e104);
+      const ___e99 = document.createElement("div");
+      ___e99.className = "markdown-body";
+      const ___e100 = document.createElement("h2");
+      ___e100.appendChild(document.createTextNode(String(demoLabel(p))));
+      ___e99.appendChild(___e100);
       if (p.DemoInstructions !== "") {
-        const ___e105 = document.createElement("p");
-        ___e105.appendChild(document.createTextNode(String(p.DemoInstructions)));
-        ___e103.appendChild(___e105);
+        const ___e101 = document.createElement("p");
+        ___e101.appendChild(document.createTextNode(String(p.DemoInstructions)));
+        ___e99.appendChild(___e101);
       }
-      const ___e106 = document.createElement("div");
-      ___e106.className = demoWrapperClass(p.DemoHeight);
-      const ___e107 = document.createElement("iframe");
-      ___e107.setAttribute("id", "demo");
-      ___e107.setAttribute("src", String(p.DemoUrl));
-      ___e107.setAttribute("title", String(p.Title + " demo"));
-      ___e107.setAttribute("allowfullscreen", "");
-      ___e106.appendChild(___e107);
-      ___e103.appendChild(___e106);
+      const ___e102 = document.createElement("div");
+      ___e102.className = demoWrapperClass(p.DemoHeight);
+      const ___e103 = document.createElement("iframe");
+      ___e103.setAttribute("id", "demo");
+      ___e103.setAttribute("src", String(p.DemoUrl));
+      ___e103.setAttribute("title", String(p.Title + " demo"));
+      ___e103.setAttribute("allowfullscreen", "");
+      ___e102.appendChild(___e103);
+      ___e99.appendChild(___e102);
       if (p.DemoFullscreen) {
-        const ___e108 = document.createElement("br");
-        ___e103.appendChild(___e108);
-        const ___e109 = document.createElement("div");
-        ___e109.className = "text-center";
-        const ___e110 = document.createElement("button");
-        ___e110.setAttribute("type", "button");
-        ___e110.setAttribute("id", "fullscreen");
-        ___e110.className = "download-btn";
-        ___e110.setAttribute("data-action", "toggle-fullscreen");
-        (Icon("expand", "1rem")).Mount(___e110);
-        const ___e111 = document.createElement("span");
-        ___e111.appendChild(document.createTextNode(String(t("project.fullscreen"))));
-        ___e110.appendChild(___e111);
-        ___e109.appendChild(___e110);
-        ___e103.appendChild(___e109);
+        const ___e104 = document.createElement("br");
+        ___e99.appendChild(___e104);
+        const ___e105 = document.createElement("div");
+        ___e105.className = "text-center";
+        const ___e106 = document.createElement("button");
+        ___e106.setAttribute("type", "button");
+        ___e106.setAttribute("id", "fullscreen");
+        ___e106.className = "download-btn";
+        ___e106.setAttribute("data-action", "toggle-fullscreen");
+        (Icon("expand", "1rem")).Mount(___e106);
+        const ___e107 = document.createElement("span");
+        ___e107.appendChild(document.createTextNode(String(t("project.fullscreen"))));
+        ___e106.appendChild(___e107);
+        ___e105.appendChild(___e106);
+        ___e99.appendChild(___e105);
       }
-      ___p.appendChild(___e103);
+      ___p.appendChild(___e99);
     }
   }};
 }
@@ -1628,27 +1611,27 @@ function ProjectDemo(p) {
 function ProjectLinks(links) {
   return {Mount(___p) {
     if (__len(links) > 0) {
-      const ___e112 = document.createElement("div");
-      ___e112.className = "markdown-body";
-      const ___e113 = document.createElement("h2");
-      ___e113.appendChild(document.createTextNode(String(t("project.links"))));
-      ___e112.appendChild(___e113);
-      const ___e114 = document.createElement("div");
-      ___e114.className = "download-buttons";
+      const ___e108 = document.createElement("div");
+      ___e108.className = "markdown-body";
+      const ___e109 = document.createElement("h2");
+      ___e109.appendChild(document.createTextNode(String(t("project.links"))));
+      ___e108.appendChild(___e109);
+      const ___e110 = document.createElement("div");
+      ___e110.className = "download-buttons";
       for (const link of links) {
-        const ___e115 = document.createElement("a");
-        ___e115.setAttribute("href", String(link.Href));
-        ___e115.setAttribute("target", "_blank");
-        ___e115.setAttribute("rel", "noopener noreferrer");
-        ___e115.className = "download-btn";
-        (Icon(link.Icon, "1rem")).Mount(___e115);
-        const ___e116 = document.createElement("span");
-        ___e116.appendChild(document.createTextNode(String(link.Title)));
-        ___e115.appendChild(___e116);
-        ___e114.appendChild(___e115);
+        const ___e111 = document.createElement("a");
+        ___e111.setAttribute("href", String(link.Href));
+        ___e111.setAttribute("target", "_blank");
+        ___e111.setAttribute("rel", "noopener noreferrer");
+        ___e111.className = "download-btn";
+        (Icon(link.Icon, "1rem")).Mount(___e111);
+        const ___e112 = document.createElement("span");
+        ___e112.appendChild(document.createTextNode(String(link.Title)));
+        ___e111.appendChild(___e112);
+        ___e110.appendChild(___e111);
       }
-      ___e112.appendChild(___e114);
-      ___p.appendChild(___e112);
+      ___e108.appendChild(___e110);
+      ___p.appendChild(___e108);
     }
   }};
 }
@@ -1656,48 +1639,48 @@ function ProjectLinks(links) {
 function ProjectDetail(v, commentsEnabled) {
   return {Mount(___p) {
     if (v.Status === LoadNotFound) {
-      const ___e117 = document.createElement("div");
-      ___e117.className = "error-message";
-      const ___e118 = document.createElement("h1");
-      ___e118.appendChild(document.createTextNode(String(t("general.projectNotFound"))));
-      ___e117.appendChild(___e118);
-      const ___e119 = document.createElement("p");
-      ___e119.appendChild(document.createTextNode(String(t("general.projectNotFoundMessage"))));
-      ___e117.appendChild(___e119);
-      ___p.appendChild(___e117);
+      const ___e113 = document.createElement("div");
+      ___e113.className = "error-message";
+      const ___e114 = document.createElement("h1");
+      ___e114.appendChild(document.createTextNode(String(t("general.projectNotFound"))));
+      ___e113.appendChild(___e114);
+      const ___e115 = document.createElement("p");
+      ___e115.appendChild(document.createTextNode(String(t("general.projectNotFoundMessage"))));
+      ___e113.appendChild(___e115);
+      ___p.appendChild(___e113);
     } else {
-      const ___e120 = document.createElement("div");
-      ___e120.className = "project-detail";
-      const ___e121 = document.createElement("h1");
-      ___e121.className = "project-title";
-      ___e121.appendChild(document.createTextNode(String(v.Proj.Title)));
-      ___e120.appendChild(___e121);
-      const ___e122 = document.createElement("p");
-      ___e122.className = "project-description";
-      ___e122.appendChild(document.createTextNode(String(v.Proj.Description)));
-      ___e120.appendChild(___e122);
+      const ___e116 = document.createElement("div");
+      ___e116.className = "project-detail";
+      const ___e117 = document.createElement("h1");
+      ___e117.className = "project-title";
+      ___e117.appendChild(document.createTextNode(String(v.Proj.Title)));
+      ___e116.appendChild(___e117);
+      const ___e118 = document.createElement("p");
+      ___e118.className = "project-description";
+      ___e118.appendChild(document.createTextNode(String(v.Proj.Description)));
+      ___e116.appendChild(___e118);
       if (__len(v.Proj.Tags) > 0) {
-        const ___e123 = document.createElement("div");
-        ___e123.className = "project-tags";
+        const ___e119 = document.createElement("div");
+        ___e119.className = "project-tags";
         for (const tag of v.Proj.Tags) {
-          const ___e124 = document.createElement("span");
-          ___e124.className = "item-tag clickable-tag";
-          ___e124.setAttribute("data-search-tag", String(tag));
-          ___e124.appendChild(document.createTextNode(String(tag)));
-          ___e123.appendChild(___e124);
+          const ___e120 = document.createElement("span");
+          ___e120.className = "item-tag clickable-tag";
+          ___e120.setAttribute("data-search-tag", String(tag));
+          ___e120.appendChild(document.createTextNode(String(tag)));
+          ___e119.appendChild(___e120);
         }
-        ___e120.appendChild(___e123);
+        ___e116.appendChild(___e119);
       }
-      (ProjectReadme(v)).Mount(___e120);
-      (ProjectMedia(v.Proj.YoutubeVideos)).Mount(___e120);
-      (ProjectDemo(v.Proj)).Mount(___e120);
-      (ProjectLinks(v.Proj.Links)).Mount(___e120);
+      (ProjectReadme(v)).Mount(___e116);
+      (ProjectMedia(v.Proj.YoutubeVideos)).Mount(___e116);
+      (ProjectDemo(v.Proj)).Mount(___e116);
+      (ProjectLinks(v.Proj.Links)).Mount(___e116);
       if (commentsEnabled) {
-        const ___e125 = document.createElement("div");
-        ___e125.className = "giscus-container";
-        ___e120.appendChild(___e125);
+        const ___e121 = document.createElement("div");
+        ___e121.className = "giscus-container";
+        ___e116.appendChild(___e121);
       }
-      ___p.appendChild(___e120);
+      ___p.appendChild(___e116);
     }
   }};
 }
@@ -2236,55 +2219,55 @@ function handleSearchInput(value) {
 function SearchResultsList(results, query) {
   return {Mount(___p) {
     if (query !== "" && __len(results) === 0) {
-      const ___e126 = document.createElement("div");
-      ___e126.className = "search-no-results";
-      (Icon("search", "3rem")).Mount(___e126);
-      const ___e127 = document.createElement("p");
-      ___e127.appendChild(document.createTextNode(String(t("search.noResults"))));
-      ___e126.appendChild(___e127);
-      ___p.appendChild(___e126);
+      const ___e122 = document.createElement("div");
+      ___e122.className = "search-no-results";
+      (Icon("search", "3rem")).Mount(___e122);
+      const ___e123 = document.createElement("p");
+      ___e123.appendChild(document.createTextNode(String(t("search.noResults"))));
+      ___e122.appendChild(___e123);
+      ___p.appendChild(___e122);
     } else {
       for (const item of results) {
-        const ___e128 = document.createElement("article");
-        ___e128.className = "search-result-item blog-post-card";
-        ___e128.setAttribute("data-action", "open-post");
-        ___e128.setAttribute("data-href", String(item.Url));
-        const ___e129 = document.createElement("h2");
-        ___e129.className = "blog-post-title";
-        const ___e130 = document.createElement("a");
-        ___e130.setAttribute("href", String(item.Url));
-        ___e130.setAttribute("data-action", "nav");
-        ___e130.insertAdjacentHTML("beforeend", highlightMatch(item.Title, query));
-        ___e129.appendChild(___e130);
-        ___e128.appendChild(___e129);
-        const ___e131 = document.createElement("div");
-        ___e131.className = "blog-post-meta";
-        const ___e132 = document.createElement("span");
-        ___e132.className = "blog-post-tags";
+        const ___e124 = document.createElement("article");
+        ___e124.className = "search-result-item blog-post-card";
+        ___e124.setAttribute("data-action", "open-post");
+        ___e124.setAttribute("data-href", String(item.Url));
+        const ___e125 = document.createElement("h2");
+        ___e125.className = "blog-post-title";
+        const ___e126 = document.createElement("a");
+        ___e126.setAttribute("href", String(item.Url));
+        ___e126.setAttribute("data-action", "nav");
+        ___e126.insertAdjacentHTML("beforeend", highlightMatch(item.Title, query));
+        ___e125.appendChild(___e126);
+        ___e124.appendChild(___e125);
+        const ___e127 = document.createElement("div");
+        ___e127.className = "blog-post-meta";
+        const ___e128 = document.createElement("span");
+        ___e128.className = "blog-post-tags";
         if (item.ItemType === "project") {
-          const ___e133 = document.createElement("span");
-          ___e133.className = "item-tag";
-          ___e133.appendChild(document.createTextNode(String(t("badges.project"))));
-          ___e132.appendChild(___e133);
+          const ___e129 = document.createElement("span");
+          ___e129.className = "item-tag";
+          ___e129.appendChild(document.createTextNode(String(t("badges.project"))));
+          ___e128.appendChild(___e129);
         } else {
-          const ___e134 = document.createElement("span");
-          ___e134.className = "item-tag";
-          ___e134.appendChild(document.createTextNode(String(t("badges.blog"))));
-          ___e132.appendChild(___e134);
+          const ___e130 = document.createElement("span");
+          ___e130.className = "item-tag";
+          ___e130.appendChild(document.createTextNode(String(t("badges.blog"))));
+          ___e128.appendChild(___e130);
         }
         for (const tag of item.Tags) {
-          const ___e135 = document.createElement("span");
-          ___e135.className = "item-tag";
-          ___e135.appendChild(document.createTextNode(String(tag)));
-          ___e132.appendChild(___e135);
+          const ___e131 = document.createElement("span");
+          ___e131.className = "item-tag";
+          ___e131.appendChild(document.createTextNode(String(tag)));
+          ___e128.appendChild(___e131);
         }
-        ___e131.appendChild(___e132);
-        ___e128.appendChild(___e131);
-        const ___e136 = document.createElement("p");
-        ___e136.className = "blog-post-excerpt";
-        ___e136.insertAdjacentHTML("beforeend", highlightMatch(item.Description, query));
-        ___e128.appendChild(___e136);
-        ___p.appendChild(___e128);
+        ___e127.appendChild(___e128);
+        ___e124.appendChild(___e127);
+        const ___e132 = document.createElement("p");
+        ___e132.className = "blog-post-excerpt";
+        ___e132.insertAdjacentHTML("beforeend", highlightMatch(item.Description, query));
+        ___e124.appendChild(___e132);
+        ___p.appendChild(___e124);
       }
     }
   }};
@@ -2292,55 +2275,55 @@ function SearchResultsList(results, query) {
 
 function SearchModal(open, closing, query, results, placeholder) {
   return {Mount(___p) {
+    const ___e133 = document.createElement("div");
+    ___e133.setAttribute("id", "search-page");
+    ___e133.className = overlayClass(open, closing);
+    ___e133.setAttribute("role", "dialog");
+    ___e133.setAttribute("aria-modal", "true");
+    ___e133.setAttribute("aria-label", String(t("aria.search")));
+    const ___e134 = document.createElement("div");
+    ___e134.className = "search-page-header";
+    const ___e135 = document.createElement("div");
+    ___e135.className = "search-page-header-content";
+    const ___e136 = document.createElement("button");
+    ___e136.setAttribute("type", "button");
+    ___e136.className = "search-page-back";
+    ___e136.setAttribute("id", "search-page-back");
+    ___e136.setAttribute("aria-label", String(t("aria.goBack")));
+    ___e136.setAttribute("data-action", "close-search");
+    (Icon("arrow-left", "1.2rem")).Mount(___e136);
+    ___e135.appendChild(___e136);
     const ___e137 = document.createElement("div");
-    ___e137.setAttribute("id", "search-page");
-    ___e137.className = overlayClass(open, closing);
-    ___e137.setAttribute("role", "dialog");
-    ___e137.setAttribute("aria-modal", "true");
-    ___e137.setAttribute("aria-label", String(t("aria.search")));
-    const ___e138 = document.createElement("div");
-    ___e138.className = "search-page-header";
-    const ___e139 = document.createElement("div");
-    ___e139.className = "search-page-header-content";
-    const ___e140 = document.createElement("button");
-    ___e140.setAttribute("type", "button");
-    ___e140.className = "search-page-back";
-    ___e140.setAttribute("id", "search-page-back");
-    ___e140.setAttribute("aria-label", String(t("aria.goBack")));
-    ___e140.setAttribute("data-action", "close-search");
-    (Icon("arrow-left", "1.2rem")).Mount(___e140);
-    ___e139.appendChild(___e140);
-    const ___e141 = document.createElement("div");
-    ___e141.className = "search-page-input-wrapper";
-    const ___e142 = document.createElement("input");
-    ___e142.setAttribute("type", "search");
-    ___e142.setAttribute("id", "search-page-input");
-    ___e142.className = "search-page-input";
-    ___e142.setAttribute("placeholder", String(placeholder));
-    ___e142.setAttribute("autocomplete", "off");
-    ___e142.setAttribute("aria-label", String(t("aria.search")));
-    ___e142.setAttribute("value", String(query));
-    ___e141.appendChild(___e142);
-    const ___e143 = document.createElement("button");
-    ___e143.setAttribute("type", "button");
-    ___e143.className = searchClearClass(query);
-    ___e143.setAttribute("id", "search-page-clear");
-    ___e143.setAttribute("aria-label", String(t("aria.clearSearch")));
-    ___e143.setAttribute("data-action", "clear-search");
-    (Icon("times", "1.2rem")).Mount(___e143);
-    ___e141.appendChild(___e143);
-    ___e139.appendChild(___e141);
-    ___e138.appendChild(___e139);
+    ___e137.className = "search-page-input-wrapper";
+    const ___e138 = document.createElement("input");
+    ___e138.setAttribute("type", "search");
+    ___e138.setAttribute("id", "search-page-input");
+    ___e138.className = "search-page-input";
+    ___e138.setAttribute("placeholder", String(placeholder));
+    ___e138.setAttribute("autocomplete", "off");
+    ___e138.setAttribute("aria-label", String(t("aria.search")));
+    ___e138.setAttribute("value", String(query));
     ___e137.appendChild(___e138);
-    const ___e144 = document.createElement("div");
-    ___e144.className = "search-page-content";
-    const ___e145 = document.createElement("div");
-    ___e145.className = "search-page-results";
-    ___e145.setAttribute("id", "search-page-results");
-    (SearchResultsList(results, query)).Mount(___e145);
-    ___e144.appendChild(___e145);
-    ___e137.appendChild(___e144);
-    ___p.appendChild(___e137);
+    const ___e139 = document.createElement("button");
+    ___e139.setAttribute("type", "button");
+    ___e139.className = searchClearClass(query);
+    ___e139.setAttribute("id", "search-page-clear");
+    ___e139.setAttribute("aria-label", String(t("aria.clearSearch")));
+    ___e139.setAttribute("data-action", "clear-search");
+    (Icon("times", "1.2rem")).Mount(___e139);
+    ___e137.appendChild(___e139);
+    ___e135.appendChild(___e137);
+    ___e134.appendChild(___e135);
+    ___e133.appendChild(___e134);
+    const ___e140 = document.createElement("div");
+    ___e140.className = "search-page-content";
+    const ___e141 = document.createElement("div");
+    ___e141.className = "search-page-results";
+    ___e141.setAttribute("id", "search-page-results");
+    (SearchResultsList(results, query)).Mount(___e141);
+    ___e140.appendChild(___e141);
+    ___e133.appendChild(___e140);
+    ___p.appendChild(___e133);
   }};
 }
 
@@ -2424,6 +2407,45 @@ function sortPostsByDate(list) {
   });
 }
 
+function projectFromYAML(p) {
+  let tags = [];
+  if (p.tags != null) {
+    for (const [_$, tg] of __s(p.tags).entries()) {
+      tags = __append(tags, strVal(tg));
+    }
+  }
+  let videos = [];
+  if (p.youtube_videos != null) {
+    for (const [_$, v] of __s(p.youtube_videos).entries()) {
+      videos = __append(videos, strVal(v));
+    }
+  }
+  let links = [];
+  if (p.links != null) {
+    for (const [_$, l] of __s(p.links).entries()) {
+      links = __append(links, new ProjectLink({ Title: strVal(l.title), Icon: strVal(l.icon), Href: strVal(l.href) }));
+    }
+  }
+  let id = strVal(p.id);
+  return new Project({ ID: id, Title: strVal(p.title), Description: strVal(p.description), Tags: tags, Order: intVal(p.order), GithubRepo: strVal(p.github_repo), GithubBranch: strVal(p.github_branch), DemoUrl: strVal(p.demo_url), DemoLabel: strVal(p.demo_label), DemoInstructions: strVal(p.demo_instructions), DemoHeight: strVal(p.demo_height), DemoFullscreen: boolVal(p.demo_fullscreen), YoutubeVideos: videos, Links: links, Href: "/project/" + id });
+}
+
+function sortProjectsByOrder(list) {
+  list.sort(function(a, b) {
+    return a.Order - b.Order;
+  });
+}
+
+function pageFromYAML(id, p) {
+  return new NavPage({ ID: id, Title: strVal(p.title), Order: intVal(p.order), ShowInNav: boolVal(p.showInNav), Href: "/page/" + id });
+}
+
+function sortPagesByOrder(list) {
+  list.sort(function(a, b) {
+    return a.Order - b.Order;
+  });
+}
+
 async function initData() {
   let res = await fetch("/data/content.yaml");
   if (res == null || !res.ok) {
@@ -2497,38 +2519,15 @@ async function initData() {
   }
   if (data.projects != null) {
     for (const [_$, p] of __s(data.projects).entries()) {
-      let tags = [];
-      if (p.tags != null) {
-        for (const [_$, tg] of __s(p.tags).entries()) {
-          tags = __append(tags, strVal(tg));
-        }
-      }
-      let videos = [];
-      if (p.youtube_videos != null) {
-        for (const [_$, v] of __s(p.youtube_videos).entries()) {
-          videos = __append(videos, strVal(v));
-        }
-      }
-      let links = [];
-      if (p.links != null) {
-        for (const [_$, l] of __s(p.links).entries()) {
-          links = __append(links, new ProjectLink({ Title: strVal(l.title), Icon: strVal(l.icon), Href: strVal(l.href) }));
-        }
-      }
-      let id = strVal(p.id);
-      projects = __append(projects, new Project({ ID: id, Title: strVal(p.title), Description: strVal(p.description), Tags: tags, Order: intVal(p.order), GithubRepo: strVal(p.github_repo), GithubBranch: strVal(p.github_branch), DemoUrl: strVal(p.demo_url), DemoLabel: strVal(p.demo_label), DemoInstructions: strVal(p.demo_instructions), DemoHeight: strVal(p.demo_height), DemoFullscreen: boolVal(p.demo_fullscreen), YoutubeVideos: videos, Links: links, Href: "/project/" + id }));
+      projects = __append(projects, projectFromYAML(p));
     }
-    projects.sort(function(a, b) {
-      return a.Order - b.Order;
-    });
+    sortProjectsByOrder(projects);
   }
   if (data.pages != null) {
     for (const [id, p] of Object.entries(data.pages)) {
-      navPages = __append(navPages, new NavPage({ ID: id, Title: strVal(p.title), Order: intVal(p.order), ShowInNav: boolVal(p.showInNav), Href: "/page/" + id }));
+      navPages = __append(navPages, pageFromYAML(id, p));
     }
-    navPages.sort(function(a, b) {
-      return a.Order - b.Order;
-    });
+    sortPagesByOrder(navPages);
   }
   updateMetaTags();
   return null;

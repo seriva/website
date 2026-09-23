@@ -86,8 +86,6 @@ templ BlogPostView(v ViewState, commentsEnabled bool) {
 			<h1>{ t("general.blogNotFound") }</h1>
 			<p>{ t("general.blogNotFoundMessage") }</p>
 		</div>
-	} else if v.Status == LoadPending {
-		<div class="loading-spinner">{ t("general.loading") }</div>
 	} else {
 		<div class="blog-post-view">
 			<h1 class="project-title">{ v.Post.Title }</h1>
