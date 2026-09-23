@@ -93,7 +93,7 @@ async func handleRoute() {
 	route = parseRoute(path)
 	view = newViewState()
 
-	// Reset scroll before dispatch so the pending render already starts at the top.
+	// Reset scroll while the old content is faded out, so the new route paints at the top.
 	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "instant"})
 	document.documentElement.scrollTop = 0
 	document.body.scrollTop = 0
@@ -140,7 +140,6 @@ async func showPost(slug string) {
 
 	if needsFetch {
 		seq := routeSeq
-		renderRoute()
 		mdText, err := await loadMarkdownFile("/data/blog/" + v.Post.Filename)
 		if err != nil {
 			if seq != routeSeq {
@@ -176,7 +175,6 @@ async func showProject(id string) {
 
 	if needsFetch {
 		seq := routeSeq
-		renderRoute()
 		mdText, err := await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername))
 		html := ""
 		if err == nil {
@@ -205,7 +203,6 @@ async func showPage(id string) {
 
 	if needsFetch {
 		seq := routeSeq
-		renderRoute()
 		mdText, err := await loadMarkdownFile("/data/pages/" + id + ".md")
 		html := ""
 		if err == nil {

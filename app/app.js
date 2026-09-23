@@ -1722,9 +1722,9 @@ function navbarCollapseClass(open) {
 
 function dropdownClass(open) {
   if (open) {
-    return "nav-item dropdown show";
+    return "nav-item navbar-menu dropdown show";
   }
-  return "nav-item dropdown";
+  return "nav-item navbar-menu dropdown";
 }
 
 function navLinkClass(active) {
@@ -2041,7 +2041,6 @@ async function showPost(slug) {
   document.title = view.Post.Title + " - " + site.Title;
   if (needsFetch) {
     let seq = routeSeq;
-    renderRoute();
     let [mdText, err] = await loadMarkdownFile("/data/blog/" + v.Post.Filename);
     if (err != null) {
       if (seq !== routeSeq) {
@@ -2075,7 +2074,6 @@ async function showProject(id) {
   document.title = view.Proj.Title + " - " + site.Title;
   if (needsFetch) {
     let seq = routeSeq;
-    renderRoute();
     let [mdText, err] = await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername));
     let html = "";
     if (err == null) {
@@ -2103,7 +2101,6 @@ async function showPage(id) {
   document.title = view.Page.Title + " - " + site.Title;
   if (needsFetch) {
     let seq = routeSeq;
-    renderRoute();
     let [mdText, err] = await loadMarkdownFile("/data/pages/" + id + ".md");
     let html = "";
     if (err == null) {

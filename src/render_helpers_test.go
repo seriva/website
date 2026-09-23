@@ -26,10 +26,10 @@ func TestNavbarCollapseClass(t *testing.T) {
 }
 
 func TestDropdownClass(t *testing.T) {
-	if dropdownClass(true) != "nav-item dropdown show" {
+	if dropdownClass(true) != "nav-item navbar-menu dropdown show" {
 		t.Errorf("expected 'nav-item dropdown show', got %q", dropdownClass(true))
 	}
-	if dropdownClass(false) != "nav-item dropdown" {
+	if dropdownClass(false) != "nav-item navbar-menu dropdown" {
 		t.Errorf("expected 'nav-item dropdown', got %q", dropdownClass(false))
 	}
 }
