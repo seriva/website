@@ -9,6 +9,10 @@ func getInitialTheme() string {
 	if saved != nil && saved != "" {
 		return string(saved)
 	}
+	current := document.documentElement.getAttribute("data-theme")
+	if current != nil && current != "" {
+		return string(current)
+	}
 	return "dark"
 }
 

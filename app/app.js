@@ -408,266 +408,222 @@ function AppShell() {
   return {Mount(___p) {
     const ___e1 = document.createElement("div");
     ___e1.className = "app-root";
-    (Navbar()).Mount(___e1);
+    (Navbar(currentRoute, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)).Mount(___e1);
     const ___e2 = document.createElement("main");
     ___e2.setAttribute("id", "main-content");
     if (currentRoute === "/blog") {
-      (BlogList()).Mount(___e2);
+      (BlogList(posts, blogCurrentPage, site.PostsPerPage)).Mount(___e2);
     } else if (currentRoute.startsWith("/blog/")) {
-      (BlogPostView()).Mount(___e2);
+      (BlogPostView(currentPost, currentPostHtml, currentPostLoading, currentPostError, site.Comments.BlogEnabled)).Mount(___e2);
     } else if (currentRoute.startsWith("/project/")) {
-      (ProjectDetail()).Mount(___e2);
+      (ProjectDetail(currentProject, projectReadmeHtml, projectReadmeLoading, projectReadmeError, site.Comments.ProjectsEnabled)).Mount(___e2);
     } else if (currentRoute.startsWith("/page/")) {
-      (PageView()).Mount(___e2);
+      (PageView(currentPageHtml, currentPageLoading, currentPageError)).Mount(___e2);
     } else {
-      (BlogList()).Mount(___e2);
+      (BlogList(posts, blogCurrentPage, site.PostsPerPage)).Mount(___e2);
     }
     ___e1.appendChild(___e2);
-    (Footer()).Mount(___e1);
-    (SearchModal()).Mount(___e1);
-    (ContactModal()).Mount(___e1);
+    (Footer(currentYear(), site.Author)).Mount(___e1);
+    (SearchModal(searchOpen, searchClosing, searchQuery, searchResults, searchPlaceholderText())).Mount(___e1);
+    (ContactModal(contactOpen, contactClosing, contactForm)).Mount(___e1);
     ___p.appendChild(___e1);
   }};
 }
 
-function paginatedPosts(allPosts, page, perPage) {
-  if (__len(allPosts) === 0) {
-    return [];
-  }
-  let offset = page - 1;
-  let start = offset * perPage;
-  if (start < 0 || start >= __len(allPosts)) {
-    start = 0;
-  }
-  let end = start + perPage;
-  if (end > __len(allPosts)) {
-    end = __len(allPosts);
-  }
-  return allPosts.slice(start, end);
-}
-
-function calcTotalPages(totalCount, perPage) {
-  if (perPage <= 0) {
-    perPage = 5;
-  }
-  let num = totalCount + perPage - 1;
-  return Math.trunc(num / perPage);
-}
-
-function pageItemPrevClass(page) {
-  if (page <= 1) {
-    return "page-item disabled";
-  }
-  return "page-item";
-}
-
-function pageItemNextClass(page, totalPages) {
-  if (page >= totalPages) {
-    return "page-item disabled";
-  }
-  return "page-item";
-}
-
-function pageItemClass(page, currentPage) {
-  if (page === currentPage) {
-    return "page-item active";
-  }
-  return "page-item";
-}
-
-function pageHref(page) {
-  if (page < 1) {
-    page = 1;
-  }
-  return __sprintf("/blog/page/%d", page);
-}
-
-function pageNumbers(totalPages) {
-  let nums = [];
-  for (let i = 1; i <= totalPages; i++) {
-    nums = __append(nums, i);
-  }
-  return nums;
-}
-
-function BlogList() {
+function BlogPostCard(post, index) {
   return {Mount(___p) {
-    const ___e3 = document.createElement("div");
-    ___e3.className = "blog-container";
-    if (__len(posts) === 0) {
-      const ___e4 = document.createElement("p");
-      ___e4.className = "blog-empty";
-      ___e4.appendChild(document.createTextNode(String(t("blog.noPosts"))));
-      ___e3.appendChild(___e4);
-    } else {
-      const ___e5 = document.createElement("div");
-      ___e5.className = "blog-posts";
-      for (const [i, post] of __s(paginatedPosts(posts, blogCurrentPage, site.PostsPerPage)).entries()) {
-        const ___e6 = document.createElement("article");
-        ___e6.className = "blog-post-card";
-        ___e6.setAttribute("data-index", String(__sprintf("%d", i)));
-        ___e6.setAttribute("data-action", "open-post");
-        ___e6.setAttribute("data-href", String(post.Href));
-        ___e6.setAttribute("tabindex", "0");
-        ___e6.setAttribute("role", "article");
-        ___e6.setAttribute("aria-label", String(post.Title));
-        const ___e7 = document.createElement("h2");
-        ___e7.className = "blog-post-title";
-        const ___e8 = document.createElement("a");
-        ___e8.setAttribute("href", String(post.Href));
-        ___e8.setAttribute("data-action", "nav");
-        ___e8.appendChild(document.createTextNode(String(post.Title)));
-        ___e7.appendChild(___e8);
-        ___e6.appendChild(___e7);
-        const ___e9 = document.createElement("div");
-        ___e9.className = "blog-post-meta";
-        const ___e10 = document.createElement("span");
-        ___e10.className = "blog-post-date";
-        (IconCalendar("1rem")).Mount(___e10);
-        ___e10.appendChild(document.createTextNode(String(" " + post.Date)));
-        ___e9.appendChild(___e10);
-        if (__len(post.Tags) > 0) {
-          const ___e11 = document.createElement("span");
-          ___e11.className = "blog-post-tags";
-          for (const tag of post.Tags) {
-            const ___e12 = document.createElement("span");
-            ___e12.className = "item-tag clickable-tag";
-            ___e12.setAttribute("data-search-tag", String(tag));
-            ___e12.appendChild(document.createTextNode(String(tag)));
-            ___e11.appendChild(___e12);
-          }
-          ___e9.appendChild(___e11);
-        }
-        ___e6.appendChild(___e9);
-        const ___e13 = document.createElement("p");
-        ___e13.className = "blog-post-excerpt";
-        ___e13.appendChild(document.createTextNode(String(post.Excerpt)));
-        ___e6.appendChild(___e13);
-        ___e5.appendChild(___e6);
+    const ___e3 = document.createElement("article");
+    ___e3.className = "blog-post-card";
+    ___e3.setAttribute("data-index", String(__sprintf("%d", index)));
+    ___e3.setAttribute("data-action", "open-post");
+    ___e3.setAttribute("data-href", String(post.Href));
+    ___e3.setAttribute("tabindex", "0");
+    ___e3.setAttribute("role", "article");
+    ___e3.setAttribute("aria-label", String(post.Title));
+    const ___e4 = document.createElement("h2");
+    ___e4.className = "blog-post-title";
+    const ___e5 = document.createElement("a");
+    ___e5.setAttribute("href", String(post.Href));
+    ___e5.setAttribute("data-action", "nav");
+    ___e5.appendChild(document.createTextNode(String(post.Title)));
+    ___e4.appendChild(___e5);
+    ___e3.appendChild(___e4);
+    const ___e6 = document.createElement("div");
+    ___e6.className = "blog-post-meta";
+    const ___e7 = document.createElement("span");
+    ___e7.className = "blog-post-date";
+    (IconCalendar("1rem")).Mount(___e7);
+    ___e7.appendChild(document.createTextNode(String(" " + post.Date)));
+    ___e6.appendChild(___e7);
+    if (__len(post.Tags) > 0) {
+      const ___e8 = document.createElement("span");
+      ___e8.className = "blog-post-tags";
+      for (const tag of post.Tags) {
+        const ___e9 = document.createElement("span");
+        ___e9.className = "item-tag clickable-tag";
+        ___e9.setAttribute("data-search-tag", String(tag));
+        ___e9.appendChild(document.createTextNode(String(tag)));
+        ___e8.appendChild(___e9);
       }
-      ___e3.appendChild(___e5);
-      if (calcTotalPages(__len(posts), site.PostsPerPage) > 1) {
-        const ___e14 = document.createElement("nav");
-        ___e14.className = "blog-pagination";
-        ___e14.setAttribute("aria-label", "Blog pagination");
-        const ___e15 = document.createElement("ul");
-        ___e15.className = "pagination";
-        const ___e16 = document.createElement("li");
-        ___e16.className = pageItemPrevClass(blogCurrentPage);
-        const ___e17 = document.createElement("a");
-        ___e17.className = "page-link";
-        ___e17.setAttribute("href", String(pageHref(1)));
-        ___e17.setAttribute("data-action", "nav");
-        ___e17.setAttribute("aria-label", "First");
-        ___e17.setAttribute("title", "First Page");
-        (IconAnglesLeft("0.85em")).Mount(___e17);
-        ___e16.appendChild(___e17);
-        ___e15.appendChild(___e16);
-        const ___e18 = document.createElement("li");
-        ___e18.className = pageItemPrevClass(blogCurrentPage);
-        const ___e19 = document.createElement("a");
-        ___e19.className = "page-link";
-        ___e19.setAttribute("href", String(pageHref(blogCurrentPage - 1)));
-        ___e19.setAttribute("data-action", "nav");
-        ___e19.setAttribute("aria-label", "Previous");
-        ___e19.setAttribute("title", "Previous Page");
-        (IconChevronLeft("0.85em")).Mount(___e19);
-        ___e18.appendChild(___e19);
-        ___e15.appendChild(___e18);
-        for (const pageNum of pageNumbers(calcTotalPages(__len(posts), site.PostsPerPage))) {
-          const ___e20 = document.createElement("li");
-          ___e20.className = pageItemClass(pageNum, blogCurrentPage);
-          const ___e21 = document.createElement("a");
-          ___e21.className = "page-link";
-          ___e21.setAttribute("href", String(pageHref(pageNum)));
-          ___e21.setAttribute("data-action", "nav");
-          ___e21.appendChild(document.createTextNode(String(__sprintf("%d", pageNum))));
-          ___e20.appendChild(___e21);
-          ___e15.appendChild(___e20);
-        }
-        const ___e22 = document.createElement("li");
-        ___e22.className = pageItemNextClass(blogCurrentPage, calcTotalPages(__len(posts), site.PostsPerPage));
-        const ___e23 = document.createElement("a");
-        ___e23.className = "page-link";
-        ___e23.setAttribute("href", String(pageHref(blogCurrentPage + 1)));
-        ___e23.setAttribute("data-action", "nav");
-        ___e23.setAttribute("aria-label", "Next");
-        ___e23.setAttribute("title", "Next Page");
-        (IconChevronRight("0.85em")).Mount(___e23);
-        ___e22.appendChild(___e23);
-        ___e15.appendChild(___e22);
-        const ___e24 = document.createElement("li");
-        ___e24.className = pageItemNextClass(blogCurrentPage, calcTotalPages(__len(posts), site.PostsPerPage));
-        const ___e25 = document.createElement("a");
-        ___e25.className = "page-link";
-        ___e25.setAttribute("href", String(pageHref(calcTotalPages(__len(posts), site.PostsPerPage))));
-        ___e25.setAttribute("data-action", "nav");
-        ___e25.setAttribute("aria-label", "Last");
-        ___e25.setAttribute("title", "Last Page");
-        (IconAnglesRight("0.85em")).Mount(___e25);
-        ___e24.appendChild(___e25);
-        ___e15.appendChild(___e24);
-        ___e14.appendChild(___e15);
-        ___e3.appendChild(___e14);
-      }
+      ___e6.appendChild(___e8);
     }
+    ___e3.appendChild(___e6);
+    const ___e10 = document.createElement("p");
+    ___e10.className = "blog-post-excerpt";
+    ___e10.appendChild(document.createTextNode(String(post.Excerpt)));
+    ___e3.appendChild(___e10);
     ___p.appendChild(___e3);
   }};
 }
 
-function BlogPostView() {
+function Pagination(currentPage, totalPages) {
   return {Mount(___p) {
-    if (currentPostError) {
-      const ___e26 = document.createElement("div");
-      ___e26.className = "error-message";
-      const ___e27 = document.createElement("h1");
-      ___e27.appendChild(document.createTextNode(String(t("general.blogNotFound"))));
-      ___e26.appendChild(___e27);
-      const ___e28 = document.createElement("p");
-      ___e28.appendChild(document.createTextNode(String(t("general.blogNotFoundMessage"))));
-      ___e26.appendChild(___e28);
-      ___p.appendChild(___e26);
-    } else if (currentPostLoading) {
-      const ___e29 = document.createElement("div");
-      ___e29.className = "loading-spinner";
-      ___e29.appendChild(document.createTextNode(String(t("general.loading"))));
-      ___p.appendChild(___e29);
+    const ___e11 = document.createElement("nav");
+    ___e11.className = "blog-pagination";
+    ___e11.setAttribute("aria-label", "Blog pagination");
+    const ___e12 = document.createElement("ul");
+    ___e12.className = "pagination";
+    const ___e13 = document.createElement("li");
+    ___e13.className = pageItemPrevClass(currentPage);
+    const ___e14 = document.createElement("a");
+    ___e14.className = "page-link";
+    ___e14.setAttribute("href", String(pageHref(1)));
+    ___e14.setAttribute("data-action", "nav");
+    ___e14.setAttribute("aria-label", "First");
+    ___e14.setAttribute("title", "First Page");
+    (IconAnglesLeft("0.85em")).Mount(___e14);
+    ___e13.appendChild(___e14);
+    ___e12.appendChild(___e13);
+    const ___e15 = document.createElement("li");
+    ___e15.className = pageItemPrevClass(currentPage);
+    const ___e16 = document.createElement("a");
+    ___e16.className = "page-link";
+    ___e16.setAttribute("href", String(pageHref(currentPage - 1)));
+    ___e16.setAttribute("data-action", "nav");
+    ___e16.setAttribute("aria-label", "Previous");
+    ___e16.setAttribute("title", "Previous Page");
+    (IconChevronLeft("0.85em")).Mount(___e16);
+    ___e15.appendChild(___e16);
+    ___e12.appendChild(___e15);
+    for (const pageNum of pageNumbers(totalPages)) {
+      const ___e17 = document.createElement("li");
+      ___e17.className = pageItemClass(pageNum, currentPage);
+      const ___e18 = document.createElement("a");
+      ___e18.className = "page-link";
+      ___e18.setAttribute("href", String(pageHref(pageNum)));
+      ___e18.setAttribute("data-action", "nav");
+      ___e18.appendChild(document.createTextNode(String(__sprintf("%d", pageNum))));
+      ___e17.appendChild(___e18);
+      ___e12.appendChild(___e17);
+    }
+    const ___e19 = document.createElement("li");
+    ___e19.className = pageItemNextClass(currentPage, totalPages);
+    const ___e20 = document.createElement("a");
+    ___e20.className = "page-link";
+    ___e20.setAttribute("href", String(pageHref(currentPage + 1)));
+    ___e20.setAttribute("data-action", "nav");
+    ___e20.setAttribute("aria-label", "Next");
+    ___e20.setAttribute("title", "Next Page");
+    (IconChevronRight("0.85em")).Mount(___e20);
+    ___e19.appendChild(___e20);
+    ___e12.appendChild(___e19);
+    const ___e21 = document.createElement("li");
+    ___e21.className = pageItemNextClass(currentPage, totalPages);
+    const ___e22 = document.createElement("a");
+    ___e22.className = "page-link";
+    ___e22.setAttribute("href", String(pageHref(totalPages)));
+    ___e22.setAttribute("data-action", "nav");
+    ___e22.setAttribute("aria-label", "Last");
+    ___e22.setAttribute("title", "Last Page");
+    (IconAnglesRight("0.85em")).Mount(___e22);
+    ___e21.appendChild(___e22);
+    ___e12.appendChild(___e21);
+    ___e11.appendChild(___e12);
+    ___p.appendChild(___e11);
+  }};
+}
+
+function BlogList(allPosts, currentPage, perPage) {
+  return {Mount(___p) {
+    const ___e23 = document.createElement("div");
+    ___e23.className = "blog-container";
+    const ___e24 = document.createElement("h1");
+    ___e24.className = "sr-only";
+    ___e24.appendChild(document.createTextNode(String(t("nav.blog"))));
+    ___e23.appendChild(___e24);
+    if (__len(allPosts) === 0) {
+      const ___e25 = document.createElement("p");
+      ___e25.className = "blog-empty";
+      ___e25.appendChild(document.createTextNode(String(t("blog.noPosts"))));
+      ___e23.appendChild(___e25);
     } else {
+      const ___e26 = document.createElement("div");
+      ___e26.className = "blog-posts";
+      for (const [i, post] of __s(paginatedPosts(allPosts, currentPage, perPage)).entries()) {
+        (BlogPostCard(post, i)).Mount(___e26);
+      }
+      ___e23.appendChild(___e26);
+      if (calcTotalPages(__len(allPosts), perPage) > 1) {
+        (Pagination(currentPage, calcTotalPages(__len(allPosts), perPage))).Mount(___e23);
+      }
+    }
+    ___p.appendChild(___e23);
+  }};
+}
+
+function BlogPostView(post, html, loading, isError, commentsEnabled) {
+  return {Mount(___p) {
+    if (isError) {
+      const ___e27 = document.createElement("div");
+      ___e27.className = "error-message";
+      const ___e28 = document.createElement("h1");
+      ___e28.appendChild(document.createTextNode(String(t("general.blogNotFound"))));
+      ___e27.appendChild(___e28);
+      const ___e29 = document.createElement("p");
+      ___e29.appendChild(document.createTextNode(String(t("general.blogNotFoundMessage"))));
+      ___e27.appendChild(___e29);
+      ___p.appendChild(___e27);
+    } else if (loading) {
       const ___e30 = document.createElement("div");
-      ___e30.className = "blog-post-view";
-      const ___e31 = document.createElement("h1");
-      ___e31.className = "project-title";
-      ___e31.appendChild(document.createTextNode(String(currentPost.Title)));
-      ___e30.appendChild(___e31);
-      const ___e32 = document.createElement("p");
-      ___e32.className = "project-description";
-      ___e32.appendChild(document.createTextNode(String(currentPost.Date)));
-      ___e30.appendChild(___e32);
-      if (__len(currentPost.Tags) > 0) {
-        const ___e33 = document.createElement("div");
-        ___e33.className = "project-tags";
-        for (const tag of currentPost.Tags) {
-          const ___e34 = document.createElement("span");
-          ___e34.className = "item-tag clickable-tag";
-          ___e34.setAttribute("data-search-tag", String(tag));
-          ___e34.appendChild(document.createTextNode(String(tag)));
-          ___e33.appendChild(___e34);
-        }
-        ___e30.appendChild(___e33);
-      }
-      const ___e35 = document.createElement("div");
-      ___e35.className = "blog-post-content";
-      const ___e36 = document.createElement("div");
-      ___e36.className = "markdown-body";
-      ___e36.insertAdjacentHTML("beforeend", currentPostHtml);
-      ___e35.appendChild(___e36);
-      ___e30.appendChild(___e35);
-      if (site.Comments.BlogEnabled) {
-        const ___e37 = document.createElement("div");
-        ___e37.className = "giscus-container";
-        ___e30.appendChild(___e37);
-      }
+      ___e30.className = "loading-spinner";
+      ___e30.appendChild(document.createTextNode(String(t("general.loading"))));
       ___p.appendChild(___e30);
+    } else {
+      const ___e31 = document.createElement("div");
+      ___e31.className = "blog-post-view";
+      const ___e32 = document.createElement("h1");
+      ___e32.className = "project-title";
+      ___e32.appendChild(document.createTextNode(String(post.Title)));
+      ___e31.appendChild(___e32);
+      const ___e33 = document.createElement("p");
+      ___e33.className = "project-description";
+      ___e33.appendChild(document.createTextNode(String(post.Date)));
+      ___e31.appendChild(___e33);
+      if (__len(post.Tags) > 0) {
+        const ___e34 = document.createElement("div");
+        ___e34.className = "project-tags";
+        for (const tag of post.Tags) {
+          const ___e35 = document.createElement("span");
+          ___e35.className = "item-tag clickable-tag";
+          ___e35.setAttribute("data-search-tag", String(tag));
+          ___e35.appendChild(document.createTextNode(String(tag)));
+          ___e34.appendChild(___e35);
+        }
+        ___e31.appendChild(___e34);
+      }
+      const ___e36 = document.createElement("div");
+      ___e36.className = "blog-post-content";
+      const ___e37 = document.createElement("div");
+      ___e37.className = "markdown-body";
+      ___e37.insertAdjacentHTML("beforeend", html);
+      ___e36.appendChild(___e37);
+      ___e31.appendChild(___e36);
+      if (commentsEnabled) {
+        const ___e38 = document.createElement("div");
+        ___e38.className = "giscus-container";
+        ___e31.appendChild(___e38);
+      }
+      ___p.appendChild(___e31);
     }
   }};
 }
@@ -714,119 +670,103 @@ function updateGiscusTheme() {
   iframe.contentWindow.postMessage({ "giscus": { "setConfig": { "theme": giscusTheme } } }, "https://giscus.app");
 }
 
-function contactModalClass(open, closing) {
-  if (closing) {
-    return "show closing";
-  }
-  if (open) {
-    return "show";
-  }
-  return "";
-}
-
-function inputErrorClass(hasErr) {
-  if (hasErr) {
-    return "error";
-  }
-  return "";
-}
-
-function formStatusClass(statusType) {
-  if (statusType !== "") {
-    return "form-status " + statusType;
-  }
-  return "form-status";
-}
-
-function ContactModal() {
+function ContactModal(open, closing, form) {
   return {Mount(___p) {
-    const ___e38 = document.createElement("div");
-    ___e38.setAttribute("id", "contact-modal");
-    ___e38.className = contactModalClass(contactOpen, contactClosing);
     const ___e39 = document.createElement("div");
-    ___e39.className = "contact-modal-content";
+    ___e39.setAttribute("id", "contact-modal");
+    ___e39.className = contactModalClass(open, closing);
+    ___e39.setAttribute("role", "dialog");
+    ___e39.setAttribute("aria-modal", "true");
+    ___e39.setAttribute("aria-labelledby", "contact-modal-title");
     const ___e40 = document.createElement("div");
-    ___e40.className = "contact-modal-header";
-    const ___e41 = document.createElement("h2");
-    ___e41.appendChild(document.createTextNode(String(t("contact.title"))));
+    ___e40.className = "contact-modal-content";
+    const ___e41 = document.createElement("div");
+    ___e41.className = "contact-modal-header";
+    const ___e42 = document.createElement("h2");
+    ___e42.setAttribute("id", "contact-modal-title");
+    ___e42.appendChild(document.createTextNode(String(t("contact.title"))));
+    ___e41.appendChild(___e42);
+    const ___e43 = document.createElement("button");
+    ___e43.className = "contact-modal-close";
+    ___e43.setAttribute("id", "contact-modal-close");
+    ___e43.setAttribute("aria-label", String(t("contact.close")));
+    ___e43.setAttribute("data-action", "close-contact");
+    (IconTimes("1.2rem")).Mount(___e43);
+    ___e41.appendChild(___e43);
     ___e40.appendChild(___e41);
-    const ___e42 = document.createElement("button");
-    ___e42.className = "contact-modal-close";
-    ___e42.setAttribute("id", "contact-modal-close");
-    ___e42.setAttribute("aria-label", String(t("contact.close")));
-    ___e42.setAttribute("data-action", "close-contact");
-    (IconTimes("1.2rem")).Mount(___e42);
-    ___e40.appendChild(___e42);
-    ___e39.appendChild(___e40);
-    const ___e43 = document.createElement("form");
-    ___e43.className = "contact-form";
-    ___e43.setAttribute("id", "contact-form");
-    ___e43.setAttribute("novalidate", "");
-    const ___e44 = document.createElement("div");
-    ___e44.className = "form-group";
-    const ___e45 = document.createElement("label");
-    ___e45.setAttribute("for", "contact-name");
-    ___e45.appendChild(document.createTextNode(String(t("contact.name"))));
-    ___e45.appendChild(document.createTextNode("*"));
+    const ___e44 = document.createElement("form");
+    ___e44.className = "contact-form";
+    ___e44.setAttribute("id", "contact-form");
+    ___e44.setAttribute("novalidate", "");
+    const ___e45 = document.createElement("div");
+    ___e45.className = "form-group";
+    const ___e46 = document.createElement("label");
+    ___e46.setAttribute("for", "contact-name");
+    ___e46.appendChild(document.createTextNode(String(t("contact.name"))));
+    ___e46.appendChild(document.createTextNode("*"));
+    ___e45.appendChild(___e46);
+    const ___e47 = document.createElement("input");
+    ___e47.setAttribute("type", "text");
+    ___e47.setAttribute("id", "contact-name");
+    ___e47.setAttribute("name", "name");
+    ___e47.setAttribute("required", "");
+    ___e47.className = inputErrorClass(form.ErrName);
+    if(form.ErrName)___e47.setAttribute("aria-invalid", "");
+    ___e47.setAttribute("value", String(form.Name));
+    ___e45.appendChild(___e47);
     ___e44.appendChild(___e45);
-    const ___e46 = document.createElement("input");
-    ___e46.setAttribute("type", "text");
-    ___e46.setAttribute("id", "contact-name");
-    ___e46.setAttribute("name", "name");
-    ___e46.setAttribute("required", "");
-    ___e46.className = inputErrorClass(contactForm.ErrName);
-    ___e46.setAttribute("value", String(contactForm.Name));
-    ___e44.appendChild(___e46);
-    ___e43.appendChild(___e44);
-    const ___e47 = document.createElement("div");
-    ___e47.className = "form-group";
-    const ___e48 = document.createElement("label");
-    ___e48.setAttribute("for", "contact-email");
-    ___e48.appendChild(document.createTextNode(String(t("contact.email"))));
-    ___e48.appendChild(document.createTextNode("*"));
-    ___e47.appendChild(___e48);
-    const ___e49 = document.createElement("input");
-    ___e49.setAttribute("type", "email");
-    ___e49.setAttribute("id", "contact-email");
-    ___e49.setAttribute("name", "email");
-    ___e49.setAttribute("required", "");
-    ___e49.className = inputErrorClass(contactForm.ErrEmail);
-    ___e49.setAttribute("value", String(contactForm.Email));
-    ___e47.appendChild(___e49);
-    ___e43.appendChild(___e47);
-    const ___e50 = document.createElement("div");
-    ___e50.className = "form-group";
-    const ___e51 = document.createElement("label");
-    ___e51.setAttribute("for", "contact-message");
-    ___e51.appendChild(document.createTextNode(String(t("contact.message"))));
-    ___e51.appendChild(document.createTextNode("*"));
-    ___e50.appendChild(___e51);
-    const ___e52 = document.createElement("textarea");
-    ___e52.setAttribute("id", "contact-message");
-    ___e52.setAttribute("name", "message");
-    ___e52.setAttribute("rows", "6");
-    ___e52.setAttribute("required", "");
-    ___e52.className = inputErrorClass(contactForm.ErrMessage);
-    ___e52.appendChild(document.createTextNode(String(contactForm.Message)));
-    ___e50.appendChild(___e52);
-    ___e43.appendChild(___e50);
-    const ___e53 = document.createElement("div");
-    ___e53.className = formStatusClass(contactForm.StatusType);
-    ___e53.setAttribute("id", "contact-status");
-    const ___e54 = document.createElement("span");
-    ___e54.appendChild(document.createTextNode(String(contactForm.StatusText)));
-    ___e53.appendChild(___e54);
-    ___e43.appendChild(___e53);
-    const ___e55 = document.createElement("button");
-    ___e55.setAttribute("type", "submit");
-    ___e55.className = "btn btn-primary";
-    ___e55.setAttribute("id", "contact-submit");
-    if(contactForm.ButtonDisabled)___e55.setAttribute("disabled", "");
-    ___e55.appendChild(document.createTextNode(String(t("contact." + contactForm.ButtonState))));
-    ___e43.appendChild(___e55);
-    ___e39.appendChild(___e43);
-    ___e38.appendChild(___e39);
-    ___p.appendChild(___e38);
+    const ___e48 = document.createElement("div");
+    ___e48.className = "form-group";
+    const ___e49 = document.createElement("label");
+    ___e49.setAttribute("for", "contact-email");
+    ___e49.appendChild(document.createTextNode(String(t("contact.email"))));
+    ___e49.appendChild(document.createTextNode("*"));
+    ___e48.appendChild(___e49);
+    const ___e50 = document.createElement("input");
+    ___e50.setAttribute("type", "email");
+    ___e50.setAttribute("id", "contact-email");
+    ___e50.setAttribute("name", "email");
+    ___e50.setAttribute("required", "");
+    ___e50.className = inputErrorClass(form.ErrEmail);
+    if(form.ErrEmail)___e50.setAttribute("aria-invalid", "");
+    ___e50.setAttribute("value", String(form.Email));
+    ___e48.appendChild(___e50);
+    ___e44.appendChild(___e48);
+    const ___e51 = document.createElement("div");
+    ___e51.className = "form-group";
+    const ___e52 = document.createElement("label");
+    ___e52.setAttribute("for", "contact-message");
+    ___e52.appendChild(document.createTextNode(String(t("contact.message"))));
+    ___e52.appendChild(document.createTextNode("*"));
+    ___e51.appendChild(___e52);
+    const ___e53 = document.createElement("textarea");
+    ___e53.setAttribute("id", "contact-message");
+    ___e53.setAttribute("name", "message");
+    ___e53.setAttribute("rows", "6");
+    ___e53.setAttribute("required", "");
+    ___e53.className = inputErrorClass(form.ErrMessage);
+    if(form.ErrMessage)___e53.setAttribute("aria-invalid", "");
+    ___e53.appendChild(document.createTextNode(String(form.Message)));
+    ___e51.appendChild(___e53);
+    ___e44.appendChild(___e51);
+    const ___e54 = document.createElement("div");
+    ___e54.className = formStatusClass(form.StatusType);
+    ___e54.setAttribute("id", "contact-status");
+    ___e54.setAttribute("aria-live", "polite");
+    const ___e55 = document.createElement("span");
+    ___e55.appendChild(document.createTextNode(String(form.StatusText)));
+    ___e54.appendChild(___e55);
+    ___e44.appendChild(___e54);
+    const ___e56 = document.createElement("button");
+    ___e56.setAttribute("type", "submit");
+    ___e56.className = "btn btn-primary";
+    ___e56.setAttribute("id", "contact-submit");
+    if(form.ButtonDisabled)___e56.setAttribute("disabled", "");
+    ___e56.appendChild(document.createTextNode(String(t("contact." + form.ButtonState))));
+    ___e44.appendChild(___e56);
+    ___e40.appendChild(___e44);
+    ___e39.appendChild(___e40);
+    ___p.appendChild(___e39);
   }};
 }
 
@@ -976,15 +916,11 @@ async function submitContact() {
   }
 }
 
-function currentYear() {
-  return {_d: new Date()}._d.getFullYear();
-}
-
-function Footer() {
+function Footer(year, author) {
   return {Mount(___p) {
-    const ___e56 = document.createElement("footer");
-    ___e56.appendChild(document.createTextNode(String(__sprintf("© %d %s. %s.", currentYear(), site.Author, t("footer.rights")))));
-    ___p.appendChild(___e56);
+    const ___e57 = document.createElement("footer");
+    ___e57.appendChild(document.createTextNode(String(__sprintf("© %d %s. %s.", year, author, t("footer.rights")))));
+    ___p.appendChild(___e57);
   }};
 }
 
@@ -1562,6 +1498,352 @@ function highlightCode() {
   }
 }
 
+function Navbar(currentRoute, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
+  return {Mount(___p) {
+    const ___e58 = document.createElement("nav");
+    ___e58.className = "navbar";
+    const ___e59 = document.createElement("div");
+    ___e59.className = "navbar-inner";
+    const ___e60 = document.createElement("a");
+    ___e60.className = "navbar-brand";
+    ___e60.setAttribute("href", "/");
+    ___e60.setAttribute("data-action", "nav");
+    ___e60.appendChild(document.createTextNode(String(siteConfig.Title)));
+    ___e59.appendChild(___e60);
+    const ___e61 = document.createElement("button");
+    ___e61.className = toggleBtnClass(mobileOpen);
+    ___e61.setAttribute("aria-label", "Toggle navigation");
+    if(mobileOpen)___e61.setAttribute("aria-expanded", "");
+    ___e61.setAttribute("data-action", "toggle-mobile-nav");
+    const ___e62 = document.createElement("span");
+    ___e62.className = "navbar-toggle-icon";
+    ___e61.appendChild(___e62);
+    ___e59.appendChild(___e61);
+    const ___e63 = document.createElement("div");
+    ___e63.className = navbarCollapseClass(mobileOpen);
+    const ___e64 = document.createElement("ul");
+    ___e64.className = "navbar-nav left";
+    const ___e65 = document.createElement("li");
+    ___e65.className = "nav-item navbar-menu";
+    const ___e66 = document.createElement("a");
+    ___e66.className = navLinkClass(currentRoute === "/blog");
+    ___e66.setAttribute("href", "/blog");
+    ___e66.setAttribute("data-action", "nav");
+    ___e66.appendChild(document.createTextNode(String(t("nav.blog"))));
+    ___e65.appendChild(___e66);
+    ___e64.appendChild(___e65);
+    const ___e67 = document.createElement("li");
+    ___e67.className = dropdownClass(dropdownOpen);
+    const ___e68 = document.createElement("a");
+    ___e68.className = dropdownToggleClass(currentRoute.startsWith("/project/"));
+    ___e68.setAttribute("href", "javascript:void(0)");
+    ___e68.setAttribute("role", "button");
+    ___e68.setAttribute("aria-haspopup", "true");
+    if(dropdownOpen)___e68.setAttribute("aria-expanded", "");
+    ___e68.setAttribute("data-action", "toggle-projects-dropdown");
+    ___e68.appendChild(document.createTextNode(String(t("nav.projects"))));
+    const ___e69 = document.createElement("span");
+    ___e69.className = "dropdown-chevron dropdown-chevron-down";
+    (IconChevronDown("0.8em")).Mount(___e69);
+    ___e68.appendChild(___e69);
+    const ___e70 = document.createElement("span");
+    ___e70.className = "dropdown-chevron dropdown-chevron-up";
+    (IconChevronUp("0.8em")).Mount(___e70);
+    ___e68.appendChild(___e70);
+    ___e67.appendChild(___e68);
+    const ___e71 = document.createElement("ul");
+    ___e71.className = "dropdown-menu";
+    ___e71.setAttribute("id", "projects-dropdown");
+    for (const p of projects) {
+      const ___e72 = document.createElement("li");
+      const ___e73 = document.createElement("a");
+      ___e73.className = dropdownItemClass(currentRoute === p.Href);
+      ___e73.setAttribute("href", String(p.Href));
+      ___e73.setAttribute("data-action", "nav");
+      ___e73.appendChild(document.createTextNode(String(p.Title)));
+      ___e72.appendChild(___e73);
+      ___e71.appendChild(___e72);
+    }
+    ___e67.appendChild(___e71);
+    ___e64.appendChild(___e67);
+    for (const page of pages) {
+      if (page.ShowInNav) {
+        const ___e74 = document.createElement("li");
+        ___e74.className = "nav-item navbar-menu";
+        const ___e75 = document.createElement("a");
+        ___e75.className = navLinkClass(currentRoute === page.Href);
+        ___e75.setAttribute("href", String(page.Href));
+        ___e75.setAttribute("data-action", "nav");
+        ___e75.appendChild(document.createTextNode(String(page.Title)));
+        ___e74.appendChild(___e75);
+        ___e64.appendChild(___e74);
+      }
+    }
+    ___e63.appendChild(___e64);
+    const ___e76 = document.createElement("ul");
+    ___e76.className = "navbar-nav right";
+    if (siteConfig.Search.Enabled) {
+      const ___e77 = document.createElement("li");
+      ___e77.className = "nav-item navbar-icon";
+      const ___e78 = document.createElement("button");
+      ___e78.className = "nav-link search-toggle";
+      ___e78.setAttribute("id", "search-toggle");
+      ___e78.setAttribute("aria-label", String(t("aria.search")));
+      ___e78.setAttribute("title", String(t("search.buttonTitle")));
+      ___e78.setAttribute("data-action", "open-search");
+      (IconSearch("1.35rem")).Mount(___e78);
+      ___e77.appendChild(___e78);
+      ___e76.appendChild(___e77);
+    }
+    const ___e79 = document.createElement("li");
+    ___e79.className = "nav-item navbar-icon";
+    const ___e80 = document.createElement("button");
+    ___e80.setAttribute("id", "theme-toggle");
+    ___e80.className = "theme-toggle nav-link";
+    ___e80.setAttribute("aria-label", String(t("aria.toggleTheme")));
+    ___e80.setAttribute("title", String(t("theme.toggleTitle")));
+    ___e80.setAttribute("data-action", "toggle-theme");
+    (IconSun("1.35rem")).Mount(___e80);
+    (IconMoon("1.35rem")).Mount(___e80);
+    ___e79.appendChild(___e80);
+    ___e76.appendChild(___e79);
+    if (siteConfig.EmailJS.Enabled) {
+      const ___e81 = document.createElement("li");
+      ___e81.className = "nav-item navbar-icon";
+      const ___e82 = document.createElement("button");
+      ___e82.className = "nav-link email-toggle";
+      ___e82.setAttribute("id", "email-toggle");
+      ___e82.setAttribute("aria-label", String(t("contact.title")));
+      ___e82.setAttribute("title", String(t("contact.buttonTitle")));
+      ___e82.setAttribute("data-action", "open-contact");
+      (IconEnvelope("1.35rem")).Mount(___e82);
+      ___e81.appendChild(___e82);
+      ___e76.appendChild(___e81);
+    }
+    for (const s of siteConfig.Social) {
+      const ___e83 = document.createElement("li");
+      ___e83.className = "nav-item navbar-icon";
+      const ___e84 = document.createElement("a");
+      ___e84.className = "nav-link";
+      ___e84.setAttribute("href", String(s.Href));
+      ___e84.setAttribute("target", String(s.Target));
+      ___e84.setAttribute("rel", String(s.Rel));
+      (DynamicIcon(s.Icon, "1.35rem")).Mount(___e84);
+      ___e83.appendChild(___e84);
+      ___e76.appendChild(___e83);
+    }
+    ___e63.appendChild(___e76);
+    ___e59.appendChild(___e63);
+    ___e58.appendChild(___e59);
+    ___p.appendChild(___e58);
+  }};
+}
+
+function PageView(html, loading, isError) {
+  return {Mount(___p) {
+    if (isError) {
+      const ___e85 = document.createElement("div");
+      ___e85.className = "error-message";
+      const ___e86 = document.createElement("h1");
+      ___e86.appendChild(document.createTextNode(String(t("general.notFound"))));
+      ___e85.appendChild(___e86);
+      const ___e87 = document.createElement("p");
+      ___e87.appendChild(document.createTextNode(String(t("general.notFoundMessage"))));
+      ___e85.appendChild(___e87);
+      ___p.appendChild(___e85);
+    } else if (loading) {
+      const ___e88 = document.createElement("div");
+      ___e88.className = "loading-spinner";
+      ___e88.appendChild(document.createTextNode(String(t("general.loading"))));
+      ___p.appendChild(___e88);
+    } else {
+      const ___e89 = document.createElement("div");
+      ___e89.className = "page-view";
+      const ___e90 = document.createElement("div");
+      ___e90.className = "markdown-body";
+      ___e90.insertAdjacentHTML("beforeend", html);
+      ___e89.appendChild(___e90);
+      ___p.appendChild(___e89);
+    }
+  }};
+}
+
+function ProjectReadme(repo, html, loading, isError) {
+  return {Mount(___p) {
+    if (repo !== "") {
+      if (loading) {
+        const ___e91 = document.createElement("div");
+        ___e91.setAttribute("id", "project-readme");
+        const ___e92 = document.createElement("p");
+        ___e92.appendChild(document.createTextNode(String(t("project.loadingReadme"))));
+        ___e91.appendChild(___e92);
+        ___p.appendChild(___e91);
+      } else if (isError) {
+        const ___e93 = document.createElement("div");
+        ___e93.setAttribute("id", "project-readme");
+        const ___e94 = document.createElement("p");
+        ___e94.appendChild(document.createTextNode(String(t("project.readmeError"))));
+        ___e93.appendChild(___e94);
+        ___p.appendChild(___e93);
+      } else if (html !== "") {
+        const ___e95 = document.createElement("div");
+        ___e95.setAttribute("id", "project-readme");
+        ___e95.className = "markdown-body";
+        ___e95.insertAdjacentHTML("beforeend", html);
+        ___p.appendChild(___e95);
+      }
+    }
+  }};
+}
+
+function ProjectMedia(videos) {
+  return {Mount(___p) {
+    if (__len(videos) > 0) {
+      const ___e96 = document.createElement("div");
+      ___e96.className = "markdown-body";
+      const ___e97 = document.createElement("h2");
+      ___e97.appendChild(document.createTextNode(String(t("project.media"))));
+      ___e96.appendChild(___e97);
+      for (const v of videos) {
+        const ___e98 = document.createElement("div");
+        ___e98.className = "youtube-video";
+        const ___e99 = document.createElement("div");
+        ___e99.className = "iframeWrapper";
+        const ___e100 = document.createElement("iframe");
+        ___e100.setAttribute("width", "560");
+        ___e100.setAttribute("height", "349");
+        ___e100.setAttribute("src", String("https://www.youtube.com/embed/" + v + "?rel=0&hd=1"));
+        ___e100.setAttribute("title", "YouTube video player");
+        ___e100.setAttribute("allowfullscreen", "");
+        ___e99.appendChild(___e100);
+        ___e98.appendChild(___e99);
+        ___e96.appendChild(___e98);
+      }
+      ___p.appendChild(___e96);
+    }
+  }};
+}
+
+function ProjectDemo(p) {
+  return {Mount(___p) {
+    if (p.DemoUrl !== "") {
+      const ___e101 = document.createElement("div");
+      ___e101.className = "markdown-body";
+      const ___e102 = document.createElement("h2");
+      ___e102.appendChild(document.createTextNode(String(demoLabel(p))));
+      ___e101.appendChild(___e102);
+      if (p.DemoInstructions !== "") {
+        const ___e103 = document.createElement("p");
+        ___e103.appendChild(document.createTextNode(String(p.DemoInstructions)));
+        ___e101.appendChild(___e103);
+      }
+      const ___e104 = document.createElement("div");
+      ___e104.className = demoWrapperClass(p.DemoHeight);
+      const ___e105 = document.createElement("iframe");
+      ___e105.setAttribute("id", "demo");
+      ___e105.setAttribute("src", String(p.DemoUrl));
+      ___e105.setAttribute("title", String(p.Title + " demo"));
+      ___e105.setAttribute("allowfullscreen", "");
+      ___e104.appendChild(___e105);
+      ___e101.appendChild(___e104);
+      if (p.DemoFullscreen) {
+        const ___e106 = document.createElement("br");
+        ___e101.appendChild(___e106);
+        const ___e107 = document.createElement("div");
+        ___e107.className = "text-center";
+        const ___e108 = document.createElement("button");
+        ___e108.setAttribute("id", "fullscreen");
+        ___e108.className = "download-btn";
+        ___e108.setAttribute("data-action", "toggle-fullscreen");
+        (IconExpand("1rem")).Mount(___e108);
+        const ___e109 = document.createElement("span");
+        ___e109.appendChild(document.createTextNode(String(t("project.fullscreen"))));
+        ___e108.appendChild(___e109);
+        ___e107.appendChild(___e108);
+        ___e101.appendChild(___e107);
+      }
+      ___p.appendChild(___e101);
+    }
+  }};
+}
+
+function ProjectLinks(links) {
+  return {Mount(___p) {
+    if (__len(links) > 0) {
+      const ___e110 = document.createElement("div");
+      ___e110.className = "markdown-body";
+      const ___e111 = document.createElement("h2");
+      ___e111.appendChild(document.createTextNode(String(t("project.links"))));
+      ___e110.appendChild(___e111);
+      const ___e112 = document.createElement("div");
+      ___e112.className = "download-buttons";
+      for (const link of links) {
+        const ___e113 = document.createElement("a");
+        ___e113.setAttribute("href", String(link.Href));
+        ___e113.setAttribute("target", "_blank");
+        ___e113.setAttribute("rel", "noopener noreferrer");
+        ___e113.className = "download-btn";
+        (DynamicIcon(link.Icon, "1rem")).Mount(___e113);
+        const ___e114 = document.createElement("span");
+        ___e114.appendChild(document.createTextNode(String(link.Title)));
+        ___e113.appendChild(___e114);
+        ___e112.appendChild(___e113);
+      }
+      ___e110.appendChild(___e112);
+      ___p.appendChild(___e110);
+    }
+  }};
+}
+
+function ProjectDetail(p, readmeHtml, loading, isError, commentsEnabled) {
+  return {Mount(___p) {
+    if (isError && p.ID === "") {
+      const ___e115 = document.createElement("div");
+      ___e115.className = "error-message";
+      const ___e116 = document.createElement("h1");
+      ___e116.appendChild(document.createTextNode(String(t("general.projectNotFound"))));
+      ___e115.appendChild(___e116);
+      const ___e117 = document.createElement("p");
+      ___e117.appendChild(document.createTextNode(String(t("general.projectNotFoundMessage"))));
+      ___e115.appendChild(___e117);
+      ___p.appendChild(___e115);
+    } else {
+      const ___e118 = document.createElement("div");
+      ___e118.className = "project-detail";
+      const ___e119 = document.createElement("h1");
+      ___e119.className = "project-title";
+      ___e119.appendChild(document.createTextNode(String(p.Title)));
+      ___e118.appendChild(___e119);
+      const ___e120 = document.createElement("p");
+      ___e120.className = "project-description";
+      ___e120.appendChild(document.createTextNode(String(p.Description)));
+      ___e118.appendChild(___e120);
+      if (__len(p.Tags) > 0) {
+        const ___e121 = document.createElement("div");
+        ___e121.className = "project-tags";
+        for (const tag of p.Tags) {
+          const ___e122 = document.createElement("span");
+          ___e122.className = "item-tag clickable-tag";
+          ___e122.setAttribute("data-search-tag", String(tag));
+          ___e122.appendChild(document.createTextNode(String(tag)));
+          ___e121.appendChild(___e122);
+        }
+        ___e118.appendChild(___e121);
+      }
+      (ProjectReadme(p.GithubRepo, readmeHtml, loading, isError)).Mount(___e118);
+      (ProjectMedia(p.YoutubeVideos)).Mount(___e118);
+      (ProjectDemo(p)).Mount(___e118);
+      (ProjectLinks(p.Links)).Mount(___e118);
+      if (commentsEnabled) {
+        const ___e123 = document.createElement("div");
+        ___e123.className = "giscus-container";
+        ___e118.appendChild(___e123);
+      }
+      ___p.appendChild(___e118);
+    }
+  }};
+}
+
 function toggleBtnClass(open) {
   if (open) {
     return "navbar-toggle active";
@@ -1604,171 +1886,64 @@ function dropdownItemClass(active) {
   return "dropdown-item";
 }
 
-function Navbar() {
-  return {Mount(___p) {
-    const ___e57 = document.createElement("nav");
-    ___e57.className = "navbar";
-    const ___e58 = document.createElement("div");
-    ___e58.className = "navbar-inner";
-    const ___e59 = document.createElement("a");
-    ___e59.className = "navbar-brand";
-    ___e59.setAttribute("href", "/");
-    ___e59.setAttribute("data-action", "nav");
-    ___e59.appendChild(document.createTextNode(String(site.Title)));
-    ___e58.appendChild(___e59);
-    const ___e60 = document.createElement("button");
-    ___e60.className = toggleBtnClass(mobileMenuOpen);
-    ___e60.setAttribute("aria-label", "Toggle navigation");
-    ___e60.setAttribute("data-action", "toggle-mobile-nav");
-    const ___e61 = document.createElement("span");
-    ___e61.className = "navbar-toggle-icon";
-    ___e60.appendChild(___e61);
-    ___e58.appendChild(___e60);
-    const ___e62 = document.createElement("div");
-    ___e62.className = navbarCollapseClass(mobileMenuOpen);
-    const ___e63 = document.createElement("ul");
-    ___e63.className = "navbar-nav left";
-    const ___e64 = document.createElement("li");
-    ___e64.className = "nav-item navbar-menu";
-    const ___e65 = document.createElement("a");
-    ___e65.className = navLinkClass(currentRoute === "/blog");
-    ___e65.setAttribute("href", "/blog");
-    ___e65.setAttribute("data-action", "nav");
-    ___e65.appendChild(document.createTextNode(String(t("nav.blog"))));
-    ___e64.appendChild(___e65);
-    ___e63.appendChild(___e64);
-    const ___e66 = document.createElement("li");
-    ___e66.className = dropdownClass(projectsDropdownOpen);
-    const ___e67 = document.createElement("a");
-    ___e67.className = dropdownToggleClass(currentRoute.startsWith("/project/"));
-    ___e67.setAttribute("href", "javascript:void(0)");
-    ___e67.setAttribute("role", "button");
-    ___e67.setAttribute("data-action", "toggle-projects-dropdown");
-    ___e67.appendChild(document.createTextNode(String(t("nav.projects"))));
-    const ___e68 = document.createElement("span");
-    ___e68.className = "dropdown-chevron dropdown-chevron-down";
-    (IconChevronDown("0.8em")).Mount(___e68);
-    ___e67.appendChild(___e68);
-    const ___e69 = document.createElement("span");
-    ___e69.className = "dropdown-chevron dropdown-chevron-up";
-    (IconChevronUp("0.8em")).Mount(___e69);
-    ___e67.appendChild(___e69);
-    ___e66.appendChild(___e67);
-    const ___e70 = document.createElement("ul");
-    ___e70.className = "dropdown-menu";
-    ___e70.setAttribute("id", "projects-dropdown");
-    for (const p of projects) {
-      const ___e71 = document.createElement("li");
-      const ___e72 = document.createElement("a");
-      ___e72.className = dropdownItemClass(currentRoute === p.Href);
-      ___e72.setAttribute("href", String(p.Href));
-      ___e72.setAttribute("data-action", "nav");
-      ___e72.appendChild(document.createTextNode(String(p.Title)));
-      ___e71.appendChild(___e72);
-      ___e70.appendChild(___e71);
-    }
-    ___e66.appendChild(___e70);
-    ___e63.appendChild(___e66);
-    for (const page of navPages) {
-      if (page.ShowInNav) {
-        const ___e73 = document.createElement("li");
-        ___e73.className = "nav-item navbar-menu";
-        const ___e74 = document.createElement("a");
-        ___e74.className = navLinkClass(currentRoute === page.Href);
-        ___e74.setAttribute("href", String(page.Href));
-        ___e74.setAttribute("data-action", "nav");
-        ___e74.appendChild(document.createTextNode(String(page.Title)));
-        ___e73.appendChild(___e74);
-        ___e63.appendChild(___e73);
-      }
-    }
-    ___e62.appendChild(___e63);
-    const ___e75 = document.createElement("ul");
-    ___e75.className = "navbar-nav right";
-    if (site.Search.Enabled) {
-      const ___e76 = document.createElement("li");
-      ___e76.className = "nav-item navbar-icon";
-      const ___e77 = document.createElement("button");
-      ___e77.className = "nav-link search-toggle";
-      ___e77.setAttribute("id", "search-toggle");
-      ___e77.setAttribute("aria-label", String(t("aria.search")));
-      ___e77.setAttribute("title", String(t("search.buttonTitle")));
-      ___e77.setAttribute("data-action", "open-search");
-      (IconSearch("1.35rem")).Mount(___e77);
-      ___e76.appendChild(___e77);
-      ___e75.appendChild(___e76);
-    }
-    const ___e78 = document.createElement("li");
-    ___e78.className = "nav-item navbar-icon";
-    const ___e79 = document.createElement("button");
-    ___e79.setAttribute("id", "theme-toggle");
-    ___e79.className = "theme-toggle nav-link";
-    ___e79.setAttribute("aria-label", String(t("aria.toggleTheme")));
-    ___e79.setAttribute("title", String(t("theme.toggleTitle")));
-    ___e79.setAttribute("data-action", "toggle-theme");
-    (IconSun("1.35rem")).Mount(___e79);
-    (IconMoon("1.35rem")).Mount(___e79);
-    ___e78.appendChild(___e79);
-    ___e75.appendChild(___e78);
-    if (site.EmailJS.Enabled) {
-      const ___e80 = document.createElement("li");
-      ___e80.className = "nav-item navbar-icon";
-      const ___e81 = document.createElement("button");
-      ___e81.className = "nav-link email-toggle";
-      ___e81.setAttribute("id", "email-toggle");
-      ___e81.setAttribute("aria-label", String(t("contact.title")));
-      ___e81.setAttribute("title", String(t("contact.buttonTitle")));
-      ___e81.setAttribute("data-action", "open-contact");
-      (IconEnvelope("1.35rem")).Mount(___e81);
-      ___e80.appendChild(___e81);
-      ___e75.appendChild(___e80);
-    }
-    for (const s of site.Social) {
-      const ___e82 = document.createElement("li");
-      ___e82.className = "nav-item navbar-icon";
-      const ___e83 = document.createElement("a");
-      ___e83.className = "nav-link";
-      ___e83.setAttribute("href", String(s.Href));
-      ___e83.setAttribute("target", String(s.Target));
-      ___e83.setAttribute("rel", String(s.Rel));
-      (DynamicIcon(s.Icon, "1.35rem")).Mount(___e83);
-      ___e82.appendChild(___e83);
-      ___e75.appendChild(___e82);
-    }
-    ___e62.appendChild(___e75);
-    ___e58.appendChild(___e62);
-    ___e57.appendChild(___e58);
-    ___p.appendChild(___e57);
-  }};
+function paginatedPosts(allPosts, page, perPage) {
+  if (__len(allPosts) === 0) {
+    return [];
+  }
+  let offset = page - 1;
+  let start = offset * perPage;
+  if (start < 0 || start >= __len(allPosts)) {
+    start = 0;
+  }
+  let end = start + perPage;
+  if (end > __len(allPosts)) {
+    end = __len(allPosts);
+  }
+  return allPosts.slice(start, end);
 }
 
-function PageView() {
-  return {Mount(___p) {
-    if (currentPageError) {
-      const ___e84 = document.createElement("div");
-      ___e84.className = "error-message";
-      const ___e85 = document.createElement("h1");
-      ___e85.appendChild(document.createTextNode(String(t("general.notFound"))));
-      ___e84.appendChild(___e85);
-      const ___e86 = document.createElement("p");
-      ___e86.appendChild(document.createTextNode(String(t("general.notFoundMessage"))));
-      ___e84.appendChild(___e86);
-      ___p.appendChild(___e84);
-    } else if (currentPageLoading) {
-      const ___e87 = document.createElement("div");
-      ___e87.className = "loading-spinner";
-      ___e87.appendChild(document.createTextNode(String(t("general.loading"))));
-      ___p.appendChild(___e87);
-    } else {
-      const ___e88 = document.createElement("div");
-      ___e88.className = "page-view";
-      const ___e89 = document.createElement("div");
-      ___e89.className = "markdown-body";
-      ___e89.insertAdjacentHTML("beforeend", currentPageHtml);
-      ___e88.appendChild(___e89);
-      ___p.appendChild(___e88);
-    }
-  }};
+function calcTotalPages(totalCount, perPage) {
+  if (perPage <= 0) {
+    perPage = 5;
+  }
+  let num = totalCount + perPage - 1;
+  return Math.trunc(num / perPage);
+}
+
+function pageItemPrevClass(page) {
+  if (page <= 1) {
+    return "page-item disabled";
+  }
+  return "page-item";
+}
+
+function pageItemNextClass(page, totalPages) {
+  if (page >= totalPages) {
+    return "page-item disabled";
+  }
+  return "page-item";
+}
+
+function pageItemClass(page, currentPage) {
+  if (page === currentPage) {
+    return "page-item active";
+  }
+  return "page-item";
+}
+
+function pageHref(page) {
+  if (page < 1) {
+    page = 1;
+  }
+  return __sprintf("/blog/page/%d", page);
+}
+
+function pageNumbers(totalPages) {
+  let nums = [];
+  for (let i = 1; i <= totalPages; i++) {
+    nums = __append(nums, i);
+  }
+  return nums;
 }
 
 function demoLabel(p) {
@@ -1785,156 +1960,76 @@ function demoWrapperClass(height) {
   return "iframeWrapper";
 }
 
-function ProjectDetail() {
-  return {Mount(___p) {
-    if (projectReadmeError && currentProject.ID === "") {
-      const ___e90 = document.createElement("div");
-      ___e90.className = "error-message";
-      const ___e91 = document.createElement("h1");
-      ___e91.appendChild(document.createTextNode(String(t("general.projectNotFound"))));
-      ___e90.appendChild(___e91);
-      const ___e92 = document.createElement("p");
-      ___e92.appendChild(document.createTextNode(String(t("general.projectNotFoundMessage"))));
-      ___e90.appendChild(___e92);
-      ___p.appendChild(___e90);
-    } else {
-      const ___e93 = document.createElement("div");
-      ___e93.className = "project-detail";
-      const ___e94 = document.createElement("h1");
-      ___e94.className = "project-title";
-      ___e94.appendChild(document.createTextNode(String(currentProject.Title)));
-      ___e93.appendChild(___e94);
-      const ___e95 = document.createElement("p");
-      ___e95.className = "project-description";
-      ___e95.appendChild(document.createTextNode(String(currentProject.Description)));
-      ___e93.appendChild(___e95);
-      if (__len(currentProject.Tags) > 0) {
-        const ___e96 = document.createElement("div");
-        ___e96.className = "project-tags";
-        for (const tag of currentProject.Tags) {
-          const ___e97 = document.createElement("span");
-          ___e97.className = "item-tag clickable-tag";
-          ___e97.setAttribute("data-search-tag", String(tag));
-          ___e97.appendChild(document.createTextNode(String(tag)));
-          ___e96.appendChild(___e97);
-        }
-        ___e93.appendChild(___e96);
-      }
-      if (currentProject.GithubRepo !== "") {
-        if (projectReadmeLoading) {
-          const ___e98 = document.createElement("div");
-          ___e98.setAttribute("id", "project-readme");
-          const ___e99 = document.createElement("p");
-          ___e99.appendChild(document.createTextNode(String(t("project.loadingReadme"))));
-          ___e98.appendChild(___e99);
-          ___e93.appendChild(___e98);
-        } else if (projectReadmeError) {
-          const ___e100 = document.createElement("div");
-          ___e100.setAttribute("id", "project-readme");
-          const ___e101 = document.createElement("p");
-          ___e101.appendChild(document.createTextNode(String(t("project.readmeError"))));
-          ___e100.appendChild(___e101);
-          ___e93.appendChild(___e100);
-        } else if (projectReadmeHtml !== "") {
-          const ___e102 = document.createElement("div");
-          ___e102.setAttribute("id", "project-readme");
-          ___e102.className = "markdown-body";
-          ___e102.insertAdjacentHTML("beforeend", projectReadmeHtml);
-          ___e93.appendChild(___e102);
-        }
-      }
-      if (__len(currentProject.YoutubeVideos) > 0) {
-        const ___e103 = document.createElement("div");
-        ___e103.className = "markdown-body";
-        const ___e104 = document.createElement("h2");
-        ___e104.appendChild(document.createTextNode(String(t("project.media"))));
-        ___e103.appendChild(___e104);
-        for (const v of currentProject.YoutubeVideos) {
-          const ___e105 = document.createElement("div");
-          ___e105.className = "youtube-video";
-          const ___e106 = document.createElement("div");
-          ___e106.className = "iframeWrapper";
-          const ___e107 = document.createElement("iframe");
-          ___e107.setAttribute("width", "560");
-          ___e107.setAttribute("height", "349");
-          ___e107.setAttribute("src", String("https://www.youtube.com/embed/" + v + "?rel=0&hd=1"));
-          ___e107.setAttribute("frameborder", "0");
-          ___e107.setAttribute("allowfullscreen", "");
-          ___e106.appendChild(___e107);
-          ___e105.appendChild(___e106);
-          ___e103.appendChild(___e105);
-        }
-        ___e93.appendChild(___e103);
-      }
-      if (currentProject.DemoUrl !== "") {
-        const ___e108 = document.createElement("div");
-        ___e108.className = "markdown-body";
-        const ___e109 = document.createElement("h2");
-        ___e109.appendChild(document.createTextNode(String(demoLabel(currentProject))));
-        ___e108.appendChild(___e109);
-        if (currentProject.DemoInstructions !== "") {
-          const ___e110 = document.createElement("p");
-          ___e110.appendChild(document.createTextNode(String(currentProject.DemoInstructions)));
-          ___e108.appendChild(___e110);
-        }
-        const ___e111 = document.createElement("div");
-        ___e111.className = demoWrapperClass(currentProject.DemoHeight);
-        const ___e112 = document.createElement("iframe");
-        ___e112.setAttribute("id", "demo");
-        ___e112.setAttribute("src", String(currentProject.DemoUrl));
-        ___e112.setAttribute("frameborder", "0");
-        ___e112.setAttribute("scrolling", "no");
-        ___e112.setAttribute("allowfullscreen", "");
-        ___e111.appendChild(___e112);
-        ___e108.appendChild(___e111);
-        if (currentProject.DemoFullscreen) {
-          const ___e113 = document.createElement("br");
-          ___e108.appendChild(___e113);
-          const ___e114 = document.createElement("center");
-          const ___e115 = document.createElement("button");
-          ___e115.setAttribute("id", "fullscreen");
-          ___e115.className = "download-btn";
-          ___e115.setAttribute("data-action", "toggle-fullscreen");
-          (IconExpand("1rem")).Mount(___e115);
-          const ___e116 = document.createElement("span");
-          ___e116.appendChild(document.createTextNode(String(t("project.fullscreen"))));
-          ___e115.appendChild(___e116);
-          ___e114.appendChild(___e115);
-          ___e108.appendChild(___e114);
-        }
-        ___e93.appendChild(___e108);
-      }
-      if (__len(currentProject.Links) > 0) {
-        const ___e117 = document.createElement("div");
-        ___e117.className = "markdown-body";
-        const ___e118 = document.createElement("h2");
-        ___e118.appendChild(document.createTextNode(String(t("project.links"))));
-        ___e117.appendChild(___e118);
-        const ___e119 = document.createElement("div");
-        ___e119.className = "download-buttons";
-        for (const link of currentProject.Links) {
-          const ___e120 = document.createElement("a");
-          ___e120.setAttribute("href", String(link.Href));
-          ___e120.setAttribute("target", "_blank");
-          ___e120.setAttribute("rel", "noopener noreferrer");
-          ___e120.className = "download-btn";
-          (DynamicIcon(link.Icon, "1rem")).Mount(___e120);
-          const ___e121 = document.createElement("span");
-          ___e121.appendChild(document.createTextNode(String(link.Title)));
-          ___e120.appendChild(___e121);
-          ___e119.appendChild(___e120);
-        }
-        ___e117.appendChild(___e119);
-        ___e93.appendChild(___e117);
-      }
-      if (site.Comments.ProjectsEnabled) {
-        const ___e122 = document.createElement("div");
-        ___e122.className = "giscus-container";
-        ___e93.appendChild(___e122);
-      }
-      ___p.appendChild(___e93);
-    }
-  }};
+function searchPageClass(open, closing) {
+  if (closing) {
+    return "show closing";
+  }
+  if (open) {
+    return "show";
+  }
+  return "";
+}
+
+function searchClearClass(q) {
+  if (q !== "") {
+    return "search-page-clear show";
+  }
+  return "search-page-clear";
+}
+
+function searchPlaceholderText() {
+  if (site.Search.Placeholder !== "" && site.Search.Placeholder !== "undefined") {
+    return site.Search.Placeholder;
+  }
+  let res = t("search.placeholder");
+  if (res === "search.placeholder" || res === "" || res === "undefined") {
+    return "Search...";
+  }
+  return res;
+}
+
+function highlightMatch(text, query) {
+  if (query === "") {
+    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
+  }
+  let lowerText = text.toLowerCase();
+  let lowerQuery = query.toLowerCase();
+  let idx = lowerText.indexOf(lowerQuery);
+  if (idx === -1) {
+    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
+  }
+  let before = text.slice(0, idx).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
+  let match = text.slice(idx, idx + __len(query)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
+  let after = text.slice(idx + __len(query)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
+  return before + "<mark>" + match + "</mark>" + after;
+}
+
+function contactModalClass(open, closing) {
+  if (closing) {
+    return "show closing";
+  }
+  if (open) {
+    return "show";
+  }
+  return "";
+}
+
+function inputErrorClass(hasErr) {
+  if (hasErr) {
+    return "error";
+  }
+  return "";
+}
+
+function formStatusClass(statusType) {
+  if (statusType !== "") {
+    return "form-status " + statusType;
+  }
+  return "form-status";
+}
+
+function currentYear() {
+  return {_d: new Date()}._d.getFullYear();
 }
 
 function navigate(url) {
@@ -2207,7 +2302,7 @@ function performSearch(q) {
 function renderSearchResults() {
   let el = document.querySelector("#search-page-results");
   if (el !== null) {
-    ((sel,n)=>{const e=document.querySelector(sel);e.innerHTML="";n.Mount(e)})("#search-page-results",SearchResultsList());
+    ((sel,n)=>{const e=document.querySelector(sel);e.innerHTML="";n.Mount(e)})("#search-page-results",SearchResultsList(searchResults, searchQuery));
   }
 }
 
@@ -2300,150 +2395,112 @@ function handleSearchInput(value) {
   }, 150);
 }
 
-function searchPageClass(open, closing) {
-  if (closing) {
-    return "show closing";
-  }
-  if (open) {
-    return "show";
-  }
-  return "";
-}
-
-function searchClearClass(q) {
-  if (q !== "") {
-    return "search-page-clear show";
-  }
-  return "search-page-clear";
-}
-
-function searchPlaceholderText() {
-  if (site.Search.Placeholder !== "" && site.Search.Placeholder !== "undefined") {
-    return site.Search.Placeholder;
-  }
-  let res = t("search.placeholder");
-  if (res === "search.placeholder" || res === "" || res === "undefined") {
-    return "Search...";
-  }
-  return res;
-}
-
-function highlightMatch(text, query) {
-  if (query === "") {
-    return text;
-  }
-  let lowerText = text.toLowerCase();
-  let lowerQuery = query.toLowerCase();
-  let idx = lowerText.indexOf(lowerQuery);
-  if (idx === -1) {
-    return text;
-  }
-  return text.slice(0, idx) + "<mark>" + text.slice(idx, idx + __len(query)) + "</mark>" + text.slice(idx + __len(query));
-}
-
-function SearchResultsList() {
+function SearchResultsList(results, query) {
   return {Mount(___p) {
-    if (searchQuery !== "" && __len(searchResults) === 0) {
-      const ___e123 = document.createElement("div");
-      ___e123.className = "search-no-results";
-      (IconSearch("3rem")).Mount(___e123);
-      const ___e124 = document.createElement("p");
-      ___e124.appendChild(document.createTextNode(String(t("search.noResults"))));
-      ___e123.appendChild(___e124);
-      ___p.appendChild(___e123);
+    if (query !== "" && __len(results) === 0) {
+      const ___e124 = document.createElement("div");
+      ___e124.className = "search-no-results";
+      (IconSearch("3rem")).Mount(___e124);
+      const ___e125 = document.createElement("p");
+      ___e125.appendChild(document.createTextNode(String(t("search.noResults"))));
+      ___e124.appendChild(___e125);
+      ___p.appendChild(___e124);
     } else {
-      for (const item of searchResults) {
-        const ___e125 = document.createElement("article");
-        ___e125.className = "search-result-item blog-post-card";
-        ___e125.setAttribute("data-action", "open-post");
-        ___e125.setAttribute("data-href", String(item.Url));
-        const ___e126 = document.createElement("h2");
-        ___e126.className = "blog-post-title";
-        const ___e127 = document.createElement("a");
-        ___e127.setAttribute("href", String(item.Url));
-        ___e127.setAttribute("data-action", "nav");
-        ___e127.insertAdjacentHTML("beforeend", highlightMatch(item.Title, searchQuery));
+      for (const item of results) {
+        const ___e126 = document.createElement("article");
+        ___e126.className = "search-result-item blog-post-card";
+        ___e126.setAttribute("data-action", "open-post");
+        ___e126.setAttribute("data-href", String(item.Url));
+        const ___e127 = document.createElement("h2");
+        ___e127.className = "blog-post-title";
+        const ___e128 = document.createElement("a");
+        ___e128.setAttribute("href", String(item.Url));
+        ___e128.setAttribute("data-action", "nav");
+        ___e128.insertAdjacentHTML("beforeend", highlightMatch(item.Title, query));
+        ___e127.appendChild(___e128);
         ___e126.appendChild(___e127);
-        ___e125.appendChild(___e126);
-        const ___e128 = document.createElement("div");
-        ___e128.className = "blog-post-meta";
-        const ___e129 = document.createElement("span");
-        ___e129.className = "blog-post-tags";
+        const ___e129 = document.createElement("div");
+        ___e129.className = "blog-post-meta";
+        const ___e130 = document.createElement("span");
+        ___e130.className = "blog-post-tags";
         if (item.ItemType === "project") {
-          const ___e130 = document.createElement("span");
-          ___e130.className = "item-tag";
-          ___e130.appendChild(document.createTextNode(String(t("badges.project"))));
-          ___e129.appendChild(___e130);
-        } else {
           const ___e131 = document.createElement("span");
           ___e131.className = "item-tag";
-          ___e131.appendChild(document.createTextNode(String(t("badges.blog"))));
-          ___e129.appendChild(___e131);
-        }
-        for (const tag of item.Tags) {
+          ___e131.appendChild(document.createTextNode(String(t("badges.project"))));
+          ___e130.appendChild(___e131);
+        } else {
           const ___e132 = document.createElement("span");
           ___e132.className = "item-tag";
-          ___e132.appendChild(document.createTextNode(String(tag)));
-          ___e129.appendChild(___e132);
+          ___e132.appendChild(document.createTextNode(String(t("badges.blog"))));
+          ___e130.appendChild(___e132);
         }
-        ___e128.appendChild(___e129);
-        ___e125.appendChild(___e128);
-        const ___e133 = document.createElement("p");
-        ___e133.className = "blog-post-excerpt";
-        ___e133.insertAdjacentHTML("beforeend", highlightMatch(item.Description, searchQuery));
-        ___e125.appendChild(___e133);
-        ___p.appendChild(___e125);
+        for (const tag of item.Tags) {
+          const ___e133 = document.createElement("span");
+          ___e133.className = "item-tag";
+          ___e133.appendChild(document.createTextNode(String(tag)));
+          ___e130.appendChild(___e133);
+        }
+        ___e129.appendChild(___e130);
+        ___e126.appendChild(___e129);
+        const ___e134 = document.createElement("p");
+        ___e134.className = "blog-post-excerpt";
+        ___e134.insertAdjacentHTML("beforeend", highlightMatch(item.Description, query));
+        ___e126.appendChild(___e134);
+        ___p.appendChild(___e126);
       }
     }
   }};
 }
 
-function SearchModal() {
+function SearchModal(open, closing, query, results, placeholder) {
   return {Mount(___p) {
-    const ___e134 = document.createElement("div");
-    ___e134.setAttribute("id", "search-page");
-    ___e134.className = searchPageClass(searchOpen, searchClosing);
     const ___e135 = document.createElement("div");
-    ___e135.className = "search-page-header";
+    ___e135.setAttribute("id", "search-page");
+    ___e135.className = searchPageClass(open, closing);
+    ___e135.setAttribute("role", "dialog");
+    ___e135.setAttribute("aria-modal", "true");
+    ___e135.setAttribute("aria-label", String(t("aria.search")));
     const ___e136 = document.createElement("div");
-    ___e136.className = "search-page-header-content";
-    const ___e137 = document.createElement("button");
-    ___e137.className = "search-page-back";
-    ___e137.setAttribute("id", "search-page-back");
-    ___e137.setAttribute("aria-label", String(t("aria.goBack")));
-    ___e137.setAttribute("data-action", "close-search");
-    (IconArrowLeft("1.2rem")).Mount(___e137);
+    ___e136.className = "search-page-header";
+    const ___e137 = document.createElement("div");
+    ___e137.className = "search-page-header-content";
+    const ___e138 = document.createElement("button");
+    ___e138.className = "search-page-back";
+    ___e138.setAttribute("id", "search-page-back");
+    ___e138.setAttribute("aria-label", String(t("aria.goBack")));
+    ___e138.setAttribute("data-action", "close-search");
+    (IconArrowLeft("1.2rem")).Mount(___e138);
+    ___e137.appendChild(___e138);
+    const ___e139 = document.createElement("div");
+    ___e139.className = "search-page-input-wrapper";
+    const ___e140 = document.createElement("input");
+    ___e140.setAttribute("type", "search");
+    ___e140.setAttribute("id", "search-page-input");
+    ___e140.className = "search-page-input";
+    ___e140.setAttribute("placeholder", String(placeholder));
+    ___e140.setAttribute("autocomplete", "off");
+    ___e140.setAttribute("aria-label", String(t("aria.search")));
+    ___e140.setAttribute("value", String(query));
+    ___e139.appendChild(___e140);
+    const ___e141 = document.createElement("button");
+    ___e141.className = searchClearClass(query);
+    ___e141.setAttribute("id", "search-page-clear");
+    ___e141.setAttribute("aria-label", String(t("aria.clearSearch")));
+    ___e141.setAttribute("data-action", "clear-search");
+    (IconTimes("1.2rem")).Mount(___e141);
+    ___e139.appendChild(___e141);
+    ___e137.appendChild(___e139);
     ___e136.appendChild(___e137);
-    const ___e138 = document.createElement("div");
-    ___e138.className = "search-page-input-wrapper";
-    const ___e139 = document.createElement("input");
-    ___e139.setAttribute("type", "search");
-    ___e139.setAttribute("id", "search-page-input");
-    ___e139.className = "search-page-input";
-    ___e139.setAttribute("placeholder", String(searchPlaceholderText()));
-    ___e139.setAttribute("autocomplete", "off");
-    ___e139.setAttribute("aria-label", String(t("aria.search")));
-    ___e139.setAttribute("value", String(searchQuery));
-    ___e138.appendChild(___e139);
-    const ___e140 = document.createElement("button");
-    ___e140.className = searchClearClass(searchQuery);
-    ___e140.setAttribute("id", "search-page-clear");
-    ___e140.setAttribute("aria-label", String(t("aria.clearSearch")));
-    ___e140.setAttribute("data-action", "clear-search");
-    (IconTimes("1.2rem")).Mount(___e140);
-    ___e138.appendChild(___e140);
-    ___e136.appendChild(___e138);
     ___e135.appendChild(___e136);
-    ___e134.appendChild(___e135);
-    const ___e141 = document.createElement("div");
-    ___e141.className = "search-page-content";
     const ___e142 = document.createElement("div");
-    ___e142.className = "search-page-results";
-    ___e142.setAttribute("id", "search-page-results");
-    (SearchResultsList()).Mount(___e142);
-    ___e141.appendChild(___e142);
-    ___e134.appendChild(___e141);
-    ___p.appendChild(___e134);
+    ___e142.className = "search-page-content";
+    const ___e143 = document.createElement("div");
+    ___e143.className = "search-page-results";
+    ___e143.setAttribute("id", "search-page-results");
+    (SearchResultsList(results, query)).Mount(___e143);
+    ___e142.appendChild(___e143);
+    ___e135.appendChild(___e142);
+    ___p.appendChild(___e135);
   }};
 }
 
@@ -2637,13 +2694,17 @@ async function initData() {
 }
 
 function appCSS() {
-  return "\n/* Fonts */\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 400;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-400-normal.woff2\") format(\"woff2\");\n}\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 600;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-600-normal.woff2\") format(\"woff2\");\n}\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 700;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-700-normal.woff2\") format(\"woff2\");\n}\n\n.icon {\n\tdisplay: inline-block;\n\tvertical-align: middle;\n\ttransition: transform var(--transition-fast);\n}\n.icon:hover {\n\ttransform: rotate(5deg) scale(1.1);\n}\n\n/* CSS Custom Properties */\n:root {\n\t--accent: #10B981;\n\t--background-color: #0D1117;\n\t--header-color: #111827;\n\t--hover-color: #1A2332;\n\t--border-color: #21262D;\n\t--font-color: #E6EDF3;\n\t--text-light: #7D8590;\n\t--error-color: #ff6b6b;\n\t--border-width: 2px;\n\t--border-radius: 4px;\n\t--border-radius-large: 8px;\n\t--spacing-xs: 4px;\n\t--spacing-sm: 8px;\n\t--spacing-md: 15px;\n\t--spacing-lg: 24px;\n\t--spacing-xl: 2rem;\n\t--font-family-primary: Raleway, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n\t--font-family-mono: Consolas, Monaco, \"Andale Mono\", \"Ubuntu Mono\", monospace;\n\t--font-size-base: 16px;\n\t--font-size-sm: 0.9em;\n\t--font-size-lg: 1.1em;\n\t--theme-transition-duration: 0.25s;\n\t--theme-transition-timing: ease-in-out;\n\t--line-height-base: 1.6;\n\t--transition-fast: 0.2s ease;\n\t--transition-normal: 0.3s ease;\n\t--z-navbar: 1030;\n\t--z-dropdown: 1000;\n}\n\n/* Reset & Base Styles */\nhtml {\n\theight: 100%;\n\toverflow-x: hidden;\n\toverflow-y: scroll;\n\tscroll-behavior: smooth;\n}\nhtml::after {\n\tcontent: \"\";\n\tdisplay: block;\n\theight: 101vh;\n\twidth: 1px;\n\tposition: absolute;\n\ttop: 0;\n\tleft: -1px;\n\tpointer-events: none;\n\tvisibility: hidden;\n}\n\n/* Prevent outer scrollbar when contact modal is open */\nhtml.modal-open,\nbody.modal-open,\nhtml:has(#contact-modal.show),\nbody:has(#contact-modal.show) {\n\toverflow: hidden !important;\n}\n\nhtml.modal-open::after,\nhtml:has(#contact-modal.show)::after {\n\tdisplay: none !important;\n}\n\n*, *::before, *::after {\n\tbox-sizing: border-box;\n}\n\n/* Theme color transitions on elements that change */\nbody, main, nav.navbar, footer, .navbar-inner, .dropdown-menu, .blog-post-card, .search-page-header, .contact-modal-content {\n\ttransition: background-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tcolor var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tborder-color var(--theme-transition-duration) var(--theme-transition-timing);\n}\n\na, button, input, textarea, select, .nav-link, .dropdown-item {\n\ttransition: background-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tcolor var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tborder-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\topacity var(--transition-fast),\n\t\ttransform var(--transition-fast);\n}\n\nbody {\n\tmin-height: 100vh;\n\tmargin: 0;\n\tpadding-top: 56px;\n\tdisplay: flex;\n\ttext-align: center;\n\tflex-direction: column;\n\tfont-family: var(--font-family-primary);\n\tfont-size: var(--font-size-base);\n\tbackground-color: var(--background-color);\n\tcolor: var(--font-color);\n\tline-height: var(--line-height-base);\n\t-webkit-font-smoothing: antialiased;\n\t-moz-osx-font-smoothing: grayscale;\n\ttext-rendering: optimizeLegibility;\n\toverflow-x: hidden;\n\twidth: 100%;\n}\n\n#app, .app-root {\n\tdisplay: flex;\n\tflex-direction: column;\n\tmin-height: calc(100vh - 56px);\n\tflex: 1 0 auto;\n}\n\nmain {\n\tmargin: 0 auto;\n\tpadding: var(--spacing-lg);\n\tflex: 1 0 auto;\n\tmax-width: 900px;\n\twidth: 100%;\n\tbackground-color: var(--background-color);\n\tcolor: var(--font-color);\n\tanimation: fadeIn 0.2s ease-in-out;\n}\nmain:focus {\n\toutline: none;\n}\n\n/* Page transition animations */\n@keyframes fadeIn {\n\tfrom {\n\t\topacity: 0;\n\t\ttransform: translateY(10px);\n\t}\n\tto {\n\t\topacity: 1;\n\t\ttransform: translateY(0);\n\t}\n}\n\nmain.page-transition-out {\n\tanimation: fadeOut 0.2s ease-in-out forwards;\n}\n\n@keyframes fadeOut {\n\tfrom {\n\t\topacity: 1;\n\t\ttransform: translateY(0);\n\t}\n\tto {\n\t\topacity: 0;\n\t\ttransform: translateY(-10px);\n\t}\n}\n\nimg {\n\tmax-width: 100%;\n}\n\na {\n\tcolor: var(--accent);\n}\na.icon:hover {\n\ttext-decoration: none;\n}\n\n/* Tags */\n.item-tag {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n\tpadding: var(--spacing-xs) var(--spacing-sm);\n\tborder-radius: var(--border-radius);\n\tfont-size: var(--font-size-sm);\n\tdisplay: inline-block;\n\tmargin: 2px;\n}\n.clickable-tag {\n\tcursor: pointer;\n\ttransition: all var(--transition-fast);\n}\n.clickable-tag:hover {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n\ttransform: translateY(-1px);\n\tbox-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);\n}\n\n/* About Page */\n.about-pic {\n\twidth: 15vh;\n\theight: 15vh;\n\tborder-radius: 50%;\n\tmargin-bottom: 20px;\n\tobject-fit: cover;\n\ttransition: transform var(--transition-normal);\n}\n.about-pic:hover {\n\ttransform: scale(1.05);\n}\n\n@keyframes imageLoad {\n\tfrom { opacity: 0; transform: scale(0.95); }\n\tto { opacity: 1; transform: scale(1); }\n}\n\n/* Shared Loading & Error styles */\n.loading-spinner {\n\ttext-align: center;\n\tpadding: 2rem;\n\tcolor: var(--accent);\n\tfont-size: 1.2em;\n\tanimation: pulse 1.5s ease-in-out infinite;\n}\n@keyframes pulse {\n\t0%, 100% { opacity: 1; }\n\t50% { opacity: 0.5; }\n}\n\n.error-message {\n\ttext-align: center;\n\tpadding: 2rem;\n\tmax-width: 600px;\n\tmargin: 0 auto;\n}\n.error-message h1 {\n\tcolor: #ff6b6b;\n\tmargin-bottom: 1rem;\n\tfont-size: 2em;\n}\n.error-message p {\n\tcolor: var(--text-light);\n\tfont-size: 1.1em;\n}\n\n/* Accessibility */\nbutton:focus, a:focus, input:focus, select:focus, textarea:focus {\n\toutline: 2px solid var(--accent);\n\toutline-offset: 2px;\n}\n*:focus:not(:focus-visible) {\n\toutline: none;\n}\n\n/* Navbar */\nnav.navbar {\n\tbackground-color: var(--header-color);\n\tborder-bottom: var(--border-width) solid var(--accent);\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\tz-index: var(--z-navbar);\n\tfont-family: var(--font-family-primary);\n}\nnav.navbar .navbar-inner {\n\tmax-width: 1000px;\n\tmargin-inline: auto;\n\tpadding: 0 15px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: space-between;\n}\nnav.navbar .navbar-brand {\n\tcolor: var(--font-color);\n\tfont-weight: bold;\n\ttext-decoration: none;\n\tfont-size: 1.25em;\n\tdisplay: none;\n\tpadding: 11px 0;\n}\nnav.navbar .navbar-collapse {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: space-between;\n\twidth: 100%;\n}\nnav.navbar .navbar-nav {\n\tdisplay: flex;\n\tlist-style: none;\n\tmargin: 0;\n\tpadding: 0;\n\talign-items: stretch;\n}\nnav.navbar .navbar-nav.left {\n\tmargin-right: auto;\n}\nnav.navbar .navbar-nav.right {\n\tmargin-left: auto;\n}\nnav.navbar .nav-item {\n\tposition: relative;\n\tdisplay: flex;\n\talign-items: stretch;\n}\nbutton.nav-link {\n\tbackground: none;\n\tborder: none;\n\tcursor: pointer;\n\tfont-family: inherit;\n\tfont-size: inherit;\n\twidth: auto;\n\ttransition: transform 0.1s ease, background-color var(--transition-fast), color var(--transition-fast);\n}\nbutton.nav-link:active {\n\ttransform: scale(0.95);\n}\n.nav-link {\n\tdisplay: flex;\n\talign-items: center;\n\tpadding: 11px 20px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tline-height: 1.2;\n\tfont-size: 1.25em;\n\tfont-weight: 700;\n\ttransition: background-color var(--transition-fast),\n\t\t\t\tcolor var(--transition-fast),\n\t\t\t\tborder-color var(--transition-fast),\n\t\t\t\topacity var(--transition-fast),\n\t\t\t\ttransform var(--transition-fast);\n}\n.navbar-menu .nav-link, .navbar-icon .nav-link {\n\tfont-size: 1.35rem;\n}\n.navbar-menu .nav-link {\n\tfont-weight: 700;\n}\n.navbar-icon .nav-link svg {\n\ttransition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),\n\t\t\t\trotate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);\n\ttransform-origin: center;\n}\n.navbar-icon .nav-link:hover svg, .navbar-icon .nav-link:focus svg {\n\ttransform: rotate(8deg) scale(1.25);\n}\n.navbar-icon .nav-link:active svg {\n\ttransform: rotate(4deg) scale(1.1);\n}\n.nav-link:hover, .nav-link:focus, .nav-link:active {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.nav-link.active {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.nav-link:focus:not(.active) {\n\toutline: 2px solid var(--accent);\n\toutline-offset: -2px;\n}\n.nav-link:focus:not(:focus-visible):not(.active) {\n\tbackground-color: transparent;\n\tcolor: var(--font-color);\n\toutline: none;\n}\n.nav-link.active:focus {\n\toutline: none;\n}\n.nav-link:focus:not(:focus-visible):hover {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n}\n\n@media (min-width: 768px) {\n\tnav.navbar .navbar-inner {\n\t\tpadding-left: 20px;\n\t\tpadding-right: 20px;\n\t}\n}\n\n.navbar-toggle {\n\tdisplay: none;\n\tbackground: transparent;\n\tborder: none;\n\tcolor: var(--font-color);\n\tfont-size: 1.5em;\n\tcursor: pointer;\n\tpadding: 11px 0.5rem;\n\ttransition: transform var(--transition-fast);\n\toverflow: visible;\n}\n.navbar-toggle:focus {\n\toutline: 2px solid var(--accent);\n\toutline-offset: 2px;\n}\n.navbar-toggle:focus:not(:focus-visible) {\n\toutline: none;\n}\n.navbar-toggle:active {\n\ttransform: scale(0.9);\n}\n.navbar-toggle-icon {\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: relative;\n\ttransition: background-color var(--transition-normal);\n\tz-index: 1;\n}\n.navbar-toggle-icon::before {\n\tcontent: '';\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: absolute;\n\tleft: 0;\n\ttop: -8px;\n\ttransition: all var(--transition-normal);\n}\n.navbar-toggle-icon::after {\n\tcontent: '';\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: absolute;\n\tleft: 0;\n\tbottom: -8px;\n\ttransition: all var(--transition-normal);\n}\n.navbar-toggle.active .navbar-toggle-icon {\n\tbackground-color: transparent;\n}\n.navbar-toggle.active .navbar-toggle-icon::before {\n\ttransform: rotate(45deg);\n\ttop: 0;\n}\n.navbar-toggle.active .navbar-toggle-icon::after {\n\ttransform: rotate(-45deg);\n\tbottom: 0;\n}\n\n/* Dropdown */\n.dropdown {\n\tposition: relative;\n}\n.dropdown-toggle {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.3rem;\n}\n.dropdown-chevron {\n\tdisplay: inline-flex;\n\talign-items: center;\n\ttransition: transform var(--transition-fast);\n\ttransform-origin: center;\n}\n.dropdown-chevron svg {\n\twidth: 0.8em;\n\theight: 0.8em;\n}\n.dropdown-chevron-down {\n\tdisplay: inline-flex;\n}\n.dropdown-chevron-up {\n\tdisplay: none;\n}\n.dropdown.show .dropdown-chevron-down {\n\tdisplay: none;\n}\n.dropdown.show .dropdown-chevron-up {\n\tdisplay: inline-flex;\n}\n.dropdown-menu {\n\tposition: absolute;\n\ttop: 100%;\n\tleft: 0;\n\tmin-width: 200px;\n\tbackground-color: var(--header-color);\n\tborder: var(--border-width) solid var(--accent);\n\tpadding: 0;\n\tmargin: 0;\n\tlist-style: none;\n\tz-index: var(--z-dropdown);\n\tbox-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);\n\topacity: 0;\n\tvisibility: hidden;\n\ttransform: translateY(-5px);\n\ttransition: all 0.2s ease;\n}\n.dropdown.show .dropdown-menu {\n\topacity: 1;\n\tvisibility: visible;\n\ttransform: translateY(0);\n}\n.dropdown-item {\n\tdisplay: block;\n\tpadding: 10px 20px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tfont-size: 16px;\n\tfont-weight: bold;\n\tbackground-color: var(--header-color);\n\ttransition: all var(--transition-fast);\n\tborder: none;\n\twidth: 100%;\n\ttext-align: left;\n\twhite-space: nowrap;\n}\n.dropdown-item:hover, .dropdown-item:focus, .dropdown-item:active, .dropdown-item.active {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n}\n.dropdown-item.active:focus {\n\toutline: none;\n}\n\n/* Theme Toggle */\n.theme-toggle {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--font-color);\n\tcursor: pointer;\n\tpadding: 11px 20px;\n\tdisplay: flex;\n\talign-items: center;\n\tfont-size: 1.35rem;\n\ttransition: color var(--transition-fast), background-color var(--transition-fast);\n}\n.theme-toggle:hover, .theme-toggle:focus {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.theme-toggle:hover svg, .theme-toggle:focus svg {\n\ttransform: rotate(8deg) scale(1.25);\n}\n.theme-toggle:active {\n\tcolor: var(--accent);\n}\n.theme-toggle:active svg {\n\ttransform: rotate(4deg) scale(1.1);\n}\n.theme-toggle svg {\n\ttransition: opacity var(--theme-transition-duration) var(--theme-transition-timing),\n\t\t\t\ttransform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),\n\t\t\t\tfill var(--transition-fast);\n\tfill: currentColor;\n}\n:root[data-theme=\"dark\"] .theme-toggle .icon-sun {\n\tdisplay: inline-block;\n\topacity: 1;\n}\n:root[data-theme=\"dark\"] .theme-toggle .icon-moon {\n\tdisplay: none;\n\topacity: 0;\n}\n:root[data-theme=\"light\"] .theme-toggle .icon-sun {\n\tdisplay: none;\n\topacity: 0;\n}\n:root[data-theme=\"light\"] .theme-toggle .icon-moon {\n\tdisplay: inline-block;\n\topacity: 1;\n}\n\n/* Mobile navbar */\n@media (max-width: 767px) {\n\tnav.navbar .navbar-brand {\n\t\tdisplay: block;\n\t}\n\t.navbar-toggle {\n\t\tdisplay: block;\n\t}\n\tnav.navbar .navbar-collapse {\n\t\tposition: absolute;\n\t\ttop: 100%;\n\t\tleft: 0;\n\t\tright: 0;\n\t\tbackground-color: var(--header-color);\n\t\tborder-bottom: var(--border-width) solid var(--accent);\n\t\tflex-direction: column;\n\t\talign-items: stretch;\n\t\tmax-height: 0;\n\t\toverflow: hidden;\n\t\ttransition: max-height 0.25s ease-in;\n\t}\n\tnav.navbar .navbar-collapse.show {\n\t\tmax-height: 800px;\n\t\toverflow-y: auto;\n\t\toverflow-x: hidden;\n\t\ttransition: max-height 0.8s ease-out;\n\t}\n\tnav.navbar .navbar-nav {\n\t\tflex-direction: column;\n\t\twidth: 100%;\n\t\tmax-width: 100%;\n\t\toverflow-x: hidden;\n\t}\n\tnav.navbar .navbar-nav.left, nav.navbar .navbar-nav.right {\n\t\tmargin: 0;\n\t}\n\tnav.navbar .navbar-nav.right {\n\t\tflex-direction: row;\n\t\tjustify-content: center;\n\t\tpadding: 10px 0;\n\t\tmargin-top: 10px;\n\t}\n\tnav.navbar .navbar-nav.right .nav-item {\n\t\tdisplay: inline-flex;\n\t}\n\tnav.navbar .navbar-nav.right .nav-link {\n\t\tpadding: 10px 15px;\n\t\theight: auto;\n\t}\n\tnav.navbar .navbar-nav.left .nav-item {\n\t\twidth: 100%;\n\t\theight: auto;\n\t\toverflow: hidden;\n\t}\n\tnav.navbar .navbar-nav.left .nav-link {\n\t\theight: auto;\n\t\tpadding: 12px 20px;\n\t\twidth: 100%;\n\t\tjustify-content: flex-start;\n\t}\n\t.dropdown {\n\t\tdisplay: flex;\n\t\tflex-direction: column;\n\t\twidth: 100%;\n\t}\n\t.dropdown-menu {\n\t\tposition: static;\n\t\tborder: none;\n\t\tbox-shadow: none;\n\t\twidth: 100%;\n\t\tdisplay: flex;\n\t\tflex-direction: column;\n\t\tmax-height: 0;\n\t\toverflow: hidden;\n\t\ttransition: max-height 0.4s ease-out;\n\t\torder: 2;\n\t}\n\t.dropdown-toggle {\n\t\torder: 1;\n\t\twidth: 100%;\n\t}\n\t.dropdown.show .dropdown-menu {\n\t\tmax-height: 500px;\n\t\ttransition: max-height 0.5s ease-out;\n\t}\n\t.dropdown-item {\n\t\tpadding-left: 40px;\n\t\twidth: 100%;\n\t\ttext-align: left;\n\t\twhite-space: normal;\n\t\tword-wrap: break-word;\n\t}\n}\n\n/* Blog List */\n.blog-container {\n\tmax-width: 900px;\n\tmargin: 0 auto;\n\ttext-align: left;\n}\n.blog-page-title {\n\tcolor: var(--accent);\n\tfont-size: 2em;\n\tmargin-bottom: 1.5rem;\n\ttext-align: center;\n}\n.blog-empty {\n\ttext-align: center;\n\tcolor: var(--text-light);\n\tfont-size: 1.1em;\n\tpadding: 2rem 0;\n}\n.blog-posts {\n\tdisplay: flex;\n\tflex-direction: column;\n\tgap: 1.5rem;\n\tmargin-bottom: 2rem;\n}\n.blog-post-card {\n\tpadding: 1.5rem;\n\tbackground-color: rgba(255, 255, 255, 0.02);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius-large);\n\ttransition: all var(--transition-normal);\n\tcursor: pointer;\n}\n.blog-post-card:hover {\n\tbackground-color: rgba(255, 255, 255, 0.05);\n\tborder-color: var(--accent);\n\ttransform: translateY(-4px) scale(1.01);\n\tbox-shadow: 0 8px 25px rgba(66, 155, 238, 0.15);\n}\n.blog-post-title {\n\tmargin: 0 0 0.35rem 0;\n\tfont-size: 1.35em;\n\tfont-weight: bold;\n\tline-height: 1.3;\n}\n.blog-post-title a {\n\tcolor: var(--accent);\n\ttext-decoration: none;\n\ttransition: color var(--transition-fast);\n}\n.blog-post-title a:hover {\n\tcolor: var(--font-color);\n}\n.blog-post-meta {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\talign-items: center;\n\tgap: 0.75rem;\n\tmargin-bottom: 0.75rem;\n\tfont-size: 1em;\n\tcolor: var(--text-light);\n}\n.blog-post-date {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.4rem;\n}\n.blog-post-tags {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\tgap: 0.4rem;\n}\n.blog-post-excerpt {\n\tcolor: var(--text-light);\n\tline-height: 1.5;\n\tmargin-bottom: 0;\n\tfont-size: 1.05em;\n}\n.blog-post-card mark {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n\tpadding: 1px 3px;\n\tborder-radius: 2px;\n\tfont-weight: bold;\n}\n\n.blog-pagination {\n\tmargin: 2rem 0;\n\tdisplay: flex;\n\tjustify-content: center;\n}\n.blog-pagination .pagination {\n\tdisplay: flex;\n\tgap: 0.5rem;\n\tlist-style: none;\n\tpadding: 0;\n\tmargin: 0;\n}\n.blog-pagination .page-item {\n\tdisplay: flex;\n}\n.blog-pagination .page-link {\n\tdisplay: inline-flex;\n\talign-items: center;\n\tjustify-content: center;\n\tpadding: 0.5rem 0.75rem;\n\tbackground-color: rgba(255, 255, 255, 0.02);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius);\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\ttransition: all var(--transition-fast);\n\tcursor: pointer;\n\tmin-width: 40px;\n\theight: 38px;\n\tbox-sizing: border-box;\n\ttext-align: center;\n}\n.blog-pagination .page-link svg {\n\tdisplay: inline-block;\n\tvertical-align: middle;\n}\n.blog-pagination .page-link:hover {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\tcolor: var(--accent);\n}\n.blog-pagination .page-item.active .page-link {\n\tbackground-color: var(--accent);\n\tborder-color: var(--accent);\n\tcolor: var(--background-color);\n\tfont-weight: bold;\n}\n.blog-pagination .page-item.disabled .page-link {\n\topacity: 0.5;\n\tcursor: not-allowed;\n\tpointer-events: none;\n}\n\n@media (max-width: 767px) {\n\t.blog-post-card {\n\t\tpadding: 1rem;\n\t\tmargin: 0.25rem;\n\t\ttext-align: center;\n\t}\n\t.blog-posts {\n\t\tgap: 0.5rem;\n\t}\n\t.blog-post-title {\n\t\tfont-size: 1.25em;\n\t}\n\t.blog-post-meta {\n\t\tflex-direction: column;\n\t\talign-items: center;\n\t\tgap: 0.5rem;\n\t\tfont-size: 0.95em;\n\t\tjustify-content: center;\n\t}\n\t.blog-post-excerpt {\n\t\tfont-size: 1em;\n\t}\n\t.blog-pagination .page-link {\n\t\tpadding: 0.4rem 0.6rem;\n\t\tfont-size: 0.9em;\n\t\tmin-width: 35px;\n\t\theight: 35px;\n\t}\n}\n\n/* Projects */\n.project-title {\n\tcolor: var(--accent);\n\tfont-size: 1.5em;\n\tmargin: 0 0 0.02em 0;\n\tfont-weight: bold;\n}\n.project-description {\n\tmargin: 0 0 0.5em 0;\n\tcolor: var(--text-light);\n\tfont-size: 1.2em;\n\tline-height: 1.6;\n}\n.project-tags {\n\tmargin: 0.8em 0;\n\tfont-size: 1.1em;\n}\n.youtube-video {\n\tmargin: 20px 0;\n}\n.iframeWrapper {\n\tposition: relative;\n\tpadding-bottom: 56.25%;\n\tpadding-top: 25px;\n\theight: 0;\n}\n.iframeWrapper iframe {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\twidth: 100%;\n\theight: 100%;\n\tmax-width: 100%;\n\toverflow: hidden;\n}\n.demo-iframe-wrapper {\n\twidth: 100%;\n\tmargin: 20px 0;\n}\n.demo-iframe-wrapper iframe {\n\twidth: 100%;\n\theight: 700px;\n\tmax-width: 100%;\n\tborder: none;\n\toverflow: hidden;\n}\n.download-buttons {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\tgap: 15px;\n\tmargin: 1.5em 0;\n\tjustify-content: flex-start;\n}\n.download-btn {\n\tdisplay: inline-flex;\n\talign-items: center;\n\tjustify-content: center;\n\tgap: 8px;\n\tpadding: 12px 24px;\n\tbackground-color: var(--hover-color);\n\tborder: 2px solid var(--accent);\n\tborder-radius: 8px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tfont: 600 1em var(--font-family-primary);\n\ttransition: all var(--transition-normal);\n\tcursor: pointer;\n\tappearance: none;\n}\n.download-btn:hover, .download-btn:focus {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\ttransform: translateY(-2px);\n\tbox-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);\n\tcolor: var(--accent);\n\ttext-decoration: none;\n}\n.download-btn:active {\n\ttransform: translateY(0) scale(0.95);\n\ttext-decoration: none;\n}\n\n/* Markdown */\n.markdown-body {\n\tfont-family: var(--font-family-primary);\n\tfont-size: 1em;\n\tline-height: 1.6;\n\tcolor: var(--text-light);\n\ttext-align: left;\n}\n.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {\n\tcolor: var(--font-color);\n\tmargin: 1em 0 0.5em;\n\tfont-weight: bold;\n\tline-height: 1.25;\n}\n.markdown-body h1 {\n\tfont-size: 1.8em;\n\tmargin-top: 0;\n}\n.markdown-body h2 {\n\tfont-size: 1.4em;\n}\n.markdown-body h3 {\n\tfont-size: 1.2em;\n}\n.markdown-body p, .markdown-body li {\n\tmargin: 0.5em 0;\n\tline-height: 1.6;\n\tfont-size: 1.1em;\n\tcolor: var(--text-light);\n}\n.markdown-body ul, .markdown-body ol {\n\tmargin: 0.5em 0;\n\tpadding-left: 2em;\n}\n.markdown-body code:not([class*=\"language-\"]) {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n\tpadding: 2px 6px;\n\tborder-radius: 3px;\n\tfont-family: var(--font-family-mono);\n\tfont-size: 0.9em;\n}\n.markdown-body pre:not([class*=\"language-\"]) {\n\tbackground-color: var(--hover-color);\n\tpadding: 0.5em;\n\tborder-radius: 3px;\n\toverflow-x: auto;\n\tmargin: 0.5em 0;\n\tborder: 1px solid var(--border-color);\n\tfont-family: var(--font-family-mono);\n\tline-height: 1.4;\n}\n.markdown-body pre[class*=\"language-\"] {\n\tmargin: 0.5em 0;\n\toverflow-x: auto;\n\tfont-family: var(--font-family-mono);\n\tline-height: 1.4;\n\tposition: relative;\n}\n.markdown-body a {\n\tcolor: var(--accent);\n\ttext-decoration: none;\n\tdisplay: inline-block;\n\ttransition: transform var(--transition-fast);\n}\n.markdown-body a:hover {\n\ttext-decoration: none;\n\ttransform: translateY(-2px);\n}\n.markdown-body blockquote {\n\tborder-left: 4px solid var(--accent);\n\tpadding-left: 1em;\n\tmargin: 0.5em 0;\n\tfont-style: italic;\n}\n.markdown-body table {\n\twidth: 100%;\n\tborder-collapse: collapse;\n\tmargin: 0.5em 0;\n}\n.markdown-body th, .markdown-body td {\n\tborder: 1px solid var(--border-color);\n\tpadding: 0.5em 1em;\n\ttext-align: left;\n}\n.markdown-body th {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n\tfont-weight: bold;\n}\n.markdown-body hr {\n\tborder: none;\n\tborder-top: 1px solid var(--border-color);\n\tmargin: 0.5em 0;\n}\n\n/* Copy Code Button */\n.copy-code-button {\n\tposition: absolute;\n\ttop: 0.5em;\n\tright: 0.5em;\n\tpadding: 0.4em 0.8em;\n\tfont-size: 0.85em;\n\tfont-family: var(--font-family-primary);\n\tfont-weight: 700;\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius);\n\tcursor: pointer;\n\topacity: 0;\n\ttransition: opacity var(--transition-fast), background-color var(--transition-fast);\n\tz-index: 10;\n}\npre:hover .copy-code-button {\n\topacity: 1;\n}\n.copy-code-button:hover {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n}\n.copy-code-button:active {\n\ttransform: scale(0.95);\n}\n.copy-code-button.copied {\n\tbackground-color: #10b981;\n\tcolor: white;\n\topacity: 1;\n}\n\n/* Giscus comments */\n.giscus-container {\n\tmax-width: 900px;\n\tmargin: 3rem auto;\n\tpadding: 2rem 1rem;\n\tborder-top: 2px solid var(--border-color);\n}\n.giscus-container iframe {\n\tcolor-scheme: dark;\n}\n\n/* Search Page / Overlay */\n#search-page {\n\tdisplay: none;\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\tbottom: 0;\n\tbackground-color: var(--background-color);\n\tz-index: 2000;\n\tflex-direction: column;\n\toverflow: hidden;\n\topacity: 0;\n\ttransform: scale(0.95);\n\tanimation: scaleFadeIn 0.25s ease-out forwards;\n}\n#search-page.show {\n\tdisplay: flex;\n}\n#search-page.closing {\n\tanimation: scaleFadeOut 0.2s ease-in forwards;\n}\n.search-page-header {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\theight: 56px;\n\tpadding: 0 1rem;\n\tbackground-color: var(--header-color);\n\tborder-bottom: var(--border-width) solid var(--accent);\n\tanimation: slideDown var(--transition-normal) ease-out;\n}\n.search-page-header-content {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.75rem;\n\twidth: 100%;\n\tmax-width: 900px;\n}\n.search-page-back {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--font-color);\n\tcursor: pointer;\n\tpadding: 0.5rem;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tfont-size: 1.2em;\n\ttransition: color var(--transition-fast);\n}\n.search-page-back:hover {\n\tcolor: var(--accent);\n}\n.search-page-input-wrapper {\n\tflex: 1;\n\tposition: relative;\n\tdisplay: flex;\n\talign-items: center;\n}\n.search-page-input {\n\twidth: 100%;\n\tpadding: 0.5rem 2.5rem 0.5rem 1rem;\n\tbackground-color: var(--hover-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: 20px;\n\tcolor: var(--font-color);\n\tfont-size: 1em;\n}\n.search-page-input::-webkit-search-cancel-button {\n\t-webkit-appearance: none;\n\tappearance: none;\n}\n.search-page-input:focus {\n\toutline: none;\n\tborder-color: var(--accent);\n\tbackground-color: var(--background-color);\n\tbox-shadow: 0 0 0 3px rgba(66, 155, 238, 0.1);\n}\n.search-page-clear {\n\tposition: absolute;\n\tright: 0.5rem;\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--text-light);\n\tcursor: pointer;\n\tpadding: 0.25rem 0.5rem;\n\tdisplay: none;\n\ttransition: color var(--transition-fast);\n}\n.search-page-clear:hover {\n\tcolor: var(--accent);\n}\n.search-page-clear.show {\n\tdisplay: block;\n}\n.search-page-content {\n\tflex: 1;\n\toverflow-y: auto;\n\tpadding: 1rem;\n\tdisplay: flex;\n\tjustify-content: center;\n\tanimation: fadeIn 0.4s ease-out 0.1s both;\n}\n.search-page-results {\n\tdisplay: flex;\n\tflex-direction: column;\n\tgap: 1.5rem;\n\twidth: 100%;\n\tmax-width: 900px;\n\ttext-align: left;\n}\n.search-no-results {\n\tpadding: var(--spacing-xl);\n\ttext-align: center;\n\tcolor: var(--text-light);\n}\n.search-no-results p {\n\tmargin: 0;\n\tfont-size: 0.9em;\n}\n\n/* Contact Modal */\n#contact-modal {\n\tdisplay: none;\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\twidth: 100%;\n\theight: 100%;\n\tbackground-color: rgba(0, 0, 0, 0.8);\n\tz-index: 10000;\n\toverflow-y: auto;\n\tpadding: 2rem 1rem;\n}\n#contact-modal.show {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n}\n#contact-modal.closing {\n\tanimation: fadeOut 0.2s ease-in-out forwards;\n}\n.contact-modal-content {\n\tbackground-color: var(--background-color);\n\tborder: 2px solid var(--border-color);\n\tborder-radius: 8px;\n\tpadding: 1.5rem;\n\tmax-width: 450px;\n\twidth: 100%;\n\tposition: relative;\n\tbox-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);\n\topacity: 0;\n\ttransform: scale(0.95);\n\tanimation: scaleFadeIn 0.25s ease-out forwards;\n}\n.contact-modal-header {\n\tdisplay: flex;\n\tjustify-content: space-between;\n\talign-items: center;\n\tmargin-bottom: 1rem;\n}\n.contact-modal-header h2 {\n\tmargin: 0;\n\tcolor: var(--accent);\n\tfont-size: 1.25rem;\n}\n.contact-modal-close {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--text-light);\n\tfont-size: 1.5rem;\n\tcursor: pointer;\n\tpadding: 0;\n\twidth: 32px;\n\theight: 32px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tborder-radius: 4px;\n\ttransition: all 0.2s ease;\n}\n.contact-modal-close:hover {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n}\n.contact-form .form-group {\n\tmargin-bottom: 0.75rem;\n}\n.contact-form label {\n\tdisplay: block;\n\tmargin-bottom: 0.25rem;\n\tcolor: var(--font-color);\n\tfont-weight: 600;\n\tfont-size: 0.9rem;\n\ttext-align: left;\n}\n.contact-form input, .contact-form textarea {\n\twidth: 100%;\n\tpadding: 0.6rem;\n\tbackground-color: var(--hover-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: 4px;\n\tcolor: var(--font-color);\n\tfont-family: inherit;\n\tfont-size: 0.95rem;\n\ttransition: border-color 0.2s ease;\n}\n.contact-form input:focus, .contact-form textarea:focus {\n\toutline: none;\n\tborder-color: var(--accent);\n}\n.contact-form input.error, .contact-form textarea.error {\n\tborder-color: #ef4444;\n}\n.contact-form textarea {\n\tresize: vertical;\n\tmin-height: 100px;\n}\n.form-status {\n\tpadding: 0.6rem;\n\tborder-radius: 4px;\n\tmargin-bottom: 0.25rem;\n\ttext-align: center;\n\tfont-size: 0.9rem;\n\tdisplay: none;\n}\n.form-status.success, .form-status.error {\n\tdisplay: block;\n}\n.form-status.success {\n\tbackground-color: rgba(16, 185, 129, 0.1);\n\tborder: 1px solid var(--accent);\n\tcolor: var(--accent);\n}\n.form-status.error {\n\tbackground-color: rgba(239, 68, 68, 0.1);\n\tborder: 1px solid #ef4444;\n\tcolor: #ef4444;\n}\n.contact-form .btn {\n\twidth: 100%;\n\tpadding: 12px 24px;\n\tmargin-top: 0.75rem;\n\tbackground-color: var(--hover-color);\n\tborder: 2px solid var(--accent);\n\tborder-radius: 8px;\n\tcolor: var(--font-color);\n\tfont-weight: 600;\n\tfont-size: 1em;\n\tcursor: pointer;\n\ttransition: all var(--transition-normal);\n}\n.contact-form .btn:hover:not(:disabled) {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\tcolor: var(--accent);\n\ttransform: translateY(-2px);\n\tbox-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);\n}\n.contact-form .btn:disabled {\n\topacity: 0.5;\n\tcursor: not-allowed;\n\ttransform: none;\n}\n\n@keyframes scaleFadeIn {\n\tfrom { opacity: 0; transform: scale(0.95); }\n\tto { opacity: 1; transform: scale(1); }\n}\n@keyframes scaleFadeOut {\n\tfrom { opacity: 1; transform: scale(1); }\n\tto { opacity: 0; transform: scale(0.95); }\n}\n@keyframes slideDown {\n\tfrom { transform: translateY(-100%); opacity: 0; }\n\tto { transform: translateY(0); opacity: 1; }\n}\n\n/* Footer */\nfooter {\n\tmargin-top: auto;\n\tmargin-bottom: 0;\n\tpadding: 1rem 0;\n\tbackground-color: transparent;\n\tflex-shrink: 0;\n\tmax-width: 1000px;\n\tmargin-inline: auto;\n\ttext-align: center;\n\tcolor: var(--text-light);\n\tfont-size: 0.9em;\n}\n";
+  return "\n/* Fonts */\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 400;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-400-normal.woff2\") format(\"woff2\");\n}\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 600;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-600-normal.woff2\") format(\"woff2\");\n}\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 700;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-700-normal.woff2\") format(\"woff2\");\n}\n\n.icon {\n\tdisplay: inline-block;\n\tvertical-align: middle;\n\ttransition: transform var(--transition-fast);\n}\n.icon:hover {\n\ttransform: rotate(5deg) scale(1.1);\n}\n\n/* CSS Custom Properties */\n:root {\n\t--accent: #10B981;\n\t--background-color: #0D1117;\n\t--header-color: #111827;\n\t--hover-color: #1A2332;\n\t--border-color: #21262D;\n\t--font-color: #E6EDF3;\n\t--text-light: #7D8590;\n\t--error-color: #ff6b6b;\n\t--border-width: 2px;\n\t--border-radius: 4px;\n\t--border-radius-large: 8px;\n\t--spacing-xs: 4px;\n\t--spacing-sm: 8px;\n\t--spacing-md: 15px;\n\t--spacing-lg: 24px;\n\t--spacing-xl: 2rem;\n\t--font-family-primary: Raleway, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n\t--font-family-mono: Consolas, Monaco, \"Andale Mono\", \"Ubuntu Mono\", monospace;\n\t--font-size-base: 16px;\n\t--font-size-sm: 0.9em;\n\t--font-size-lg: 1.1em;\n\t--theme-transition-duration: 0.25s;\n\t--theme-transition-timing: ease-in-out;\n\t--line-height-base: 1.6;\n\t--transition-fast: 0.2s ease;\n\t--transition-normal: 0.3s ease;\n\t--z-navbar: 1030;\n\t--z-dropdown: 1000;\n}\n\n/* Reset & Base Styles */\nhtml {\n\theight: 100%;\n\toverflow-x: hidden;\n\toverflow-y: scroll;\n\tscroll-behavior: smooth;\n}\nhtml::after {\n\tcontent: \"\";\n\tdisplay: block;\n\theight: 101vh;\n\twidth: 1px;\n\tposition: absolute;\n\ttop: 0;\n\tleft: -1px;\n\tpointer-events: none;\n\tvisibility: hidden;\n}\n\n/* Prevent outer scrollbar when contact modal is open */\nhtml.modal-open,\nbody.modal-open,\nhtml:has(#contact-modal.show),\nbody:has(#contact-modal.show) {\n\toverflow: hidden !important;\n}\n\nhtml.modal-open::after,\nhtml:has(#contact-modal.show)::after {\n\tdisplay: none !important;\n}\n\n*, *::before, *::after {\n\tbox-sizing: border-box;\n}\n\n/* Theme color transitions on elements that change */\nbody, main, nav.navbar, footer, .navbar-inner, .dropdown-menu, .blog-post-card, .search-page-header, .contact-modal-content {\n\ttransition: background-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tcolor var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tborder-color var(--theme-transition-duration) var(--theme-transition-timing);\n}\n\na, button, input, textarea, select, .nav-link, .dropdown-item {\n\ttransition: background-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tcolor var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tborder-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\topacity var(--transition-fast),\n\t\ttransform var(--transition-fast);\n}\n\nbody {\n\tmin-height: 100vh;\n\tmargin: 0;\n\tpadding-top: 56px;\n\tdisplay: flex;\n\ttext-align: center;\n\tflex-direction: column;\n\tfont-family: var(--font-family-primary);\n\tfont-size: var(--font-size-base);\n\tbackground-color: var(--background-color);\n\tcolor: var(--font-color);\n\tline-height: var(--line-height-base);\n\t-webkit-font-smoothing: antialiased;\n\t-moz-osx-font-smoothing: grayscale;\n\ttext-rendering: optimizeLegibility;\n\toverflow-x: hidden;\n\twidth: 100%;\n}\n\n#app, .app-root {\n\tdisplay: flex;\n\tflex-direction: column;\n\tmin-height: calc(100vh - 56px);\n\tflex: 1 0 auto;\n}\n\nmain {\n\tmargin: 0 auto;\n\tpadding: var(--spacing-lg);\n\tflex: 1 0 auto;\n\tmax-width: 900px;\n\twidth: 100%;\n\tbackground-color: var(--background-color);\n\tcolor: var(--font-color);\n\tanimation: fadeIn 0.2s ease-in-out;\n}\nmain:focus {\n\toutline: none;\n}\n\n/* Page transition animations */\n@keyframes fadeIn {\n\tfrom {\n\t\topacity: 0;\n\t\ttransform: translateY(10px);\n\t}\n\tto {\n\t\topacity: 1;\n\t\ttransform: translateY(0);\n\t}\n}\n\nmain.page-transition-out {\n\tanimation: fadeOut 0.2s ease-in-out forwards;\n}\n\n@keyframes fadeOut {\n\tfrom {\n\t\topacity: 1;\n\t\ttransform: translateY(0);\n\t}\n\tto {\n\t\topacity: 0;\n\t\ttransform: translateY(-10px);\n\t}\n}\n\nimg {\n\tmax-width: 100%;\n}\n\na {\n\tcolor: var(--accent);\n}\na.icon:hover {\n\ttext-decoration: none;\n}\n\n/* Tags */\n.item-tag {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n\tpadding: var(--spacing-xs) var(--spacing-sm);\n\tborder-radius: var(--border-radius);\n\tfont-size: var(--font-size-sm);\n\tdisplay: inline-block;\n\tmargin: 2px;\n}\n.clickable-tag {\n\tcursor: pointer;\n\ttransition: all var(--transition-fast);\n}\n.clickable-tag:hover {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n\ttransform: translateY(-1px);\n\tbox-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);\n}\n\n/* About Page */\n.about-pic {\n\twidth: 15vh;\n\theight: 15vh;\n\tborder-radius: 50%;\n\tmargin-bottom: 20px;\n\tobject-fit: cover;\n\ttransition: transform var(--transition-normal);\n}\n.about-pic:hover {\n\ttransform: scale(1.05);\n}\n\n@keyframes imageLoad {\n\tfrom { opacity: 0; transform: scale(0.95); }\n\tto { opacity: 1; transform: scale(1); }\n}\n\n/* Shared Loading & Error styles */\n.loading-spinner {\n\ttext-align: center;\n\tpadding: 2rem;\n\tcolor: var(--accent);\n\tfont-size: 1.2em;\n\tanimation: pulse 1.5s ease-in-out infinite;\n}\n@keyframes pulse {\n\t0%, 100% { opacity: 1; }\n\t50% { opacity: 0.5; }\n}\n\n.error-message {\n\ttext-align: center;\n\tpadding: 2rem;\n\tmax-width: 600px;\n\tmargin: 0 auto;\n}\n.error-message h1 {\n\tcolor: #ff6b6b;\n\tmargin-bottom: 1rem;\n\tfont-size: 2em;\n}\n.error-message p {\n\tcolor: var(--text-light);\n\tfont-size: 1.1em;\n}\n\n/* Accessibility */\nbutton:focus, a:focus, input:focus, select:focus, textarea:focus {\n\toutline: 2px solid var(--accent);\n\toutline-offset: 2px;\n}\n*:focus:not(:focus-visible) {\n\toutline: none;\n}\n\n/* Navbar */\nnav.navbar {\n\tbackground-color: var(--header-color);\n\tborder-bottom: var(--border-width) solid var(--accent);\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\tz-index: var(--z-navbar);\n\tfont-family: var(--font-family-primary);\n}\nnav.navbar .navbar-inner {\n\tmax-width: 1000px;\n\tmargin-inline: auto;\n\tpadding: 0 15px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: space-between;\n}\nnav.navbar .navbar-brand {\n\tcolor: var(--font-color);\n\tfont-weight: bold;\n\ttext-decoration: none;\n\tfont-size: 1.25em;\n\tdisplay: none;\n\tpadding: 11px 0;\n}\nnav.navbar .navbar-collapse {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: space-between;\n\twidth: 100%;\n}\nnav.navbar .navbar-nav {\n\tdisplay: flex;\n\tlist-style: none;\n\tmargin: 0;\n\tpadding: 0;\n\talign-items: stretch;\n}\nnav.navbar .navbar-nav.left {\n\tmargin-right: auto;\n}\nnav.navbar .navbar-nav.right {\n\tmargin-left: auto;\n}\nnav.navbar .nav-item {\n\tposition: relative;\n\tdisplay: flex;\n\talign-items: stretch;\n}\nbutton.nav-link {\n\tbackground: none;\n\tborder: none;\n\tcursor: pointer;\n\tfont-family: inherit;\n\tfont-size: inherit;\n\twidth: auto;\n\ttransition: transform 0.1s ease, background-color var(--transition-fast), color var(--transition-fast);\n}\nbutton.nav-link:active {\n\ttransform: scale(0.95);\n}\n.nav-link {\n\tdisplay: flex;\n\talign-items: center;\n\tpadding: 11px 20px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tline-height: 1.2;\n\tfont-size: 1.25em;\n\tfont-weight: 700;\n\ttransition: background-color var(--transition-fast),\n\t\t\t\tcolor var(--transition-fast),\n\t\t\t\tborder-color var(--transition-fast),\n\t\t\t\topacity var(--transition-fast),\n\t\t\t\ttransform var(--transition-fast);\n}\n.navbar-menu .nav-link, .navbar-icon .nav-link {\n\tfont-size: 1.35rem;\n}\n.navbar-menu .nav-link {\n\tfont-weight: 700;\n}\n.navbar-icon .nav-link svg {\n\ttransition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),\n\t\t\t\trotate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);\n\ttransform-origin: center;\n}\n.navbar-icon .nav-link:hover svg, .navbar-icon .nav-link:focus svg {\n\ttransform: rotate(8deg) scale(1.25);\n}\n.navbar-icon .nav-link:active svg {\n\ttransform: rotate(4deg) scale(1.1);\n}\n.nav-link:hover, .nav-link:focus, .nav-link:active {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.nav-link.active {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.nav-link:focus:not(.active) {\n\toutline: 2px solid var(--accent);\n\toutline-offset: -2px;\n}\n.nav-link:focus:not(:focus-visible):not(.active) {\n\tbackground-color: transparent;\n\tcolor: var(--font-color);\n\toutline: none;\n}\n.nav-link.active:focus {\n\toutline: none;\n}\n.nav-link:focus:not(:focus-visible):hover {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n}\n\n@media (min-width: 768px) {\n\tnav.navbar .navbar-inner {\n\t\tpadding-left: 20px;\n\t\tpadding-right: 20px;\n\t}\n}\n\n.navbar-toggle {\n\tdisplay: none;\n\tbackground: transparent;\n\tborder: none;\n\tcolor: var(--font-color);\n\tfont-size: 1.5em;\n\tcursor: pointer;\n\tpadding: 11px 0.5rem;\n\ttransition: transform var(--transition-fast);\n\toverflow: visible;\n}\n.navbar-toggle:focus {\n\toutline: 2px solid var(--accent);\n\toutline-offset: 2px;\n}\n.navbar-toggle:focus:not(:focus-visible) {\n\toutline: none;\n}\n.navbar-toggle:active {\n\ttransform: scale(0.9);\n}\n.navbar-toggle-icon {\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: relative;\n\ttransition: background-color var(--transition-normal);\n\tz-index: 1;\n}\n.navbar-toggle-icon::before {\n\tcontent: '';\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: absolute;\n\tleft: 0;\n\ttop: -8px;\n\ttransition: all var(--transition-normal);\n}\n.navbar-toggle-icon::after {\n\tcontent: '';\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: absolute;\n\tleft: 0;\n\tbottom: -8px;\n\ttransition: all var(--transition-normal);\n}\n.navbar-toggle.active .navbar-toggle-icon {\n\tbackground-color: transparent;\n}\n.navbar-toggle.active .navbar-toggle-icon::before {\n\ttransform: rotate(45deg);\n\ttop: 0;\n}\n.navbar-toggle.active .navbar-toggle-icon::after {\n\ttransform: rotate(-45deg);\n\tbottom: 0;\n}\n\n/* Dropdown */\n.dropdown {\n\tposition: relative;\n}\n.dropdown-toggle {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.3rem;\n}\n.dropdown-chevron {\n\tdisplay: inline-flex;\n\talign-items: center;\n\ttransition: transform var(--transition-fast);\n\ttransform-origin: center;\n}\n.dropdown-chevron svg {\n\twidth: 0.8em;\n\theight: 0.8em;\n}\n.dropdown-chevron-down {\n\tdisplay: inline-flex;\n}\n.dropdown-chevron-up {\n\tdisplay: none;\n}\n.dropdown.show .dropdown-chevron-down {\n\tdisplay: none;\n}\n.dropdown.show .dropdown-chevron-up {\n\tdisplay: inline-flex;\n}\n.dropdown-menu {\n\tposition: absolute;\n\ttop: 100%;\n\tleft: 0;\n\tmin-width: 200px;\n\tbackground-color: var(--header-color);\n\tborder: var(--border-width) solid var(--accent);\n\tpadding: 0;\n\tmargin: 0;\n\tlist-style: none;\n\tz-index: var(--z-dropdown);\n\tbox-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);\n\topacity: 0;\n\tvisibility: hidden;\n\ttransform: translateY(-5px);\n\ttransition: all 0.2s ease;\n}\n.dropdown.show .dropdown-menu {\n\topacity: 1;\n\tvisibility: visible;\n\ttransform: translateY(0);\n}\n.dropdown-item {\n\tdisplay: block;\n\tpadding: 10px 20px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tfont-size: 16px;\n\tfont-weight: bold;\n\tbackground-color: var(--header-color);\n\ttransition: all var(--transition-fast);\n\tborder: none;\n\twidth: 100%;\n\ttext-align: left;\n\twhite-space: nowrap;\n}\n.dropdown-item:hover, .dropdown-item:focus, .dropdown-item:active, .dropdown-item.active {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n}\n.dropdown-item.active:focus {\n\toutline: none;\n}\n\n/* Theme Toggle */\n.theme-toggle {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--font-color);\n\tcursor: pointer;\n\tpadding: 11px 20px;\n\tdisplay: flex;\n\talign-items: center;\n\tfont-size: 1.35rem;\n\ttransition: color var(--transition-fast), background-color var(--transition-fast);\n}\n.theme-toggle:hover, .theme-toggle:focus {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.theme-toggle:hover svg, .theme-toggle:focus svg {\n\ttransform: rotate(8deg) scale(1.25);\n}\n.theme-toggle:active {\n\tcolor: var(--accent);\n}\n.theme-toggle:active svg {\n\ttransform: rotate(4deg) scale(1.1);\n}\n.theme-toggle svg {\n\ttransition: opacity var(--theme-transition-duration) var(--theme-transition-timing),\n\t\t\t\ttransform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),\n\t\t\t\tfill var(--transition-fast);\n\tfill: currentColor;\n}\n:root[data-theme=\"dark\"] .theme-toggle .icon-sun {\n\tdisplay: inline-block;\n\topacity: 1;\n}\n:root[data-theme=\"dark\"] .theme-toggle .icon-moon {\n\tdisplay: none;\n\topacity: 0;\n}\n:root[data-theme=\"light\"] .theme-toggle .icon-sun {\n\tdisplay: none;\n\topacity: 0;\n}\n:root[data-theme=\"light\"] .theme-toggle .icon-moon {\n\tdisplay: inline-block;\n\topacity: 1;\n}\n\n/* Mobile navbar */\n@media (max-width: 767px) {\n\tnav.navbar .navbar-brand {\n\t\tdisplay: block;\n\t}\n\t.navbar-toggle {\n\t\tdisplay: block;\n\t}\n\tnav.navbar .navbar-collapse {\n\t\tposition: absolute;\n\t\ttop: 100%;\n\t\tleft: 0;\n\t\tright: 0;\n\t\tbackground-color: var(--header-color);\n\t\tborder-bottom: var(--border-width) solid var(--accent);\n\t\tflex-direction: column;\n\t\talign-items: stretch;\n\t\tmax-height: 0;\n\t\toverflow: hidden;\n\t\ttransition: max-height 0.25s ease-in;\n\t}\n\tnav.navbar .navbar-collapse.show {\n\t\tmax-height: 800px;\n\t\toverflow-y: auto;\n\t\toverflow-x: hidden;\n\t\ttransition: max-height 0.8s ease-out;\n\t}\n\tnav.navbar .navbar-nav {\n\t\tflex-direction: column;\n\t\twidth: 100%;\n\t\tmax-width: 100%;\n\t\toverflow-x: hidden;\n\t}\n\tnav.navbar .navbar-nav.left, nav.navbar .navbar-nav.right {\n\t\tmargin: 0;\n\t}\n\tnav.navbar .navbar-nav.right {\n\t\tflex-direction: row;\n\t\tjustify-content: center;\n\t\tpadding: 10px 0;\n\t\tmargin-top: 10px;\n\t}\n\tnav.navbar .navbar-nav.right .nav-item {\n\t\tdisplay: inline-flex;\n\t}\n\tnav.navbar .navbar-nav.right .nav-link {\n\t\tpadding: 10px 15px;\n\t\theight: auto;\n\t}\n\tnav.navbar .navbar-nav.left .nav-item {\n\t\twidth: 100%;\n\t\theight: auto;\n\t\toverflow: hidden;\n\t}\n\tnav.navbar .navbar-nav.left .nav-link {\n\t\theight: auto;\n\t\tpadding: 12px 20px;\n\t\twidth: 100%;\n\t\tjustify-content: flex-start;\n\t}\n\t.dropdown {\n\t\tdisplay: flex;\n\t\tflex-direction: column;\n\t\twidth: 100%;\n\t}\n\t.dropdown-menu {\n\t\tposition: static;\n\t\tborder: none;\n\t\tbox-shadow: none;\n\t\twidth: 100%;\n\t\tdisplay: flex;\n\t\tflex-direction: column;\n\t\tmax-height: 0;\n\t\toverflow: hidden;\n\t\ttransition: max-height 0.4s ease-out;\n\t\torder: 2;\n\t}\n\t.dropdown-toggle {\n\t\torder: 1;\n\t\twidth: 100%;\n\t}\n\t.dropdown.show .dropdown-menu {\n\t\tmax-height: 500px;\n\t\ttransition: max-height 0.5s ease-out;\n\t}\n\t.dropdown-item {\n\t\tpadding-left: 40px;\n\t\twidth: 100%;\n\t\ttext-align: left;\n\t\twhite-space: normal;\n\t\tword-wrap: break-word;\n\t}\n}\n\n/* Blog List */\n.blog-container {\n\tmax-width: 900px;\n\tmargin: 0 auto;\n\ttext-align: left;\n}\n.blog-page-title {\n\tcolor: var(--accent);\n\tfont-size: 2em;\n\tmargin-bottom: 1.5rem;\n\ttext-align: center;\n}\n.blog-empty {\n\ttext-align: center;\n\tcolor: var(--text-light);\n\tfont-size: 1.1em;\n\tpadding: 2rem 0;\n}\n.blog-posts {\n\tdisplay: flex;\n\tflex-direction: column;\n\tgap: 1.5rem;\n\tmargin-bottom: 2rem;\n}\n.blog-post-card {\n\tpadding: 1.5rem;\n\tbackground-color: rgba(255, 255, 255, 0.02);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius-large);\n\ttransition: all var(--transition-normal);\n\tcursor: pointer;\n}\n.blog-post-card:hover {\n\tbackground-color: rgba(255, 255, 255, 0.05);\n\tborder-color: var(--accent);\n\ttransform: translateY(-4px) scale(1.01);\n\tbox-shadow: 0 8px 25px rgba(66, 155, 238, 0.15);\n}\n.blog-post-title {\n\tmargin: 0 0 0.35rem 0;\n\tfont-size: 1.35em;\n\tfont-weight: bold;\n\tline-height: 1.3;\n}\n.blog-post-title a {\n\tcolor: var(--accent);\n\ttext-decoration: none;\n\ttransition: color var(--transition-fast);\n}\n.blog-post-title a:hover {\n\tcolor: var(--font-color);\n}\n.blog-post-meta {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\talign-items: center;\n\tgap: 0.75rem;\n\tmargin-bottom: 0.75rem;\n\tfont-size: 1em;\n\tcolor: var(--text-light);\n}\n.blog-post-date {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.4rem;\n}\n.blog-post-tags {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\tgap: 0.4rem;\n}\n.blog-post-excerpt {\n\tcolor: var(--text-light);\n\tline-height: 1.5;\n\tmargin-bottom: 0;\n\tfont-size: 1.05em;\n}\n.blog-post-card mark {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n\tpadding: 1px 3px;\n\tborder-radius: 2px;\n\tfont-weight: bold;\n}\n\n.blog-pagination {\n\tmargin: 2rem 0;\n\tdisplay: flex;\n\tjustify-content: center;\n}\n.blog-pagination .pagination {\n\tdisplay: flex;\n\tgap: 0.5rem;\n\tlist-style: none;\n\tpadding: 0;\n\tmargin: 0;\n}\n.blog-pagination .page-item {\n\tdisplay: flex;\n}\n.blog-pagination .page-link {\n\tdisplay: inline-flex;\n\talign-items: center;\n\tjustify-content: center;\n\tpadding: 0.5rem 0.75rem;\n\tbackground-color: rgba(255, 255, 255, 0.02);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius);\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\ttransition: all var(--transition-fast);\n\tcursor: pointer;\n\tmin-width: 40px;\n\theight: 38px;\n\tbox-sizing: border-box;\n\ttext-align: center;\n}\n.blog-pagination .page-link svg {\n\tdisplay: inline-block;\n\tvertical-align: middle;\n}\n.blog-pagination .page-link:hover {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\tcolor: var(--accent);\n}\n.blog-pagination .page-item.active .page-link {\n\tbackground-color: var(--accent);\n\tborder-color: var(--accent);\n\tcolor: var(--background-color);\n\tfont-weight: bold;\n}\n.blog-pagination .page-item.disabled .page-link {\n\topacity: 0.5;\n\tcursor: not-allowed;\n\tpointer-events: none;\n}\n\n@media (max-width: 767px) {\n\t.blog-post-card {\n\t\tpadding: 1rem;\n\t\tmargin: 0.25rem;\n\t\ttext-align: center;\n\t}\n\t.blog-posts {\n\t\tgap: 0.5rem;\n\t}\n\t.blog-post-title {\n\t\tfont-size: 1.25em;\n\t}\n\t.blog-post-meta {\n\t\tflex-direction: column;\n\t\talign-items: center;\n\t\tgap: 0.5rem;\n\t\tfont-size: 0.95em;\n\t\tjustify-content: center;\n\t}\n\t.blog-post-excerpt {\n\t\tfont-size: 1em;\n\t}\n\t.blog-pagination .page-link {\n\t\tpadding: 0.4rem 0.6rem;\n\t\tfont-size: 0.9em;\n\t\tmin-width: 35px;\n\t\theight: 35px;\n\t}\n}\n\n/* Projects */\n.project-title {\n\tcolor: var(--accent);\n\tfont-size: 1.5em;\n\tmargin: 0 0 0.02em 0;\n\tfont-weight: bold;\n}\n.project-description {\n\tmargin: 0 0 0.5em 0;\n\tcolor: var(--text-light);\n\tfont-size: 1.2em;\n\tline-height: 1.6;\n}\n.project-tags {\n\tmargin: 0.8em 0;\n\tfont-size: 1.1em;\n}\n.youtube-video {\n\tmargin: 20px 0;\n}\n.iframeWrapper {\n\tposition: relative;\n\tpadding-bottom: 56.25%;\n\tpadding-top: 25px;\n\theight: 0;\n}\n.iframeWrapper iframe {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\twidth: 100%;\n\theight: 100%;\n\tmax-width: 100%;\n\toverflow: hidden;\n}\n.demo-iframe-wrapper {\n\twidth: 100%;\n\tmargin: 20px 0;\n}\n.demo-iframe-wrapper iframe {\n\twidth: 100%;\n\theight: 700px;\n\tmax-width: 100%;\n\tborder: none;\n\toverflow: hidden;\n}\n.download-buttons {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\tgap: 15px;\n\tmargin: 1.5em 0;\n\tjustify-content: flex-start;\n}\n.download-btn {\n\tdisplay: inline-flex;\n\talign-items: center;\n\tjustify-content: center;\n\tgap: 8px;\n\tpadding: 12px 24px;\n\tbackground-color: var(--hover-color);\n\tborder: 2px solid var(--accent);\n\tborder-radius: 8px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tfont: 600 1em var(--font-family-primary);\n\ttransition: all var(--transition-normal);\n\tcursor: pointer;\n\tappearance: none;\n}\n.download-btn:hover, .download-btn:focus {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\ttransform: translateY(-2px);\n\tbox-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);\n\tcolor: var(--accent);\n\ttext-decoration: none;\n}\n.download-btn:active {\n\ttransform: translateY(0) scale(0.95);\n\ttext-decoration: none;\n}\n\n/* Markdown */\n.markdown-body {\n\tfont-family: var(--font-family-primary);\n\tfont-size: 1em;\n\tline-height: 1.6;\n\tcolor: var(--text-light);\n\ttext-align: left;\n}\n.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {\n\tcolor: var(--font-color);\n\tmargin: 1em 0 0.5em;\n\tfont-weight: bold;\n\tline-height: 1.25;\n}\n.markdown-body h1 {\n\tfont-size: 1.8em;\n\tmargin-top: 0;\n}\n.markdown-body h2 {\n\tfont-size: 1.4em;\n}\n.markdown-body h3 {\n\tfont-size: 1.2em;\n}\n.markdown-body p, .markdown-body li {\n\tmargin: 0.5em 0;\n\tline-height: 1.6;\n\tfont-size: 1.1em;\n\tcolor: var(--text-light);\n}\n.markdown-body ul, .markdown-body ol {\n\tmargin: 0.5em 0;\n\tpadding-left: 2em;\n}\n.markdown-body code:not([class*=\"language-\"]) {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n\tpadding: 2px 6px;\n\tborder-radius: 3px;\n\tfont-family: var(--font-family-mono);\n\tfont-size: 0.9em;\n}\n.markdown-body pre:not([class*=\"language-\"]) {\n\tbackground-color: var(--hover-color);\n\tpadding: 0.5em;\n\tborder-radius: 3px;\n\toverflow-x: auto;\n\tmargin: 0.5em 0;\n\tborder: 1px solid var(--border-color);\n\tfont-family: var(--font-family-mono);\n\tline-height: 1.4;\n}\n.markdown-body pre[class*=\"language-\"] {\n\tmargin: 0.5em 0;\n\toverflow-x: auto;\n\tfont-family: var(--font-family-mono);\n\tline-height: 1.4;\n\tposition: relative;\n}\n.markdown-body a {\n\tcolor: var(--accent);\n\ttext-decoration: none;\n\tdisplay: inline-block;\n\ttransition: transform var(--transition-fast);\n}\n.markdown-body a:hover {\n\ttext-decoration: none;\n\ttransform: translateY(-2px);\n}\n.markdown-body blockquote {\n\tborder-left: 4px solid var(--accent);\n\tpadding-left: 1em;\n\tmargin: 0.5em 0;\n\tfont-style: italic;\n}\n.markdown-body table {\n\twidth: 100%;\n\tborder-collapse: collapse;\n\tmargin: 0.5em 0;\n}\n.markdown-body th, .markdown-body td {\n\tborder: 1px solid var(--border-color);\n\tpadding: 0.5em 1em;\n\ttext-align: left;\n}\n.markdown-body th {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n\tfont-weight: bold;\n}\n.markdown-body hr {\n\tborder: none;\n\tborder-top: 1px solid var(--border-color);\n\tmargin: 0.5em 0;\n}\n\n/* Copy Code Button */\n.copy-code-button {\n\tposition: absolute;\n\ttop: 0.5em;\n\tright: 0.5em;\n\tpadding: 0.4em 0.8em;\n\tfont-size: 0.85em;\n\tfont-family: var(--font-family-primary);\n\tfont-weight: 700;\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius);\n\tcursor: pointer;\n\topacity: 0;\n\ttransition: opacity var(--transition-fast), background-color var(--transition-fast);\n\tz-index: 10;\n}\npre:hover .copy-code-button {\n\topacity: 1;\n}\n.copy-code-button:hover {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n}\n.copy-code-button:active {\n\ttransform: scale(0.95);\n}\n.copy-code-button.copied {\n\tbackground-color: #10b981;\n\tcolor: white;\n\topacity: 1;\n}\n\n/* Giscus comments */\n.giscus-container {\n\tmax-width: 900px;\n\tmargin: 3rem auto;\n\tpadding: 2rem 1rem;\n\tborder-top: 2px solid var(--border-color);\n}\n.giscus-container iframe {\n\tcolor-scheme: dark;\n}\n\n/* Search Page / Overlay */\n#search-page {\n\tdisplay: none;\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\tbottom: 0;\n\tbackground-color: var(--background-color);\n\tz-index: 2000;\n\tflex-direction: column;\n\toverflow: hidden;\n\topacity: 0;\n\ttransform: scale(0.95);\n\tanimation: scaleFadeIn 0.25s ease-out forwards;\n}\n#search-page.show {\n\tdisplay: flex;\n}\n#search-page.closing {\n\tanimation: scaleFadeOut 0.2s ease-in forwards;\n}\n.search-page-header {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\theight: 56px;\n\tpadding: 0 1rem;\n\tbackground-color: var(--header-color);\n\tborder-bottom: var(--border-width) solid var(--accent);\n\tanimation: slideDown var(--transition-normal) ease-out;\n}\n.search-page-header-content {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.75rem;\n\twidth: 100%;\n\tmax-width: 900px;\n}\n.search-page-back {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--font-color);\n\tcursor: pointer;\n\tpadding: 0.5rem;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tfont-size: 1.2em;\n\ttransition: color var(--transition-fast);\n}\n.search-page-back:hover {\n\tcolor: var(--accent);\n}\n.search-page-input-wrapper {\n\tflex: 1;\n\tposition: relative;\n\tdisplay: flex;\n\talign-items: center;\n}\n.search-page-input {\n\twidth: 100%;\n\tpadding: 0.5rem 2.5rem 0.5rem 1rem;\n\tbackground-color: var(--hover-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: 20px;\n\tcolor: var(--font-color);\n\tfont-size: 1em;\n}\n.search-page-input::-webkit-search-cancel-button {\n\t-webkit-appearance: none;\n\tappearance: none;\n}\n.search-page-input:focus {\n\toutline: none;\n\tborder-color: var(--accent);\n\tbackground-color: var(--background-color);\n\tbox-shadow: 0 0 0 3px rgba(66, 155, 238, 0.1);\n}\n.search-page-clear {\n\tposition: absolute;\n\tright: 0.5rem;\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--text-light);\n\tcursor: pointer;\n\tpadding: 0.25rem 0.5rem;\n\tdisplay: none;\n\ttransition: color var(--transition-fast);\n}\n.search-page-clear:hover {\n\tcolor: var(--accent);\n}\n.search-page-clear.show {\n\tdisplay: block;\n}\n.search-page-content {\n\tflex: 1;\n\toverflow-y: auto;\n\tpadding: 1rem;\n\tdisplay: flex;\n\tjustify-content: center;\n\tanimation: fadeIn 0.4s ease-out 0.1s both;\n}\n.search-page-results {\n\tdisplay: flex;\n\tflex-direction: column;\n\tgap: 1.5rem;\n\twidth: 100%;\n\tmax-width: 900px;\n\ttext-align: left;\n}\n.search-no-results {\n\tpadding: var(--spacing-xl);\n\ttext-align: center;\n\tcolor: var(--text-light);\n}\n.search-no-results p {\n\tmargin: 0;\n\tfont-size: 0.9em;\n}\n\n/* Contact Modal */\n#contact-modal {\n\tdisplay: none;\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\twidth: 100%;\n\theight: 100%;\n\tbackground-color: rgba(0, 0, 0, 0.8);\n\tz-index: 10000;\n\toverflow-y: auto;\n\tpadding: 2rem 1rem;\n}\n#contact-modal.show {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n}\n#contact-modal.closing {\n\tanimation: fadeOut 0.2s ease-in-out forwards;\n}\n.contact-modal-content {\n\tbackground-color: var(--background-color);\n\tborder: 2px solid var(--border-color);\n\tborder-radius: 8px;\n\tpadding: 1.5rem;\n\tmax-width: 450px;\n\twidth: 100%;\n\tposition: relative;\n\tbox-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);\n\topacity: 0;\n\ttransform: scale(0.95);\n\tanimation: scaleFadeIn 0.25s ease-out forwards;\n}\n.contact-modal-header {\n\tdisplay: flex;\n\tjustify-content: space-between;\n\talign-items: center;\n\tmargin-bottom: 1rem;\n}\n.contact-modal-header h2 {\n\tmargin: 0;\n\tcolor: var(--accent);\n\tfont-size: 1.25rem;\n}\n.contact-modal-close {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--text-light);\n\tfont-size: 1.5rem;\n\tcursor: pointer;\n\tpadding: 0;\n\twidth: 32px;\n\theight: 32px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tborder-radius: 4px;\n\ttransition: all 0.2s ease;\n}\n.contact-modal-close:hover {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n}\n.contact-form .form-group {\n\tmargin-bottom: 0.75rem;\n}\n.contact-form label {\n\tdisplay: block;\n\tmargin-bottom: 0.25rem;\n\tcolor: var(--font-color);\n\tfont-weight: 600;\n\tfont-size: 0.9rem;\n\ttext-align: left;\n}\n.contact-form input, .contact-form textarea {\n\twidth: 100%;\n\tpadding: 0.6rem;\n\tbackground-color: var(--hover-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: 4px;\n\tcolor: var(--font-color);\n\tfont-family: inherit;\n\tfont-size: 0.95rem;\n\ttransition: border-color 0.2s ease;\n}\n.contact-form input:focus, .contact-form textarea:focus {\n\toutline: none;\n\tborder-color: var(--accent);\n}\n.contact-form input.error, .contact-form textarea.error {\n\tborder-color: #ef4444;\n}\n.contact-form textarea {\n\tresize: vertical;\n\tmin-height: 100px;\n}\n.form-status {\n\tpadding: 0.6rem;\n\tborder-radius: 4px;\n\tmargin-bottom: 0.25rem;\n\ttext-align: center;\n\tfont-size: 0.9rem;\n\tdisplay: none;\n}\n.form-status.success, .form-status.error {\n\tdisplay: block;\n}\n.form-status.success {\n\tbackground-color: rgba(16, 185, 129, 0.1);\n\tborder: 1px solid var(--accent);\n\tcolor: var(--accent);\n}\n.form-status.error {\n\tbackground-color: rgba(239, 68, 68, 0.1);\n\tborder: 1px solid #ef4444;\n\tcolor: #ef4444;\n}\n.contact-form .btn {\n\twidth: 100%;\n\tpadding: 12px 24px;\n\tmargin-top: 0.75rem;\n\tbackground-color: var(--hover-color);\n\tborder: 2px solid var(--accent);\n\tborder-radius: 8px;\n\tcolor: var(--font-color);\n\tfont-weight: 600;\n\tfont-size: 1em;\n\tcursor: pointer;\n\ttransition: all var(--transition-normal);\n}\n.contact-form .btn:hover:not(:disabled) {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\tcolor: var(--accent);\n\ttransform: translateY(-2px);\n\tbox-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);\n}\n.contact-form .btn:disabled {\n\topacity: 0.5;\n\tcursor: not-allowed;\n\ttransform: none;\n}\n\n@keyframes scaleFadeIn {\n\tfrom { opacity: 0; transform: scale(0.95); }\n\tto { opacity: 1; transform: scale(1); }\n}\n@keyframes scaleFadeOut {\n\tfrom { opacity: 1; transform: scale(1); }\n\tto { opacity: 0; transform: scale(0.95); }\n}\n@keyframes slideDown {\n\tfrom { transform: translateY(-100%); opacity: 0; }\n\tto { transform: translateY(0); opacity: 1; }\n}\n\n/* Footer */\nfooter {\n\tmargin-top: auto;\n\tmargin-bottom: 0;\n\tpadding: 1rem 0;\n\tbackground-color: transparent;\n\tflex-shrink: 0;\n\tmax-width: 1000px;\n\tmargin-inline: auto;\n\ttext-align: center;\n\tfont-size: 0.9em;\n}\n\n/* Utilities */\n.text-center {\n\ttext-align: center;\n}\n.sr-only {\n\tposition: absolute;\n\twidth: 1px;\n\theight: 1px;\n\tpadding: 0;\n\tmargin: -1px;\n\toverflow: hidden;\n\tclip: rect(0, 0, 0, 0);\n\twhite-space: nowrap;\n\tborder-width: 0;\n}\n";
 }
 
 function getInitialTheme() {
   let saved = localStorage.getItem(themeStorageKey);
   if (saved !== null && saved !== "") {
     return String(saved);
+  }
+  let current = document.documentElement.getAttribute("data-theme");
+  if (current !== null && current !== "") {
+    return String(current);
   }
   return "dark";
 }
