@@ -8,3 +8,7 @@ pre-commit:
     lint:
       priority: 2
       run: npm run check
+
+    test:
+      priority: 3
+      run: npm run test:unit

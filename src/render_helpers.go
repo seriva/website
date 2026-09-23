@@ -27,9 +27,9 @@ func navbarCollapseClass(open bool) string {
 
 func dropdownClass(open bool) string {
 	if open {
-		return "nav-item dropdown show"
+		return "nav-item navbar-menu dropdown show"
 	}
-	return "nav-item dropdown"
+	return "nav-item navbar-menu dropdown"
 }
 
 func navLinkClass(active bool) string {

@@ -5,11 +5,11 @@
 > **IMMUTABLE SECTION:** Do not modify Part 1 unless explicitly instructed. This is a universal standard. Only adjust Part 2 (Project Context) for project-specific needs.
 
 ## 1. Context & Rules
-- **Caveman Speak:** Communicate in "caveman" style (extreme density, zero fluff, drop grammar, `->` for correlations) for progress updates, execution logs, and short status. Use standard technical English for design reviews, architectural trade-offs, blockers, and questions. Exception: human-facing docs (`README`, `CHANGELOG`, plans) must remain readable.
-- **Plan-first:** Create `docs/vX.Y.Z/<feature>-plan.md` (or `docs/plans/<feature>-plan.md` for unversioned projects) & update roadmap for non-trivial (multi-component, arch-altering, risky) features. For unversioned projects, move completed plans to `docs/plans/archive/` once verified and merged (mark status Completed with date, update roadmap link).
+- **Caveman Speak:** Communicate in "caveman" style (extreme density, zero fluff, drop grammar, `->` for correlations). Exception: human-facing docs (`README`, `CHANGELOG`, plans) must remain readable.
+- **Plan-first:** Create `docs/vX.Y.Z/<feature>-plan.md` & update roadmap for non-trivial (multi-component, arch-altering, risky) features.
 - **TDD:** Write failing tests first for non-trivial logic (if applicable).
-- **Quality:** Run format/lint before every commit. Update `CHANGELOG.md` & `README.md` before commit/PR.
-- **Verify:** Run tests/compiler or ask user to visually verify before concluding/commit/PR. If automated tests do not exist for the subsystem, define and log the exact manual, visual, or console verification steps before declaring done. Never assume.
+- **Quality:** Run format/lint before every commit. Update `CHANGELOG.md` & `README.md` before PR.
+- **Verify:** Run tests/compiler or ask user to visually verify before concluding/PR. Never assume.
 - **Blockers:** Stop and ask user on ambiguity; do not guess.
 - **Scope:** Stick strictly to requested task/plan. No unrequested features/refactoring.
 - **Dependencies:** Use existing packages/standard lib. Ask before adding new dependencies.
@@ -29,30 +29,29 @@
 # Part 2: Project Context
 
 ## Project Identity
-A modern personal portfolio website built with GoFront using `.templ` component architecture, compiled to native JavaScript ES modules, with YAML/Markdown-driven content.
+A modern, modular personal portfolio website built with vanilla JavaScript (ES6 modules), a custom signals-based reactive system, and YAML/Markdown-driven content. Microtastic handles build tooling and dev serving.
 
 ## Tech Stack
-- **Framework**: GoFront (`.templ` components, Go-inspired frontend architecture)
-- **Reactivity & DOM**: Native GoFront `.templ` and `gom` DOM rendering
-- **Routing**: Path-based SPA routing via `src/router.go`
+- **Runtime**: ES6 Modules (Vanilla JS) — no TypeScript, no virtual DOM
+- **Reactivity**: Custom signals system (`utils/reactive.js`) with declarative DOM binding
+- **Routing**: Path-based SPA routing (Microtastic)
 - **Content**: YAML + Marked.js + Prism.js for Markdown rendering
 - **Search**: Fuse.js (fuzzy search)
 - **Integrations**: EmailJS (contact form), giscus (GitHub Discussions comments)
-- **Build / Dev**: `npm run dev` (port 8181), `npm run prod` (production bundle in `public/`)
+- **Build / Dev**: Microtastic (`npm run dev` on port 8181, `npm run prod`)
 - **E2E Tests**: Playwright (`npm run test:e2e`) — tests/e2e/, requires dev server on port 8181
-- **Quality**: Biome (`npm run format`, `npm run check`), GoFront type checker (`gofront src --check`)
+- **Quality**: Biome (`npm run format`, `npm run check`), Node.js test runner (`npm run test:unit`)
 
 ## Architecture
-The application is written in GoFront in `src/`. The entry point is `src/main.go`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `src/*.templ`. State and store logic reside in `src/store.go`, route content state (`ViewState`) and its pure resolvers in `src/view.go`, routing in `src/router.go`, markdown handling in `src/markdown.go`, theme management in `src/theme.go`, search in `src/search.go`, email handling in `src/email.go`. Global CSS is a plain stylesheet at `app/css/app.css` (linked from `index.html`, formatted and linted by Biome). Build output is generated to `app/app.js` (dev) and `public/app.js` (prod).
+The entry point is `app/src/main.js`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `app/src/components/`, each pairing a class extending `Reactive.Component` with a co-located `*.styles.js` file for CSS-in-JS definitions. Shared utilities — the reactive system, the router, and `MarkdownLoader` — live in `app/src/utils/`. Static assets (fonts, Prism themes) are under `app/fonts/` and `app/css/`. The `scripts/` directory holds build-time helpers like `generate-seo.js`, and all tests reside in `tests/`.
 
 ## Core Rules & Anti-Patterns
-- **GoFront Architecture:** All UI components are written in `.templ` files in `src/`. Go source code lives in `src/` under `package main`.
-- **Root-relative paths only:** always use root-relative paths for routes (e.g., `/blog`, `/project/:id`, `/page/:id`).
-- **Content lives in data:** all site content belongs in `app/data/content.yaml` and `app/data/blog/` / `app/data/pages/` Markdown files, never hard-coded in components.
-- **No scattered event listeners:** use `data-action` delegation in `main.go` instead of attaching `addEventListener` calls throughout components.
-- **State drives the DOM:** mutate the Go state, then call the matching region render (`renderMain`, `renderNavbar`, `renderContactForm`, `renderSearchResults`) or `syncOverlays()` in `src/ui.go`. Do not toggle classes or read form values ad hoc with `querySelector`.
-- **Route content lives in `view ViewState`:** one struct with a `LoadStatus` enum (`LoadReady`/`LoadPending`/`LoadFailed`/`LoadNotFound`), reset by `handleRoute` on every navigation. Keep resolvers (`resolvePost`/`resolveProject`/`resolvePage`) pure — no DOM, no `fetch` — so they stay unit-testable; async loaders in `src/router.go` own the side effects.
-- **Testable seams:** logic that touches `fetch`, `Fuse`, or the URL hash goes behind a small pure function (`resolveRedirect`, `postFromYAML`, `performSearch` over an injectable `fuseInstance`). DOM-dependent tests run under `gofront test src --dom` (jsdom); use `window.localStorage`, never bare `localStorage`, so code runs in both.
-- **No skipping quality gates:** never push without running `npm run check`, `gofront src --check`, `npm run test:e2e`, and `npm run prod`.
-- **Unversioned project:** this project does not use version numbers or semver releases. Feature plans belong in `docs/plans/<feature>-plan.md` (never `docs/vX.Y.Z/`). Completed plans are moved to `docs/plans/archive/` (marked Completed with date, roadmap link updated). Roadmap, documentation, changelog, and package metadata do not maintain version numbers.
+- **Always use TDD:** core logic must have tests in `/tests/unit/` using the native Node.js test runner. `npm run test:unit` must pass before pushing. New user-facing features (routes, components, flows) must also have corresponding e2e tests in `/tests/e2e/`.
+- **Root-relative paths only:** always use root-relative paths for modules (e.g., `/src/main.js`) so SPA routing works at any depth.
+- **Reactive component pattern:** extend `Reactive.Component`; use `this.signal()` / `this.computed()` in `state()`; declare bindings in `template()` via `data-text`, `data-class-*`, `data-on-click`, etc.
+- **Content lives in data:** all site content (projects, blog metadata, theme settings, i18n) belongs in `app/data/content.yaml` and `app/data/blog/` / `app/data/pages/` Markdown files, never hard-coded in components.
+- **No TypeScript or virtual DOM:** this project uses pure ES6 modules with direct DOM manipulation; do not introduce frameworks or transpilers.
+- **No scattered event listeners:** use `data-action` delegation in `main.js` instead of attaching `addEventListener` calls throughout components.
+- **No ad-hoc naming:** classes/components are PascalCase, functions/variables are camelCase, private fields use `#` prefix, style files follow `[name].styles.js`.
+- **No skipping quality gates:** never push without running `npm run format`, `npm run check`, `npm run test:unit`, `npm run test:e2e`, and `npm run prod`.
 

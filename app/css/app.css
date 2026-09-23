@@ -368,7 +368,6 @@ button.nav-link {
 	border: none;
 	cursor: pointer;
 	font-family: inherit;
-	font-size: inherit;
 	width: auto;
 	transition:
 		transform 0.1s ease,
