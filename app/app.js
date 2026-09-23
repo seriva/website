@@ -1953,7 +1953,7 @@ async function handleRoute() {
     let mainEl = document.querySelector("#main-content");
     if (mainEl != null) {
       mainEl.classList.add("page-transition-out");
-      await sleep(200);
+      await new Promise(r => setTimeout(r, 200 * 1000000 / 1000000));
     }
   }
   isInitialRoute = false;
@@ -2483,9 +2483,8 @@ async function initData() {
     }
   }
   if (data.translations != null && data.translations.en != null) {
-    for (const [_$, entry] of __s(objectEntries(data.translations.en)).entries()) {
-      let k = strVal(entry.key);
-      translations[k] = strVal(entry.value);
+    for (const [k, v] of Object.entries(data.translations.en)) {
+      translations[k] = strVal(v);
     }
   }
   site.PostsPerPage = 5;
@@ -2547,9 +2546,7 @@ async function initData() {
     });
   }
   if (data.pages != null) {
-    for (const [_$, entry] of __s(objectEntries(data.pages)).entries()) {
-      let id = strVal(entry.key);
-      let p = entry.value;
+    for (const [id, p] of Object.entries(data.pages)) {
       navPages = __append(navPages, new NavPage({ ID: id, Title: strVal(p.title), Order: intVal(p.order), ShowInNav: boolVal(p.showInNav), Href: "/page/" + id }));
     }
     navPages.sort(function(a, b) {
@@ -2711,4 +2708,3 @@ function resetOverlays() {
 }
 
 main();
-(function(){var es=new EventSource('/_gofront/events');es.addEventListener('reload',function(){location.reload();});})();

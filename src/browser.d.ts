@@ -9,11 +9,8 @@ declare namespace Prism {
 }
 
 declare function createFuse(list: any[], options?: any): any;
-declare function objectEntries(obj: any): any[];
 
 declare namespace emailjs {
     function init(publicKey: string): void;
     function send(serviceId: string, templateId: string, templateParams: any, publicKey?: string): Promise<any>;
 }
-
-declare function sleep(ms: number): Promise<void>;

@@ -3,6 +3,7 @@ package main
 import "js:./browser.d.ts"
 import "strconv"
 import "strings"
+import "time"
 
 func navigate(url string) {
 	if url != window.location.pathname {
@@ -61,7 +62,7 @@ async func handleRoute() {
 		mainEl := document.querySelector("#main-content")
 		if mainEl != nil {
 			mainEl.classList.add("page-transition-out")
-			await sleep(200)
+			time.Sleep(200 * time.Millisecond)
 		}
 	}
 	isInitialRoute = false
