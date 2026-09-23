@@ -85,25 +85,16 @@ export const YAMLParser = {
 				} else {
 					// No value - next lines define nested object or array
 					// Peek ahead to see if next non-empty line is an array item
-					let _nextIndent = -1;
 					let isArray = false;
 					for (let j = i + 1; j < lines.length; j++) {
 						const nextLine = lines[j].trim();
 						if (!nextLine || nextLine.startsWith("#")) continue;
-						_nextIndent = lines[j].search(/\S/);
 						isArray = nextLine.startsWith("- ");
 						break;
 					}
 
-					if (isArray) {
-						// Create array
-						parent.obj[key] = [];
-						stack.push({ obj: parent.obj[key], indent, key });
-					} else {
-						// Create nested object
-						parent.obj[key] = {};
-						stack.push({ obj: parent.obj[key], indent, key });
-					}
+					parent.obj[key] = isArray ? [] : {};
+					stack.push({ obj: parent.obj[key], indent, key });
 				}
 			}
 		}

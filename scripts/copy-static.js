@@ -64,7 +64,6 @@ function main() {
 
 		const stat = statSync(srcPath);
 		if (stat.isDirectory()) {
-			mkdirSync(destPath, { recursive: true });
 			cpSync(srcPath, destPath, { recursive: true, force: true });
 			copiedCount++;
 			console.log(`✓ Copied directory: ${item}/ → public/${item}/`);

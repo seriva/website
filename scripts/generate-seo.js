@@ -28,10 +28,6 @@ function escapeXml(str) {
 		.replace(/'/g, "&apos;");
 }
 
-function buildXml(parts) {
-	return parts.join("");
-}
-
 function generateSitemap(contentData, baseUrl) {
 	const today = new Date().toISOString().split("T")[0];
 	const parts = [
@@ -79,7 +75,7 @@ function generateSitemap(contentData, baseUrl) {
 	}
 
 	parts.push("</urlset>\n");
-	return buildXml(parts);
+	return parts.join("");
 }
 
 // ===========================================
@@ -144,7 +140,7 @@ function generateRssFeed(contentData, baseUrl) {
 	}
 
 	parts.push("  </channel>\n", "</rss>\n");
-	return buildXml(parts);
+	return parts.join("");
 }
 
 // ===========================================

@@ -217,9 +217,8 @@ async func initData() error {
 
 	// Translations
 	if data.translations != nil && data.translations.en != nil {
-		for _, entry := range objectEntries(data.translations.en) {
-			k := strVal(entry.key)
-			translations[k] = strVal(entry.value)
+		for k, v := range data.translations.en.(map[string]any) {
+			translations[k] = strVal(v)
 		}
 	}
 
@@ -318,9 +317,7 @@ async func initData() error {
 
 	// Pages
 	if data.pages != nil {
-		for _, entry := range objectEntries(data.pages) {
-			id := strVal(entry.key)
-			p := entry.value
+		for id, p := range data.pages.(map[string]any) {
 			navPages = append(navPages, NavPage{
 				ID:        id,
 				Title:     strVal(p.title),
