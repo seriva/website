@@ -1,59 +1,16 @@
 package main
 
-import "strings"
-
-func searchPageClass(open bool, closing bool) string {
-	if closing {
-		return "show closing"
-	}
-	if open {
-		return "show"
-	}
-	return ""
-}
-
-func searchClearClass(q string) string {
-	if q != "" {
-		return "search-page-clear show"
-	}
-	return "search-page-clear"
-}
-
-func searchPlaceholderText() string {
-	if site.Search.Placeholder != "" && site.Search.Placeholder != "undefined" {
-		return site.Search.Placeholder
-	}
-	res := t("search.placeholder")
-	if res == "search.placeholder" || res == "" || res == "undefined" {
-		return "Search..."
-	}
-	return res
-}
-
-func highlightMatch(text string, query string) string {
-	if query == "" {
-		return text
-	}
-	lowerText := strings.ToLower(text)
-	lowerQuery := strings.ToLower(query)
-	idx := strings.Index(lowerText, lowerQuery)
-	if idx == -1 {
-		return text
-	}
-	return text[:idx] + "<mark>" + text[idx:idx+len(query)] + "</mark>" + text[idx+len(query):]
-}
-
-templ SearchResultsList() {
-	if searchQuery != "" && len(searchResults) == 0 {
+templ SearchResultsList(results []SearchResultItem, query string) {
+	if query != "" && len(results) == 0 {
 		<div class="search-no-results">
 			@IconSearch("3rem")
 			<p>{ t("search.noResults") }</p>
 		</div>
 	} else {
-		for _, item := range searchResults {
+		for _, item := range results {
 			<article class="search-result-item blog-post-card" data-action="open-post" data-href={ item.Url }>
 				<h2 class="blog-post-title">
-					<a href={ item.Url } data-action="nav">@templ.Raw(highlightMatch(item.Title, searchQuery))</a>
+					<a href={ item.Url } data-action="nav">@templ.Raw(highlightMatch(item.Title, query))</a>
 				</h2>
 				<div class="blog-post-meta">
 					<span class="blog-post-tags">
@@ -67,22 +24,22 @@ templ SearchResultsList() {
 						}
 					</span>
 				</div>
-				<p class="blog-post-excerpt">@templ.Raw(highlightMatch(item.Description, searchQuery))</p>
+				<p class="blog-post-excerpt">@templ.Raw(highlightMatch(item.Description, query))</p>
 			</article>
 		}
 	}
 }
 
-templ SearchModal() {
-	<div id="search-page" class={ searchPageClass(searchOpen, searchClosing) }>
+templ SearchModal(open bool, closing bool, query string, results []SearchResultItem, placeholder string) {
+	<div id="search-page" class={ searchPageClass(open, closing) } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
 		<div class="search-page-header">
 			<div class="search-page-header-content">
 				<button class="search-page-back" id="search-page-back" aria-label={ t("aria.goBack") } data-action="close-search">
 					@IconArrowLeft("1.2rem")
 				</button>
 				<div class="search-page-input-wrapper">
-					<input type="search" id="search-page-input" class="search-page-input" placeholder={ searchPlaceholderText() } autocomplete="off" aria-label={ t("aria.search") } value={ searchQuery }/>
-					<button class={ searchClearClass(searchQuery) } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
+					<input type="search" id="search-page-input" class="search-page-input" placeholder={ placeholder } autocomplete="off" aria-label={ t("aria.search") } value={ query }/>
+					<button class={ searchClearClass(query) } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
 						@IconTimes("1.2rem")
 					</button>
 				</div>
@@ -90,7 +47,7 @@ templ SearchModal() {
 		</div>
 		<div class="search-page-content">
 			<div class="search-page-results" id="search-page-results">
-				@SearchResultsList()
+				@SearchResultsList(results, query)
 			</div>
 		</div>
 	</div>

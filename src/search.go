@@ -87,7 +87,7 @@ func performSearch(q string) []SearchResultItem {
 func renderSearchResults() {
 	el := document.querySelector("#search-page-results")
 	if el != nil {
-		gom.Mount("#search-page-results", SearchResultsList())
+		gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery))
 	}
 }
 

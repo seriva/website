@@ -3532,7 +3532,7 @@ var gn = x.lex;
 * @public
 */
 //#endregion
-//#region .gofront-vendor-entry-1790110891439.mjs
+//#region .gofront-vendor-entry-1790166178941.mjs
 var import_prism = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var Prism = function(_self) {
 		var lang = /(?:^|\s)lang(?:uage)?-([\w-]+)(?=\s|$)/i;

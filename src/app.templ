@@ -8,22 +8,22 @@ templ AppStyles() {
 
 templ AppShell() {
 	<div class="app-root">
-		@Navbar()
+		@Navbar(currentRoute, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
 		<main id="main-content">
 			if currentRoute == "/blog" {
-				@BlogList()
+				@BlogList(posts, blogCurrentPage, site.PostsPerPage)
 			} else if strings.HasPrefix(currentRoute, "/blog/") {
-				@BlogPostView()
+				@BlogPostView(currentPost, currentPostHtml, currentPostLoading, currentPostError, site.Comments.BlogEnabled)
 			} else if strings.HasPrefix(currentRoute, "/project/") {
-				@ProjectDetail()
+				@ProjectDetail(currentProject, projectReadmeHtml, projectReadmeLoading, projectReadmeError, site.Comments.ProjectsEnabled)
 			} else if strings.HasPrefix(currentRoute, "/page/") {
-				@PageView()
+				@PageView(currentPageHtml, currentPageLoading, currentPageError)
 			} else {
-				@BlogList()
+				@BlogList(posts, blogCurrentPage, site.PostsPerPage)
 			}
 		</main>
-		@Footer()
-		@SearchModal()
-		@ContactModal()
+		@Footer(currentYear(), site.Author)
+		@SearchModal(searchOpen, searchClosing, searchQuery, searchResults, searchPlaceholderText())
+		@ContactModal(contactOpen, contactClosing, contactForm)
 	</div>
 }

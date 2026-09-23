@@ -1362,8 +1362,23 @@ footer {
 	max-width: 1000px;
 	margin-inline: auto;
 	text-align: center;
-	color: var(--text-light);
 	font-size: 0.9em;
+}
+
+/* Utilities */
+.text-center {
+	text-align: center;
+}
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
 }
 `
 }
