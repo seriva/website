@@ -5,7 +5,7 @@ import "js:./browser.d.ts"
 const themeStorageKey = "theme-preference"
 
 func getInitialTheme() string {
-	saved := localStorage.getItem(themeStorageKey)
+	saved := window.localStorage.getItem(themeStorageKey)
 	if saved != nil && saved != "" {
 		return string(saved)
 	}
@@ -70,7 +70,7 @@ func nextTheme(current string) string {
 
 func toggleTheme() {
 	next := nextTheme(currentTheme)
-	localStorage.setItem(themeStorageKey, next)
+	window.localStorage.setItem(themeStorageKey, next)
 	applyTheme(next)
 }
 

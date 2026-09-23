@@ -1,17 +1,17 @@
 package main
 
-templ PageView(html string, loading bool, isError bool) {
-	if isError {
+templ PageView(v ViewState) {
+	if v.Status == LoadFailed {
 		<div class="error-message">
 			<h1>{ t("general.notFound") }</h1>
 			<p>{ t("general.notFoundMessage") }</p>
 		</div>
-	} else if loading {
+	} else if v.Status == LoadPending {
 		<div class="loading-spinner">{ t("general.loading") }</div>
 	} else {
 		<div class="page-view">
 			<div class="markdown-body">
-				@templ.Raw(html)
+				@templ.Raw(v.HTML)
 			</div>
 		</div>
 	}

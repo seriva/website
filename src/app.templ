@@ -1,17 +1,13 @@
 package main
 
-templ AppStyles() {
-	@templ.Raw("<style id=\"app-styles\">" + appCSS() + "</style>")
-}
-
 templ RouteView(r RouteMatch) {
 	switch r.Kind {
 	case RoutePost:
-		@BlogPostView(currentPost, currentPostHtml, currentPostLoading, currentPostError, site.Comments.BlogEnabled)
+		@BlogPostView(view, site.Comments.BlogEnabled)
 	case RouteProject:
-		@ProjectDetail(currentProject, projectReadmeHtml, projectReadmeLoading, projectReadmeError, site.Comments.ProjectsEnabled)
+		@ProjectDetail(view, site.Comments.ProjectsEnabled)
 	case RoutePage:
-		@PageView(currentPageHtml, currentPageLoading, currentPageError)
+		@PageView(view)
 	default:
 		@BlogList(posts, r.Page, site.PostsPerPage)
 	}

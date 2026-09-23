@@ -1,9 +1,3 @@
-package main
-
-// ── Application CSS ───────────────────────────────────────────
-
-func appCSS() string {
-	return `
 /* Fonts */
 @font-face {
 	font-family: Raleway;
@@ -38,13 +32,13 @@ func appCSS() string {
 
 /* CSS Custom Properties */
 :root {
-	--accent: #10B981;
-	--background-color: #0D1117;
+	--accent: #10b981;
+	--background-color: #0d1117;
 	--header-color: #111827;
-	--hover-color: #1A2332;
-	--border-color: #21262D;
-	--font-color: #E6EDF3;
-	--text-light: #7D8590;
+	--hover-color: #1a2332;
+	--border-color: #21262d;
+	--font-color: #e6edf3;
+	--text-light: #7d8590;
 	--error-color: #ff6b6b;
 	--border-width: 2px;
 	--border-radius: 4px;
@@ -54,7 +48,9 @@ func appCSS() string {
 	--spacing-md: 15px;
 	--spacing-lg: 24px;
 	--spacing-xl: 2rem;
-	--font-family-primary: Raleway, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--font-family-primary:
+		Raleway, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+		"Helvetica Neue", Arial, sans-serif;
 	--font-family-mono: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
 	--font-size-base: 16px;
 	--font-size-sm: 0.9em;
@@ -100,19 +96,39 @@ html:has(#contact-modal.show)::after {
 	display: none !important;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
 	box-sizing: border-box;
 }
 
 /* Theme color transitions on elements that change */
-body, main, nav.navbar, footer, .navbar-inner, .dropdown-menu, .blog-post-card, .search-page-header, .contact-modal-content {
-	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+body,
+main,
+nav.navbar,
+footer,
+.navbar-inner,
+.dropdown-menu,
+.blog-post-card,
+.search-page-header,
+.contact-modal-content {
+	transition:
+		background-color var(--theme-transition-duration)
+		var(--theme-transition-timing),
 		color var(--theme-transition-duration) var(--theme-transition-timing),
 		border-color var(--theme-transition-duration) var(--theme-transition-timing);
 }
 
-a, button, input, textarea, select, .nav-link, .dropdown-item {
-	transition: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+a,
+button,
+input,
+textarea,
+select,
+.nav-link,
+.dropdown-item {
+	transition:
+		background-color var(--theme-transition-duration)
+		var(--theme-transition-timing),
 		color var(--theme-transition-duration) var(--theme-transition-timing),
 		border-color var(--theme-transition-duration) var(--theme-transition-timing),
 		opacity var(--transition-fast),
@@ -138,7 +154,8 @@ body {
 	width: 100%;
 }
 
-#app, .app-root {
+#app,
+.app-root {
 	display: flex;
 	flex-direction: column;
 	min-height: calc(100vh - 56px);
@@ -146,7 +163,8 @@ body {
 }
 
 /* Region mount points: transparent to layout */
-#navbar-slot, #content-slot {
+#navbar-slot,
+#content-slot {
 	display: contents;
 }
 
@@ -237,8 +255,14 @@ a.icon:hover {
 }
 
 @keyframes imageLoad {
-	from { opacity: 0; transform: scale(0.95); }
-	to { opacity: 1; transform: scale(1); }
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 /* Shared Loading & Error styles */
@@ -250,8 +274,13 @@ a.icon:hover {
 	animation: pulse 1.5s ease-in-out infinite;
 }
 @keyframes pulse {
-	0%, 100% { opacity: 1; }
-	50% { opacity: 0.5; }
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
 }
 
 .error-message {
@@ -271,7 +300,11 @@ a.icon:hover {
 }
 
 /* Accessibility */
-button:focus, a:focus, input:focus, select:focus, textarea:focus {
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
@@ -337,7 +370,10 @@ button.nav-link {
 	font-family: inherit;
 	font-size: inherit;
 	width: auto;
-	transition: transform 0.1s ease, background-color var(--transition-fast), color var(--transition-fast);
+	transition:
+		transform 0.1s ease,
+		background-color var(--transition-fast),
+		color var(--transition-fast);
 }
 button.nav-link:active {
 	transform: scale(0.95);
@@ -351,30 +387,36 @@ button.nav-link:active {
 	line-height: 1.2;
 	font-size: 1.25em;
 	font-weight: 700;
-	transition: background-color var(--transition-fast),
-				color var(--transition-fast),
-				border-color var(--transition-fast),
-				opacity var(--transition-fast),
-				transform var(--transition-fast);
+	transition:
+		background-color var(--transition-fast),
+		color var(--transition-fast),
+		border-color var(--transition-fast),
+		opacity var(--transition-fast),
+		transform var(--transition-fast);
 }
-.navbar-menu .nav-link, .navbar-icon .nav-link {
+.navbar-menu .nav-link,
+.navbar-icon .nav-link {
 	font-size: 1.35rem;
 }
 .navbar-menu .nav-link {
 	font-weight: 700;
 }
 .navbar-icon .nav-link svg {
-	transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-				rotate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition:
+		transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+		rotate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 	transform-origin: center;
 }
-.navbar-icon .nav-link:hover svg, .navbar-icon .nav-link:focus svg {
+.navbar-icon .nav-link:hover svg,
+.navbar-icon .nav-link:focus svg {
 	transform: rotate(8deg) scale(1.25);
 }
 .navbar-icon .nav-link:active svg {
 	transform: rotate(4deg) scale(1.1);
 }
-.nav-link:hover, .nav-link:focus, .nav-link:active {
+.nav-link:hover,
+.nav-link:focus,
+.nav-link:active {
 	color: var(--accent);
 	background-color: var(--hover-color);
 }
@@ -437,7 +479,7 @@ button.nav-link:active {
 	z-index: 1;
 }
 .navbar-toggle-icon::before {
-	content: '';
+	content: "";
 	display: block;
 	width: 24px;
 	height: 2px;
@@ -448,7 +490,7 @@ button.nav-link:active {
 	transition: all var(--transition-normal);
 }
 .navbar-toggle-icon::after {
-	content: '';
+	content: "";
 	display: block;
 	width: 24px;
 	height: 2px;
@@ -537,7 +579,10 @@ button.nav-link:active {
 	text-align: left;
 	white-space: nowrap;
 }
-.dropdown-item:hover, .dropdown-item:focus, .dropdown-item:active, .dropdown-item.active {
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:active,
+.dropdown-item.active {
 	background-color: var(--hover-color);
 	color: var(--accent);
 }
@@ -555,13 +600,17 @@ button.nav-link:active {
 	display: flex;
 	align-items: center;
 	font-size: 1.35rem;
-	transition: color var(--transition-fast), background-color var(--transition-fast);
+	transition:
+		color var(--transition-fast),
+		background-color var(--transition-fast);
 }
-.theme-toggle:hover, .theme-toggle:focus {
+.theme-toggle:hover,
+.theme-toggle:focus {
 	color: var(--accent);
 	background-color: var(--hover-color);
 }
-.theme-toggle:hover svg, .theme-toggle:focus svg {
+.theme-toggle:hover svg,
+.theme-toggle:focus svg {
 	transform: rotate(8deg) scale(1.25);
 }
 .theme-toggle:active {
@@ -571,9 +620,10 @@ button.nav-link:active {
 	transform: rotate(4deg) scale(1.1);
 }
 .theme-toggle svg {
-	transition: opacity var(--theme-transition-duration) var(--theme-transition-timing),
-				transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-				fill var(--transition-fast);
+	transition:
+		opacity var(--theme-transition-duration) var(--theme-transition-timing),
+		transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+		fill var(--transition-fast);
 	fill: currentColor;
 }
 :root[data-theme="dark"] .theme-toggle .icon-sun {
@@ -626,7 +676,8 @@ button.nav-link:active {
 		max-width: 100%;
 		overflow-x: hidden;
 	}
-	nav.navbar .navbar-nav.left, nav.navbar .navbar-nav.right {
+	nav.navbar .navbar-nav.left,
+	nav.navbar .navbar-nav.right {
 		margin: 0;
 	}
 	nav.navbar .navbar-nav.right {
@@ -924,7 +975,8 @@ button.nav-link:active {
 	cursor: pointer;
 	appearance: none;
 }
-.download-btn:hover, .download-btn:focus {
+.download-btn:hover,
+.download-btn:focus {
 	background-color: var(--hover-color);
 	border-color: var(--accent);
 	transform: translateY(-2px);
@@ -945,7 +997,12 @@ button.nav-link:active {
 	color: var(--text-light);
 	text-align: left;
 }
-.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
 	color: var(--font-color);
 	margin: 1em 0 0.5em;
 	font-weight: bold;
@@ -961,13 +1018,15 @@ button.nav-link:active {
 .markdown-body h3 {
 	font-size: 1.2em;
 }
-.markdown-body p, .markdown-body li {
+.markdown-body p,
+.markdown-body li {
 	margin: 0.5em 0;
 	line-height: 1.6;
 	font-size: 1.1em;
 	color: var(--text-light);
 }
-.markdown-body ul, .markdown-body ol {
+.markdown-body ul,
+.markdown-body ol {
 	margin: 0.5em 0;
 	padding-left: 2em;
 }
@@ -1017,7 +1076,8 @@ button.nav-link:active {
 	border-collapse: collapse;
 	margin: 0.5em 0;
 }
-.markdown-body th, .markdown-body td {
+.markdown-body th,
+.markdown-body td {
 	border: 1px solid var(--border-color);
 	padding: 0.5em 1em;
 	text-align: left;
@@ -1048,7 +1108,9 @@ button.nav-link:active {
 	border-radius: var(--border-radius);
 	cursor: pointer;
 	opacity: 0;
-	transition: opacity var(--transition-fast), background-color var(--transition-fast);
+	transition:
+		opacity var(--transition-fast),
+		background-color var(--transition-fast);
 	z-index: 10;
 }
 pre:hover .copy-code-button {
@@ -1275,7 +1337,8 @@ pre:hover .copy-code-button {
 	font-size: 0.9rem;
 	text-align: left;
 }
-.contact-form input, .contact-form textarea {
+.contact-form input,
+.contact-form textarea {
 	width: 100%;
 	padding: 0.6rem;
 	background-color: var(--hover-color);
@@ -1286,11 +1349,13 @@ pre:hover .copy-code-button {
 	font-size: 0.95rem;
 	transition: border-color 0.2s ease;
 }
-.contact-form input:focus, .contact-form textarea:focus {
+.contact-form input:focus,
+.contact-form textarea:focus {
 	outline: none;
 	border-color: var(--accent);
 }
-.contact-form input.error, .contact-form textarea.error {
+.contact-form input.error,
+.contact-form textarea.error {
 	border-color: #ef4444;
 }
 .contact-form textarea {
@@ -1305,7 +1370,8 @@ pre:hover .copy-code-button {
 	font-size: 0.9rem;
 	display: none;
 }
-.form-status.success, .form-status.error {
+.form-status.success,
+.form-status.error {
 	display: block;
 }
 .form-status.success {
@@ -1345,16 +1411,34 @@ pre:hover .copy-code-button {
 }
 
 @keyframes scaleFadeIn {
-	from { opacity: 0; transform: scale(0.95); }
-	to { opacity: 1; transform: scale(1); }
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 @keyframes scaleFadeOut {
-	from { opacity: 1; transform: scale(1); }
-	to { opacity: 0; transform: scale(0.95); }
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.95);
+	}
 }
 @keyframes slideDown {
-	from { transform: translateY(-100%); opacity: 0; }
-	to { transform: translateY(0); opacity: 1; }
+	from {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
 }
 
 /* Footer */
@@ -1384,6 +1468,4 @@ footer {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border-width: 0;
-}
-`
 }

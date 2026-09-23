@@ -48,3 +48,28 @@ func TestParseFrontmatterMalformed(t *testing.T) {
 		t.Error("expected non-empty body for malformed frontmatter")
 	}
 }
+
+func TestParseFrontmatterArrays(t *testing.T) {
+	content := "---\ntitle: Tagged\ntags:\n  - go\n  - web\n---\nBody"
+	meta, body := parseFrontmatter(content)
+
+	tags, ok := meta["tags"].([]any)
+	if !ok || len(tags) != 2 || tags[0] != "go" || tags[1] != "web" {
+		t.Errorf("expected tags [go web], got %v", meta["tags"])
+	}
+	if body != "Body" {
+		t.Errorf("body = %q", body)
+	}
+}
+
+func TestParseFrontmatterClosingAtEOF(t *testing.T) {
+	content := "---\ntitle: Only Meta\n---"
+	meta, body := parseFrontmatter(content)
+
+	if meta["title"] != "Only Meta" {
+		t.Errorf("expected title, got %v", meta)
+	}
+	if body != "" {
+		t.Errorf("expected empty body, got %q", body)
+	}
+}

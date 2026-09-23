@@ -62,6 +62,28 @@ type NavPage struct {
 	Href      string
 }
 
+// ── Route view state ──────────────────────────────────────────
+
+type LoadStatus int
+
+const (
+	LoadReady LoadStatus = iota // content available or nothing to load
+	LoadPending
+	LoadFailed
+	LoadNotFound
+)
+
+// ViewState is the state of the current route's content region.
+// Only the field matching route.Kind is populated. Always build it with
+// newViewState(): a bare struct literal leaves Status as null, not LoadReady.
+type ViewState struct {
+	Post   BlogPost
+	Proj   Project // not `Project`: a field named after its type breaks the emitted constructor
+	Page   NavPage
+	HTML   string // rendered markdown for post, readme or page
+	Status LoadStatus
+}
+
 type SocialLink struct {
 	Icon   string
 	Href   string

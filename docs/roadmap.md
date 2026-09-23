@@ -12,6 +12,7 @@ Design documents for planned features live in `docs/plans/`
 
 | Feature | Difficulty | Status | Notes |
 |---------|------------|--------|-------|
+| [Post-Rewrite Hardening](plans/archive/post-rewrite-hardening-plan.md) | Medium | Completed (2026-09-23) | `ViewState` + `LoadStatus` replaces route globals with pure resolvers, CSS extracted to `app/css/app.css` with Biome checks (app.js 104→73 KB), unit-test breadth restored via `gofront test --dom` (116 Go tests); coarse re-render explicitly accepted |
 | [State-Driven Rendering & templ Idioms](plans/archive/state-driven-rendering-and-templ-idioms-plan.md) | Medium | Completed (2026-09-23) | Route enum + `parseRoute`, region renders, `syncOverlays()` reconciler, ARIA/button fixes, single `Icon()` component, CSP hygiene, GoFront 1.2.1 |
 | [Accessibility, Semantics & Component Decomposition](plans/archive/accessibility-and-semantics-plan.md) | Low | Completed (2026-09-23) | Decomposed ProjectDetail, replaced obsolete tags/attrs, added WAI-ARIA states, and synced OS theme |
 | [GoFront & templ Best Practices](plans/archive/gofront-templ-best-practices-plan.md) | Medium | Completed (2026-09-23) | Refactored helpers into Go files, parameterized components, decomposed templates, and secured raw HTML |

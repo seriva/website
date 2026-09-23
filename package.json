@@ -15,7 +15,7 @@
 		"dev": "gofront src -o app/app.js --serve --port 8181",
 		"prod": "npm run check && gofront prep --minify && gofront src -o public/app.js --minify --mangle && node scripts/copy-static.js && npm run seo",
 		"test:unit": "node --test tests/unit/*.test.js",
-		"test:gofront": "gofront test src && gofront test src/utils",
+		"test:gofront": "gofront test src --dom && gofront test src/utils",
 		"test:e2e": "playwright test",
 		"test:all": "npm run test:gofront && npm run test:unit && npm run test:e2e",
 		"format": "biome format --write .",

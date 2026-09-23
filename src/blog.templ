@@ -80,28 +80,28 @@ templ BlogList(allPosts []BlogPost, currentPage int, perPage int) {
 	</div>
 }
 
-templ BlogPostView(post BlogPost, html string, loading bool, isError bool, commentsEnabled bool) {
-	if isError {
+templ BlogPostView(v ViewState, commentsEnabled bool) {
+	if v.Status == LoadNotFound || v.Status == LoadFailed {
 		<div class="error-message">
 			<h1>{ t("general.blogNotFound") }</h1>
 			<p>{ t("general.blogNotFoundMessage") }</p>
 		</div>
-	} else if loading {
+	} else if v.Status == LoadPending {
 		<div class="loading-spinner">{ t("general.loading") }</div>
 	} else {
 		<div class="blog-post-view">
-			<h1 class="project-title">{ post.Title }</h1>
-			<p class="project-description">{ post.Date }</p>
-			if len(post.Tags) > 0 {
+			<h1 class="project-title">{ v.Post.Title }</h1>
+			<p class="project-description">{ v.Post.Date }</p>
+			if len(v.Post.Tags) > 0 {
 				<div class="project-tags">
-					for _, tag := range post.Tags {
+					for _, tag := range v.Post.Tags {
 						<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
 					}
 				</div>
 			}
 			<div class="blog-post-content">
 				<div class="markdown-body">
-					@templ.Raw(html)
+					@templ.Raw(v.HTML)
 				</div>
 			</div>
 			if commentsEnabled {

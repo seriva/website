@@ -216,8 +216,7 @@ func setupEvents() {
 }
 
 async func main() {
-	gom.MountTo("head", AppStyles())
-
+	view = newViewState()
 	err := await initData()
 	if err != nil {
 		console.error("Init data failed:", err)

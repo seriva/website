@@ -25,27 +25,11 @@ var searchResults = []SearchResultItem{}
 var contactOpen bool
 var contactForm ContactState
 
-// Route view states
-var currentPost = BlogPost{
-	Tags: []string{},
-}
-var currentPostHtml string
-var currentPostLoading bool
-var currentPostError bool
+// Route view state; main() and handleRoute assign newViewState(). Not initialised
+// here: globals are emitted in file order, so LoadReady (types.go) would be in TDZ.
+var view ViewState
 
-var currentProject = Project{
-	Tags:          []string{},
-	YoutubeVideos: []string{},
-	Links:         []ProjectLink{},
-}
-var projectReadmeHtml string
-var projectReadmeLoading bool
-var projectReadmeError bool
-
-var currentPageHtml string
-var currentPageLoading bool
-var currentPageError bool
-
+// Rendered-HTML caches keyed by post filename, project github repo and page id.
 var readmeCache map[string]string = map[string]string{}
 var postHtmlCache map[string]string = map[string]string{}
 var pageHtmlCache map[string]string = map[string]string{}
@@ -106,6 +90,41 @@ func intVal(v any) int {
 		return 0
 	}
 	return int(v)
+}
+
+// postFromYAML maps one raw `blog.posts[]` entry to a BlogPost.
+func postFromYAML(p any) BlogPost {
+	fn := strVal(p.filename)
+	slug := strings.TrimSuffix(fn, ".md")
+	tags := []string{}
+	if p.tags != nil {
+		for _, tg := range p.tags {
+			tags = append(tags, strVal(tg))
+		}
+	}
+	return BlogPost{
+		ID:       slug,
+		Slug:     slug,
+		Title:    strVal(p.title),
+		Date:     strVal(p.date),
+		Excerpt:  strVal(p.excerpt),
+		Tags:     tags,
+		Filename: fn,
+		Href:     "/blog/" + slug,
+	}
+}
+
+// sortPostsByDate orders newest first; dates are ISO strings so lexical order works.
+func sortPostsByDate(list []BlogPost) {
+	slices.SortFunc(list, func(a BlogPost, b BlogPost) int {
+		if a.Date < b.Date {
+			return 1
+		}
+		if a.Date > b.Date {
+			return -1
+		}
+		return 0
+	})
 }
 
 async func initData() error {
@@ -230,38 +249,9 @@ async func initData() error {
 		}
 		if data.blog.posts != nil {
 			for _, p := range data.blog.posts {
-				fn := strVal(p.filename)
-				slug := fn
-				if strings.HasSuffix(slug, ".md") {
-					slug = slug[:len(slug)-3]
-				}
-				tags := []string{}
-				if p.tags != nil {
-					for _, tg := range p.tags {
-						tags = append(tags, strVal(tg))
-					}
-				}
-				posts = append(posts, BlogPost{
-					ID:       slug,
-					Slug:     slug,
-					Title:    strVal(p.title),
-					Date:     strVal(p.date),
-					Excerpt:  strVal(p.excerpt),
-					Tags:     tags,
-					Filename: fn,
-					Href:     "/blog/" + slug,
-				})
+				posts = append(posts, postFromYAML(p))
 			}
-			// Sort posts by date descending
-			slices.SortFunc(posts, func(a BlogPost, b BlogPost) int {
-				if a.Date < b.Date {
-					return 1
-				}
-				if a.Date > b.Date {
-					return -1
-				}
-				return 0
-			})
+			sortPostsByDate(posts)
 		}
 	}
 
