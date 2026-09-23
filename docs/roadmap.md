@@ -8,10 +8,18 @@ Design documents for planned features live in `docs/plans/`
 
 ---
 
+## Completed
+
+| Feature | Difficulty | Status | Notes |
+|---------|------------|--------|-------|
+| [GoFront Rewrite](plans/archive/gofront-rewrite-plan.md) | High | Completed (2026-09-22) | Rewrote frontend from vanilla JS / Microtastic to GoFront (.templ) architecture |
+
+---
+
 ## Upcoming
 
-| Feature    | Difficulty | Status | Notes |
-|------------|------------|--------|-------|
+| Feature | Difficulty | Status | Notes |
+|---------|------------|--------|-------|
 
 ---
 

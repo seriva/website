@@ -1,0 +1,165 @@
+package main
+
+import "fmt"
+
+func paginatedPosts(allPosts []BlogPost, page int, perPage int) []BlogPost {
+	if len(allPosts) == 0 {
+		return []BlogPost{}
+	}
+	offset := page - 1
+	start := offset * perPage
+	if start < 0 || start >= len(allPosts) {
+		start = 0
+	}
+	end := start + perPage
+	if end > len(allPosts) {
+		end = len(allPosts)
+	}
+	return allPosts[start:end]
+}
+
+func calcTotalPages(totalCount int, perPage int) int {
+	if perPage <= 0 {
+		perPage = 5
+	}
+	num := totalCount + perPage - 1
+	return num / perPage
+}
+
+func pageItemPrevClass(page int) string {
+	if page <= 1 {
+		return "page-item disabled"
+	}
+	return "page-item"
+}
+
+func pageItemNextClass(page int, totalPages int) string {
+	if page >= totalPages {
+		return "page-item disabled"
+	}
+	return "page-item"
+}
+
+func pageItemClass(page int, currentPage int) string {
+	if page == currentPage {
+		return "page-item active"
+	}
+	return "page-item"
+}
+
+func pageHref(page int) string {
+	if page < 1 {
+		page = 1
+	}
+	return fmt.Sprintf("/blog/page/%d", page)
+}
+
+func pageNumbers(totalPages int) []int {
+	nums := []int{}
+	for i := 1; i <= totalPages; i++ {
+		nums = append(nums, i)
+	}
+	return nums
+}
+
+templ BlogList() {
+	<div class="blog-container">
+		if len(posts) == 0 {
+			<p class="blog-empty">{ t("blog.noPosts") }</p>
+		} else {
+			<div class="blog-posts">
+				for i, post := range paginatedPosts(posts, blogCurrentPage, site.PostsPerPage) {
+					<article
+						class="blog-post-card"
+						data-index={ fmt.Sprintf("%d", i) }
+						data-action="open-post"
+						data-href={ post.Href }
+						tabindex="0"
+						role="article"
+						aria-label={ post.Title }
+					>
+						<h2 class="blog-post-title">
+							<a href={ post.Href } data-action="nav">{ post.Title }</a>
+						</h2>
+						<div class="blog-post-meta">
+							<span class="blog-post-date">
+								@IconCalendar("1rem")
+								{ " " + post.Date }
+							</span>
+							if len(post.Tags) > 0 {
+								<span class="blog-post-tags">
+									for _, tag := range post.Tags {
+										<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
+									}
+								</span>
+							}
+						</div>
+						<p class="blog-post-excerpt">{ post.Excerpt }</p>
+					</article>
+				}
+			</div>
+			if calcTotalPages(len(posts), site.PostsPerPage) > 1 {
+				<nav class="blog-pagination" aria-label="Blog pagination">
+					<ul class="pagination">
+						<li class={ pageItemPrevClass(blogCurrentPage) }>
+							<a class="page-link" href={ pageHref(1) } data-action="nav" aria-label="First" title="First Page">
+								@IconAnglesLeft("0.85em")
+							</a>
+						</li>
+						<li class={ pageItemPrevClass(blogCurrentPage) }>
+							<a class="page-link" href={ pageHref(blogCurrentPage - 1) } data-action="nav" aria-label="Previous" title="Previous Page">
+								@IconChevronLeft("0.85em")
+							</a>
+						</li>
+						for _, pageNum := range pageNumbers(calcTotalPages(len(posts), site.PostsPerPage)) {
+							<li class={ pageItemClass(pageNum, blogCurrentPage) }>
+								<a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ fmt.Sprintf("%d", pageNum) }</a>
+							</li>
+						}
+						<li class={ pageItemNextClass(blogCurrentPage, calcTotalPages(len(posts), site.PostsPerPage)) }>
+							<a class="page-link" href={ pageHref(blogCurrentPage + 1) } data-action="nav" aria-label="Next" title="Next Page">
+								@IconChevronRight("0.85em")
+							</a>
+						</li>
+						<li class={ pageItemNextClass(blogCurrentPage, calcTotalPages(len(posts), site.PostsPerPage)) }>
+							<a class="page-link" href={ pageHref(calcTotalPages(len(posts), site.PostsPerPage)) } data-action="nav" aria-label="Last" title="Last Page">
+								@IconAnglesRight("0.85em")
+							</a>
+						</li>
+					</ul>
+				</nav>
+			}
+		}
+	</div>
+}
+
+templ BlogPostView() {
+	if currentPostError {
+		<div class="error-message">
+			<h1>{ t("general.blogNotFound") }</h1>
+			<p>{ t("general.blogNotFoundMessage") }</p>
+		</div>
+	} else if currentPostLoading {
+		<div class="loading-spinner">{ t("general.loading") }</div>
+	} else {
+		<div class="blog-post-view">
+			<h1 class="project-title">{ currentPost.Title }</h1>
+			<p class="project-description">{ currentPost.Date }</p>
+			if len(currentPost.Tags) > 0 {
+				<div class="project-tags">
+					for _, tag := range currentPost.Tags {
+						<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
+					}
+				</div>
+			}
+			<div class="blog-post-content">
+				<div class="markdown-body">
+					@templ.Raw(currentPostHtml)
+				</div>
+			</div>
+			if site.Comments.BlogEnabled {
+				<div class="giscus-container"></div>
+			}
+		</div>
+	}
+}

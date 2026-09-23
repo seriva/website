@@ -1,27 +1,24 @@
 ## About
 
-Personal portfolio website built with vanilla JavaScript (ES6 modules), custom reactive system, and [Microtastic](https://github.com/scriptex/microtastic) for minimal build tooling. Content managed through YAML configuration and markdown files.
+Personal portfolio website built with [GoFront](https://github.com/seriva/gofront) v1.1.0 using `.templ` component architecture. Content managed through YAML configuration and markdown files.
 
-**Key Features:** Reactive UI with signals • Path-based SPA routing • Markdown blog & pages • Fuzzy search (Fuse.js) • Light/Dark themes • GitHub integration • Optional comments (giscus) & contact form (EmailJS)
+**Key Features:** GoFront templ components • Path-based SPA routing • Markdown blog & pages • Fuzzy search (Fuse.js) • Light/Dark themes • GitHub integration • Optional comments (giscus) & contact form (EmailJS)
 
 ## Tech Stack
 
-- **Core**: Vanilla HTML/JS (ES6 modules) • CSS-in-JS (via reactive.js) • Custom reactive system (signals, computed, declarative binding)
-- **Build**: Microtastic (SPA dev server) • Biome (lint/format) • Node.js test runner (91 tests)
-- **Content**: YAML config + Markdown • Custom YAML parser (~4KB) • Marked.js • Prism.js v1.30
+- **Core**: GoFront v1.1.0 (`.templ` components, Go-inspired frontend architecture)
+- **Build**: `gofront prep` & `gofront src -o ...` • Biome (lint/format) • Playwright (10 E2E suites)
+- **Content**: YAML config + Markdown • Pure GoFront YAML parser • Marked.js • Prism.js v1.30
 - **Features**: Fuse.js (search) • EmailJS (contact form) • giscus (comments)
 - **Assets**: Raleway fonts • Inline SVG icons (local, no CDNs)
 
 ## Architecture
 
-The application follows a modular namespace pattern with reactive components:
+The application is written in GoFront under `src/` and compiles to native JavaScript ES modules:
 
 **Key Modules:**
-- **Core**: `main.js` (init, event delegation) • `utils/reactive.js` (signals, components) • `Context` (state, data, blog utilities) • `Router` (SPA routing)
-- **Components**: `MainContent` (main container) • `Navbar`, `Footer`, `BlogList`, `BlogPost`, `Project`, `Page` (self-contained reactive UI - each loads its own data)
-- **Features**: `Search` (Fuse.js, conditional) • `ContactForm` (EmailJS, conditional) • `Theme` (light/dark)
-- **Styles**: `styles/reset.styles.js` (global reset) • `styles/shared.styles.js` (shared utilities) • `styles/theme.styles.js` (CSS variables) • `styles/fonts.styles.js` (font loading) • `styles/main.styles.js` (main styles) • `[component].styles.js` (component-scoped)
-- **Utilities**: `Templates` (HTML generation) • `MarkdownLoader` (markdown parsing, copy code buttons) • `PrismLoader` • `YAMLParser` • `i18n`
+- **Source (`src/`)**: `main.go` (init, global event delegation) • `store.go` (state, data, YAML parsing) • `router.go` (SPA routing) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `styles.go` (global CSS)
+- **Components (`src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
 
 ## Development
 

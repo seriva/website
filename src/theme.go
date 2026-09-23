@@ -1,0 +1,73 @@
+package main
+
+import "js:./browser.d.ts"
+
+const themeStorageKey = "theme-preference"
+
+func getInitialTheme() string {
+	saved := localStorage.getItem(themeStorageKey)
+	if saved != nil && saved != "" {
+		return string(saved)
+	}
+	return "dark"
+}
+
+func getThemeColors(name string) ThemeColors {
+	if name == "light" {
+		return site.LightTheme
+	}
+	return site.DarkTheme
+}
+
+func applyColorScheme(colors ThemeColors) {
+	root := document.documentElement
+	root.style.setProperty("--accent", colors.Primary)
+	root.style.setProperty("--font-color", colors.Text)
+	root.style.setProperty("--background-color", colors.Background)
+	root.style.setProperty("--header-color", colors.Secondary)
+	root.style.setProperty("--text-light", colors.TextLight)
+	root.style.setProperty("--border-color", colors.Border)
+	root.style.setProperty("--hover-color", colors.Hover)
+}
+
+func applyPrismTheme(themeName string) {
+	id := "prism-theme"
+	link := document.getElementById(id)
+	href := "/css/prism-themes/" + themeName + ".min.css"
+
+	if link != nil {
+		link.href = href
+	} else {
+		newLink := document.createElement("link")
+		newLink.id = id
+		newLink.rel = "stylesheet"
+		newLink.href = href
+		document.head.appendChild(newLink)
+	}
+}
+
+func applyTheme(theme string) {
+	currentTheme = theme
+	document.documentElement.setAttribute("data-theme", theme)
+	colors := getThemeColors(theme)
+	applyColorScheme(colors)
+	if colors.CodeTheme != "" {
+		applyPrismTheme(colors.CodeTheme)
+	}
+	updateGiscusTheme()
+}
+
+func toggleTheme() {
+	if currentTheme == "dark" {
+		currentTheme = "light"
+	} else {
+		currentTheme = "dark"
+	}
+	localStorage.setItem(themeStorageKey, currentTheme)
+	applyTheme(currentTheme)
+}
+
+func initTheme() {
+	initial := getInitialTheme()
+	applyTheme(initial)
+}

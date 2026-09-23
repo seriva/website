@@ -1,0 +1,14 @@
+package main
+
+import "fmt"
+import "time"
+
+func currentYear() int {
+	return time.Now().Year()
+}
+
+templ Footer() {
+	<footer>
+		{ fmt.Sprintf("© %d %s. %s.", currentYear(), site.Author, t("footer.rights")) }
+	</footer>
+}
