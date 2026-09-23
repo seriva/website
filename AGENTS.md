@@ -43,7 +43,7 @@ A modern personal portfolio website built with GoFront using `.templ` component 
 - **Quality**: Biome (`npm run format`, `npm run check`), GoFront type checker (`gofront src --check`)
 
 ## Architecture
-The application is written in GoFront in `src/`. The entry point is `src/main.go`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `src/*.templ`. State and store logic reside in `src/store.go`, routing in `src/router.go`, markdown handling in `src/markdown.go`, theme management in `src/theme.go`, search in `src/search.go`, email handling in `src/email.go`, and styles in `src/styles.go`. Build output is generated to `app/app.js` (dev) and `public/app.js` (prod).
+The application is written in GoFront in `src/`. The entry point is `src/main.go`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `src/*.templ`. State and store logic reside in `src/store.go`, route content state (`ViewState`) and its pure resolvers in `src/view.go`, routing in `src/router.go`, markdown handling in `src/markdown.go`, theme management in `src/theme.go`, search in `src/search.go`, email handling in `src/email.go`. Global CSS is a plain stylesheet at `app/css/app.css` (linked from `index.html`, formatted and linted by Biome). Build output is generated to `app/app.js` (dev) and `public/app.js` (prod).
 
 ## Core Rules & Anti-Patterns
 - **GoFront Architecture:** All UI components are written in `.templ` files in `src/`. Go source code lives in `src/` under `package main`.
@@ -51,6 +51,8 @@ The application is written in GoFront in `src/`. The entry point is `src/main.go
 - **Content lives in data:** all site content belongs in `app/data/content.yaml` and `app/data/blog/` / `app/data/pages/` Markdown files, never hard-coded in components.
 - **No scattered event listeners:** use `data-action` delegation in `main.go` instead of attaching `addEventListener` calls throughout components.
 - **State drives the DOM:** mutate the Go state, then call the matching region render (`renderMain`, `renderNavbar`, `renderContactForm`, `renderSearchResults`) or `syncOverlays()` in `src/ui.go`. Do not toggle classes or read form values ad hoc with `querySelector`.
+- **Route content lives in `view ViewState`:** one struct with a `LoadStatus` enum (`LoadReady`/`LoadPending`/`LoadFailed`/`LoadNotFound`), reset by `handleRoute` on every navigation. Keep resolvers (`resolvePost`/`resolveProject`/`resolvePage`) pure — no DOM, no `fetch` — so they stay unit-testable; async loaders in `src/router.go` own the side effects.
+- **Testable seams:** logic that touches `fetch`, `Fuse`, or the URL hash goes behind a small pure function (`resolveRedirect`, `postFromYAML`, `performSearch` over an injectable `fuseInstance`). DOM-dependent tests run under `gofront test src --dom` (jsdom); use `window.localStorage`, never bare `localStorage`, so code runs in both.
 - **No skipping quality gates:** never push without running `npm run check`, `gofront src --check`, `npm run test:e2e`, and `npm run prod`.
 - **Unversioned project:** this project does not use version numbers or semver releases. Feature plans belong in `docs/plans/<feature>-plan.md` (never `docs/vX.Y.Z/`). Completed plans are moved to `docs/plans/archive/` (marked Completed with date, roadmap link updated). Roadmap, documentation, changelog, and package metadata do not maintain version numbers.
 

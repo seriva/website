@@ -253,6 +253,18 @@ class NavPage {
   }
 }
 
+// type LoadStatus = int
+
+class ViewState {
+  constructor({ Post = new BlogPost(), Proj = new Project(), Page = new NavPage(), HTML = "", Status = null } = {}) {
+    this.Post = Post;
+    this.Proj = Proj;
+    this.Page = Page;
+    this.HTML = HTML;
+    this.Status = Status;
+  }
+}
+
 class SocialLink {
   constructor({ Icon = "", Href = "", Target = "", Rel = "" } = {}) {
     this.Icon = Icon;
@@ -360,6 +372,8 @@ let icons = { "sun": new iconDef({ ViewBox: "0 0 512 512", Path: "M361.5 1.2c5 2
 
 let isInitialRoute = true;
 
+let routeSeq = 0;
+
 let fuseInstance = null;
 
 let searchDebounceTimer = null;
@@ -394,27 +408,7 @@ let contactOpen = false;
 
 let contactForm = new ContactState();
 
-let currentPost = new BlogPost({ Tags: [] });
-
-let currentPostHtml = "";
-
-let currentPostLoading = false;
-
-let currentPostError = false;
-
-let currentProject = new Project({ Tags: [], YoutubeVideos: [], Links: [] });
-
-let projectReadmeHtml = "";
-
-let projectReadmeLoading = false;
-
-let projectReadmeError = false;
-
-let currentPageHtml = "";
-
-let currentPageLoading = false;
-
-let currentPageError = false;
+let view = new ViewState();
 
 let readmeCache = {  };
 
@@ -429,23 +423,22 @@ const RoutePost = 1;
 const RouteProject = 2;
 const RoutePage = 3;
 
-function AppStyles() {
-  return {Mount(___p) {
-    ___p.insertAdjacentHTML("beforeend", "<style id=\"app-styles\">" + appCSS() + "</style>");
-  }};
-}
+const LoadReady = 0;
+const LoadPending = 1;
+const LoadFailed = 2;
+const LoadNotFound = 3;
 
 function RouteView(r) {
   return {Mount(___p) {
     switch (r.Kind) {
       case RoutePost: {
-        (BlogPostView(currentPost, currentPostHtml, currentPostLoading, currentPostError, site.Comments.BlogEnabled)).Mount(___p);
+        (BlogPostView(view, site.Comments.BlogEnabled)).Mount(___p);
       break; }
       case RouteProject: {
-        (ProjectDetail(currentProject, projectReadmeHtml, projectReadmeLoading, projectReadmeError, site.Comments.ProjectsEnabled)).Mount(___p);
+        (ProjectDetail(view, site.Comments.ProjectsEnabled)).Mount(___p);
       break; }
       case RoutePage: {
-        (PageView(currentPageHtml, currentPageLoading, currentPageError)).Mount(___p);
+        (PageView(view)).Mount(___p);
       break; }
       default: {
         (BlogList(posts, r.Page, site.PostsPerPage)).Mount(___p);
@@ -623,9 +616,9 @@ function BlogList(allPosts, currentPage, perPage) {
   }};
 }
 
-function BlogPostView(post, html, loading, isError, commentsEnabled) {
+function BlogPostView(v, commentsEnabled) {
   return {Mount(___p) {
-    if (isError) {
+    if (v.Status === LoadNotFound || v.Status === LoadFailed) {
       const ___e29 = document.createElement("div");
       ___e29.className = "error-message";
       const ___e30 = document.createElement("h1");
@@ -635,7 +628,7 @@ function BlogPostView(post, html, loading, isError, commentsEnabled) {
       ___e31.appendChild(document.createTextNode(String(t("general.blogNotFoundMessage"))));
       ___e29.appendChild(___e31);
       ___p.appendChild(___e29);
-    } else if (loading) {
+    } else if (v.Status === LoadPending) {
       const ___e32 = document.createElement("div");
       ___e32.className = "loading-spinner";
       ___e32.appendChild(document.createTextNode(String(t("general.loading"))));
@@ -645,16 +638,16 @@ function BlogPostView(post, html, loading, isError, commentsEnabled) {
       ___e33.className = "blog-post-view";
       const ___e34 = document.createElement("h1");
       ___e34.className = "project-title";
-      ___e34.appendChild(document.createTextNode(String(post.Title)));
+      ___e34.appendChild(document.createTextNode(String(v.Post.Title)));
       ___e33.appendChild(___e34);
       const ___e35 = document.createElement("p");
       ___e35.className = "project-description";
-      ___e35.appendChild(document.createTextNode(String(post.Date)));
+      ___e35.appendChild(document.createTextNode(String(v.Post.Date)));
       ___e33.appendChild(___e35);
-      if (__len(post.Tags) > 0) {
+      if (__len(v.Post.Tags) > 0) {
         const ___e36 = document.createElement("div");
         ___e36.className = "project-tags";
-        for (const tag of post.Tags) {
+        for (const tag of v.Post.Tags) {
           const ___e37 = document.createElement("span");
           ___e37.className = "item-tag clickable-tag";
           ___e37.setAttribute("data-search-tag", String(tag));
@@ -667,7 +660,7 @@ function BlogPostView(post, html, loading, isError, commentsEnabled) {
       ___e38.className = "blog-post-content";
       const ___e39 = document.createElement("div");
       ___e39.className = "markdown-body";
-      ___e39.insertAdjacentHTML("beforeend", html);
+      ___e39.insertAdjacentHTML("beforeend", v.HTML);
       ___e38.appendChild(___e39);
       ___e33.appendChild(___e38);
       if (commentsEnabled) {
@@ -1228,7 +1221,7 @@ function setupEvents() {
 }
 
 async function main() {
-  ((sel,n)=>{const e=document.querySelector(sel);n.Mount(e)})("head",AppStyles());
+  view = newViewState();
   let err = await initData();
   if (err != null) {
     console.error("Init data failed:", err);
@@ -1503,9 +1496,9 @@ function Navbar(r, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
   }};
 }
 
-function PageView(html, loading, isError) {
+function PageView(v) {
   return {Mount(___p) {
-    if (isError) {
+    if (v.Status === LoadFailed) {
       const ___e87 = document.createElement("div");
       ___e87.className = "error-message";
       const ___e88 = document.createElement("h1");
@@ -1515,7 +1508,7 @@ function PageView(html, loading, isError) {
       ___e89.appendChild(document.createTextNode(String(t("general.notFoundMessage"))));
       ___e87.appendChild(___e89);
       ___p.appendChild(___e87);
-    } else if (loading) {
+    } else if (v.Status === LoadPending) {
       const ___e90 = document.createElement("div");
       ___e90.className = "loading-spinner";
       ___e90.appendChild(document.createTextNode(String(t("general.loading"))));
@@ -1525,35 +1518,35 @@ function PageView(html, loading, isError) {
       ___e91.className = "page-view";
       const ___e92 = document.createElement("div");
       ___e92.className = "markdown-body";
-      ___e92.insertAdjacentHTML("beforeend", html);
+      ___e92.insertAdjacentHTML("beforeend", v.HTML);
       ___e91.appendChild(___e92);
       ___p.appendChild(___e91);
     }
   }};
 }
 
-function ProjectReadme(repo, html, loading, isError) {
+function ProjectReadme(v) {
   return {Mount(___p) {
-    if (repo !== "") {
-      if (loading) {
+    if (v.Proj.GithubRepo !== "") {
+      if (v.Status === LoadPending) {
         const ___e93 = document.createElement("div");
         ___e93.setAttribute("id", "project-readme");
         const ___e94 = document.createElement("p");
         ___e94.appendChild(document.createTextNode(String(t("project.loadingReadme"))));
         ___e93.appendChild(___e94);
         ___p.appendChild(___e93);
-      } else if (isError) {
+      } else if (v.Status === LoadFailed) {
         const ___e95 = document.createElement("div");
         ___e95.setAttribute("id", "project-readme");
         const ___e96 = document.createElement("p");
         ___e96.appendChild(document.createTextNode(String(t("project.readmeError"))));
         ___e95.appendChild(___e96);
         ___p.appendChild(___e95);
-      } else if (html !== "") {
+      } else if (v.HTML !== "") {
         const ___e97 = document.createElement("div");
         ___e97.setAttribute("id", "project-readme");
         ___e97.className = "markdown-body";
-        ___e97.insertAdjacentHTML("beforeend", html);
+        ___e97.insertAdjacentHTML("beforeend", v.HTML);
         ___p.appendChild(___e97);
       }
     }
@@ -1660,9 +1653,9 @@ function ProjectLinks(links) {
   }};
 }
 
-function ProjectDetail(p, readmeHtml, loading, isError, commentsEnabled) {
+function ProjectDetail(v, commentsEnabled) {
   return {Mount(___p) {
-    if (isError && p.ID === "") {
+    if (v.Status === LoadNotFound) {
       const ___e117 = document.createElement("div");
       ___e117.className = "error-message";
       const ___e118 = document.createElement("h1");
@@ -1677,16 +1670,16 @@ function ProjectDetail(p, readmeHtml, loading, isError, commentsEnabled) {
       ___e120.className = "project-detail";
       const ___e121 = document.createElement("h1");
       ___e121.className = "project-title";
-      ___e121.appendChild(document.createTextNode(String(p.Title)));
+      ___e121.appendChild(document.createTextNode(String(v.Proj.Title)));
       ___e120.appendChild(___e121);
       const ___e122 = document.createElement("p");
       ___e122.className = "project-description";
-      ___e122.appendChild(document.createTextNode(String(p.Description)));
+      ___e122.appendChild(document.createTextNode(String(v.Proj.Description)));
       ___e120.appendChild(___e122);
-      if (__len(p.Tags) > 0) {
+      if (__len(v.Proj.Tags) > 0) {
         const ___e123 = document.createElement("div");
         ___e123.className = "project-tags";
-        for (const tag of p.Tags) {
+        for (const tag of v.Proj.Tags) {
           const ___e124 = document.createElement("span");
           ___e124.className = "item-tag clickable-tag";
           ___e124.setAttribute("data-search-tag", String(tag));
@@ -1695,10 +1688,10 @@ function ProjectDetail(p, readmeHtml, loading, isError, commentsEnabled) {
         }
         ___e120.appendChild(___e123);
       }
-      (ProjectReadme(p.GithubRepo, readmeHtml, loading, isError)).Mount(___e120);
-      (ProjectMedia(p.YoutubeVideos)).Mount(___e120);
-      (ProjectDemo(p)).Mount(___e120);
-      (ProjectLinks(p.Links)).Mount(___e120);
+      (ProjectReadme(v)).Mount(___e120);
+      (ProjectMedia(v.Proj.YoutubeVideos)).Mount(___e120);
+      (ProjectDemo(v.Proj)).Mount(___e120);
+      (ProjectLinks(v.Proj.Links)).Mount(___e120);
       if (commentsEnabled) {
         const ___e125 = document.createElement("div");
         ___e125.className = "giscus-container";
@@ -1940,14 +1933,48 @@ function parseRoute(path) {
   return new RouteMatch({ Kind: RouteBlog, Page: 1 });
 }
 
+function resolveRedirect(hash) {
+  let target = "";
+  let ok = false;
+  const __defers = [];
+  let __panic = null;
+  try {
+    __defers.push(() => { (function() {
+      {
+        let r = (typeof __panic !== "undefined" && __panic !== null ? (() => { const __r = __panic.message ?? String(__panic); __panic = null; return __r; })() : null);
+        if (r != null) {
+          target = "";
+          ok = false;
+        }
+      }
+    })(); });
+    let [encoded, found] = (hash).startsWith("#!redirect=") ? [(hash).slice(("#!redirect=").length), true] : [hash, false];
+    if (!found || encoded === "") {
+      return ["", false];
+    }
+    let decoded = String(decodeURIComponent(encoded));
+    if (!decoded.startsWith("/") || decoded.startsWith("//")) {
+      return ["", false];
+    }
+    return [decoded, true];
+  } catch (__err) {
+    __panic = __err;
+  } finally {
+    for (let __i = __defers.length - 1; __i >= 0; __i--) __defers[__i]();
+    if (__panic !== null) throw __panic;
+  }
+  return [target, ok];
+}
+
 async function handleRoute() {
   resetOverlays();
   let path = window.location.pathname;
-  let hash = window.location.hash;
-  if (hash.startsWith("#!redirect=")) {
-    let redirect = decodeURIComponent(hash.slice(11));
-    window.history.replaceState({  }, "", redirect);
-    path = redirect;
+  {
+    let [redirect, ok] = resolveRedirect(window.location.hash);
+    if (ok) {
+      window.history.replaceState({  }, "", redirect);
+      path = redirect;
+    }
   }
   if (!isInitialRoute) {
     let mainEl = document.querySelector("#main-content");
@@ -1957,7 +1984,12 @@ async function handleRoute() {
     }
   }
   isInitialRoute = false;
+  routeSeq++;
   route = parseRoute(path);
+  view = newViewState();
+  window.scrollTo({ "top": 0, "left": 0, "behavior": "instant" });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
   switch (route.Kind) {
     case RoutePost:
     {
@@ -1988,9 +2020,6 @@ async function handleRoute() {
       mainEl.removeAttribute("tabindex");
     }, 100);
   }
-  window.scrollTo({ "top": 0, "left": 0, "behavior": "instant" });
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
 }
 
 function showBlog(page) {
@@ -2003,47 +2032,33 @@ function showBlog(page) {
 }
 
 async function showPost(slug) {
-  let found = new BlogPost();
-  let isFound = false;
-  for (const [_$, p] of __s(posts).entries()) {
-    if (p.Slug === slug || p.ID === slug) {
-      found = p;
-      isFound = true;
-      break;
-    }
-  }
-  if (!isFound) {
-    currentPostError = true;
-    currentPostLoading = false;
+  let [v, needsFetch] = resolvePost(slug, posts, postHtmlCache);
+  view = v;
+  if (view.Status === LoadNotFound) {
     renderRoute();
     return;
   }
-  currentPost = found;
-  document.title = currentPost.Title + " - " + site.Title;
-  {
-    let cached = postHtmlCache[currentPost.Filename];
-    let ok = (currentPost.Filename) in postHtmlCache;
-    if (ok && cached !== "") {
-      currentPostHtml = cached;
-      currentPostLoading = false;
-      currentPostError = false;
-    } else {
-      currentPostLoading = true;
-      currentPostError = false;
-      let [mdText, err] = await loadMarkdownFile("/data/blog/" + currentPost.Filename);
-      if (err != null) {
-        currentPostError = true;
-        currentPostLoading = false;
-        renderRoute();
+  document.title = view.Post.Title + " - " + site.Title;
+  if (needsFetch) {
+    let seq = routeSeq;
+    renderRoute();
+    let [mdText, err] = await loadMarkdownFile("/data/blog/" + v.Post.Filename);
+    if (err != null) {
+      if (seq !== routeSeq) {
         return;
       }
-      let [_, content] = parseFrontmatter(mdText);
-      let html = parseMarkdown(content);
-      postHtmlCache[currentPost.Filename] = html;
-      currentPostHtml = html;
-      currentPostLoading = false;
-      currentPostError = false;
+      view.Status = LoadFailed;
+      renderRoute();
+      return;
     }
+    let [_, content] = parseFrontmatter(mdText);
+    let html = parseMarkdown(content);
+    postHtmlCache[v.Post.Filename] = html;
+    if (seq !== routeSeq) {
+      return;
+    }
+    view.HTML = html;
+    view.Status = LoadReady;
   }
   renderRoute();
   highlightCode();
@@ -2051,58 +2066,30 @@ async function showPost(slug) {
 }
 
 async function showProject(id) {
-  let found = new Project();
-  let isFound = false;
-  for (const [_$, p] of __s(projects).entries()) {
-    if (p.ID === id) {
-      found = p;
-      isFound = true;
-      break;
+  let [v, needsFetch] = resolveProject(id, projects, readmeCache);
+  view = v;
+  if (view.Status === LoadNotFound) {
+    renderRoute();
+    return;
+  }
+  document.title = view.Proj.Title + " - " + site.Title;
+  if (needsFetch) {
+    let seq = routeSeq;
+    renderRoute();
+    let [mdText, err] = await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername));
+    let html = "";
+    if (err == null) {
+      html = parseMarkdown(mdText);
+      readmeCache[v.Proj.GithubRepo] = html;
     }
-  }
-  if (!isFound) {
-    currentProject = new Project({ Tags: [], YoutubeVideos: [], Links: [] });
-    projectReadmeError = true;
-    projectReadmeLoading = false;
-    renderRoute();
-    return;
-  }
-  currentProject = found;
-  document.title = currentProject.Title + " - " + site.Title;
-  if (currentProject.GithubRepo === "") {
-    projectReadmeLoading = false;
-    projectReadmeError = false;
-    renderRoute();
-    loadGiscus();
-    return;
-  }
-  {
-    let cached = readmeCache[currentProject.GithubRepo];
-    let ok = (currentProject.GithubRepo) in readmeCache;
-    if (ok && cached !== "") {
-      projectReadmeHtml = parseMarkdown(cached);
-      projectReadmeLoading = false;
-      projectReadmeError = false;
+    if (seq !== routeSeq) {
+      return;
+    }
+    if (err != null) {
+      view.Status = LoadFailed;
     } else {
-      projectReadmeLoading = true;
-      projectReadmeError = false;
-      let repo = currentProject.GithubRepo;
-      if (!repo.includes("/")) {
-        repo = site.GithubUsername + "/" + repo;
-      }
-      let branch = currentProject.GithubBranch;
-      if (branch === "") {
-        branch = "main";
-      }
-      let url = "https://raw.githubusercontent.com/" + repo + "/" + branch + "/README.md";
-      let [mdText, err] = await loadMarkdownFile(url);
-      if (err != null) {
-        projectReadmeError = true;
-      } else {
-        readmeCache[currentProject.GithubRepo] = mdText;
-        projectReadmeHtml = parseMarkdown(mdText);
-      }
-      projectReadmeLoading = false;
+      view.HTML = html;
+      view.Status = LoadReady;
     }
   }
   renderRoute();
@@ -2111,38 +2098,26 @@ async function showProject(id) {
 }
 
 async function showPage(id) {
-  let found = new NavPage();
-  let isFound = false;
-  for (const [_$, p] of __s(navPages).entries()) {
-    if (p.ID === id) {
-      found = p;
-      isFound = true;
-      break;
+  let [v, needsFetch] = resolvePage(id, navPages, pageHtmlCache);
+  view = v;
+  document.title = view.Page.Title + " - " + site.Title;
+  if (needsFetch) {
+    let seq = routeSeq;
+    renderRoute();
+    let [mdText, err] = await loadMarkdownFile("/data/pages/" + id + ".md");
+    let html = "";
+    if (err == null) {
+      html = parseMarkdown(mdText);
+      pageHtmlCache[id] = html;
     }
-  }
-  if (!isFound) {
-    found = new NavPage({ ID: id, Title: id });
-  }
-  document.title = found.Title + " - " + site.Title;
-  {
-    let cached = pageHtmlCache[id];
-    let ok = (id) in pageHtmlCache;
-    if (ok && cached !== "") {
-      currentPageHtml = cached;
-      currentPageLoading = false;
-      currentPageError = false;
+    if (seq !== routeSeq) {
+      return;
+    }
+    if (err != null) {
+      view.Status = LoadFailed;
     } else {
-      currentPageLoading = true;
-      currentPageError = false;
-      let [mdText, err] = await loadMarkdownFile("/data/pages/" + id + ".md");
-      if (err != null) {
-        currentPageError = true;
-      } else {
-        let html = parseMarkdown(mdText);
-        pageHtmlCache[id] = html;
-        currentPageHtml = html;
-      }
-      currentPageLoading = false;
+      view.HTML = html;
+      view.Status = LoadReady;
     }
   }
   renderRoute();
@@ -2428,6 +2403,30 @@ function intVal(v) {
   return Math.trunc(Number(v));
 }
 
+function postFromYAML(p) {
+  let fn = strVal(p.filename);
+  let slug = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(fn, ".md");
+  let tags = [];
+  if (p.tags != null) {
+    for (const [_$, tg] of __s(p.tags).entries()) {
+      tags = __append(tags, strVal(tg));
+    }
+  }
+  return new BlogPost({ ID: slug, Slug: slug, Title: strVal(p.title), Date: strVal(p.date), Excerpt: strVal(p.excerpt), Tags: tags, Filename: fn, Href: "/blog/" + slug });
+}
+
+function sortPostsByDate(list) {
+  list.sort(function(a, b) {
+    if (a.Date < b.Date) {
+      return 1;
+    }
+    if (a.Date > b.Date) {
+      return -1;
+    }
+    return 0;
+  });
+}
+
 async function initData() {
   let res = await fetch("/data/content.yaml");
   if (res == null || !res.ok) {
@@ -2494,28 +2493,9 @@ async function initData() {
     }
     if (data.blog.posts != null) {
       for (const [_$, p] of __s(data.blog.posts).entries()) {
-        let fn = strVal(p.filename);
-        let slug = fn;
-        if (slug.endsWith(".md")) {
-          slug = slug.slice(0, __len(slug) - 3);
-        }
-        let tags = [];
-        if (p.tags != null) {
-          for (const [_$, tg] of __s(p.tags).entries()) {
-            tags = __append(tags, strVal(tg));
-          }
-        }
-        posts = __append(posts, new BlogPost({ ID: slug, Slug: slug, Title: strVal(p.title), Date: strVal(p.date), Excerpt: strVal(p.excerpt), Tags: tags, Filename: fn, Href: "/blog/" + slug }));
+        posts = __append(posts, postFromYAML(p));
       }
-      posts.sort(function(a, b) {
-        if (a.Date < b.Date) {
-          return 1;
-        }
-        if (a.Date > b.Date) {
-          return -1;
-        }
-        return 0;
-      });
+      sortPostsByDate(posts);
     }
   }
   if (data.projects != null) {
@@ -2557,12 +2537,8 @@ async function initData() {
   return null;
 }
 
-function appCSS() {
-  return "\n/* Fonts */\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 400;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-400-normal.woff2\") format(\"woff2\");\n}\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 600;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-600-normal.woff2\") format(\"woff2\");\n}\n@font-face {\n\tfont-family: Raleway;\n\tfont-style: normal;\n\tfont-weight: 700;\n\tfont-display: swap;\n\tsrc: url(\"/fonts/raleway-latin-700-normal.woff2\") format(\"woff2\");\n}\n\n.icon {\n\tdisplay: inline-block;\n\tvertical-align: middle;\n\ttransition: transform var(--transition-fast);\n}\n.icon:hover {\n\ttransform: rotate(5deg) scale(1.1);\n}\n\n/* CSS Custom Properties */\n:root {\n\t--accent: #10B981;\n\t--background-color: #0D1117;\n\t--header-color: #111827;\n\t--hover-color: #1A2332;\n\t--border-color: #21262D;\n\t--font-color: #E6EDF3;\n\t--text-light: #7D8590;\n\t--error-color: #ff6b6b;\n\t--border-width: 2px;\n\t--border-radius: 4px;\n\t--border-radius-large: 8px;\n\t--spacing-xs: 4px;\n\t--spacing-sm: 8px;\n\t--spacing-md: 15px;\n\t--spacing-lg: 24px;\n\t--spacing-xl: 2rem;\n\t--font-family-primary: Raleway, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif;\n\t--font-family-mono: Consolas, Monaco, \"Andale Mono\", \"Ubuntu Mono\", monospace;\n\t--font-size-base: 16px;\n\t--font-size-sm: 0.9em;\n\t--font-size-lg: 1.1em;\n\t--theme-transition-duration: 0.25s;\n\t--theme-transition-timing: ease-in-out;\n\t--line-height-base: 1.6;\n\t--transition-fast: 0.2s ease;\n\t--transition-normal: 0.3s ease;\n\t--z-navbar: 1030;\n\t--z-dropdown: 1000;\n}\n\n/* Reset & Base Styles */\nhtml {\n\theight: 100%;\n\toverflow-x: hidden;\n\toverflow-y: scroll;\n\tscroll-behavior: smooth;\n}\nhtml::after {\n\tcontent: \"\";\n\tdisplay: block;\n\theight: 101vh;\n\twidth: 1px;\n\tposition: absolute;\n\ttop: 0;\n\tleft: -1px;\n\tpointer-events: none;\n\tvisibility: hidden;\n}\n\n/* Prevent outer scrollbar when contact modal is open */\nhtml.modal-open,\nbody.modal-open,\nhtml:has(#contact-modal.show),\nbody:has(#contact-modal.show) {\n\toverflow: hidden !important;\n}\n\nhtml.modal-open::after,\nhtml:has(#contact-modal.show)::after {\n\tdisplay: none !important;\n}\n\n*, *::before, *::after {\n\tbox-sizing: border-box;\n}\n\n/* Theme color transitions on elements that change */\nbody, main, nav.navbar, footer, .navbar-inner, .dropdown-menu, .blog-post-card, .search-page-header, .contact-modal-content {\n\ttransition: background-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tcolor var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tborder-color var(--theme-transition-duration) var(--theme-transition-timing);\n}\n\na, button, input, textarea, select, .nav-link, .dropdown-item {\n\ttransition: background-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tcolor var(--theme-transition-duration) var(--theme-transition-timing),\n\t\tborder-color var(--theme-transition-duration) var(--theme-transition-timing),\n\t\topacity var(--transition-fast),\n\t\ttransform var(--transition-fast);\n}\n\nbody {\n\tmin-height: 100vh;\n\tmargin: 0;\n\tpadding-top: 56px;\n\tdisplay: flex;\n\ttext-align: center;\n\tflex-direction: column;\n\tfont-family: var(--font-family-primary);\n\tfont-size: var(--font-size-base);\n\tbackground-color: var(--background-color);\n\tcolor: var(--font-color);\n\tline-height: var(--line-height-base);\n\t-webkit-font-smoothing: antialiased;\n\t-moz-osx-font-smoothing: grayscale;\n\ttext-rendering: optimizeLegibility;\n\toverflow-x: hidden;\n\twidth: 100%;\n}\n\n#app, .app-root {\n\tdisplay: flex;\n\tflex-direction: column;\n\tmin-height: calc(100vh - 56px);\n\tflex: 1 0 auto;\n}\n\n/* Region mount points: transparent to layout */\n#navbar-slot, #content-slot {\n\tdisplay: contents;\n}\n\nmain {\n\tmargin: 0 auto;\n\tpadding: var(--spacing-lg);\n\tflex: 1 0 auto;\n\tmax-width: 900px;\n\twidth: 100%;\n\tbackground-color: var(--background-color);\n\tcolor: var(--font-color);\n\tanimation: fadeIn 0.2s ease-in-out;\n}\nmain:focus {\n\toutline: none;\n}\n\n/* Page transition animations */\n@keyframes fadeIn {\n\tfrom {\n\t\topacity: 0;\n\t\ttransform: translateY(10px);\n\t}\n\tto {\n\t\topacity: 1;\n\t\ttransform: translateY(0);\n\t}\n}\n\nmain.page-transition-out {\n\tanimation: fadeOut 0.2s ease-in-out forwards;\n}\n\n@keyframes fadeOut {\n\tfrom {\n\t\topacity: 1;\n\t\ttransform: translateY(0);\n\t}\n\tto {\n\t\topacity: 0;\n\t\ttransform: translateY(-10px);\n\t}\n}\n\nimg {\n\tmax-width: 100%;\n}\n\na {\n\tcolor: var(--accent);\n}\na.icon:hover {\n\ttext-decoration: none;\n}\n\n/* Tags */\n.item-tag {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n\tpadding: var(--spacing-xs) var(--spacing-sm);\n\tborder-radius: var(--border-radius);\n\tfont-size: var(--font-size-sm);\n\tdisplay: inline-block;\n\tmargin: 2px;\n}\n.clickable-tag {\n\tcursor: pointer;\n\ttransition: all var(--transition-fast);\n}\n.clickable-tag:hover {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n\ttransform: translateY(-1px);\n\tbox-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);\n}\n\n/* About Page */\n.about-pic {\n\twidth: 15vh;\n\theight: 15vh;\n\tborder-radius: 50%;\n\tmargin-bottom: 20px;\n\tobject-fit: cover;\n\ttransition: transform var(--transition-normal);\n}\n.about-pic:hover {\n\ttransform: scale(1.05);\n}\n\n@keyframes imageLoad {\n\tfrom { opacity: 0; transform: scale(0.95); }\n\tto { opacity: 1; transform: scale(1); }\n}\n\n/* Shared Loading & Error styles */\n.loading-spinner {\n\ttext-align: center;\n\tpadding: 2rem;\n\tcolor: var(--accent);\n\tfont-size: 1.2em;\n\tanimation: pulse 1.5s ease-in-out infinite;\n}\n@keyframes pulse {\n\t0%, 100% { opacity: 1; }\n\t50% { opacity: 0.5; }\n}\n\n.error-message {\n\ttext-align: center;\n\tpadding: 2rem;\n\tmax-width: 600px;\n\tmargin: 0 auto;\n}\n.error-message h1 {\n\tcolor: #ff6b6b;\n\tmargin-bottom: 1rem;\n\tfont-size: 2em;\n}\n.error-message p {\n\tcolor: var(--text-light);\n\tfont-size: 1.1em;\n}\n\n/* Accessibility */\nbutton:focus, a:focus, input:focus, select:focus, textarea:focus {\n\toutline: 2px solid var(--accent);\n\toutline-offset: 2px;\n}\n*:focus:not(:focus-visible) {\n\toutline: none;\n}\n\n/* Navbar */\nnav.navbar {\n\tbackground-color: var(--header-color);\n\tborder-bottom: var(--border-width) solid var(--accent);\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\tz-index: var(--z-navbar);\n\tfont-family: var(--font-family-primary);\n}\nnav.navbar .navbar-inner {\n\tmax-width: 1000px;\n\tmargin-inline: auto;\n\tpadding: 0 15px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: space-between;\n}\nnav.navbar .navbar-brand {\n\tcolor: var(--font-color);\n\tfont-weight: bold;\n\ttext-decoration: none;\n\tfont-size: 1.25em;\n\tdisplay: none;\n\tpadding: 11px 0;\n}\nnav.navbar .navbar-collapse {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: space-between;\n\twidth: 100%;\n}\nnav.navbar .navbar-nav {\n\tdisplay: flex;\n\tlist-style: none;\n\tmargin: 0;\n\tpadding: 0;\n\talign-items: stretch;\n}\nnav.navbar .navbar-nav.left {\n\tmargin-right: auto;\n}\nnav.navbar .navbar-nav.right {\n\tmargin-left: auto;\n}\nnav.navbar .nav-item {\n\tposition: relative;\n\tdisplay: flex;\n\talign-items: stretch;\n}\nbutton.nav-link {\n\tbackground: none;\n\tborder: none;\n\tcursor: pointer;\n\tfont-family: inherit;\n\tfont-size: inherit;\n\twidth: auto;\n\ttransition: transform 0.1s ease, background-color var(--transition-fast), color var(--transition-fast);\n}\nbutton.nav-link:active {\n\ttransform: scale(0.95);\n}\n.nav-link {\n\tdisplay: flex;\n\talign-items: center;\n\tpadding: 11px 20px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tline-height: 1.2;\n\tfont-size: 1.25em;\n\tfont-weight: 700;\n\ttransition: background-color var(--transition-fast),\n\t\t\t\tcolor var(--transition-fast),\n\t\t\t\tborder-color var(--transition-fast),\n\t\t\t\topacity var(--transition-fast),\n\t\t\t\ttransform var(--transition-fast);\n}\n.navbar-menu .nav-link, .navbar-icon .nav-link {\n\tfont-size: 1.35rem;\n}\n.navbar-menu .nav-link {\n\tfont-weight: 700;\n}\n.navbar-icon .nav-link svg {\n\ttransition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),\n\t\t\t\trotate 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);\n\ttransform-origin: center;\n}\n.navbar-icon .nav-link:hover svg, .navbar-icon .nav-link:focus svg {\n\ttransform: rotate(8deg) scale(1.25);\n}\n.navbar-icon .nav-link:active svg {\n\ttransform: rotate(4deg) scale(1.1);\n}\n.nav-link:hover, .nav-link:focus, .nav-link:active {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.nav-link.active {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.nav-link:focus:not(.active) {\n\toutline: 2px solid var(--accent);\n\toutline-offset: -2px;\n}\n.nav-link:focus:not(:focus-visible):not(.active) {\n\tbackground-color: transparent;\n\tcolor: var(--font-color);\n\toutline: none;\n}\n.nav-link.active:focus {\n\toutline: none;\n}\n.nav-link:focus:not(:focus-visible):hover {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n}\n\n@media (min-width: 768px) {\n\tnav.navbar .navbar-inner {\n\t\tpadding-left: 20px;\n\t\tpadding-right: 20px;\n\t}\n}\n\n.navbar-toggle {\n\tdisplay: none;\n\tbackground: transparent;\n\tborder: none;\n\tcolor: var(--font-color);\n\tfont-size: 1.5em;\n\tcursor: pointer;\n\tpadding: 11px 0.5rem;\n\ttransition: transform var(--transition-fast);\n\toverflow: visible;\n}\n.navbar-toggle:focus {\n\toutline: 2px solid var(--accent);\n\toutline-offset: 2px;\n}\n.navbar-toggle:focus:not(:focus-visible) {\n\toutline: none;\n}\n.navbar-toggle:active {\n\ttransform: scale(0.9);\n}\n.navbar-toggle-icon {\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: relative;\n\ttransition: background-color var(--transition-normal);\n\tz-index: 1;\n}\n.navbar-toggle-icon::before {\n\tcontent: '';\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: absolute;\n\tleft: 0;\n\ttop: -8px;\n\ttransition: all var(--transition-normal);\n}\n.navbar-toggle-icon::after {\n\tcontent: '';\n\tdisplay: block;\n\twidth: 24px;\n\theight: 2px;\n\tbackground-color: currentColor;\n\tposition: absolute;\n\tleft: 0;\n\tbottom: -8px;\n\ttransition: all var(--transition-normal);\n}\n.navbar-toggle.active .navbar-toggle-icon {\n\tbackground-color: transparent;\n}\n.navbar-toggle.active .navbar-toggle-icon::before {\n\ttransform: rotate(45deg);\n\ttop: 0;\n}\n.navbar-toggle.active .navbar-toggle-icon::after {\n\ttransform: rotate(-45deg);\n\tbottom: 0;\n}\n\n/* Dropdown */\n.dropdown {\n\tposition: relative;\n}\n.dropdown-toggle {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.3rem;\n}\n.dropdown-chevron {\n\tdisplay: inline-flex;\n\talign-items: center;\n\ttransition: transform var(--transition-fast);\n\ttransform-origin: center;\n}\n.dropdown-chevron svg {\n\twidth: 0.8em;\n\theight: 0.8em;\n}\n.dropdown-chevron-down {\n\tdisplay: inline-flex;\n}\n.dropdown-chevron-up {\n\tdisplay: none;\n}\n.dropdown.show .dropdown-chevron-down {\n\tdisplay: none;\n}\n.dropdown.show .dropdown-chevron-up {\n\tdisplay: inline-flex;\n}\n.dropdown-menu {\n\tposition: absolute;\n\ttop: 100%;\n\tleft: 0;\n\tmin-width: 200px;\n\tbackground-color: var(--header-color);\n\tborder: var(--border-width) solid var(--accent);\n\tpadding: 0;\n\tmargin: 0;\n\tlist-style: none;\n\tz-index: var(--z-dropdown);\n\tbox-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);\n\topacity: 0;\n\tvisibility: hidden;\n\ttransform: translateY(-5px);\n\ttransition: all 0.2s ease;\n}\n.dropdown.show .dropdown-menu {\n\topacity: 1;\n\tvisibility: visible;\n\ttransform: translateY(0);\n}\n.dropdown-item {\n\tdisplay: block;\n\tpadding: 10px 20px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tfont-size: 16px;\n\tfont-weight: bold;\n\tbackground-color: var(--header-color);\n\ttransition: all var(--transition-fast);\n\tborder: none;\n\twidth: 100%;\n\ttext-align: left;\n\twhite-space: nowrap;\n}\n.dropdown-item:hover, .dropdown-item:focus, .dropdown-item:active, .dropdown-item.active {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n}\n.dropdown-item.active:focus {\n\toutline: none;\n}\n\n/* Theme Toggle */\n.theme-toggle {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--font-color);\n\tcursor: pointer;\n\tpadding: 11px 20px;\n\tdisplay: flex;\n\talign-items: center;\n\tfont-size: 1.35rem;\n\ttransition: color var(--transition-fast), background-color var(--transition-fast);\n}\n.theme-toggle:hover, .theme-toggle:focus {\n\tcolor: var(--accent);\n\tbackground-color: var(--hover-color);\n}\n.theme-toggle:hover svg, .theme-toggle:focus svg {\n\ttransform: rotate(8deg) scale(1.25);\n}\n.theme-toggle:active {\n\tcolor: var(--accent);\n}\n.theme-toggle:active svg {\n\ttransform: rotate(4deg) scale(1.1);\n}\n.theme-toggle svg {\n\ttransition: opacity var(--theme-transition-duration) var(--theme-transition-timing),\n\t\t\t\ttransform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),\n\t\t\t\tfill var(--transition-fast);\n\tfill: currentColor;\n}\n:root[data-theme=\"dark\"] .theme-toggle .icon-sun {\n\tdisplay: inline-block;\n\topacity: 1;\n}\n:root[data-theme=\"dark\"] .theme-toggle .icon-moon {\n\tdisplay: none;\n\topacity: 0;\n}\n:root[data-theme=\"light\"] .theme-toggle .icon-sun {\n\tdisplay: none;\n\topacity: 0;\n}\n:root[data-theme=\"light\"] .theme-toggle .icon-moon {\n\tdisplay: inline-block;\n\topacity: 1;\n}\n\n/* Mobile navbar */\n@media (max-width: 767px) {\n\tnav.navbar .navbar-brand {\n\t\tdisplay: block;\n\t}\n\t.navbar-toggle {\n\t\tdisplay: block;\n\t}\n\tnav.navbar .navbar-collapse {\n\t\tposition: absolute;\n\t\ttop: 100%;\n\t\tleft: 0;\n\t\tright: 0;\n\t\tbackground-color: var(--header-color);\n\t\tborder-bottom: var(--border-width) solid var(--accent);\n\t\tflex-direction: column;\n\t\talign-items: stretch;\n\t\tmax-height: 0;\n\t\toverflow: hidden;\n\t\ttransition: max-height 0.25s ease-in;\n\t}\n\tnav.navbar .navbar-collapse.show {\n\t\tmax-height: 800px;\n\t\toverflow-y: auto;\n\t\toverflow-x: hidden;\n\t\ttransition: max-height 0.8s ease-out;\n\t}\n\tnav.navbar .navbar-nav {\n\t\tflex-direction: column;\n\t\twidth: 100%;\n\t\tmax-width: 100%;\n\t\toverflow-x: hidden;\n\t}\n\tnav.navbar .navbar-nav.left, nav.navbar .navbar-nav.right {\n\t\tmargin: 0;\n\t}\n\tnav.navbar .navbar-nav.right {\n\t\tflex-direction: row;\n\t\tjustify-content: center;\n\t\tpadding: 10px 0;\n\t\tmargin-top: 10px;\n\t}\n\tnav.navbar .navbar-nav.right .nav-item {\n\t\tdisplay: inline-flex;\n\t}\n\tnav.navbar .navbar-nav.right .nav-link {\n\t\tpadding: 10px 15px;\n\t\theight: auto;\n\t}\n\tnav.navbar .navbar-nav.left .nav-item {\n\t\twidth: 100%;\n\t\theight: auto;\n\t\toverflow: hidden;\n\t}\n\tnav.navbar .navbar-nav.left .nav-link {\n\t\theight: auto;\n\t\tpadding: 12px 20px;\n\t\twidth: 100%;\n\t\tjustify-content: flex-start;\n\t}\n\t.dropdown {\n\t\tdisplay: flex;\n\t\tflex-direction: column;\n\t\twidth: 100%;\n\t}\n\t.dropdown-menu {\n\t\tposition: static;\n\t\tborder: none;\n\t\tbox-shadow: none;\n\t\twidth: 100%;\n\t\tdisplay: flex;\n\t\tflex-direction: column;\n\t\tmax-height: 0;\n\t\toverflow: hidden;\n\t\ttransition: max-height 0.4s ease-out;\n\t\torder: 2;\n\t}\n\t.dropdown-toggle {\n\t\torder: 1;\n\t\twidth: 100%;\n\t}\n\t.dropdown.show .dropdown-menu {\n\t\tmax-height: 500px;\n\t\ttransition: max-height 0.5s ease-out;\n\t}\n\t.dropdown-item {\n\t\tpadding-left: 40px;\n\t\twidth: 100%;\n\t\ttext-align: left;\n\t\twhite-space: normal;\n\t\tword-wrap: break-word;\n\t}\n}\n\n/* Blog List */\n.blog-container {\n\tmax-width: 900px;\n\tmargin: 0 auto;\n\ttext-align: left;\n}\n.blog-page-title {\n\tcolor: var(--accent);\n\tfont-size: 2em;\n\tmargin-bottom: 1.5rem;\n\ttext-align: center;\n}\n.blog-empty {\n\ttext-align: center;\n\tcolor: var(--text-light);\n\tfont-size: 1.1em;\n\tpadding: 2rem 0;\n}\n.blog-posts {\n\tdisplay: flex;\n\tflex-direction: column;\n\tgap: 1.5rem;\n\tmargin-bottom: 2rem;\n}\n.blog-post-card {\n\tpadding: 1.5rem;\n\tbackground-color: rgba(255, 255, 255, 0.02);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius-large);\n\ttransition: all var(--transition-normal);\n\tcursor: pointer;\n}\n.blog-post-card:hover {\n\tbackground-color: rgba(255, 255, 255, 0.05);\n\tborder-color: var(--accent);\n\ttransform: translateY(-4px) scale(1.01);\n\tbox-shadow: 0 8px 25px rgba(66, 155, 238, 0.15);\n}\n.blog-post-title {\n\tmargin: 0 0 0.35rem 0;\n\tfont-size: 1.35em;\n\tfont-weight: bold;\n\tline-height: 1.3;\n}\n.blog-post-title a {\n\tcolor: var(--accent);\n\ttext-decoration: none;\n\ttransition: color var(--transition-fast);\n}\n.blog-post-title a:hover {\n\tcolor: var(--font-color);\n}\n.blog-post-meta {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\talign-items: center;\n\tgap: 0.75rem;\n\tmargin-bottom: 0.75rem;\n\tfont-size: 1em;\n\tcolor: var(--text-light);\n}\n.blog-post-date {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.4rem;\n}\n.blog-post-tags {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\tgap: 0.4rem;\n}\n.blog-post-excerpt {\n\tcolor: var(--text-light);\n\tline-height: 1.5;\n\tmargin-bottom: 0;\n\tfont-size: 1.05em;\n}\n.blog-post-card mark {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n\tpadding: 1px 3px;\n\tborder-radius: 2px;\n\tfont-weight: bold;\n}\n\n.blog-pagination {\n\tmargin: 2rem 0;\n\tdisplay: flex;\n\tjustify-content: center;\n}\n.blog-pagination .pagination {\n\tdisplay: flex;\n\tgap: 0.5rem;\n\tlist-style: none;\n\tpadding: 0;\n\tmargin: 0;\n}\n.blog-pagination .page-item {\n\tdisplay: flex;\n}\n.blog-pagination .page-link {\n\tdisplay: inline-flex;\n\talign-items: center;\n\tjustify-content: center;\n\tpadding: 0.5rem 0.75rem;\n\tbackground-color: rgba(255, 255, 255, 0.02);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius);\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\ttransition: all var(--transition-fast);\n\tcursor: pointer;\n\tmin-width: 40px;\n\theight: 38px;\n\tbox-sizing: border-box;\n\ttext-align: center;\n}\n.blog-pagination .page-link svg {\n\tdisplay: inline-block;\n\tvertical-align: middle;\n}\n.blog-pagination .page-link:hover {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\tcolor: var(--accent);\n}\n.blog-pagination .page-item.active .page-link {\n\tbackground-color: var(--accent);\n\tborder-color: var(--accent);\n\tcolor: var(--background-color);\n\tfont-weight: bold;\n}\n.blog-pagination .page-item.disabled .page-link {\n\topacity: 0.5;\n\tcursor: not-allowed;\n\tpointer-events: none;\n}\n\n@media (max-width: 767px) {\n\t.blog-post-card {\n\t\tpadding: 1rem;\n\t\tmargin: 0.25rem;\n\t\ttext-align: center;\n\t}\n\t.blog-posts {\n\t\tgap: 0.5rem;\n\t}\n\t.blog-post-title {\n\t\tfont-size: 1.25em;\n\t}\n\t.blog-post-meta {\n\t\tflex-direction: column;\n\t\talign-items: center;\n\t\tgap: 0.5rem;\n\t\tfont-size: 0.95em;\n\t\tjustify-content: center;\n\t}\n\t.blog-post-excerpt {\n\t\tfont-size: 1em;\n\t}\n\t.blog-pagination .page-link {\n\t\tpadding: 0.4rem 0.6rem;\n\t\tfont-size: 0.9em;\n\t\tmin-width: 35px;\n\t\theight: 35px;\n\t}\n}\n\n/* Projects */\n.project-title {\n\tcolor: var(--accent);\n\tfont-size: 1.5em;\n\tmargin: 0 0 0.02em 0;\n\tfont-weight: bold;\n}\n.project-description {\n\tmargin: 0 0 0.5em 0;\n\tcolor: var(--text-light);\n\tfont-size: 1.2em;\n\tline-height: 1.6;\n}\n.project-tags {\n\tmargin: 0.8em 0;\n\tfont-size: 1.1em;\n}\n.youtube-video {\n\tmargin: 20px 0;\n}\n.iframeWrapper {\n\tposition: relative;\n\tpadding-bottom: 56.25%;\n\tpadding-top: 25px;\n\theight: 0;\n}\n.iframeWrapper iframe {\n\tposition: absolute;\n\ttop: 0;\n\tleft: 0;\n\twidth: 100%;\n\theight: 100%;\n\tmax-width: 100%;\n\toverflow: hidden;\n}\n.demo-iframe-wrapper {\n\twidth: 100%;\n\tmargin: 20px 0;\n}\n.demo-iframe-wrapper iframe {\n\twidth: 100%;\n\theight: 700px;\n\tmax-width: 100%;\n\tborder: none;\n\toverflow: hidden;\n}\n.download-buttons {\n\tdisplay: flex;\n\tflex-wrap: wrap;\n\tgap: 15px;\n\tmargin: 1.5em 0;\n\tjustify-content: flex-start;\n}\n.download-btn {\n\tdisplay: inline-flex;\n\talign-items: center;\n\tjustify-content: center;\n\tgap: 8px;\n\tpadding: 12px 24px;\n\tbackground-color: var(--hover-color);\n\tborder: 2px solid var(--accent);\n\tborder-radius: 8px;\n\tcolor: var(--font-color);\n\ttext-decoration: none;\n\tfont: 600 1em var(--font-family-primary);\n\ttransition: all var(--transition-normal);\n\tcursor: pointer;\n\tappearance: none;\n}\n.download-btn:hover, .download-btn:focus {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\ttransform: translateY(-2px);\n\tbox-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);\n\tcolor: var(--accent);\n\ttext-decoration: none;\n}\n.download-btn:active {\n\ttransform: translateY(0) scale(0.95);\n\ttext-decoration: none;\n}\n\n/* Markdown */\n.markdown-body {\n\tfont-family: var(--font-family-primary);\n\tfont-size: 1em;\n\tline-height: 1.6;\n\tcolor: var(--text-light);\n\ttext-align: left;\n}\n.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {\n\tcolor: var(--font-color);\n\tmargin: 1em 0 0.5em;\n\tfont-weight: bold;\n\tline-height: 1.25;\n}\n.markdown-body h1 {\n\tfont-size: 1.8em;\n\tmargin-top: 0;\n}\n.markdown-body h2 {\n\tfont-size: 1.4em;\n}\n.markdown-body h3 {\n\tfont-size: 1.2em;\n}\n.markdown-body p, .markdown-body li {\n\tmargin: 0.5em 0;\n\tline-height: 1.6;\n\tfont-size: 1.1em;\n\tcolor: var(--text-light);\n}\n.markdown-body ul, .markdown-body ol {\n\tmargin: 0.5em 0;\n\tpadding-left: 2em;\n}\n.markdown-body code:not([class*=\"language-\"]) {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n\tpadding: 2px 6px;\n\tborder-radius: 3px;\n\tfont-family: var(--font-family-mono);\n\tfont-size: 0.9em;\n}\n.markdown-body pre:not([class*=\"language-\"]) {\n\tbackground-color: var(--hover-color);\n\tpadding: 0.5em;\n\tborder-radius: 3px;\n\toverflow-x: auto;\n\tmargin: 0.5em 0;\n\tborder: 1px solid var(--border-color);\n\tfont-family: var(--font-family-mono);\n\tline-height: 1.4;\n}\n.markdown-body pre[class*=\"language-\"] {\n\tmargin: 0.5em 0;\n\toverflow-x: auto;\n\tfont-family: var(--font-family-mono);\n\tline-height: 1.4;\n\tposition: relative;\n}\n.markdown-body a {\n\tcolor: var(--accent);\n\ttext-decoration: none;\n\tdisplay: inline-block;\n\ttransition: transform var(--transition-fast);\n}\n.markdown-body a:hover {\n\ttext-decoration: none;\n\ttransform: translateY(-2px);\n}\n.markdown-body blockquote {\n\tborder-left: 4px solid var(--accent);\n\tpadding-left: 1em;\n\tmargin: 0.5em 0;\n\tfont-style: italic;\n}\n.markdown-body table {\n\twidth: 100%;\n\tborder-collapse: collapse;\n\tmargin: 0.5em 0;\n}\n.markdown-body th, .markdown-body td {\n\tborder: 1px solid var(--border-color);\n\tpadding: 0.5em 1em;\n\ttext-align: left;\n}\n.markdown-body th {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--accent);\n\tfont-weight: bold;\n}\n.markdown-body hr {\n\tborder: none;\n\tborder-top: 1px solid var(--border-color);\n\tmargin: 0.5em 0;\n}\n\n/* Copy Code Button */\n.copy-code-button {\n\tposition: absolute;\n\ttop: 0.5em;\n\tright: 0.5em;\n\tpadding: 0.4em 0.8em;\n\tfont-size: 0.85em;\n\tfont-family: var(--font-family-primary);\n\tfont-weight: 700;\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: var(--border-radius);\n\tcursor: pointer;\n\topacity: 0;\n\ttransition: opacity var(--transition-fast), background-color var(--transition-fast);\n\tz-index: 10;\n}\npre:hover .copy-code-button {\n\topacity: 1;\n}\n.copy-code-button:hover {\n\tbackground-color: var(--accent);\n\tcolor: var(--background-color);\n}\n.copy-code-button:active {\n\ttransform: scale(0.95);\n}\n.copy-code-button.copied {\n\tbackground-color: #10b981;\n\tcolor: white;\n\topacity: 1;\n}\n\n/* Giscus comments */\n.giscus-container {\n\tmax-width: 900px;\n\tmargin: 3rem auto;\n\tpadding: 2rem 1rem;\n\tborder-top: 2px solid var(--border-color);\n}\n.giscus-container iframe {\n\tcolor-scheme: dark;\n}\n\n/* Search Page / Overlay */\n#search-page {\n\tdisplay: none;\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\tright: 0;\n\tbottom: 0;\n\tbackground-color: var(--background-color);\n\tz-index: 2000;\n\tflex-direction: column;\n\toverflow: hidden;\n\topacity: 0;\n\ttransform: scale(0.95);\n\tanimation: scaleFadeIn 0.25s ease-out forwards;\n}\n#search-page.show {\n\tdisplay: flex;\n}\n#search-page.closing {\n\tanimation: scaleFadeOut 0.2s ease-in forwards;\n}\n.search-page-header {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\theight: 56px;\n\tpadding: 0 1rem;\n\tbackground-color: var(--header-color);\n\tborder-bottom: var(--border-width) solid var(--accent);\n\tanimation: slideDown var(--transition-normal) ease-out;\n}\n.search-page-header-content {\n\tdisplay: flex;\n\talign-items: center;\n\tgap: 0.75rem;\n\twidth: 100%;\n\tmax-width: 900px;\n}\n.search-page-back {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--font-color);\n\tcursor: pointer;\n\tpadding: 0.5rem;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tfont-size: 1.2em;\n\ttransition: color var(--transition-fast);\n}\n.search-page-back:hover {\n\tcolor: var(--accent);\n}\n.search-page-input-wrapper {\n\tflex: 1;\n\tposition: relative;\n\tdisplay: flex;\n\talign-items: center;\n}\n.search-page-input {\n\twidth: 100%;\n\tpadding: 0.5rem 2.5rem 0.5rem 1rem;\n\tbackground-color: var(--hover-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: 20px;\n\tcolor: var(--font-color);\n\tfont-size: 1em;\n}\n.search-page-input::-webkit-search-cancel-button {\n\t-webkit-appearance: none;\n\tappearance: none;\n}\n.search-page-input:focus {\n\toutline: none;\n\tborder-color: var(--accent);\n\tbackground-color: var(--background-color);\n\tbox-shadow: 0 0 0 3px rgba(66, 155, 238, 0.1);\n}\n.search-page-clear {\n\tposition: absolute;\n\tright: 0.5rem;\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--text-light);\n\tcursor: pointer;\n\tpadding: 0.25rem 0.5rem;\n\tdisplay: none;\n\ttransition: color var(--transition-fast);\n}\n.search-page-clear:hover {\n\tcolor: var(--accent);\n}\n.search-page-clear.show {\n\tdisplay: block;\n}\n.search-page-content {\n\tflex: 1;\n\toverflow-y: auto;\n\tpadding: 1rem;\n\tdisplay: flex;\n\tjustify-content: center;\n\tanimation: fadeIn 0.4s ease-out 0.1s both;\n}\n.search-page-results {\n\tdisplay: flex;\n\tflex-direction: column;\n\tgap: 1.5rem;\n\twidth: 100%;\n\tmax-width: 900px;\n\ttext-align: left;\n}\n.search-no-results {\n\tpadding: var(--spacing-xl);\n\ttext-align: center;\n\tcolor: var(--text-light);\n}\n.search-no-results p {\n\tmargin: 0;\n\tfont-size: 0.9em;\n}\n\n/* Contact Modal */\n#contact-modal {\n\tdisplay: none;\n\tposition: fixed;\n\ttop: 0;\n\tleft: 0;\n\twidth: 100%;\n\theight: 100%;\n\tbackground-color: rgba(0, 0, 0, 0.8);\n\tz-index: 10000;\n\toverflow-y: auto;\n\tpadding: 2rem 1rem;\n}\n#contact-modal.show {\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n}\n#contact-modal.closing {\n\tanimation: fadeOut 0.2s ease-in-out forwards;\n}\n.contact-modal-content {\n\tbackground-color: var(--background-color);\n\tborder: 2px solid var(--border-color);\n\tborder-radius: 8px;\n\tpadding: 1.5rem;\n\tmax-width: 450px;\n\twidth: 100%;\n\tposition: relative;\n\tbox-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);\n\topacity: 0;\n\ttransform: scale(0.95);\n\tanimation: scaleFadeIn 0.25s ease-out forwards;\n}\n.contact-modal-header {\n\tdisplay: flex;\n\tjustify-content: space-between;\n\talign-items: center;\n\tmargin-bottom: 1rem;\n}\n.contact-modal-header h2 {\n\tmargin: 0;\n\tcolor: var(--accent);\n\tfont-size: 1.25rem;\n}\n.contact-modal-close {\n\tbackground: none;\n\tborder: none;\n\tcolor: var(--text-light);\n\tfont-size: 1.5rem;\n\tcursor: pointer;\n\tpadding: 0;\n\twidth: 32px;\n\theight: 32px;\n\tdisplay: flex;\n\talign-items: center;\n\tjustify-content: center;\n\tborder-radius: 4px;\n\ttransition: all 0.2s ease;\n}\n.contact-modal-close:hover {\n\tbackground-color: var(--hover-color);\n\tcolor: var(--font-color);\n}\n.contact-form .form-group {\n\tmargin-bottom: 0.75rem;\n}\n.contact-form label {\n\tdisplay: block;\n\tmargin-bottom: 0.25rem;\n\tcolor: var(--font-color);\n\tfont-weight: 600;\n\tfont-size: 0.9rem;\n\ttext-align: left;\n}\n.contact-form input, .contact-form textarea {\n\twidth: 100%;\n\tpadding: 0.6rem;\n\tbackground-color: var(--hover-color);\n\tborder: 1px solid var(--border-color);\n\tborder-radius: 4px;\n\tcolor: var(--font-color);\n\tfont-family: inherit;\n\tfont-size: 0.95rem;\n\ttransition: border-color 0.2s ease;\n}\n.contact-form input:focus, .contact-form textarea:focus {\n\toutline: none;\n\tborder-color: var(--accent);\n}\n.contact-form input.error, .contact-form textarea.error {\n\tborder-color: #ef4444;\n}\n.contact-form textarea {\n\tresize: vertical;\n\tmin-height: 100px;\n}\n.form-status {\n\tpadding: 0.6rem;\n\tborder-radius: 4px;\n\tmargin-bottom: 0.25rem;\n\ttext-align: center;\n\tfont-size: 0.9rem;\n\tdisplay: none;\n}\n.form-status.success, .form-status.error {\n\tdisplay: block;\n}\n.form-status.success {\n\tbackground-color: rgba(16, 185, 129, 0.1);\n\tborder: 1px solid var(--accent);\n\tcolor: var(--accent);\n}\n.form-status.error {\n\tbackground-color: rgba(239, 68, 68, 0.1);\n\tborder: 1px solid #ef4444;\n\tcolor: #ef4444;\n}\n.contact-form .btn {\n\twidth: 100%;\n\tpadding: 12px 24px;\n\tmargin-top: 0.75rem;\n\tbackground-color: var(--hover-color);\n\tborder: 2px solid var(--accent);\n\tborder-radius: 8px;\n\tcolor: var(--font-color);\n\tfont-weight: 600;\n\tfont-size: 1em;\n\tcursor: pointer;\n\ttransition: all var(--transition-normal);\n}\n.contact-form .btn:hover:not(:disabled) {\n\tbackground-color: var(--hover-color);\n\tborder-color: var(--accent);\n\tcolor: var(--accent);\n\ttransform: translateY(-2px);\n\tbox-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);\n}\n.contact-form .btn:disabled {\n\topacity: 0.5;\n\tcursor: not-allowed;\n\ttransform: none;\n}\n\n@keyframes scaleFadeIn {\n\tfrom { opacity: 0; transform: scale(0.95); }\n\tto { opacity: 1; transform: scale(1); }\n}\n@keyframes scaleFadeOut {\n\tfrom { opacity: 1; transform: scale(1); }\n\tto { opacity: 0; transform: scale(0.95); }\n}\n@keyframes slideDown {\n\tfrom { transform: translateY(-100%); opacity: 0; }\n\tto { transform: translateY(0); opacity: 1; }\n}\n\n/* Footer */\nfooter {\n\tmargin-top: auto;\n\tmargin-bottom: 0;\n\tpadding: 1rem 0;\n\tbackground-color: transparent;\n\tflex-shrink: 0;\n\tmax-width: 1000px;\n\tmargin-inline: auto;\n\ttext-align: center;\n\tfont-size: 0.9em;\n}\n\n/* Utilities */\n.text-center {\n\ttext-align: center;\n}\n.sr-only {\n\tposition: absolute;\n\twidth: 1px;\n\theight: 1px;\n\tpadding: 0;\n\tmargin: -1px;\n\toverflow: hidden;\n\tclip: rect(0, 0, 0, 0);\n\twhite-space: nowrap;\n\tborder-width: 0;\n}\n";
-}
-
 function getInitialTheme() {
-  let saved = localStorage.getItem(themeStorageKey);
+  let saved = window.localStorage.getItem(themeStorageKey);
   if (saved != null && saved !== "") {
     return String(saved);
   }
@@ -2626,7 +2602,7 @@ function nextTheme(current) {
 
 function toggleTheme() {
   let next = nextTheme(currentTheme);
-  localStorage.setItem(themeStorageKey, next);
+  window.localStorage.setItem(themeStorageKey, next);
   applyTheme(next);
 }
 
@@ -2707,4 +2683,87 @@ function resetOverlays() {
   syncOverlays();
 }
 
+function newViewState() {
+  return new ViewState({ Post: new BlogPost({ Tags: [] }), Proj: new Project({ Tags: [], YoutubeVideos: [], Links: [] }), Status: LoadReady });
+}
+
+function resolvePost(slug, all, cache) {
+  let v = newViewState();
+  for (const [_$, p] of __s(all).entries()) {
+    if (p.Slug === slug || p.ID === slug) {
+      v.Post = p;
+      {
+        let html = cache[p.Filename];
+        let ok = (p.Filename) in cache;
+        if (ok && html !== "") {
+          v.HTML = html;
+          return [v, false];
+        }
+      }
+      v.Status = LoadPending;
+      return [v, true];
+    }
+  }
+  v.Status = LoadNotFound;
+  return [v, false];
+}
+
+function resolveProject(id, all, cache) {
+  let v = newViewState();
+  for (const [_$, p] of __s(all).entries()) {
+    if (p.ID === id) {
+      v.Proj = p;
+      if (p.GithubRepo === "") {
+        return [v, false];
+      }
+      {
+        let html = cache[p.GithubRepo];
+        let ok = (p.GithubRepo) in cache;
+        if (ok && html !== "") {
+          v.HTML = html;
+          return [v, false];
+        }
+      }
+      v.Status = LoadPending;
+      return [v, true];
+    }
+  }
+  v.Status = LoadNotFound;
+  return [v, false];
+}
+
+function resolvePage(id, all, cache) {
+  let v = newViewState();
+  v.Page = new NavPage({ ID: id, Title: id });
+  for (const [_$, p] of __s(all).entries()) {
+    if (p.ID === id) {
+      v.Page = p;
+      break;
+    }
+  }
+  {
+    let html = cache[id];
+    let ok = (id) in cache;
+    if (ok && html !== "") {
+      v.HTML = html;
+      return [v, false];
+    }
+  }
+  v.Status = LoadPending;
+  return [v, true];
+}
+
+function readmeURL(p, githubUsername) {
+  let repo = p.GithubRepo;
+  if (!repo.includes("/")) {
+    repo = githubUsername + "/" + repo;
+  }
+  let branch = p.GithubBranch;
+  if (branch === "") {
+    branch = "main";
+  }
+  return "https://raw.githubusercontent.com/" + repo + "/" + branch + "/README.md";
+}
+
 main();
+(function(){var es=new EventSource('/_gofront/events');es.addEventListener('reload',function(){location.reload();});})();

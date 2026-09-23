@@ -45,15 +45,37 @@ func parseRoute(path string) RouteMatch {
 
 var isInitialRoute = true
 
+// routeSeq is bumped on every navigation so an in-flight loader can tell it
+// has been superseded and must not touch `view`.
+var routeSeq int
+
+// resolveRedirect decodes the GitHub Pages 404 fallback hash (`#!redirect=<path>`).
+// Malformed encodings and non-local targets are treated as no redirect rather than throwing.
+func resolveRedirect(hash string) (target string, ok bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			target = ""
+			ok = false
+		}
+	}()
+	encoded, found := strings.CutPrefix(hash, "#!redirect=")
+	if !found || encoded == "" {
+		return "", false
+	}
+	decoded := string(decodeURIComponent(encoded))
+	// Only same-origin paths: "//host" and "scheme:" would make replaceState throw.
+	if !strings.HasPrefix(decoded, "/") || strings.HasPrefix(decoded, "//") {
+		return "", false
+	}
+	return decoded, true
+}
+
 async func handleRoute() {
 	resetOverlays()
 
 	path := window.location.pathname
-	hash := window.location.hash
 
-	// 404 redirect handler (GitHub Pages SPA fallback)
-	if strings.HasPrefix(hash, "#!redirect=") {
-		redirect := decodeURIComponent(hash[11:])
+	if redirect, ok := resolveRedirect(window.location.hash); ok {
 		window.history.replaceState(map[string]any{}, "", redirect)
 		path = redirect
 	}
@@ -67,7 +89,14 @@ async func handleRoute() {
 	}
 	isInitialRoute = false
 
+	routeSeq++
 	route = parseRoute(path)
+	view = newViewState()
+
+	// Reset scroll before dispatch so the pending render already starts at the top.
+	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "instant"})
+	document.documentElement.scrollTop = 0
+	document.body.scrollTop = 0
 
 	switch route.Kind {
 	case RoutePost:
@@ -88,10 +117,6 @@ async func handleRoute() {
 			mainEl.removeAttribute("tabindex")
 		}, 100)
 	}
-
-	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "instant"})
-	document.documentElement.scrollTop = 0
-	document.body.scrollTop = 0
 }
 
 func showBlog(page int) {
@@ -104,48 +129,35 @@ func showBlog(page int) {
 }
 
 async func showPost(slug string) {
-	var found BlogPost
-	isFound := false
-	for _, p := range posts {
-		if p.Slug == slug || p.ID == slug {
-			found = p
-			isFound = true
-			break
-		}
-	}
-
-	if !isFound {
-		currentPostError = true
-		currentPostLoading = false
+	v, needsFetch := resolvePost(slug, posts, postHtmlCache)
+	view = v
+	if view.Status == LoadNotFound {
 		renderRoute()
 		return
 	}
 
-	currentPost = found
-	document.title = currentPost.Title + " - " + site.Title
+	document.title = view.Post.Title + " - " + site.Title
 
-	if cached, ok := postHtmlCache[currentPost.Filename]; ok && cached != "" {
-		currentPostHtml = cached
-		currentPostLoading = false
-		currentPostError = false
-	} else {
-		currentPostLoading = true
-		currentPostError = false
-
-		mdText, err := await loadMarkdownFile("/data/blog/" + currentPost.Filename)
+	if needsFetch {
+		seq := routeSeq
+		renderRoute()
+		mdText, err := await loadMarkdownFile("/data/blog/" + v.Post.Filename)
 		if err != nil {
-			currentPostError = true
-			currentPostLoading = false
+			if seq != routeSeq {
+				return
+			}
+			view.Status = LoadFailed
 			renderRoute()
 			return
 		}
-
 		_, content := parseFrontmatter(mdText)
 		html := parseMarkdown(content)
-		postHtmlCache[currentPost.Filename] = html
-		currentPostHtml = html
-		currentPostLoading = false
-		currentPostError = false
+		postHtmlCache[v.Post.Filename] = html
+		if seq != routeSeq {
+			return
+		}
+		view.HTML = html
+		view.Status = LoadReady
 	}
 	renderRoute()
 	highlightCode()
@@ -153,64 +165,33 @@ async func showPost(slug string) {
 }
 
 async func showProject(id string) {
-	var found Project
-	isFound := false
-	for _, p := range projects {
-		if p.ID == id {
-			found = p
-			isFound = true
-			break
-		}
-	}
-
-	if !isFound {
-		currentProject = Project{
-			Tags:          []string{},
-			YoutubeVideos: []string{},
-			Links:         []ProjectLink{},
-		}
-		projectReadmeError = true
-		projectReadmeLoading = false
+	v, needsFetch := resolveProject(id, projects, readmeCache)
+	view = v
+	if view.Status == LoadNotFound {
 		renderRoute()
 		return
 	}
 
-	currentProject = found
-	document.title = currentProject.Title + " - " + site.Title
+	document.title = view.Proj.Title + " - " + site.Title
 
-	if currentProject.GithubRepo == "" {
-		projectReadmeLoading = false
-		projectReadmeError = false
+	if needsFetch {
+		seq := routeSeq
 		renderRoute()
-		loadGiscus()
-		return
-	}
-
-	if cached, ok := readmeCache[currentProject.GithubRepo]; ok && cached != "" {
-		projectReadmeHtml = parseMarkdown(cached)
-		projectReadmeLoading = false
-		projectReadmeError = false
-	} else {
-		projectReadmeLoading = true
-		projectReadmeError = false
-
-		repo := currentProject.GithubRepo
-		if !strings.Contains(repo, "/") {
-			repo = site.GithubUsername + "/" + repo
+		mdText, err := await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername))
+		html := ""
+		if err == nil {
+			html = parseMarkdown(mdText)
+			readmeCache[v.Proj.GithubRepo] = html
 		}
-		branch := currentProject.GithubBranch
-		if branch == "" {
-			branch = "main"
+		if seq != routeSeq {
+			return
 		}
-		url := "https://raw.githubusercontent.com/" + repo + "/" + branch + "/README.md"
-		mdText, err := await loadMarkdownFile(url)
 		if err != nil {
-			projectReadmeError = true
+			view.Status = LoadFailed
 		} else {
-			readmeCache[currentProject.GithubRepo] = mdText
-			projectReadmeHtml = parseMarkdown(mdText)
+			view.HTML = html
+			view.Status = LoadReady
 		}
-		projectReadmeLoading = false
 	}
 	renderRoute()
 	highlightCode()
@@ -218,39 +199,28 @@ async func showProject(id string) {
 }
 
 async func showPage(id string) {
-	var found NavPage
-	isFound := false
-	for _, p := range navPages {
-		if p.ID == id {
-			found = p
-			isFound = true
-			break
-		}
-	}
+	v, needsFetch := resolvePage(id, navPages, pageHtmlCache)
+	view = v
+	document.title = view.Page.Title + " - " + site.Title
 
-	if !isFound {
-		found = NavPage{ID: id, Title: id}
-	}
-
-	document.title = found.Title + " - " + site.Title
-
-	if cached, ok := pageHtmlCache[id]; ok && cached != "" {
-		currentPageHtml = cached
-		currentPageLoading = false
-		currentPageError = false
-	} else {
-		currentPageLoading = true
-		currentPageError = false
-
+	if needsFetch {
+		seq := routeSeq
+		renderRoute()
 		mdText, err := await loadMarkdownFile("/data/pages/" + id + ".md")
-		if err != nil {
-			currentPageError = true
-		} else {
-			html := parseMarkdown(mdText)
+		html := ""
+		if err == nil {
+			html = parseMarkdown(mdText)
 			pageHtmlCache[id] = html
-			currentPageHtml = html
 		}
-		currentPageLoading = false
+		if seq != routeSeq {
+			return
+		}
+		if err != nil {
+			view.Status = LoadFailed
+		} else {
+			view.HTML = html
+			view.Status = LoadReady
+		}
 	}
 	renderRoute()
 	highlightCode()

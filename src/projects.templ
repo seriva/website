@@ -1,18 +1,18 @@
 package main
 
-templ ProjectReadme(repo string, html string, loading bool, isError bool) {
-	if repo != "" {
-		if loading {
+templ ProjectReadme(v ViewState) {
+	if v.Proj.GithubRepo != "" {
+		if v.Status == LoadPending {
 			<div id="project-readme">
 				<p>{ t("project.loadingReadme") }</p>
 			</div>
-		} else if isError {
+		} else if v.Status == LoadFailed {
 			<div id="project-readme">
 				<p>{ t("project.readmeError") }</p>
 			</div>
-		} else if html != "" {
+		} else if v.HTML != "" {
 			<div id="project-readme" class="markdown-body">
-				@templ.Raw(html)
+				@templ.Raw(v.HTML)
 			</div>
 		}
 	}
@@ -72,27 +72,27 @@ templ ProjectLinks(links []ProjectLink) {
 	}
 }
 
-templ ProjectDetail(p Project, readmeHtml string, loading bool, isError bool, commentsEnabled bool) {
-	if isError && p.ID == "" {
+templ ProjectDetail(v ViewState, commentsEnabled bool) {
+	if v.Status == LoadNotFound {
 		<div class="error-message">
 			<h1>{ t("general.projectNotFound") }</h1>
 			<p>{ t("general.projectNotFoundMessage") }</p>
 		</div>
 	} else {
 		<div class="project-detail">
-			<h1 class="project-title">{ p.Title }</h1>
-			<p class="project-description">{ p.Description }</p>
-			if len(p.Tags) > 0 {
+			<h1 class="project-title">{ v.Proj.Title }</h1>
+			<p class="project-description">{ v.Proj.Description }</p>
+			if len(v.Proj.Tags) > 0 {
 				<div class="project-tags">
-					for _, tag := range p.Tags {
+					for _, tag := range v.Proj.Tags {
 						<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
 					}
 				</div>
 			}
-			@ProjectReadme(p.GithubRepo, readmeHtml, loading, isError)
-			@ProjectMedia(p.YoutubeVideos)
-			@ProjectDemo(p)
-			@ProjectLinks(p.Links)
+			@ProjectReadme(v)
+			@ProjectMedia(v.Proj.YoutubeVideos)
+			@ProjectDemo(v.Proj)
+			@ProjectLinks(v.Proj.Links)
 			if commentsEnabled {
 				<div class="giscus-container"></div>
 			}
