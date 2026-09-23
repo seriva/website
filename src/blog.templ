@@ -1,11 +1,9 @@
 package main
 
-import "fmt"
-
 templ BlogPostCard(post BlogPost, index int) {
 	<article
 		class="blog-post-card"
-		data-index={ fmt.Sprintf("%d", index) }
+		data-index={ index }
 		data-action="open-post"
 		data-href={ post.Href }
 		tabindex="0"
@@ -17,7 +15,7 @@ templ BlogPostCard(post BlogPost, index int) {
 		</h2>
 		<div class="blog-post-meta">
 			<span class="blog-post-date">
-				@IconCalendar("1rem")
+				@Icon("calendar", "1rem")
 				{ " " + post.Date }
 			</span>
 			if len(post.Tags) > 0 {
@@ -37,27 +35,27 @@ templ Pagination(currentPage int, totalPages int) {
 		<ul class="pagination">
 			<li class={ pageItemPrevClass(currentPage) }>
 				<a class="page-link" href={ pageHref(1) } data-action="nav" aria-label="First" title="First Page">
-					@IconAnglesLeft("0.85em")
+					@Icon("angles-left", "0.85em")
 				</a>
 			</li>
 			<li class={ pageItemPrevClass(currentPage) }>
 				<a class="page-link" href={ pageHref(currentPage - 1) } data-action="nav" aria-label="Previous" title="Previous Page">
-					@IconChevronLeft("0.85em")
+					@Icon("chevron-left", "0.85em")
 				</a>
 			</li>
 			for _, pageNum := range pageNumbers(totalPages) {
 				<li class={ pageItemClass(pageNum, currentPage) }>
-					<a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ fmt.Sprintf("%d", pageNum) }</a>
+					<a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ pageNum }</a>
 				</li>
 			}
 			<li class={ pageItemNextClass(currentPage, totalPages) }>
 				<a class="page-link" href={ pageHref(currentPage + 1) } data-action="nav" aria-label="Next" title="Next Page">
-					@IconChevronRight("0.85em")
+					@Icon("chevron-right", "0.85em")
 				</a>
 			</li>
 			<li class={ pageItemNextClass(currentPage, totalPages) }>
 				<a class="page-link" href={ pageHref(totalPages) } data-action="nav" aria-label="Last" title="Last Page">
-					@IconAnglesRight("0.85em")
+					@Icon("angles-right", "0.85em")
 				</a>
 			</li>
 		</ul>

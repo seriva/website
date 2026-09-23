@@ -1,5 +1,22 @@
 package main
 
+// ── Routing ───────────────────────────────────────────────────
+
+type Route int
+
+const (
+	RouteBlog Route = iota
+	RoutePost
+	RouteProject
+	RoutePage
+)
+
+type RouteMatch struct {
+	Kind  Route
+	Param string // post slug, project id or page id
+	Page  int    // blog page number (RouteBlog only, >= 1)
+}
+
 // ── Data structs ──────────────────────────────────────────────
 
 type ProjectLink struct {
@@ -97,7 +114,6 @@ type SiteConfig struct {
 	Description    string
 	Author         string
 	GithubUsername string
-	DefaultRoute   string
 	DarkTheme      ThemeColors
 	LightTheme     ThemeColors
 	Comments       CommentsConfig

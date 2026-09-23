@@ -3,7 +3,7 @@ package main
 templ SearchResultsList(results []SearchResultItem, query string) {
 	if query != "" && len(results) == 0 {
 		<div class="search-no-results">
-			@IconSearch("3rem")
+			@Icon("search", "3rem")
 			<p>{ t("search.noResults") }</p>
 		</div>
 	} else {
@@ -31,16 +31,16 @@ templ SearchResultsList(results []SearchResultItem, query string) {
 }
 
 templ SearchModal(open bool, closing bool, query string, results []SearchResultItem, placeholder string) {
-	<div id="search-page" class={ searchPageClass(open, closing) } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
+	<div id="search-page" class={ overlayClass(open, closing) } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
 		<div class="search-page-header">
 			<div class="search-page-header-content">
-				<button class="search-page-back" id="search-page-back" aria-label={ t("aria.goBack") } data-action="close-search">
-					@IconArrowLeft("1.2rem")
+				<button type="button" class="search-page-back" id="search-page-back" aria-label={ t("aria.goBack") } data-action="close-search">
+					@Icon("arrow-left", "1.2rem")
 				</button>
 				<div class="search-page-input-wrapper">
 					<input type="search" id="search-page-input" class="search-page-input" placeholder={ placeholder } autocomplete="off" aria-label={ t("aria.search") } value={ query }/>
-					<button class={ searchClearClass(query) } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
-						@IconTimes("1.2rem")
+					<button type="button" class={ searchClearClass(query) } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
+						@Icon("times", "1.2rem")
 					</button>
 				</div>
 			</div>

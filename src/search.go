@@ -43,20 +43,27 @@ func initSearch() {
 			map[string]any{"name": "tags", "weight": 0.2},
 		},
 		"threshold":          0.4,
-		"minMatchCharLength": 2,
+		"minMatchCharLength": searchMinChars(),
 	}
 
 	fuseInstance = createFuse(searchItems, options)
 }
 
+func searchMinChars() int {
+	if site.Search.MinChars > 0 {
+		return site.Search.MinChars
+	}
+	return 2
+}
+
 func performSearch(q string) []SearchResultItem {
 	trimmed := strings.TrimSpace(q)
-	if len(trimmed) < 2 || fuseInstance == nil {
+	if len(trimmed) < searchMinChars() || fuseInstance == nil {
 		return []SearchResultItem{}
 	}
 
 	results := fuseInstance.search(trimmed)
-	var out []SearchResultItem
+	out := []SearchResultItem{}
 	maxResults := 8
 	if len(results) < maxResults {
 		maxResults = len(results)
@@ -85,26 +92,22 @@ func performSearch(q string) []SearchResultItem {
 }
 
 func renderSearchResults() {
-	el := document.querySelector("#search-page-results")
-	if el != nil {
-		gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery))
+	gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery))
+}
+
+// setSearchInput writes the input's value; it is user-owned DOM state, not derived.
+func setSearchInput(v string) {
+	inp := document.querySelector("#search-page-input")
+	if inp != nil {
+		inp.value = v
 	}
 }
 
 func openSearch() {
 	searchOpen = true
 	searchClosing = false
-	searchEl := document.querySelector("#search-page")
-	if searchEl != nil {
-		searchEl.classList.remove("closing")
-		searchEl.classList.add("show")
-	}
-	setTimeout(func() {
-		inp := document.querySelector("#search-page-input")
-		if inp != nil {
-			inp.focus()
-		}
-	}, 50)
+	syncOverlays()
+	focusLater("#search-page-input")
 }
 
 func openSearchWithTag(tag string) {
@@ -112,23 +115,19 @@ func openSearchWithTag(tag string) {
 	searchClosing = false
 	searchQuery = tag
 	searchResults = performSearch(tag)
-	searchEl := document.querySelector("#search-page")
-	if searchEl != nil {
-		searchEl.classList.remove("closing")
-		searchEl.classList.add("show")
-	}
-	clearBtn := document.querySelector("#search-page-clear")
-	if clearBtn != nil {
-		clearBtn.classList.add("show")
-	}
+	setSearchInput(tag)
 	renderSearchResults()
-	setTimeout(func() {
-		inp := document.querySelector("#search-page-input")
-		if inp != nil {
-			inp.value = tag
-			inp.focus()
-		}
-	}, 50)
+	syncOverlays()
+	focusLater("#search-page-input")
+}
+
+func clearSearch() {
+	searchQuery = ""
+	searchResults = []SearchResultItem{}
+	setSearchInput("")
+	renderSearchResults()
+	syncOverlays()
+	focusLater("#search-page-input")
 }
 
 func closeSearch() {
@@ -136,41 +135,21 @@ func closeSearch() {
 		return
 	}
 	searchClosing = true
-	searchEl := document.querySelector("#search-page")
-	if searchEl != nil {
-		searchEl.classList.add("closing")
-	}
+	syncOverlays()
 	setTimeout(func() {
 		searchOpen = false
 		searchClosing = false
 		searchQuery = ""
 		searchResults = []SearchResultItem{}
-		if searchEl != nil {
-			searchEl.classList.remove("show")
-			searchEl.classList.remove("closing")
-		}
-		inp := document.querySelector("#search-page-input")
-		if inp != nil {
-			inp.value = ""
-		}
-		clearBtn := document.querySelector("#search-page-clear")
-		if clearBtn != nil {
-			clearBtn.classList.remove("show")
-		}
+		setSearchInput("")
 		renderSearchResults()
+		syncOverlays()
 	}, 200)
 }
 
 func handleSearchInput(value string) {
 	searchQuery = value
-	clearBtn := document.querySelector("#search-page-clear")
-	if clearBtn != nil {
-		if value != "" {
-			clearBtn.classList.add("show")
-		} else {
-			clearBtn.classList.remove("show")
-		}
-	}
+	syncOverlays()
 	if searchDebounceTimer != nil {
 		clearTimeout(searchDebounceTimer)
 	}

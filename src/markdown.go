@@ -5,10 +5,6 @@ import "errors"
 import "js:./browser.d.ts"
 import "strings"
 
-func initMarkdown() {
-	// Marked is loaded via app/vendor.js and exposed globally
-}
-
 func parseMarkdown(content string) string {
 	if content == "" {
 		return ""

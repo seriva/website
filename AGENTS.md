@@ -29,16 +29,16 @@
 # Part 2: Project Context
 
 ## Project Identity
-A modern personal portfolio website built with GoFront v1.1.0 using `.templ` component architecture, compiled to native JavaScript ES modules, with YAML/Markdown-driven content.
+A modern personal portfolio website built with GoFront using `.templ` component architecture, compiled to native JavaScript ES modules, with YAML/Markdown-driven content.
 
 ## Tech Stack
-- **Framework**: GoFront v1.1.0 (`.templ` components, Go-inspired frontend architecture)
+- **Framework**: GoFront (`.templ` components, Go-inspired frontend architecture)
 - **Reactivity & DOM**: Native GoFront `.templ` and `gom` DOM rendering
 - **Routing**: Path-based SPA routing via `src/router.go`
 - **Content**: YAML + Marked.js + Prism.js for Markdown rendering
 - **Search**: Fuse.js (fuzzy search)
 - **Integrations**: EmailJS (contact form), giscus (GitHub Discussions comments)
-- **Build / Dev**: `gofront src -o app/app.js` (`npm run dev` on port 8181, `npm run prod`)
+- **Build / Dev**: `npm run dev` (port 8181), `npm run prod` (production bundle in `public/`)
 - **E2E Tests**: Playwright (`npm run test:e2e`) — tests/e2e/, requires dev server on port 8181
 - **Quality**: Biome (`npm run format`, `npm run check`), GoFront type checker (`gofront src --check`)
 
@@ -50,6 +50,7 @@ The application is written in GoFront in `src/`. The entry point is `src/main.go
 - **Root-relative paths only:** always use root-relative paths for routes (e.g., `/blog`, `/project/:id`, `/page/:id`).
 - **Content lives in data:** all site content belongs in `app/data/content.yaml` and `app/data/blog/` / `app/data/pages/` Markdown files, never hard-coded in components.
 - **No scattered event listeners:** use `data-action` delegation in `main.go` instead of attaching `addEventListener` calls throughout components.
+- **State drives the DOM:** mutate the Go state, then call the matching region render (`renderMain`, `renderNavbar`, `renderContactForm`, `renderSearchResults`) or `syncOverlays()` in `src/ui.go`. Do not toggle classes or read form values ad hoc with `querySelector`.
 - **No skipping quality gates:** never push without running `npm run check`, `gofront src --check`, `npm run test:e2e`, and `npm run prod`.
 - **Unversioned project:** this project does not use version numbers or semver releases. Feature plans belong in `docs/plans/<feature>-plan.md` (never `docs/vX.Y.Z/`). Completed plans are moved to `docs/plans/archive/` (marked Completed with date, roadmap link updated). Roadmap, documentation, changelog, and package metadata do not maintain version numbers.
 

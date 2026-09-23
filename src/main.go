@@ -3,20 +3,9 @@ package main
 import "js:./browser.d.ts"
 import "strings"
 
-func render() {
-	gom.Mount("#app", AppShell())
-}
-
 func toggleProjectsDropdown() {
 	projectsDropdownOpen = !projectsDropdownOpen
-	dropdown := document.querySelector(".dropdown")
-	if dropdown != nil {
-		if projectsDropdownOpen {
-			dropdown.classList.add("show")
-		} else {
-			dropdown.classList.remove("show")
-		}
-	}
+	syncOverlays()
 }
 
 func closeProjectsDropdown() {
@@ -24,30 +13,12 @@ func closeProjectsDropdown() {
 		return
 	}
 	projectsDropdownOpen = false
-	dropdown := document.querySelector(".dropdown")
-	if dropdown != nil {
-		dropdown.classList.remove("show")
-	}
+	syncOverlays()
 }
 
 func toggleMobileMenu() {
 	mobileMenuOpen = !mobileMenuOpen
-	btn := document.querySelector(".navbar-toggle")
-	collapse := document.querySelector(".navbar-collapse")
-	if btn != nil {
-		if mobileMenuOpen {
-			btn.classList.add("active")
-		} else {
-			btn.classList.remove("active")
-		}
-	}
-	if collapse != nil {
-		if mobileMenuOpen {
-			collapse.classList.add("show")
-		} else {
-			collapse.classList.remove("show")
-		}
-	}
+	syncOverlays()
 }
 
 func closeMobileMenu() {
@@ -55,14 +26,7 @@ func closeMobileMenu() {
 		return
 	}
 	mobileMenuOpen = false
-	btn := document.querySelector(".navbar-toggle")
-	collapse := document.querySelector(".navbar-collapse")
-	if btn != nil {
-		btn.classList.remove("active")
-	}
-	if collapse != nil {
-		collapse.classList.remove("show")
-	}
+	syncOverlays()
 }
 
 func setupEvents() {
@@ -122,18 +86,7 @@ func setupEvents() {
 				closeSearch()
 			case "clear-search":
 				e.preventDefault()
-				searchQuery = ""
-				searchResults = []SearchResultItem{}
-				clearBtn := document.querySelector("#search-page-clear")
-				if clearBtn != nil {
-					clearBtn.classList.remove("show")
-				}
-				renderSearchResults()
-				inp := document.querySelector("#search-page-input")
-				if inp != nil {
-					inp.value = ""
-					inp.focus()
-				}
+				clearSearch()
 			case "open-contact":
 				e.preventDefault()
 				closeMobileMenu()
@@ -207,10 +160,14 @@ func setupEvents() {
 		}
 	})
 
-	// Input on search
+	// Input on search and contact form fields
 	app.addEventListener("input", func(e any) {
 		if e.target.matches("#search-page-input") {
 			handleSearchInput(string(e.target.value))
+			return
+		}
+		if e.target.closest("#contact-form") != nil {
+			updateContactField(string(e.target.name), string(e.target.value))
 		}
 	})
 
@@ -261,7 +218,6 @@ func setupEvents() {
 async func main() {
 	gom.MountTo("head", AppStyles())
 
-	initMarkdown()
 	err := await initData()
 	if err != nil {
 		console.error("Init data failed:", err)
@@ -271,6 +227,8 @@ async func main() {
 	initSearch()
 	initEmailJS()
 
+	// Shell is mounted once; routes and overlays re-render their own regions.
+	gom.Mount("#app", AppShell())
 	setupEvents()
 	await handleRoute()
 

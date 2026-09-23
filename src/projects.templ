@@ -46,8 +46,8 @@ templ ProjectDemo(p Project) {
 			if p.DemoFullscreen {
 				<br/>
 				<div class="text-center">
-					<button id="fullscreen" class="download-btn" data-action="toggle-fullscreen">
-						@IconExpand("1rem")
+					<button type="button" id="fullscreen" class="download-btn" data-action="toggle-fullscreen">
+						@Icon("expand", "1rem")
 						<span>{ t("project.fullscreen") }</span>
 					</button>
 				</div>
@@ -63,7 +63,7 @@ templ ProjectLinks(links []ProjectLink) {
 			<div class="download-buttons">
 				for _, link := range links {
 					<a href={ link.Href } target="_blank" rel="noopener noreferrer" class="download-btn">
-						@DynamicIcon(link.Icon, "1rem")
+						@Icon(link.Icon, "1rem")
 						<span>{ link.Title }</span>
 					</a>
 				}
