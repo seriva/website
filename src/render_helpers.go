@@ -7,6 +7,10 @@ import "time"
 
 // ── Navbar helpers ────────────────────────────────────────────
 
+func isActiveRoute(r RouteMatch, kind Route, param string) bool {
+	return r.Kind == kind && r.Param == param
+}
+
 func toggleBtnClass(open bool) string {
 	if open {
 		return "navbar-toggle active"
@@ -127,9 +131,10 @@ func demoWrapperClass(height string) string {
 	return "iframeWrapper"
 }
 
-// ── Search helpers ────────────────────────────────────────────
+// ── Overlay helpers ───────────────────────────────────────────
 
-func searchPageClass(open bool, closing bool) string {
+// overlayClass is shared by the search page and contact modal.
+func overlayClass(open bool, closing bool) string {
 	if closing {
 		return "show closing"
 	}
@@ -138,6 +143,8 @@ func searchPageClass(open bool, closing bool) string {
 	}
 	return ""
 }
+
+// ── Search helpers ────────────────────────────────────────────
 
 func searchClearClass(q string) string {
 	if q != "" {
@@ -174,16 +181,6 @@ func highlightMatch(text string, query string) string {
 }
 
 // ── Contact helpers ───────────────────────────────────────────
-
-func contactModalClass(open bool, closing bool) string {
-	if closing {
-		return "show closing"
-	}
-	if open {
-		return "show"
-	}
-	return ""
-}
 
 func inputErrorClass(hasErr bool) string {
 	if hasErr {

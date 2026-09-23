@@ -61,14 +61,17 @@ func applyTheme(theme string) {
 	updateGiscusTheme()
 }
 
-func toggleTheme() {
-	if currentTheme == "dark" {
-		currentTheme = "light"
-	} else {
-		currentTheme = "dark"
+func nextTheme(current string) string {
+	if current == "dark" {
+		return "light"
 	}
-	localStorage.setItem(themeStorageKey, currentTheme)
-	applyTheme(currentTheme)
+	return "dark"
+}
+
+func toggleTheme() {
+	next := nextTheme(currentTheme)
+	localStorage.setItem(themeStorageKey, next)
+	applyTheme(next)
 }
 
 func initTheme() {

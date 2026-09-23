@@ -1,33 +1,39 @@
 package main
 
+import "strconv"
+
+templ ContactFormFields(form ContactState) {
+	<div class="form-group">
+		<label for="contact-name">{ t("contact.name") }*</label>
+		<input type="text" id="contact-name" name="name" required class={ inputErrorClass(form.ErrName) } aria-invalid={ strconv.FormatBool(form.ErrName) } value={ form.Name }/>
+	</div>
+	<div class="form-group">
+		<label for="contact-email">{ t("contact.email") }*</label>
+		<input type="email" id="contact-email" name="email" required class={ inputErrorClass(form.ErrEmail) } aria-invalid={ strconv.FormatBool(form.ErrEmail) } value={ form.Email }/>
+	</div>
+	<div class="form-group">
+		<label for="contact-message">{ t("contact.message") }*</label>
+		<textarea id="contact-message" name="message" rows="6" required class={ inputErrorClass(form.ErrMessage) } aria-invalid={ strconv.FormatBool(form.ErrMessage) }>{ form.Message }</textarea>
+	</div>
+	<div class={ formStatusClass(form.StatusType) } id="contact-status" aria-live="polite">
+		<span>{ form.StatusText }</span>
+	</div>
+	<button type="submit" class="btn btn-primary" id="contact-submit" disabled?={ form.ButtonDisabled }>
+		{ t("contact." + form.ButtonState) }
+	</button>
+}
+
 templ ContactModal(open bool, closing bool, form ContactState) {
-	<div id="contact-modal" class={ contactModalClass(open, closing) } role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+	<div id="contact-modal" class={ overlayClass(open, closing) } role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
 		<div class="contact-modal-content">
 			<div class="contact-modal-header">
 				<h2 id="contact-modal-title">{ t("contact.title") }</h2>
-				<button class="contact-modal-close" id="contact-modal-close" aria-label={ t("contact.close") } data-action="close-contact">
-					@IconTimes("1.2rem")
+				<button type="button" class="contact-modal-close" id="contact-modal-close" aria-label={ t("contact.close") } data-action="close-contact">
+					@Icon("times", "1.2rem")
 				</button>
 			</div>
 			<form class="contact-form" id="contact-form" novalidate>
-				<div class="form-group">
-					<label for="contact-name">{ t("contact.name") }*</label>
-					<input type="text" id="contact-name" name="name" required class={ inputErrorClass(form.ErrName) } aria-invalid?={ form.ErrName } value={ form.Name }/>
-				</div>
-				<div class="form-group">
-					<label for="contact-email">{ t("contact.email") }*</label>
-					<input type="email" id="contact-email" name="email" required class={ inputErrorClass(form.ErrEmail) } aria-invalid?={ form.ErrEmail } value={ form.Email }/>
-				</div>
-				<div class="form-group">
-					<label for="contact-message">{ t("contact.message") }*</label>
-					<textarea id="contact-message" name="message" rows="6" required class={ inputErrorClass(form.ErrMessage) } aria-invalid?={ form.ErrMessage }>{ form.Message }</textarea>
-				</div>
-				<div class={ formStatusClass(form.StatusType) } id="contact-status" aria-live="polite">
-					<span>{ form.StatusText }</span>
-				</div>
-				<button type="submit" class="btn btn-primary" id="contact-submit" disabled?={ form.ButtonDisabled }>
-					{ t("contact." + form.ButtonState) }
-				</button>
+				@ContactFormFields(form)
 			</form>
 		</div>
 	</div>

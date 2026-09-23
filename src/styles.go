@@ -145,6 +145,11 @@ body {
 	flex: 1 0 auto;
 }
 
+/* Region mount points: transparent to layout */
+#navbar-slot, #content-slot {
+	display: contents;
+}
+
 main {
 	margin: 0 auto;
 	padding: var(--spacing-lg);

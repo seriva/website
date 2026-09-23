@@ -1,27 +1,36 @@
 package main
 
-import "strings"
-
 templ AppStyles() {
 	@templ.Raw("<style id=\"app-styles\">" + appCSS() + "</style>")
 }
 
+templ RouteView(r RouteMatch) {
+	switch r.Kind {
+	case RoutePost:
+		@BlogPostView(currentPost, currentPostHtml, currentPostLoading, currentPostError, site.Comments.BlogEnabled)
+	case RouteProject:
+		@ProjectDetail(currentProject, projectReadmeHtml, projectReadmeLoading, projectReadmeError, site.Comments.ProjectsEnabled)
+	case RoutePage:
+		@PageView(currentPageHtml, currentPageLoading, currentPageError)
+	default:
+		@BlogList(posts, r.Page, site.PostsPerPage)
+	}
+}
+
+templ MainContent() {
+	<main id="main-content">
+		@RouteView(route)
+	</main>
+}
+
 templ AppShell() {
 	<div class="app-root">
-		@Navbar(currentRoute, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
-		<main id="main-content">
-			if currentRoute == "/blog" {
-				@BlogList(posts, blogCurrentPage, site.PostsPerPage)
-			} else if strings.HasPrefix(currentRoute, "/blog/") {
-				@BlogPostView(currentPost, currentPostHtml, currentPostLoading, currentPostError, site.Comments.BlogEnabled)
-			} else if strings.HasPrefix(currentRoute, "/project/") {
-				@ProjectDetail(currentProject, projectReadmeHtml, projectReadmeLoading, projectReadmeError, site.Comments.ProjectsEnabled)
-			} else if strings.HasPrefix(currentRoute, "/page/") {
-				@PageView(currentPageHtml, currentPageLoading, currentPageError)
-			} else {
-				@BlogList(posts, blogCurrentPage, site.PostsPerPage)
-			}
-		</main>
+		<div id="navbar-slot">
+			@Navbar(route, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
+		</div>
+		<div id="content-slot">
+			@MainContent()
+		</div>
 		@Footer(currentYear(), site.Author)
 		@SearchModal(searchOpen, searchClosing, searchQuery, searchResults, searchPlaceholderText())
 		@ContactModal(contactOpen, contactClosing, contactForm)

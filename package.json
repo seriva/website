@@ -2,7 +2,7 @@
 	"name": "portfolio-website",
 	"private": true,
 	"type": "module",
-	"description": "Modern portfolio website built with GoFront v1.1.0",
+	"description": "Modern portfolio website built with GoFront",
 	"author": "Portfolio Owner",
 	"license": "MIT",
 	"engines": {
@@ -13,9 +13,11 @@
 		"prepare": "lefthook install && npm run prep",
 		"prep": "gofront prep",
 		"dev": "gofront src -o app/app.js --serve --port 8181",
-		"build": "gofront src -o app/app.js",
-		"prod": "npm run check && gofront prep && gofront src -o public/app.js --minify && npm run seo",
+		"prod": "npm run check && gofront prep --minify && gofront src -o public/app.js --minify --mangle && node scripts/copy-static.js && npm run seo",
+		"test:unit": "node --test tests/unit/*.test.js",
+		"test:gofront": "gofront test src && gofront test src/utils",
 		"test:e2e": "playwright test",
+		"test:all": "npm run test:gofront && npm run test:unit && npm run test:e2e",
 		"format": "biome format --write .",
 		"check": "biome check .",
 		"seo": "node scripts/generate-seo.js"
@@ -24,7 +26,7 @@
 		"@biomejs/biome": "^2.5.14",
 		"@fontsource/raleway": "^5.3.0",
 		"@playwright/test": "^1.63.0",
-		"gofront": "^1.1.0",
+		"gofront": "^1.2.1",
 		"jsdom": "^30.1.0",
 		"lefthook": "^2.1.14",
 		"rolldown": "^1.1.2"
@@ -34,6 +36,18 @@
 		"fuse.js": "^7.5.0",
 		"marked": "^18.0.13",
 		"prismjs": "^1.30.0"
+	},
+	"vendor": {
+		"dest": [
+			"app/vendor.js",
+			"public/vendor.js"
+		],
+		"minify": true,
+		"globals": {
+			"@emailjs/browser": ["emailjs"],
+			"fuse.js": ["Fuse"],
+			"prismjs": ["Prism"]
+		}
 	},
 	"assetCopy": [
 		{

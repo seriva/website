@@ -15,7 +15,7 @@ var posts = []BlogPost{}
 var projects = []Project{}
 var navPages = []NavPage{}
 var translations = map[string]string{}
-var currentRoute = "/blog"
+var route = RouteMatch{Page: 1} // zero Kind == RouteBlog
 var currentTheme = "dark"
 var mobileMenuOpen bool
 var projectsDropdownOpen bool
@@ -26,7 +26,6 @@ var contactOpen bool
 var contactForm ContactState
 
 // Route view states
-var blogCurrentPage = 1
 var currentPost = BlogPost{
 	Tags: []string{},
 }
@@ -43,7 +42,6 @@ var projectReadmeHtml string
 var projectReadmeLoading bool
 var projectReadmeError bool
 
-var currentPage NavPage
 var currentPageHtml string
 var currentPageLoading bool
 var currentPageError bool
@@ -128,7 +126,6 @@ async func initData() error {
 		site.Description = strVal(siteData.description)
 		site.Author = strVal(siteData.author)
 		site.GithubUsername = strVal(siteData.github_username)
-		site.DefaultRoute = strVal(siteData.defaultRoute)
 
 		if siteData.theme != nil {
 			if siteData.theme.dark != nil {

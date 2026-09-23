@@ -11,29 +11,41 @@ func navigate(url string) {
 	handleRoute()
 }
 
+// parseRoute maps a URL path to a RouteMatch. Unknown paths fall back to the blog list.
+func parseRoute(path string) RouteMatch {
+	if len(path) > 1 {
+		path = strings.TrimSuffix(path, "/")
+	}
+	if path == "" || path == "/" || path == "/blog" {
+		return RouteMatch{Kind: RouteBlog, Page: 1}
+	}
+	if rest, ok := strings.CutPrefix(path, "/blog/page/"); ok {
+		n, err := strconv.Atoi(rest)
+		if err != nil || n < 1 {
+			n = 1
+		}
+		return RouteMatch{Kind: RouteBlog, Page: n}
+	}
+	if slug, ok := strings.CutPrefix(path, "/blog/"); ok {
+		slug = strings.TrimPrefix(slug, "post/")
+		if slug == "" {
+			return RouteMatch{Kind: RouteBlog, Page: 1}
+		}
+		return RouteMatch{Kind: RoutePost, Param: slug}
+	}
+	if id, ok := strings.CutPrefix(path, "/project/"); ok {
+		return RouteMatch{Kind: RouteProject, Param: id}
+	}
+	if id, ok := strings.CutPrefix(path, "/page/"); ok {
+		return RouteMatch{Kind: RoutePage, Param: id}
+	}
+	return RouteMatch{Kind: RouteBlog, Page: 1}
+}
+
 var isInitialRoute = true
 
 async func handleRoute() {
-	closeMobileMenu()
-	closeProjectsDropdown()
-	searchOpen = false
-	searchClosing = false
-	contactOpen = false
-	searchEl := document.querySelector("#search-page")
-	if searchEl != nil {
-		searchEl.classList.remove("show")
-		searchEl.classList.remove("closing")
-	}
-	clearBtn := document.querySelector("#search-page-clear")
-	if clearBtn != nil {
-		clearBtn.classList.remove("show")
-	}
-	inp := document.querySelector("#search-page-input")
-	if inp != nil {
-		inp.value = ""
-	}
-	document.documentElement.classList.remove("modal-open")
-	document.body.classList.remove("modal-open")
+	resetOverlays()
 
 	path := window.location.pathname
 	hash := window.location.hash
@@ -54,184 +66,17 @@ async func handleRoute() {
 	}
 	isInitialRoute = false
 
-	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "instant"})
-	document.documentElement.scrollTop = 0
-	document.body.scrollTop = 0
+	route = parseRoute(path)
 
-	if path == "/" || path == "/blog" {
-		currentRoute = "/blog"
-		blogCurrentPage = 1
-		document.title = site.Title
-		render()
-	} else if strings.HasPrefix(path, "/blog/page/") {
-		currentRoute = "/blog"
-		numStr := path[11:]
-		n, err := strconv.Atoi(numStr)
-		if err != nil || n < 1 {
-			n = 1
-		}
-		blogCurrentPage = n
-		document.title = t("nav.blog") + " - " + site.Title
-		render()
-	} else if strings.HasPrefix(path, "/blog/") {
-		slug := path[6:]
-		if strings.HasPrefix(slug, "post/") {
-			slug = slug[5:]
-		}
-		currentRoute = "/blog/" + slug
-
-		var found BlogPost
-		isFound := false
-		for _, p := range posts {
-			if p.Slug == slug || p.ID == slug {
-				found = p
-				isFound = true
-				break
-			}
-		}
-
-		if !isFound {
-			currentPostError = true
-			currentPostLoading = false
-			render()
-			return
-		}
-
-		currentPost = found
-		document.title = currentPost.Title + " - " + site.Title
-
-		if cached, ok := postHtmlCache[currentPost.Filename]; ok && cached != "" {
-			currentPostHtml = cached
-			currentPostLoading = false
-			currentPostError = false
-		} else {
-			currentPostLoading = true
-			currentPostError = false
-
-			mdText, err := await loadMarkdownFile("/data/blog/" + currentPost.Filename)
-			if err != nil {
-				currentPostError = true
-				currentPostLoading = false
-				render()
-				return
-			}
-
-			_, content := parseFrontmatter(mdText)
-			html := parseMarkdown(content)
-			postHtmlCache[currentPost.Filename] = html
-			currentPostHtml = html
-			currentPostLoading = false
-			currentPostError = false
-		}
-		render()
-		highlightCode()
-		loadGiscus()
-	} else if strings.HasPrefix(path, "/project/") {
-		id := path[9:]
-		currentRoute = "/project/" + id
-
-		var found Project
-		isFound := false
-		for _, p := range projects {
-			if p.ID == id {
-				found = p
-				isFound = true
-				break
-			}
-		}
-
-		if !isFound {
-			projectReadmeError = true
-			projectReadmeLoading = false
-			render()
-			return
-		}
-
-		currentProject = found
-		document.title = currentProject.Title + " - " + site.Title
-
-		if currentProject.GithubRepo != "" {
-			if cached, ok := readmeCache[currentProject.GithubRepo]; ok && cached != "" {
-				projectReadmeHtml = parseMarkdown(cached)
-				projectReadmeLoading = false
-				projectReadmeError = false
-			} else {
-				projectReadmeLoading = true
-				projectReadmeError = false
-
-				repo := currentProject.GithubRepo
-				if !strings.Contains(repo, "/") {
-					repo = site.GithubUsername + "/" + repo
-				}
-				branch := currentProject.GithubBranch
-				if branch == "" {
-					branch = "main"
-				}
-				url := "https://raw.githubusercontent.com/" + repo + "/" + branch + "/README.md"
-				mdText, err := await loadMarkdownFile(url)
-				if err != nil {
-					projectReadmeError = true
-				} else {
-					readmeCache[currentProject.GithubRepo] = mdText
-					projectReadmeHtml = parseMarkdown(mdText)
-				}
-				projectReadmeLoading = false
-			}
-			render()
-			highlightCode()
-		} else {
-			projectReadmeLoading = false
-			projectReadmeError = false
-			render()
-		}
-		loadGiscus()
-	} else if strings.HasPrefix(path, "/page/") {
-		id := path[6:]
-		currentRoute = "/page/" + id
-
-		var found NavPage
-		isFound := false
-		for _, p := range navPages {
-			if p.ID == id {
-				found = p
-				isFound = true
-				break
-			}
-		}
-
-		if !isFound {
-			found = NavPage{ID: id, Title: id}
-		}
-
-		currentPage = found
-		document.title = currentPage.Title + " - " + site.Title
-
-		if cached, ok := pageHtmlCache[id]; ok && cached != "" {
-			currentPageHtml = cached
-			currentPageLoading = false
-			currentPageError = false
-		} else {
-			currentPageLoading = true
-			currentPageError = false
-
-			mdText, err := await loadMarkdownFile("/data/pages/" + id + ".md")
-			if err != nil {
-				currentPageError = true
-			} else {
-				html := parseMarkdown(mdText)
-				pageHtmlCache[id] = html
-				currentPageHtml = html
-			}
-			currentPageLoading = false
-		}
-		render()
-		highlightCode()
-	} else {
-		// Unknown route -> graceful fallback to blog list
-		currentRoute = "/blog"
-		blogCurrentPage = 1
-		document.title = site.Title
-		render()
+	switch route.Kind {
+	case RoutePost:
+		await showPost(route.Param)
+	case RouteProject:
+		await showProject(route.Param)
+	case RoutePage:
+		await showPage(route.Param)
+	default:
+		showBlog(route.Page)
 	}
 
 	mainEl := document.querySelector("#main-content")
@@ -246,4 +91,166 @@ async func handleRoute() {
 	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "instant"})
 	document.documentElement.scrollTop = 0
 	document.body.scrollTop = 0
+}
+
+func showBlog(page int) {
+	if page > 1 {
+		document.title = t("nav.blog") + " - " + site.Title
+	} else {
+		document.title = site.Title
+	}
+	renderRoute()
+}
+
+async func showPost(slug string) {
+	var found BlogPost
+	isFound := false
+	for _, p := range posts {
+		if p.Slug == slug || p.ID == slug {
+			found = p
+			isFound = true
+			break
+		}
+	}
+
+	if !isFound {
+		currentPostError = true
+		currentPostLoading = false
+		renderRoute()
+		return
+	}
+
+	currentPost = found
+	document.title = currentPost.Title + " - " + site.Title
+
+	if cached, ok := postHtmlCache[currentPost.Filename]; ok && cached != "" {
+		currentPostHtml = cached
+		currentPostLoading = false
+		currentPostError = false
+	} else {
+		currentPostLoading = true
+		currentPostError = false
+
+		mdText, err := await loadMarkdownFile("/data/blog/" + currentPost.Filename)
+		if err != nil {
+			currentPostError = true
+			currentPostLoading = false
+			renderRoute()
+			return
+		}
+
+		_, content := parseFrontmatter(mdText)
+		html := parseMarkdown(content)
+		postHtmlCache[currentPost.Filename] = html
+		currentPostHtml = html
+		currentPostLoading = false
+		currentPostError = false
+	}
+	renderRoute()
+	highlightCode()
+	loadGiscus()
+}
+
+async func showProject(id string) {
+	var found Project
+	isFound := false
+	for _, p := range projects {
+		if p.ID == id {
+			found = p
+			isFound = true
+			break
+		}
+	}
+
+	if !isFound {
+		currentProject = Project{
+			Tags:          []string{},
+			YoutubeVideos: []string{},
+			Links:         []ProjectLink{},
+		}
+		projectReadmeError = true
+		projectReadmeLoading = false
+		renderRoute()
+		return
+	}
+
+	currentProject = found
+	document.title = currentProject.Title + " - " + site.Title
+
+	if currentProject.GithubRepo == "" {
+		projectReadmeLoading = false
+		projectReadmeError = false
+		renderRoute()
+		loadGiscus()
+		return
+	}
+
+	if cached, ok := readmeCache[currentProject.GithubRepo]; ok && cached != "" {
+		projectReadmeHtml = parseMarkdown(cached)
+		projectReadmeLoading = false
+		projectReadmeError = false
+	} else {
+		projectReadmeLoading = true
+		projectReadmeError = false
+
+		repo := currentProject.GithubRepo
+		if !strings.Contains(repo, "/") {
+			repo = site.GithubUsername + "/" + repo
+		}
+		branch := currentProject.GithubBranch
+		if branch == "" {
+			branch = "main"
+		}
+		url := "https://raw.githubusercontent.com/" + repo + "/" + branch + "/README.md"
+		mdText, err := await loadMarkdownFile(url)
+		if err != nil {
+			projectReadmeError = true
+		} else {
+			readmeCache[currentProject.GithubRepo] = mdText
+			projectReadmeHtml = parseMarkdown(mdText)
+		}
+		projectReadmeLoading = false
+	}
+	renderRoute()
+	highlightCode()
+	loadGiscus()
+}
+
+async func showPage(id string) {
+	var found NavPage
+	isFound := false
+	for _, p := range navPages {
+		if p.ID == id {
+			found = p
+			isFound = true
+			break
+		}
+	}
+
+	if !isFound {
+		found = NavPage{ID: id, Title: id}
+	}
+
+	document.title = found.Title + " - " + site.Title
+
+	if cached, ok := pageHtmlCache[id]; ok && cached != "" {
+		currentPageHtml = cached
+		currentPageLoading = false
+		currentPageError = false
+	} else {
+		currentPageLoading = true
+		currentPageError = false
+
+		mdText, err := await loadMarkdownFile("/data/pages/" + id + ".md")
+		if err != nil {
+			currentPageError = true
+		} else {
+			html := parseMarkdown(mdText)
+			pageHtmlCache[id] = html
+			currentPageHtml = html
+		}
+		currentPageLoading = false
+	}
+	renderRoute()
+	highlightCode()
 }
