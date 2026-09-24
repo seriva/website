@@ -1,0 +1,513 @@
+{
+  "site": {
+    "title": "luukvanvenrooij.nl",
+    "description": "Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!",
+    "author": "Luuk van Venrooij",
+    "github_username": "seriva",
+    "i18n": {
+      "defaultLanguage": "en",
+      "availableLanguages": [
+        "en"
+      ]
+    },
+    "theme": {
+      "default": "dark",
+      "dark": {
+        "primary": "#10B981",
+        "secondary": "#111827",
+        "background": "#0D1117",
+        "text": "#E6EDF3",
+        "textLight": "#7D8590",
+        "border": "#21262D",
+        "hover": "#1A2332",
+        "code": {
+          "theme": "prism-tomorrow"
+        },
+        "comments": {
+          "theme": "dark"
+        }
+      },
+      "light": {
+        "primary": "#047857",
+        "secondary": "#D1D5DB",
+        "background": "#FFFFFF",
+        "text": "#0F172A",
+        "textLight": "#475569",
+        "border": "#9CA3AF",
+        "hover": "#E5E7EB",
+        "code": {
+          "theme": "prism-coy"
+        },
+        "comments": {
+          "theme": "light"
+        }
+      }
+    },
+    "search": {
+      "enabled": true,
+      "minChars": 2
+    },
+    "emailjs": {
+      "enabled": true,
+      "serviceId": "service_hdevvjf",
+      "templateId": "template_zqi4xf9",
+      "publicKey": "9zV-MvliyA4G90Ie9"
+    },
+    "comments": {
+      "blogEnabled": true,
+      "projectsEnabled": true,
+      "repo": "seriva/website",
+      "repoId": "MDEwOlJlcG9zaXRvcnkxNzgwNjQ3OTM=",
+      "category": "General",
+      "categoryId": "DIC_kwDOCp0Nmc4CxQUk",
+      "mapping": "url",
+      "strict": "0",
+      "reactionsEnabled": "1",
+      "emitMetadata": "0",
+      "inputPosition": "bottom",
+      "lang": "en"
+    },
+    "social": [
+      {
+        "icon": "github",
+        "href": "https://github.com/seriva/",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "icon": "youtube",
+        "href": "https://www.youtube.com/user/seriva",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "icon": "linkedin",
+        "href": "https://www.linkedin.com/in/luuk-van-venrooij/",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ]
+  },
+  "blog": {
+    "title": "Blog",
+    "showInNav": true,
+    "postsPerPage": 5,
+    "dateFormat": "MMMM D, YYYY",
+    "posts": [
+      {
+        "filename": "2026-09-21-bootstrapping-agentic-development.md",
+        "title": "Bootstrapping Agentic Development",
+        "date": "2026-09-21",
+        "excerpt": "AI coding assistants are great until every repo ends up with conflicting instructions, messy session artifacts, and broken quality gates. Here is how I standardized my workflow with Bootstrap.",
+        "tags": [
+          "AI",
+          "DevOps",
+          "Workflow"
+        ]
+      },
+      {
+        "filename": "2026-04-15-gofront-go-to-javascript.md",
+        "title": "Writing Go for the Frontend",
+        "date": "2026-04-15",
+        "excerpt": "I wanted Go's type safety on the frontend without TypeScript's ceremony. So I built a compiler that turns Go into plain JavaScript.",
+        "tags": [
+          "Go",
+          "JavaScript",
+          "Compilers",
+          "GoFront"
+        ]
+      },
+      {
+        "filename": "2026-04-02-rust-powered-toolchain.md",
+        "title": "Going Full Rust: Microtastic Upgrades to Rolldown",
+        "date": "2026-04-02",
+        "excerpt": "A small dependency bump that quietly made the entire toolchain Rust-powered — from bundling with Rolldown to linting with Biome.",
+        "tags": [
+          "Web Development",
+          "JavaScript",
+          "Microtastic",
+          "Performance"
+        ]
+      },
+      {
+        "filename": "2026-03-11-simplefps-updates.md",
+        "title": "SimpleFPS Gets WebGPU, Raycast Physics, and More",
+        "date": "2026-03-11",
+        "excerpt": "A look at the latest major updates: experimental WebGPU, raycast physics, animated particles, and GPU skinning via a custom MD5 model pipeline.",
+        "tags": [
+          "Game Development",
+          "WebGPU",
+          "JavaScript",
+          "Physics"
+        ]
+      },
+      {
+        "filename": "2025-12-23-quake-bsp-simplefps.md",
+        "title": "Stealing From id Software: BSP Maps in SimpleFPS",
+        "date": "2025-12-23",
+        "excerpt": "Creating game content is hard. So I built a Quake 3 BSP converter and ended up redesigning my rendering pipeline.",
+        "tags": [
+          "Game Development",
+          "WebGL",
+          "JavaScript"
+        ]
+      },
+      {
+        "filename": "2025-11-26-building-reactive-js.md",
+        "title": "Building Reactive.js: A Minimal Signals-Based Library",
+        "date": "2025-11-26",
+        "excerpt": "How I built a lightweight reactive state management library inspired by modern frameworks, and converted this portfolio website to use it.",
+        "tags": [
+          "JavaScript",
+          "Web Development",
+          "Reactive Programming",
+          "Microtastic"
+        ]
+      },
+      {
+        "filename": "2025-11-01-migrating-to-microtastic.md",
+        "title": "Adding Minimal Build Tooling with Microtastic",
+        "date": "2025-11-01",
+        "excerpt": "Moving from CDN dependencies to self-hosted bundles using a minimal build tool I originally created for another project.",
+        "tags": [
+          "Web Development",
+          "JavaScript",
+          "Performance",
+          "Microtastic"
+        ]
+      },
+      {
+        "filename": "2025-10-29-from-homelab-to-github-pages.md",
+        "title": "From Homelab to GitHub Pages",
+        "date": "2025-10-29",
+        "excerpt": "How I went from running my own nginx server with Let's Encrypt in my homelab, building with TeamCity, to embracing the simplicity of GitHub Pages and Actions.",
+        "tags": [
+          "DevOps",
+          "Self-Hosting",
+          "Homelab",
+          "GitHub Pages",
+          "CI/CD"
+        ]
+      },
+      {
+        "filename": "2025-10-21-vibing-portfolio-website.md",
+        "title": "Vibing a Portfolio Website",
+        "date": "2025-10-21",
+        "excerpt": "From hand-coded HTML to LAMP stacks to Hugo, and finally to vibe-coding a portfolio in a few hours with AI assistance. Here's my portfolio website origin story.",
+        "tags": [
+          "Web Development",
+          "JavaScript",
+          "Personal",
+          "AI"
+        ]
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "gofront",
+      "title": "GoFront",
+      "description": "Go syntax, type-safe, compiles to plain ES modules. Same language front and back, no runtime, no framework.",
+      "tags": [
+        "Node.js",
+        "Javascript",
+        "Go"
+      ],
+      "order": 1,
+      "github_repo": "gofront",
+      "github_branch": "master",
+      "demo_url": "https://seriva.github.io/gofront/",
+      "demo_label": "Todo App Demo",
+      "demo_instructions": "A fully functional todo app written in Go and compiled to JavaScript with GoFront.",
+      "demo_height": "650px",
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/gofront"
+        },
+        {
+          "title": "NPM",
+          "icon": "cube",
+          "href": "https://www.npmjs.com/package/gofront"
+        }
+      ]
+    },
+    {
+      "id": "snakeai",
+      "title": "SnakeAI",
+      "description": "AI-powered Snake game with machine learning.",
+      "tags": [
+        "Python",
+        "AI",
+        "Machine Learning"
+      ],
+      "order": 2,
+      "github_repo": "snakeai",
+      "github_branch": "master",
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/snakeai"
+        },
+        {
+          "title": "Download",
+          "icon": "download",
+          "href": "https://github.com/seriva/snakeai/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "simplefps",
+      "title": "SimpleFPS",
+      "description": "Simple first person arena shooter game.",
+      "tags": [
+        "Javascript",
+        "PWA",
+        "ES6"
+      ],
+      "order": 3,
+      "github_repo": "simplefps",
+      "github_branch": "master",
+      "demo_url": "https://seriva.github.io/simplefps",
+      "demo_label": "Play!",
+      "demo_instructions": "On desktop use WASD to move, mouse to look around, and left-click to shoot. On mobile it should present onscreen controls.",
+      "demo_fullscreen": true,
+      "youtube_videos": [
+        "UInnHqqX2OQ"
+      ],
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/simplefps"
+        },
+        {
+          "title": "Download",
+          "icon": "download",
+          "href": "https://github.com/seriva/simplefps/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "microtastic",
+      "title": "Microtastic",
+      "description": "Frontend framework for web applications development using Node.js.",
+      "tags": [
+        "Node.js",
+        "Javascript"
+      ],
+      "order": 4,
+      "github_repo": "microtastic",
+      "github_branch": "master",
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/microtastic"
+        },
+        {
+          "title": "NPM",
+          "icon": "cube",
+          "href": "https://www.npmjs.com/package/microtastic"
+        }
+      ]
+    },
+    {
+      "id": "website",
+      "title": "Website",
+      "description": "Minimalist SPA portfolio website with dynamic theming.",
+      "tags": [
+        "HTML",
+        "CSS",
+        "Javascript",
+        "SPA"
+      ],
+      "order": 5,
+      "github_repo": "website",
+      "github_branch": "master",
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/website"
+        }
+      ]
+    },
+    {
+      "id": "qdfps",
+      "title": "QDFPS",
+      "description": "Quick and Dirty FPS game.",
+      "tags": [
+        "Javascript",
+        "WebGL"
+      ],
+      "order": 6,
+      "github_repo": "qdfps",
+      "github_branch": "master",
+      "youtube_videos": [
+        "4dWciTdnTTQ"
+      ],
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/qdfps"
+        },
+        {
+          "title": "Download",
+          "icon": "download",
+          "href": "https://github.com/seriva/qdfps/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "genesisdevice",
+      "title": "Genesis Device",
+      "description": "Early attempt to write a game engine inspired by Elder Scrolls: Oblivion and Skyrim.",
+      "tags": [
+        "Object Pascal",
+        "Lazarus",
+        "OpenGL",
+        "SDL",
+        "Newton",
+        "OpenAL"
+      ],
+      "order": 7,
+      "github_repo": "genesisdevice",
+      "github_branch": "master",
+      "youtube_videos": [
+        "3lrvRvn8EEE",
+        "GlelXcj9M0o"
+      ],
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/genesisdevice"
+        },
+        {
+          "title": "Download",
+          "icon": "download",
+          "href": "https://github.com/seriva/genesisdevice/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "astrohunter",
+      "title": "AstroHunter",
+      "description": "A simple Asteroid game for web and Android.",
+      "tags": [
+        "Javascript",
+        "PWA",
+        "ES6"
+      ],
+      "order": 8,
+      "github_repo": "astrohunter",
+      "github_branch": "master",
+      "demo_url": "https://seriva.github.io/astrohunter/",
+      "demo_label": "Play!",
+      "demo_instructions": "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls.",
+      "demo_fullscreen": true,
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/astrohunter"
+        },
+        {
+          "title": "Download",
+          "icon": "download",
+          "href": "https://github.com/seriva/astrohunter/archive/master.zip"
+        }
+      ]
+    },
+    {
+      "id": "bootstrap",
+      "title": "Bootstrap",
+      "description": "Generic project scaffold for agentic development.",
+      "tags": [
+        "AI",
+        "DevOps",
+        "Workflow",
+        "Shell"
+      ],
+      "order": 9,
+      "github_repo": "bootstrap",
+      "github_branch": "main",
+      "links": [
+        {
+          "title": "Github",
+          "icon": "github",
+          "href": "https://github.com/seriva/bootstrap"
+        },
+        {
+          "title": "Download",
+          "icon": "download",
+          "href": "https://github.com/seriva/bootstrap/archive/main.zip"
+        }
+      ]
+    }
+  ],
+  "pages": {
+    "about": {
+      "title": "About",
+      "showInNav": true,
+      "order": 1
+    }
+  },
+  "translations": {
+    "en": {
+      "nav.projects": "Projects",
+      "nav.blog": "Blog",
+      "search.placeholder": "Search...",
+      "search.noResults": "No results found",
+      "search.loading": "Loading...",
+      "blog.backToBlog": "← Back to Blog",
+      "blog.noPosts": "No blog posts yet. Check back soon!",
+      "blog.previous": "Previous",
+      "blog.next": "Next",
+      "project.links": "Links",
+      "project.media": "Media",
+      "project.demo": "Demo",
+      "project.demoInstructions": "",
+      "project.fullscreen": "Go Fullscreen",
+      "project.readmeError": "Error loading README from GitHub.",
+      "general.error": "Error loading page",
+      "general.errorMessage": "Please try refreshing the page.",
+      "general.notFound": "Page Not Found",
+      "general.notFoundMessage": "The requested page could not be found.",
+      "general.projectNotFound": "Project not found",
+      "general.projectNotFoundMessage": "The requested project could not be found.",
+      "general.blogNotFound": "Blog Post Not Found",
+      "general.blogNotFoundMessage": "The requested blog post could not be found.",
+      "footer.rights": "All rights reserved",
+      "badges.project": "Project",
+      "badges.blog": "Blog",
+      "aria.search": "Search",
+      "aria.goBack": "Go back",
+      "aria.clearSearch": "Clear search",
+      "aria.copyCode": "Copy code to clipboard",
+      "aria.toggleTheme": "Toggle theme",
+      "theme.toggleTitle": "Toggle light/dark mode",
+      "search.buttonTitle": "Search projects and blog posts",
+      "contact.buttonTitle": "Get in touch",
+      "dropdown.loadingProjects": "Loading projects...",
+      "code.copy": "Copy",
+      "code.copied": "Copied!",
+      "code.copyFailed": "Failed",
+      "contact.title": "Get in Touch",
+      "contact.name": "Name",
+      "contact.email": "Email",
+      "contact.message": "Message",
+      "contact.send": "Send Message",
+      "contact.sending": "Sending...",
+      "contact.success": "Message sent successfully!",
+      "contact.error": "Failed to send message. Please try again.",
+      "contact.required": "This field is required",
+      "contact.invalidEmail": "Please enter a valid email address",
+      "contact.close": "Close"
+    }
+  }
+}

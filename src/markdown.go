@@ -1,6 +1,5 @@
 package main
 
-import "./utils"
 import "errors"
 import "js:./browser.d.ts"
 import "strings"
@@ -17,37 +16,34 @@ func parseMarkdown(content string) string {
 	return marked.parse(content)
 }
 
-func parseFrontmatter(markdown string) (map[string]any, string) {
+func stripFrontmatter(markdown string) string {
 	trimmed := strings.TrimSpace(markdown)
 	if !strings.HasPrefix(trimmed, "---") {
-		return map[string]any{}, trimmed
+		return trimmed
 	}
 
 	rest := trimmed[3:]
-	// Find closing ---
 	newlineIdx := strings.Index(rest, "\n")
 	if newlineIdx == -1 {
-		return map[string]any{}, trimmed
+		return trimmed
 	}
 	afterFirstLine := rest[newlineIdx+1:]
 	closingIdx := strings.Index(afterFirstLine, "\n---")
 	if closingIdx == -1 {
-		// Try without newline if at end
 		closingIdx = strings.Index(afterFirstLine, "---")
 		if closingIdx == -1 {
-			return map[string]any{}, trimmed
+			return trimmed
 		}
+		afterClosing := afterFirstLine[closingIdx+3:]
+		return strings.TrimSpace(afterClosing)
 	}
 
-	frontmatterText := strings.TrimSpace(afterFirstLine[:closingIdx])
-	body := strings.TrimSpace(afterFirstLine[closingIdx+4:])
+	afterClosing := afterFirstLine[closingIdx+4:]
+	return strings.TrimSpace(afterClosing)
+}
 
-	metadata := utils.ParseYAML(frontmatterText)
-	if metadata == nil {
-		return map[string]any{}, body
-	}
-
-	return metadata.(map[string]any), body
+func parseFrontmatter(markdown string) (map[string]any, string) {
+	return map[string]any{}, stripFrontmatter(markdown)
 }
 
 async func loadMarkdownFile(url string) (string, error) {

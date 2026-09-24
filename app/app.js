@@ -3,135 +3,6 @@ var __len = __len || function(a) {
   return a?.length ?? 0;
 };
 var __append = __append || function(a, ...b) { return a ? [...a, ...b] : b; };
-
-class StackEntry {
-  constructor({ Obj = null, Indent = 0, Key = "" } = {}) {
-    this.Obj = Obj;
-    this.Indent = Indent;
-    this.Key = Key;
-  }
-}
-
-function parseValue(str) {
-  let value = str.trim();
-  if (value.startsWith("'") && value.slice(1).includes("'") || value.startsWith("\"") && value.slice(1).includes("\"")) {
-    let quote = value.slice(0, 1);
-    let endIdx = value.slice(1).indexOf(quote);
-    if (endIdx !== -1) {
-      let quotedPart = value.slice(0, endIdx + 2);
-      let afterQuote = value.slice(endIdx + 2);
-      let commentIdx = afterQuote.indexOf("#");
-      if (commentIdx !== -1) {
-        value = quotedPart + afterQuote.slice(0, commentIdx);
-      }
-    }
-  } else {
-    let commentIdx = value.indexOf("#");
-    if (commentIdx !== -1) {
-      value = value.slice(0, commentIdx);
-    }
-  }
-  value = value.trim();
-  if (value.startsWith("[") && value.endsWith("]")) {
-    let rawJson = value.replaceAll("'", "\"");
-    return JSON.parse(rawJson);
-  }
-  if (value.startsWith("\"") && value.endsWith("\"") || value.startsWith("'") && value.endsWith("'")) {
-    if (__len(value) >= 2) {
-      return value.slice(1, __len(value) - 1);
-    }
-  }
-  if (value === "true") {
-    return true;
-  }
-  if (value === "false") {
-    return false;
-  }
-  if (value === "null" || value === "Null" || value === "NULL" || value === "~") {
-    return null;
-  }
-  if (value !== "" && !isNaN(Number(value))) {
-    return Number(value);
-  }
-  return value;
-}
-
-function ParseYAML(yamlText) {
-  if (yamlText === "") {
-    return {  };
-  }
-  let lines = yamlText.split("\n");
-  let root = {  };
-  let stack = [new StackEntry({ Obj: root, Indent: -1, Key: "" })];
-  for (let i = 0; i < __len(lines); i++) {
-    let line = lines[i];
-    let trimmed = line.trim();
-    if (trimmed === "" || trimmed.startsWith("#")) {
-      continue;
-    }
-    let indent = 0;
-    while (indent < __len(line) && line.charCodeAt(indent) === 32 || line.charCodeAt(indent) === 9) {
-      indent++;
-    }
-    let isArrayItem = trimmed.startsWith("- ");
-    while (__len(stack) > 1 && indent <= stack[__len(stack) - 1].Indent) {
-      stack = stack.slice(0, __len(stack) - 1);
-    }
-    let parent = stack[__len(stack) - 1];
-    if (isArrayItem) {
-      let content = trimmed.slice(2).trim();
-      if (content.includes(":")) {
-        let obj = {  };
-        parent.Obj.push(obj);
-        stack = __append(stack, new StackEntry({ Obj: obj, Indent: indent, Key: "" }));
-        let colonIdx = content.indexOf(":");
-        let key = content.slice(0, colonIdx).trim();
-        let valStr = content.slice(colonIdx + 1).trim();
-        if (valStr !== "") {
-          obj[key] = parseValue(valStr);
-        }
-      } else {
-        parent.Obj.push(parseValue(content));
-      }
-    } else if (trimmed.includes(":")) {
-      let colonIdx = trimmed.indexOf(":");
-      let key = trimmed.slice(0, colonIdx).trim();
-      if (key.startsWith("\"") && key.endsWith("\"") || key.startsWith("'") && key.endsWith("'")) {
-        key = key.slice(1, __len(key) - 1);
-      }
-      let valStr = trimmed.slice(colonIdx + 1).trim();
-      if (valStr !== "") {
-        parent.Obj[key] = parseValue(valStr);
-      } else {
-        let isArray = false;
-        for (let j = i + 1; j < __len(lines); j++) {
-          let nextTrimmed = lines[j].trim();
-          if (nextTrimmed === "" || nextTrimmed.startsWith("#")) {
-            continue;
-          }
-          isArray = nextTrimmed.startsWith("- ");
-          break;
-        }
-        if (isArray) {
-          let arr = [];
-          parent.Obj[key] = arr;
-          stack = __append(stack, new StackEntry({ Obj: arr, Indent: indent, Key: key }));
-        } else {
-          let nested = {  };
-          parent.Obj[key] = nested;
-          stack = __append(stack, new StackEntry({ Obj: nested, Indent: indent, Key: key }));
-        }
-      }
-    }
-  }
-  return root;
-}
-
-var __len = __len || function(a) {
-  if (a && typeof a === 'object' && !Array.isArray(a)) return Object.keys(a).length;
-  return a?.length ?? 0;
-};
-var __append = __append || function(a, ...b) { return a ? [...a, ...b] : b; };
 var __s = __s || function(a) { return a || []; };
 var __sprintf = __sprintf || function(f, ...a) {
   let i = 0;
@@ -1254,31 +1125,32 @@ function parseMarkdown(content) {
   }
 }
 
-function parseFrontmatter(markdown) {
+function stripFrontmatter(markdown) {
   let trimmed = markdown.trim();
   if (!trimmed.startsWith("---")) {
-    return [{  }, trimmed];
+    return trimmed;
   }
   let rest = trimmed.slice(3);
   let newlineIdx = rest.indexOf("\n");
   if (newlineIdx === -1) {
-    return [{  }, trimmed];
+    return trimmed;
   }
   let afterFirstLine = rest.slice(newlineIdx + 1);
   let closingIdx = afterFirstLine.indexOf("\n---");
   if (closingIdx === -1) {
     closingIdx = afterFirstLine.indexOf("---");
     if (closingIdx === -1) {
-      return [{  }, trimmed];
+      return trimmed;
     }
+    let afterClosing = afterFirstLine.slice(closingIdx + 3);
+    return afterClosing.trim();
   }
-  let frontmatterText = afterFirstLine.slice(0, closingIdx).trim();
-  let body = afterFirstLine.slice(closingIdx + 4).trim();
-  let metadata = ParseYAML(frontmatterText);
-  if (metadata == null) {
-    return [{  }, body];
-  }
-  return [metadata, body];
+  let afterClosing = afterFirstLine.slice(closingIdx + 4);
+  return afterClosing.trim();
+}
+
+function parseFrontmatter(markdown) {
+  return [{  }, stripFrontmatter(markdown)];
 }
 
 async function loadMarkdownFile(url) {
@@ -2447,14 +2319,13 @@ function sortPagesByOrder(list) {
 }
 
 async function initData() {
-  let res = await fetch("/data/content.yaml");
+  let res = await fetch("/data/content.json");
   if (res == null || !res.ok) {
-    return __error("failed to fetch /data/content.yaml");
+    return __error("failed to fetch /data/content.json");
   }
-  let rawText = await res.text();
-  let data = ParseYAML(String(rawText));
+  let data = await res.json();
   if (data == null) {
-    return __error("failed to parse /data/content.yaml");
+    return __error("failed to parse /data/content.json");
   }
   let siteData = data.site;
   if (siteData != null) {

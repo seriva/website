@@ -1,6 +1,5 @@
 package main
 
-import "./utils"
 import "errors"
 import "js:./browser.d.ts"
 import "slices"
@@ -196,15 +195,14 @@ func sortPagesByOrder(list []NavPage) {
 }
 
 async func initData() error {
-	res := await fetch("/data/content.yaml")
+	res := await fetch("/data/content.json")
 	if res == nil || !res.ok {
-		return errors.New("failed to fetch /data/content.yaml")
+		return errors.New("failed to fetch /data/content.json")
 	}
 
-	rawText := await res.text()
-	data := utils.ParseYAML(string(rawText))
+	data := await res.json()
 	if data == nil {
-		return errors.New("failed to parse /data/content.yaml")
+		return errors.New("failed to parse /data/content.json")
 	}
 
 	siteData := data.site
