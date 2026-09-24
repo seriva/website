@@ -7,12 +7,12 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"]
+		"includes": ["scripts/**/*.js", "app/css/app.css"]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"]
+		"includes": ["scripts/**/*.js", "app/css/app.css"]
 	},
 	"assist": {
 		"actions": {
@@ -23,11 +23,21 @@
 	},
 	"linter": {
 		"enabled": true,
-		"includes": ["**/app/src/**/*.js", "!**/app/src/dependencies"],
+		"includes": ["scripts/**/*.js", "app/css/app.css"],
 		"rules": {
 			"preset": "recommended"
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["app/css/app.css"],
+			"linter": {
+				"rules": {
+					"style": { "noDescendingSpecificity": "off" }
+				}
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"

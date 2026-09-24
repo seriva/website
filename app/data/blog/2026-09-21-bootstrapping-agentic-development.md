@@ -9,7 +9,7 @@ Working with AI coding assistants across multiple projects is fantastic, but it 
 
 Every tool expects its own prompt file—`CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`—and without discipline, instructions drift apart. Worse, agents love generating transient session artifacts like ephemeral checklists, scratchpads, and worktrees that clutter up git history.
 
-To solve this across all my repositories, I built [Bootstrap](/?project=bootstrap): a generic project scaffold and workflow standard for agentic development.
+To solve this across all my repositories, I built [Bootstrap](/project/bootstrap): a generic project scaffold and workflow standard for agentic development.
 
 ## The Core Philosophy
 

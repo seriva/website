@@ -79,12 +79,23 @@ test.describe("Contact Form", () => {
         });
     });
 
-    test("close button hides the modal", async ({ page }) => {
+    test("close button hides the modal and preserves outer scrollbar", async ({ page }) => {
         await page.click("#email-toggle");
         await expect(page.locator("#contact-modal")).toBeVisible();
+
+        const modalOverflow = await page.evaluate(
+            () => window.getComputedStyle(document.documentElement).overflowY
+        );
+        expect(modalOverflow).not.toBe("hidden");
+
         await page.click("#contact-modal-close");
         await expect(page.locator("#contact-modal")).not.toBeVisible({
             timeout: 1000,
         });
+
+        const restoredOverflow = await page.evaluate(
+            () => window.getComputedStyle(document.documentElement).overflowY
+        );
+        expect(restoredOverflow).not.toBe("hidden");
     });
 });

@@ -1,0 +1,97 @@
+package main
+
+templ ProjectReadme(v ViewState) {
+	if v.Proj.GithubRepo != "" {
+		if v.Status == LoadFailed {
+			<div id="project-readme">
+				<p>{ t("project.readmeError") }</p>
+			</div>
+		} else if v.HTML != "" {
+			<div id="project-readme" class="markdown-body">
+				@templ.Raw(v.HTML)
+			</div>
+		}
+	}
+}
+
+templ ProjectMedia(videos []string) {
+	if len(videos) > 0 {
+		<div class="markdown-body">
+			<h2>{ t("project.media") }</h2>
+			for _, v := range videos {
+				<div class="youtube-video">
+					<div class="iframeWrapper">
+						<iframe width="560" height="349" src={ "https://www.youtube.com/embed/" + v + "?rel=0&hd=1" } title="YouTube video player" allowfullscreen></iframe>
+					</div>
+				</div>
+			}
+		</div>
+	}
+}
+
+templ ProjectDemo(p Project) {
+	if p.DemoUrl != "" {
+		<div class="markdown-body">
+			<h2>{ demoLabel(p) }</h2>
+			if p.DemoInstructions != "" {
+				<p>{ p.DemoInstructions }</p>
+			}
+			<div class={ demoWrapperClass(p.DemoHeight) }>
+				<iframe id="demo" src={ p.DemoUrl } title={ p.Title + " demo" } allowfullscreen></iframe>
+			</div>
+			if p.DemoFullscreen {
+				<br/>
+				<div class="text-center">
+					<button type="button" id="fullscreen" class="download-btn" data-action="toggle-fullscreen">
+						@Icon("expand", "1rem")
+						<span>{ t("project.fullscreen") }</span>
+					</button>
+				</div>
+			}
+		</div>
+	}
+}
+
+templ ProjectLinks(links []ProjectLink) {
+	if len(links) > 0 {
+		<div class="markdown-body">
+			<h2>{ t("project.links") }</h2>
+			<div class="download-buttons">
+				for _, link := range links {
+					<a href={ link.Href } target="_blank" rel="noopener noreferrer" class="download-btn">
+						@Icon(link.Icon, "1rem")
+						<span>{ link.Title }</span>
+					</a>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ ProjectDetail(v ViewState, commentsEnabled bool) {
+	if v.Status == LoadNotFound {
+		<div class="error-message">
+			<h1>{ t("general.projectNotFound") }</h1>
+			<p>{ t("general.projectNotFoundMessage") }</p>
+		</div>
+	} else {
+		<div class="project-detail">
+			<h1 class="project-title">{ v.Proj.Title }</h1>
+			<p class="project-description">{ v.Proj.Description }</p>
+			if len(v.Proj.Tags) > 0 {
+				<div class="project-tags">
+					for _, tag := range v.Proj.Tags {
+						<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
+					}
+				</div>
+			}
+			@ProjectReadme(v)
+			@ProjectMedia(v.Proj.YoutubeVideos)
+			@ProjectDemo(v.Proj)
+			@ProjectLinks(v.Proj.Links)
+			if commentsEnabled {
+				<div class="giscus-container"></div>
+			}
+		</div>
+	}
+}

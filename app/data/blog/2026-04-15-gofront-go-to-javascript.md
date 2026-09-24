@@ -15,7 +15,7 @@ So I did what any reasonable person would do and built a compiler.
 
 What if you could write Go syntax, get real type checking at compile time, and have it emit clean, readable ES modules? Same language front and back. No runtime, no framework, no `tsconfig.json`. Your `.go` files get Go syntax highlighting and bracket matching for free in any editor — no plugin required.
 
-That's [GoFront](/?project=gofront).
+That's [GoFront](/project/gofront).
 
 ## How it works
 
@@ -101,7 +101,7 @@ What's not there: goroutines, channels, `goto`, `unsafe`, `reflect`. Goroutines 
 
 There are two example apps in the repo — both implement the same todo app. One uses vanilla DOM manipulation, compiled to a single ES module with no dependencies. The other integrates with a signals-based reactive framework, with the type declarations written as a hand-crafted `.d.ts` shim so GoFront knows about `Signal`, `Signals.create()`, and `Reactive.bind()`.
 
-There's a [live demo](/?project=gofront) on the project page.
+There's a [live demo](/project/gofront) on the project page.
 
 ```bash
 npm install -g gofront

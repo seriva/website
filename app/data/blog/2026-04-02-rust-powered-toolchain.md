@@ -28,7 +28,7 @@ No Node.js-based build tooling remains in the critical path. Both tools are fast
 
 Rollup is great but it's JavaScript. Rolldown doing the same job in Rust is noticeably faster at scale, and as Rolldown matures it will gain even more Rollup compatibility and optimizations. Getting on this train early through Microtastic means future speed improvements come for free.
 
-Biome was [already part of the setup](/?blog=2025-11-01-migrating-to-microtastic) — a single Rust binary replacing ESLint and Prettier with near-instant feedback.
+Biome was [already part of the setup](/blog/2025-11-01-migrating-to-microtastic) — a single Rust binary replacing ESLint and Prettier with near-instant feedback.
 
 Together they make `npm run prod` feel snappy in a way that a webpack- or Rollup-based setup rarely does. Both this site and SimpleFPS went from 2–4 second builds down to around 100ms. Admittedly, shaving a few seconds off a tiny project is the world's least necessary optimization — but at enterprise scale, that same ratio goes from minutes to seconds, which actually matters.
 

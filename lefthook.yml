@@ -11,4 +11,4 @@ pre-commit:
 
     test:
       priority: 3
-      run: npm run test:unit
+      run: npm run test:gofront

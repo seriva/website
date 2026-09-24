@@ -1,0 +1,69 @@
+package main
+
+import "strconv"
+
+templ Navbar(r RouteMatch, pages []NavPage, projects []Project, dropdownOpen bool, mobileOpen bool, siteConfig SiteConfig) {
+	<nav class="navbar">
+		<div class="navbar-inner">
+			<a class="navbar-brand" href="/" data-action="nav">{ siteConfig.Title }</a>
+			<button type="button" class={ toggleBtnClass(mobileOpen) } aria-label="Toggle navigation" aria-expanded={ strconv.FormatBool(mobileOpen) } data-action="toggle-mobile-nav">
+				<span class="navbar-toggle-icon"></span>
+			</button>
+			<div class={ navbarCollapseClass(mobileOpen) }>
+				<ul class="navbar-nav left">
+					<li class="nav-item navbar-menu">
+						<a class={ navLinkClass(r.Kind == RouteBlog) } href="/blog" data-action="nav">{ t("nav.blog") }</a>
+					</li>
+					<li class={ dropdownClass(dropdownOpen) }>
+						<button type="button" class={ dropdownToggleClass(r.Kind == RouteProject) } aria-haspopup="true" aria-controls="projects-dropdown" aria-expanded={ strconv.FormatBool(dropdownOpen) } data-action="toggle-projects-dropdown">
+							{ t("nav.projects") }
+							<span class="dropdown-chevron dropdown-chevron-down">@Icon("chevron-down", "0.8em")</span>
+							<span class="dropdown-chevron dropdown-chevron-up">@Icon("chevron-up", "0.8em")</span>
+						</button>
+						<ul class="dropdown-menu" id="projects-dropdown">
+							for _, p := range projects {
+								<li><a class={ dropdownItemClass(isActiveRoute(r, RouteProject, p.ID)) } href={ p.Href } data-action="nav">{ p.Title }</a></li>
+							}
+						</ul>
+					</li>
+					for _, page := range pages {
+						if page.ShowInNav {
+							<li class="nav-item navbar-menu">
+								<a class={ navLinkClass(isActiveRoute(r, RoutePage, page.ID)) } href={ page.Href } data-action="nav">{ page.Title }</a>
+							</li>
+						}
+					}
+				</ul>
+				<ul class="navbar-nav right">
+					if siteConfig.Search.Enabled {
+						<li class="nav-item navbar-icon">
+							<button type="button" class="nav-link search-toggle" id="search-toggle" aria-label={ t("aria.search") } title={ t("search.buttonTitle") } data-action="open-search">
+								@Icon("search", "1.35rem")
+							</button>
+						</li>
+					}
+					<li class="nav-item navbar-icon">
+						<button type="button" id="theme-toggle" class="theme-toggle nav-link" aria-label={ t("aria.toggleTheme") } title={ t("theme.toggleTitle") } data-action="toggle-theme">
+							@Icon("sun", "1.35rem")
+							@Icon("moon", "1.35rem")
+						</button>
+					</li>
+					if siteConfig.EmailJS.Enabled {
+						<li class="nav-item navbar-icon">
+							<button type="button" class="nav-link email-toggle" id="email-toggle" aria-label={ t("contact.title") } title={ t("contact.buttonTitle") } data-action="open-contact">
+								@Icon("envelope", "1.35rem")
+							</button>
+						</li>
+					}
+					for _, s := range siteConfig.Social {
+						<li class="nav-item navbar-icon">
+							<a class="nav-link" href={ s.Href } target={ s.Target } rel={ s.Rel }>
+								@Icon(s.Icon, "1.35rem")
+							</a>
+						</li>
+					}
+				</ul>
+			</div>
+		</div>
+	</nav>
+}
