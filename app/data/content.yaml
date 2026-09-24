@@ -103,6 +103,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2026-09-24-migrating-from-microtastic-to-gofront.md"
+      title: "Dogfooding GoFront: A Real-World Test Bed for My Compiler"
+      date: "2026-09-24"
+      excerpt: "Microtastic is still doing great work in SimpleFPS, but GoFront needed a serious production test bed. Here is how dogfooding the compiler exposed real bugs and hardened the toolchain."
+      tags: ["Go", "GoFront", "Web Development", "Microtastic"]
     - filename: "2026-09-21-bootstrapping-agentic-development.md"
       title: "Bootstrapping Agentic Development"
       date: "2026-09-21"

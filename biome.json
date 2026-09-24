@@ -33,7 +33,6 @@
 			"includes": ["app/css/app.css"],
 			"linter": {
 				"rules": {
-					"complexity": { "noImportantStyles": "off" },
 					"style": { "noDescendingSpecificity": "off" }
 				}
 			}
