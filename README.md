@@ -8,7 +8,7 @@ Personal portfolio website built with [GoFront](https://github.com/seriva/gofron
 
 - **Core**: GoFront (`.templ` components, Go-inspired frontend architecture)
 - **Build**: `gofront prep` & `npm run prod` • Biome (lint/format) • Playwright (10 E2E suites)
-- **Content**: YAML config + Markdown • Pure GoFront YAML parser • Marked.js • Prism.js v1.30
+- **Content**: YAML config (compiled to JSON) + Markdown • Marked.js • Prism.js v1.30
 - **Features**: Fuse.js (search) • EmailJS (contact form) • giscus (comments)
 - **Assets**: Raleway fonts • Inline SVG icons (local, no CDNs)
 
@@ -53,7 +53,7 @@ flowchart TD
 
 ### Key Modules
 
-- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state, data, YAML parsing) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, async loaders) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
+- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state & data store, JSON hydration) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, async loaders) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
 - **Components (`src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
 - **Styles (`app/css/app.css`)**: single plain stylesheet linked from `index.html`, formatted and linted by Biome; loads in parallel with the JS bundles
 
@@ -81,6 +81,7 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
+- Compile YAML configuration to `content.json`
 - Bundle and minify vendor dependencies (`gofront prep --minify`)
 - Compile, minify, and mangle GoFront application bundle to `public/app.js`
 - Copy public assets (`index.html`, `404.html`, `data/`, `fonts/`, `css/`, metadata) to `public/`
@@ -129,7 +130,7 @@ All quality gates and tests must pass before production builds.
 
 ## GoFront Component Architecture
 
-The frontend is built with [GoFront](https://github.com/seriva/gofront) v1.2.0 using declarative `.templ` components and Go:
+The frontend is built with [GoFront](https://github.com/seriva/gofront) using declarative `.templ` components and Go:
 
 ```templ
 package main
@@ -161,7 +162,7 @@ templ BlogPostCard(post BlogPost) {
 
 **GitHub Pages:** Custom `404.html` redirects deep links via hash (`#!redirect=<path>`), restored to clean URLs with `history.replaceState()` in `src/router.go`
 
-**Absolute Paths:** All resources use root-relative paths (`/app.js`, `/data/content.yaml`) to work from any route depth
+**Absolute Paths:** All resources use root-relative paths (`/app.js`, `/data/content.json`) to work from any route depth
 
 **Event Delegation:** Dynamic content uses `data-action` attributes (e.g., `<a data-action="nav">`, `<button data-action="toggle-theme">`) handled centrally in `src/main.go`
 
