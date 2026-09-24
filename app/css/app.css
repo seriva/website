@@ -83,19 +83,6 @@ html::after {
 	visibility: hidden;
 }
 
-/* Prevent outer scrollbar when contact modal is open */
-html.modal-open,
-body.modal-open,
-html:has(#contact-modal.show),
-body:has(#contact-modal.show) {
-	overflow: hidden !important;
-}
-
-html.modal-open::after,
-html:has(#contact-modal.show)::after {
-	display: none !important;
-}
-
 *,
 *::before,
 *::after {
@@ -1255,6 +1242,7 @@ pre:hover .copy-code-button {
 	background-color: rgba(0, 0, 0, 0.8);
 	z-index: 10000;
 	overflow-y: auto;
+	overscroll-behavior: contain;
 	padding: 2rem 1rem;
 }
 #contact-modal.show {

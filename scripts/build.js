@@ -5,7 +5,7 @@
 // ===========================================
 // Commands:
 //   content  — Compile app/data/content.yaml into content.json
-//   sync     — Copy static assets from app/ to public/ (configured in package.json)
+//   sync     — Copy public assets from app/ to public/ (configured in package.json)
 //   seo      — Generate public/sitemap.xml and public/rss.xml
 //   post     — Run sync + seo (production post-build)
 //   all      — Run content + sync + seo
@@ -33,7 +33,7 @@ const publicDir = join(rootDir, "public");
 const pkgPath = join(rootDir, "package.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
-const DEFAULT_STATIC_ASSETS = [
+const DEFAULT_PUBLIC_ASSETS = [
 	"index.html",
 	"404.html",
 	"boot.js",
@@ -71,7 +71,7 @@ function compileContent() {
 	}
 }
 
-// ── 2. Static Asset Synchronization ───────────────────────────
+// ── 2. Public Asset Synchronization ───────────────────────────
 
 const DEV_ORIGIN = /\s+(?:https?|wss?):\/\/localhost:\d+/g;
 
@@ -82,10 +82,11 @@ function stripDevOrigins(html) {
 	);
 }
 
-function syncStaticAssets() {
+function syncPublicAssets() {
 	mkdirSync(publicDir, { recursive: true });
 
-	const assetsToCopy = pkg.staticAssets || DEFAULT_STATIC_ASSETS;
+	const assetsToCopy =
+		pkg.publicAssets || pkg.staticAssets || DEFAULT_PUBLIC_ASSETS;
 	let copiedCount = 0;
 
 	for (const item of assetsToCopy) {
@@ -114,7 +115,7 @@ function syncStaticAssets() {
 		}
 	}
 
-	console.log(`✓ Successfully copied ${copiedCount} static assets to public/`);
+	console.log(`✓ Successfully copied ${copiedCount} public assets to public/`);
 }
 
 // ── 3. Sitemap & RSS Generation ───────────────────────────────
@@ -279,18 +280,19 @@ switch (command) {
 		break;
 	case "sync":
 	case "static":
-		syncStaticAssets();
+	case "public":
+		syncPublicAssets();
 		break;
 	case "seo":
 		generateSeo();
 		break;
 	case "post":
-		syncStaticAssets();
+		syncPublicAssets();
 		generateSeo();
 		break;
 	case "all":
 		compileContent();
-		syncStaticAssets();
+		syncPublicAssets();
 		generateSeo();
 		break;
 	default:

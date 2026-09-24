@@ -2530,8 +2530,6 @@ function syncOverlays() {
   let modalVisible = contactOpen || contactClosing;
   setClass("#contact-modal", "show", modalVisible);
   setClass("#contact-modal", "closing", contactClosing);
-  document.documentElement.classList.toggle("modal-open", modalVisible);
-  document.body.classList.toggle("modal-open", modalVisible);
 }
 
 function resetOverlays() {
@@ -2633,4 +2631,3 @@ function readmeURL(p, githubUsername) {
 }
 
 main();
-(function(){var es=new EventSource('/_gofront/events');es.addEventListener('reload',function(){location.reload();});})();

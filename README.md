@@ -83,15 +83,14 @@ This will:
 - Run code quality checks (`biome check`)
 - Bundle and minify vendor dependencies (`gofront prep --minify`)
 - Compile, minify, and mangle GoFront application bundle to `public/app.js`
-- Copy static assets (`index.html`, `404.html`, `data/`, `fonts/`, `css/`, metadata) to `public/`
+- Copy public assets (`index.html`, `404.html`, `data/`, `fonts/`, `css/`, metadata) to `public/`
 - Generate `sitemap.xml` and `rss.xml`
 - Output complete, self-contained site to `public/` directory
 
-### Asset Copying
+### Asset Management
 
-Fonts and Prism themes are automatically copied from npm packages when you run `npm run prepare`. The `assetCopy` configuration in `package.json` defines which assets to copy.
-
-Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they're auto-generated from npm packages.
+- **Vendor Assets (`assetCopy`)**: Fonts and Prism themes are copied from npm packages to `app/` during `npm run prepare` via GoFront's `assetCopy` configuration in `package.json`. Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they are generated from npm packages.
+- **Production Assets (`publicAssets`)**: Static web files and directories are synchronized from `app/` to `public/` during `npm run prod` via `publicAssets` in `package.json`.
 
 ### Code Quality Tools
 
