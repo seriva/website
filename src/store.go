@@ -46,71 +46,64 @@ func t(key string) string {
 
 // ── Meta Tags Updater ─────────────────────────────────────────
 
-func updateMeta(selector string, value string) {
+// headEl returns the <head> element matching tag[attr="name"], creating it if missing.
+func headEl(tag string, attr string, name string) any {
+	el := document.querySelector(tag + "[" + attr + "=\"" + name + "\"]")
+	if el == nil {
+		el = document.createElement(tag)
+		el.setAttribute(attr, name)
+		document.head.appendChild(el)
+	}
+	return el
+}
+
+// updateMeta sets <meta attr="name" content=value>; attr is "name" or "property".
+func updateMeta(attr string, name string, value string) {
 	if value == "" {
 		return
 	}
-	el := document.querySelector(selector)
-	if el == nil {
-		el = document.createElement("meta")
-		if strings.HasPrefix(selector, "meta[name=\"") {
-			name := strings.TrimSuffix(strings.TrimPrefix(selector, "meta[name=\""), "\"]")
-			el.setAttribute("name", name)
-		} else if strings.HasPrefix(selector, "meta[property=\"") {
-			prop := strings.TrimSuffix(strings.TrimPrefix(selector, "meta[property=\""), "\"]")
-			el.setAttribute("property", prop)
-		}
-		document.head.appendChild(el)
+	headEl("meta", attr, name).setAttribute("content", value)
+}
+
+func updateTitleMeta(title string) {
+	if title == "" {
+		return
 	}
-	el.setAttribute("content", value)
+	document.title = title
+	updateMeta("property", "og:title", title)
+	updateMeta("property", "twitter:title", title)
+}
+
+func updateDescriptionMeta(description string) {
+	updateMeta("name", "description", description)
+	updateMeta("property", "og:description", description)
+	updateMeta("property", "twitter:description", description)
 }
 
 func updateMetaTags() {
-	if site.Title != "" {
-		document.title = site.Title
-	}
-	updateMeta("meta[name=\"description\"]", site.Description)
-	updateMeta("meta[name=\"author\"]", site.Author)
-	updateMeta("meta[name=\"theme-color\"]", site.DarkTheme.Primary)
-	updateMeta("meta[name=\"msapplication-TileColor\"]", site.DarkTheme.Primary)
-	updateMeta("meta[property=\"og:title\"]", site.Title)
-	updateMeta("meta[property=\"twitter:title\"]", site.Title)
-	updateMeta("meta[property=\"og:description\"]", site.Description)
-	updateMeta("meta[property=\"twitter:description\"]", site.Description)
+	updateTitleMeta(site.Title)
+	updateDescriptionMeta(site.Description)
+	updateMeta("name", "author", site.Author)
+	updateMeta("name", "theme-color", site.DarkTheme.Primary)
+	updateMeta("name", "msapplication-TileColor", site.DarkTheme.Primary)
 }
 
 func updateRouteMeta(title string, description string, canonicalPath string) {
-	if title != "" {
-		document.title = title
-		updateMeta("meta[property=\"og:title\"]", title)
-		updateMeta("meta[property=\"twitter:title\"]", title)
+	updateTitleMeta(title)
+	updateDescriptionMeta(description)
+	if canonicalPath == "" {
+		return
 	}
-	if description != "" {
-		updateMeta("meta[name=\"description\"]", description)
-		updateMeta("meta[property=\"og:description\"]", description)
-		updateMeta("meta[property=\"twitter:description\"]", description)
-	}
-	if canonicalPath != "" {
-		fullURL := canonicalPath
-		if strings.HasPrefix(canonicalPath, "/") {
-			origin := ""
-			if window.location != nil && window.location.origin != nil {
-				origin = string(window.location.origin)
-			}
-			if origin == "" || origin == "null" {
-				origin = site.Url
-			}
-			fullURL = origin + canonicalPath
+	fullURL := canonicalPath
+	if strings.HasPrefix(canonicalPath, "/") {
+		origin := strVal(window.location.origin)
+		if origin == "" || origin == "null" {
+			origin = site.Url
 		}
-		updateMeta("meta[property=\"og:url\"]", fullURL)
-		link := document.querySelector("link[rel=\"canonical\"]")
-		if link == nil {
-			link = document.createElement("link")
-			link.setAttribute("rel", "canonical")
-			document.head.appendChild(link)
-		}
-		link.setAttribute("href", fullURL)
+		fullURL = origin + canonicalPath
 	}
+	updateMeta("property", "og:url", fullURL)
+	headEl("link", "rel", "canonical").setAttribute("href", fullURL)
 }
 
 // ── Data Initialization ───────────────────────────────────────
@@ -136,23 +129,28 @@ func intVal(v any) int {
 	return int(v)
 }
 
+// strSlice maps a raw JSON array (or nil) to a non-nil []string.
+func strSlice(raw any) []string {
+	out := []string{}
+	if raw != nil {
+		for _, v := range raw {
+			out = append(out, strVal(v))
+		}
+	}
+	return out
+}
+
 // postFromJSON maps one raw `blog.posts[]` entry to a BlogPost.
 func postFromJSON(p any) BlogPost {
 	fn := strVal(p.filename)
 	slug := strings.TrimSuffix(fn, ".md")
-	tags := []string{}
-	if p.tags != nil {
-		for _, tg := range p.tags {
-			tags = append(tags, strVal(tg))
-		}
-	}
 	return BlogPost{
 		ID:       slug,
 		Slug:     slug,
 		Title:    strVal(p.title),
 		Date:     strVal(p.date),
 		Excerpt:  strVal(p.excerpt),
-		Tags:     tags,
+		Tags:     strSlice(p.tags),
 		Filename: fn,
 		Href:     "/blog/" + slug,
 	}
@@ -161,30 +159,18 @@ func postFromJSON(p any) BlogPost {
 // sortPostsByDate orders newest first; dates are ISO strings so lexical order works.
 func sortPostsByDate(list []BlogPost) {
 	slices.SortFunc(list, func(a BlogPost, b BlogPost) int {
+		if a.Date == b.Date {
+			return 0
+		}
 		if a.Date < b.Date {
 			return 1
 		}
-		if a.Date > b.Date {
-			return -1
-		}
-		return 0
+		return -1
 	})
 }
 
 // projectFromJSON maps one raw `projects[]` entry to a Project.
 func projectFromJSON(p any) Project {
-	tags := []string{}
-	if p.tags != nil {
-		for _, tg := range p.tags {
-			tags = append(tags, strVal(tg))
-		}
-	}
-	videos := []string{}
-	if p.youtube_videos != nil {
-		for _, v := range p.youtube_videos {
-			videos = append(videos, strVal(v))
-		}
-	}
 	links := []ProjectLink{}
 	if p.links != nil {
 		for _, l := range p.links {
@@ -201,7 +187,7 @@ func projectFromJSON(p any) Project {
 		ID:               id,
 		Title:            strVal(p.title),
 		Description:      strVal(p.description),
-		Tags:             tags,
+		Tags:             strSlice(p.tags),
 		Order:            intVal(p.order),
 		GithubRepo:       strVal(p.github_repo),
 		GithubBranch:     strVal(p.github_branch),
@@ -210,10 +196,31 @@ func projectFromJSON(p any) Project {
 		DemoInstructions: strVal(p.demo_instructions),
 		DemoHeight:       strVal(p.demo_height),
 		DemoFullscreen:   boolVal(p.demo_fullscreen),
-		YoutubeVideos:    videos,
+		YoutubeVideos:    strSlice(p.youtube_videos),
 		Links:            links,
 		Href:             "/project/" + id,
 	}
+}
+
+// themeFromJSON maps one `site.theme.<name>` entry to ThemeColors.
+func themeFromJSON(d any, defaultCodeTheme string) ThemeColors {
+	tc := ThemeColors{
+		Primary:    strVal(d.primary),
+		Secondary:  strVal(d.secondary),
+		Background: strVal(d.background),
+		Text:       strVal(d.text),
+		TextLight:  strVal(d.textLight),
+		Border:     strVal(d.border),
+		Hover:      strVal(d.hover),
+		CodeTheme:  defaultCodeTheme,
+	}
+	if d.code != nil {
+		tc.CodeTheme = strVal(d.code.theme)
+	}
+	if d.comments != nil {
+		tc.CommentsTheme = strVal(d.comments.theme)
+	}
+	return tc
 }
 
 func sortProjectsByOrder(list []Project) {
@@ -260,42 +267,10 @@ async func initData() error {
 
 		if siteData.theme != nil {
 			if siteData.theme.dark != nil {
-				d := siteData.theme.dark
-				site.DarkTheme = ThemeColors{
-					Primary:    strVal(d.primary),
-					Secondary:  strVal(d.secondary),
-					Background: strVal(d.background),
-					Text:       strVal(d.text),
-					TextLight:  strVal(d.textLight),
-					Border:     strVal(d.border),
-					Hover:      strVal(d.hover),
-					CodeTheme:  "prism-tomorrow",
-				}
-				if d.code != nil {
-					site.DarkTheme.CodeTheme = strVal(d.code.theme)
-				}
-				if d.comments != nil {
-					site.DarkTheme.CommentsTheme = strVal(d.comments.theme)
-				}
+				site.DarkTheme = themeFromJSON(siteData.theme.dark, "prism-tomorrow")
 			}
 			if siteData.theme.light != nil {
-				l := siteData.theme.light
-				site.LightTheme = ThemeColors{
-					Primary:    strVal(l.primary),
-					Secondary:  strVal(l.secondary),
-					Background: strVal(l.background),
-					Text:       strVal(l.text),
-					TextLight:  strVal(l.textLight),
-					Border:     strVal(l.border),
-					Hover:      strVal(l.hover),
-					CodeTheme:  "prism-coy",
-				}
-				if l.code != nil {
-					site.LightTheme.CodeTheme = strVal(l.code.theme)
-				}
-				if l.comments != nil {
-					site.LightTheme.CommentsTheme = strVal(l.comments.theme)
-				}
+				site.LightTheme = themeFromJSON(siteData.theme.light, "prism-coy")
 			}
 		}
 

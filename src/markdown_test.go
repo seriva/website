@@ -86,15 +86,6 @@ func TestStripFrontmatterClosingAtEOF(t *testing.T) {
 	}
 }
 
-func TestParseFrontmatterCompatibility(t *testing.T) {
-	content := "---\ntitle: Compatibility\n---\n\nBody text"
-	_, body := parseFrontmatter(content)
-
-	if body != "Body text" {
-		t.Errorf("expected 'Body text', got %q", body)
-	}
-}
-
 func TestSlugify(t *testing.T) {
 	cases := []struct {
 		in   string

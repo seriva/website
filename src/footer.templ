@@ -1,9 +1,9 @@
 package main
 
-import "fmt"
+import "strconv"
 
 templ Footer(year int, author string) {
 	<footer>
-		{ fmt.Sprintf("© %d %s. %s.", year, author, t("footer.rights")) }
+		{ "© " + strconv.Itoa(year) + " " + author + ". " + t("footer.rights") + "." }
 	</footer>
 }

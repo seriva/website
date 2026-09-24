@@ -2,6 +2,15 @@ package main
 
 import "js:./browser.d.ts"
 
+// giscusTheme is the configured comments theme for the active site theme,
+// falling back to the theme name itself ("dark"/"light").
+func giscusTheme() string {
+	if ct := getThemeColors(currentTheme).CommentsTheme; ct != "" {
+		return ct
+	}
+	return currentTheme
+}
+
 func loadGiscus() {
 	container := document.querySelector(".giscus-container")
 	if container == nil {
@@ -10,12 +19,6 @@ func loadGiscus() {
 
 	// Clear any existing giscus content
 	container.innerHTML = ""
-
-	colors := getThemeColors(currentTheme)
-	giscusTheme := colors.CommentsTheme
-	if giscusTheme == "" {
-		giscusTheme = currentTheme
-	}
 
 	script := document.createElement("script")
 	script.src = "https://giscus.app/client.js"
@@ -28,7 +31,7 @@ func loadGiscus() {
 	script.setAttribute("data-reactions-enabled", site.Comments.ReactionsEnabled)
 	script.setAttribute("data-emit-metadata", site.Comments.EmitMetadata)
 	script.setAttribute("data-input-position", site.Comments.InputPosition)
-	script.setAttribute("data-theme", giscusTheme)
+	script.setAttribute("data-theme", giscusTheme())
 	script.setAttribute("data-lang", site.Comments.Lang)
 	script.setAttribute("crossorigin", "anonymous")
 	script.async = true
@@ -41,16 +44,10 @@ func updateGiscusTheme() {
 		return
 	}
 
-	colors := getThemeColors(currentTheme)
-	giscusTheme := colors.CommentsTheme
-	if giscusTheme == "" {
-		giscusTheme = currentTheme
-	}
-
 	iframe.contentWindow.postMessage(map[string]any{
 		"giscus": map[string]any{
 			"setConfig": map[string]any{
-				"theme": giscusTheme,
+				"theme": giscusTheme(),
 			},
 		},
 	}, "https://giscus.app")

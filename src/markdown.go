@@ -246,10 +246,6 @@ func stripFrontmatter(markdown string) string {
 	return strings.TrimSpace(afterClosing)
 }
 
-func parseFrontmatter(markdown string) (map[string]any, string) {
-	return map[string]any{}, stripFrontmatter(markdown)
-}
-
 async func loadMarkdownFile(url string) (string, error) {
 	defer func() {
 		if r := recover(); r != nil {

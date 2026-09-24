@@ -78,10 +78,7 @@ func resetOverlays() {
 	if searchOpen || searchQuery != "" {
 		searchOpen = false
 		searchClosing = false
-		searchQuery = ""
-		searchResults = []SearchResultItem{}
-		setSearchInput("")
-		renderSearchResults()
+		setSearchQuery("")
 	}
 	syncOverlays()
 }

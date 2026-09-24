@@ -29,6 +29,24 @@ func closeMobileMenu() {
 	syncOverlays()
 }
 
+// closeMenus collapses the nav menus before another overlay takes focus.
+func closeMenus() {
+	closeMobileMenu()
+	closeProjectsDropdown()
+}
+
+// navigateHash scrolls to an in-page anchor ("#id" or "" for top) and
+// records it in history without triggering a route change.
+func navigateHash(hash string) {
+	if strings.TrimPrefix(hash, "#") != "" {
+		scrollToHash(hash, true)
+		window.history.pushState(map[string]any{}, "", hash)
+		return
+	}
+	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
+	window.history.pushState(map[string]any{}, "", window.location.pathname)
+}
+
 func setupEvents() {
 	app := document.querySelector("#app")
 	if app == nil {
@@ -65,14 +83,7 @@ func setupEvents() {
 				if href != nil && href != "" {
 					hrefStr := string(href)
 					if strings.HasPrefix(hrefStr, "#") {
-						id := strings.TrimPrefix(hrefStr, "#")
-						if id != "" {
-							scrollToHash(hrefStr, true)
-							window.history.pushState(map[string]any{}, "", hrefStr)
-						} else {
-							window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
-							window.history.pushState(map[string]any{}, "", window.location.pathname)
-						}
+						navigateHash(hrefStr)
 						return
 					}
 					navigate(hrefStr)
@@ -90,8 +101,6 @@ func setupEvents() {
 				toggleTheme()
 			case "open-search":
 				e.preventDefault()
-				closeMobileMenu()
-				closeProjectsDropdown()
 				openSearch()
 			case "close-search":
 				e.preventDefault()
@@ -101,8 +110,6 @@ func setupEvents() {
 				clearSearch()
 			case "open-contact":
 				e.preventDefault()
-				closeMobileMenu()
-				closeProjectsDropdown()
 				openContact()
 			case "close-contact":
 				e.preventDefault()
@@ -159,14 +166,7 @@ func setupEvents() {
 			// In-page anchor hash link (#the-architecture)
 			if strings.HasPrefix(href, "#") {
 				e.preventDefault()
-				id := strings.TrimPrefix(href, "#")
-				if id != "" {
-					scrollToHash(href, true)
-					window.history.pushState(map[string]any{}, "", href)
-				} else {
-					window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
-					window.history.pushState(map[string]any{}, "", window.location.pathname)
-				}
+				navigateHash(href)
 				return
 			}
 
@@ -240,12 +240,8 @@ func setupEvents() {
 				tagName := ""
 				isEditable := false
 				if target != nil {
-					if target.tagName != nil {
-						tagName = strings.ToUpper(strVal(target.tagName))
-					}
-					if target.isContentEditable != nil {
-						isEditable = boolVal(target.isContentEditable)
-					}
+					tagName = strings.ToUpper(strVal(target.tagName))
+					isEditable = boolVal(target.isContentEditable)
 				}
 
 				inInput := tagName == "INPUT" || tagName == "TEXTAREA" || tagName == "SELECT" || isEditable
@@ -255,15 +251,11 @@ func setupEvents() {
 					if searchOpen {
 						closeSearch()
 					} else {
-						closeMobileMenu()
-						closeProjectsDropdown()
 						openSearch()
 					}
 				} else if isSlash && !inInput {
 					e.preventDefault()
 					if !searchOpen {
-						closeMobileMenu()
-						closeProjectsDropdown()
 						openSearch()
 					}
 				}

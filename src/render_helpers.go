@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
 import "html"
+import "strconv"
 import "strings"
 import "time"
 
@@ -104,7 +104,7 @@ func pageHref(page int) string {
 	if page < 1 {
 		page = 1
 	}
-	return fmt.Sprintf("/blog/page/%d", page)
+	return "/blog/page/" + strconv.Itoa(page)
 }
 
 func pageNumbers(totalPages int) []int {
@@ -154,30 +154,24 @@ func searchClearClass(q string) string {
 }
 
 func searchPlaceholderText() string {
-	if site.Search.Placeholder != "" && site.Search.Placeholder != "undefined" {
+	if site.Search.Placeholder != "" {
 		return site.Search.Placeholder
 	}
-	res := t("search.placeholder")
-	if res == "search.placeholder" || res == "" || res == "undefined" {
-		return "Search..."
+	if res := t("search.placeholder"); res != "search.placeholder" {
+		return res
 	}
-	return res
+	return "Search..."
 }
 
+// highlightMatch wraps the first case-insensitive occurrence of query in <mark>; all text is escaped.
 func highlightMatch(text string, query string) string {
-	if query == "" {
-		return html.EscapeString(text)
+	if query != "" {
+		if idx := strings.Index(strings.ToLower(text), strings.ToLower(query)); idx != -1 {
+			end := idx + len(query)
+			return html.EscapeString(text[:idx]) + "<mark>" + html.EscapeString(text[idx:end]) + "</mark>" + html.EscapeString(text[end:])
+		}
 	}
-	lowerText := strings.ToLower(text)
-	lowerQuery := strings.ToLower(query)
-	idx := strings.Index(lowerText, lowerQuery)
-	if idx == -1 {
-		return html.EscapeString(text)
-	}
-	before := html.EscapeString(text[:idx])
-	match := html.EscapeString(text[idx : idx+len(query)])
-	after := html.EscapeString(text[idx+len(query):])
-	return before + "<mark>" + match + "</mark>" + after
+	return html.EscapeString(text)
 }
 
 // ── Contact helpers ───────────────────────────────────────────
