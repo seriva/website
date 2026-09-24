@@ -103,7 +103,16 @@ func setSearchInput(v string) {
 	}
 }
 
+// setSearchQuery updates query + results together and re-renders the list.
+func setSearchQuery(q string) {
+	searchQuery = q
+	searchResults = performSearch(q)
+	setSearchInput(q)
+	renderSearchResults()
+}
+
 func openSearch() {
+	closeMenus()
 	searchOpen = true
 	searchClosing = false
 	syncOverlays()
@@ -111,21 +120,12 @@ func openSearch() {
 }
 
 func openSearchWithTag(tag string) {
-	searchOpen = true
-	searchClosing = false
-	searchQuery = tag
-	searchResults = performSearch(tag)
-	setSearchInput(tag)
-	renderSearchResults()
-	syncOverlays()
-	focusLater("#search-page-input")
+	setSearchQuery(tag)
+	openSearch()
 }
 
 func clearSearch() {
-	searchQuery = ""
-	searchResults = []SearchResultItem{}
-	setSearchInput("")
-	renderSearchResults()
+	setSearchQuery("")
 	syncOverlays()
 	focusLater("#search-page-input")
 }
@@ -139,10 +139,7 @@ func closeSearch() {
 	setTimeout(func() {
 		searchOpen = false
 		searchClosing = false
-		searchQuery = ""
-		searchResults = []SearchResultItem{}
-		setSearchInput("")
-		renderSearchResults()
+		setSearchQuery("")
 		syncOverlays()
 	}, 200)
 }

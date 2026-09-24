@@ -4,54 +4,6 @@ var __len = __len || function(a) {
 };
 var __append = __append || function(a, ...b) { return a ? [...a, ...b] : b; };
 var __s = __s || function(a) { return a || []; };
-var __sprintf = __sprintf || function(f, ...a) {
-  let i = 0;
-  return f.replace(/%([#+\- 0]*)([0-9]*)\.?([0-9]*)[sdvftxXqobeEgGw%]/g, (m) => {
-    if (m === "%%") return "%";
-    const verb = m.slice(-1);
-    const v = a[i++];
-    const [, flags, width, prec] = m.match(/^%([#+\- 0]*)([0-9]*)\.?([0-9]*)/) || [];
-    const zero = flags?.includes("0") && !flags?.includes("-");
-    const pad = (s, w, z) => {
-      w = parseInt(w) || 0;
-      if (!w) return s;
-      const p = (z ? "0" : " ").repeat(Math.max(0, w - s.length));
-      return flags.includes("-") ? s + p : p + s;
-    };
-    switch (verb) {
-      case "s": return pad(String(v == null ? "<nil>" : v), width, false);
-      case "d": return pad(String(Math.trunc(Number(v))), width, zero);
-      case "v": {
-        if (typeof v === "object" && v !== null) {
-          if ("re" in v && "im" in v) {
-            const sign = v.im >= 0 ? "+" : "";
-            return pad("(" + v.re + sign + v.im + "i)", width, false);
-          }
-          if (typeof v.Error === "function") {
-            return pad(String(v.Error()), width, false);
-          }
-          try {
-            return pad(JSON.stringify(v), width, false);
-          } catch {
-            return pad(String(v), width, false);
-          }
-        }
-        return pad(String(v == null ? "<nil>" : v), width, false);
-      }
-      case "f": { const n = Number(v), p = prec !== "" ? parseInt(prec) : 6; return pad(n.toFixed(p), width, zero); }
-      case "t": return pad(String(!!v), width, false);
-      case "x": return pad((Number(v) >>> 0).toString(16), width, zero);
-      case "X": return pad((Number(v) >>> 0).toString(16).toUpperCase(), width, zero);
-      case "o": return pad((Number(v) >>> 0).toString(8), width, zero);
-      case "b": return pad((Number(v) >>> 0).toString(2), width, zero);
-      case "q": return pad('"' + String(v == null ? "" : v).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"', width, false);
-      case "e": case "E": { const n = Number(v), p = prec !== "" ? parseInt(prec) : 6; return pad(n.toExponential(p), width, zero); }
-      case "g": case "G": { const n = Number(v); return pad(prec !== "" ? n.toPrecision(parseInt(prec)) : String(n), width, zero); }
-      case "w": return pad(String(v == null ? "<nil>" : typeof v === "object" && v.Error ? v.Error() : v), width, false);
-      default: return m;
-    }
-  });
-};
 var __error = __error || function(msg, cause) {
   return { Error() { return msg; }, toString() { return msg; }, _msg: msg, _cause: cause ?? null };
 };
@@ -620,17 +572,22 @@ function BlogPostView(v, commentsEnabled) {
   }};
 }
 
+function giscusTheme() {
+  {
+    let ct = getThemeColors(currentTheme).CommentsTheme;
+    if (ct !== "") {
+      return ct;
+    }
+  }
+  return currentTheme;
+}
+
 function loadGiscus() {
   let container = document.querySelector(".giscus-container");
   if (container == null) {
     return;
   }
   container.innerHTML = "";
-  let colors = getThemeColors(currentTheme);
-  let giscusTheme = colors.CommentsTheme;
-  if (giscusTheme === "") {
-    giscusTheme = currentTheme;
-  }
   let script = document.createElement("script");
   script.src = "https://giscus.app/client.js";
   script.setAttribute("data-repo", site.Comments.Repo);
@@ -642,7 +599,7 @@ function loadGiscus() {
   script.setAttribute("data-reactions-enabled", site.Comments.ReactionsEnabled);
   script.setAttribute("data-emit-metadata", site.Comments.EmitMetadata);
   script.setAttribute("data-input-position", site.Comments.InputPosition);
-  script.setAttribute("data-theme", giscusTheme);
+  script.setAttribute("data-theme", giscusTheme());
   script.setAttribute("data-lang", site.Comments.Lang);
   script.setAttribute("crossorigin", "anonymous");
   script.async = true;
@@ -654,12 +611,7 @@ function updateGiscusTheme() {
   if (iframe == null) {
     return;
   }
-  let colors = getThemeColors(currentTheme);
-  let giscusTheme = colors.CommentsTheme;
-  if (giscusTheme === "") {
-    giscusTheme = currentTheme;
-  }
-  iframe.contentWindow.postMessage({ "giscus": { "setConfig": { "theme": giscusTheme } } }, "https://giscus.app");
+  iframe.contentWindow.postMessage({ "giscus": { "setConfig": { "theme": giscusTheme() } } }, "https://giscus.app");
 }
 
 function ContactFormFields(form) {
@@ -796,14 +748,19 @@ async function preloadEmailJS() {
   }
 }
 
+function resetContactForm() {
+  contactForm = new ContactState({ ButtonState: "send" });
+  renderContactForm();
+}
+
 function openContact() {
   if (site.EmailJS.Enabled) {
     preloadEmailJS();
   }
+  closeMenus();
   contactOpen = true;
   contactClosing = false;
-  contactForm = new ContactState({ ButtonState: "send" });
-  renderContactForm();
+  resetContactForm();
   syncOverlays();
   focusLater("#contact-name");
 }
@@ -817,8 +774,7 @@ function closeContact() {
   setTimeout(function() {
     contactOpen = false;
     contactClosing = false;
-    contactForm = new ContactState({ ButtonState: "send" });
-    renderContactForm();
+    resetContactForm();
     syncOverlays();
   }, 200);
 }
@@ -844,10 +800,7 @@ function updateContactField(field, value) {
 }
 
 function isValidEmail(email) {
-  if (__len(email) < 5 || !email.includes("@") || !email.includes(".") || email.includes(" ")) {
-    return false;
-  }
-  return true;
+  return __len(email) >= 5 && email.includes("@") && email.includes(".") && !email.includes(" ");
 }
 
 function validateContact(form) {
@@ -940,7 +893,7 @@ async function submitContact() {
 function Footer(year, author) {
   return {Mount(___p) {
     const ___e69 = document.createElement("footer");
-    ___e69.appendChild(document.createTextNode(String(__sprintf("© %d %s. %s.", year, author, t("footer.rights")))));
+    ___e69.appendChild(document.createTextNode(String("© " + String(year) + " " + author + ". " + t("footer.rights") + ".")));
     ___p.appendChild(___e69);
   }};
 }
@@ -994,6 +947,21 @@ function closeMobileMenu() {
   syncOverlays();
 }
 
+function closeMenus() {
+  closeMobileMenu();
+  closeProjectsDropdown();
+}
+
+function navigateHash(hash) {
+  if (((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(hash, "#") !== "") {
+    scrollToHash(hash, true);
+    window.history.pushState({  }, "", hash);
+    return;
+  }
+  window.scrollTo({ "top": 0, "left": 0, "behavior": "smooth" });
+  window.history.pushState({  }, "", window.location.pathname);
+}
+
 function setupEvents() {
   let app = document.querySelector("#app");
   if (app == null) {
@@ -1025,14 +993,7 @@ function setupEvents() {
           if (href != null && href !== "") {
             let hrefStr = String(href);
             if (hrefStr.startsWith("#")) {
-              let id = ((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(hrefStr, "#");
-              if (id !== "") {
-                scrollToHash(hrefStr, true);
-                window.history.pushState({  }, "", hrefStr);
-              } else {
-                window.scrollTo({ "top": 0, "left": 0, "behavior": "smooth" });
-                window.history.pushState({  }, "", window.location.pathname);
-              }
+              navigateHash(hrefStr);
               return;
             }
             navigate(hrefStr);
@@ -1062,8 +1023,6 @@ function setupEvents() {
         case "open-search":
         {
           e.preventDefault();
-          closeMobileMenu();
-          closeProjectsDropdown();
           openSearch();
           break;
         }
@@ -1082,8 +1041,6 @@ function setupEvents() {
         case "open-contact":
         {
           e.preventDefault();
-          closeMobileMenu();
-          closeProjectsDropdown();
           openContact();
           break;
         }
@@ -1150,14 +1107,7 @@ function setupEvents() {
       }
       if (href.startsWith("#")) {
         e.preventDefault();
-        let id = ((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(href, "#");
-        if (id !== "") {
-          scrollToHash(href, true);
-          window.history.pushState({  }, "", href);
-        } else {
-          window.scrollTo({ "top": 0, "left": 0, "behavior": "smooth" });
-          window.history.pushState({  }, "", window.location.pathname);
-        }
+        navigateHash(href);
         return;
       }
       if (href.startsWith("/")) {
@@ -1216,12 +1166,8 @@ function setupEvents() {
         let tagName = "";
         let isEditable = false;
         if (target != null) {
-          if (target.tagName != null) {
-            tagName = strVal(target.tagName).toUpperCase();
-          }
-          if (target.isContentEditable != null) {
-            isEditable = boolVal(target.isContentEditable);
-          }
+          tagName = strVal(target.tagName).toUpperCase();
+          isEditable = boolVal(target.isContentEditable);
         }
         let inInput = tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT" || isEditable;
         if (isCmdK) {
@@ -1229,15 +1175,11 @@ function setupEvents() {
           if (searchOpen) {
             closeSearch();
           } else {
-            closeMobileMenu();
-            closeProjectsDropdown();
             openSearch();
           }
         } else if (isSlash && !inInput) {
           e.preventDefault();
           if (!searchOpen) {
-            closeMobileMenu();
-            closeProjectsDropdown();
             openSearch();
           }
         }
@@ -1513,10 +1455,6 @@ function stripFrontmatter(markdown) {
   }
   let afterClosing = afterFirstLine.slice(closingIdx + 4);
   return afterClosing.trim();
-}
-
-function parseFrontmatter(markdown) {
-  return [{  }, stripFrontmatter(markdown)];
 }
 
 async function loadMarkdownFile(url) {
@@ -2081,7 +2019,7 @@ function pageHref(page) {
   if (page < 1) {
     page = 1;
   }
-  return __sprintf("/blog/page/%d", page);
+  return "/blog/page/" + String(page);
 }
 
 function pageNumbers(totalPages) {
@@ -2124,30 +2062,29 @@ function searchClearClass(q) {
 }
 
 function searchPlaceholderText() {
-  if (site.Search.Placeholder !== "" && site.Search.Placeholder !== "undefined") {
+  if (site.Search.Placeholder !== "") {
     return site.Search.Placeholder;
   }
-  let res = t("search.placeholder");
-  if (res === "search.placeholder" || res === "" || res === "undefined") {
-    return "Search...";
+  {
+    let res = t("search.placeholder");
+    if (res !== "search.placeholder") {
+      return res;
+    }
   }
-  return res;
+  return "Search...";
 }
 
 function highlightMatch(text, query) {
-  if (query === "") {
-    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
+  if (query !== "") {
+    {
+      let idx = text.toLowerCase().indexOf(query.toLowerCase());
+      if (idx !== -1) {
+        let end = idx + __len(query);
+        return text.slice(0, idx).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;") + "<mark>" + text.slice(idx, end).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;") + "</mark>" + text.slice(end).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
+      }
+    }
   }
-  let lowerText = text.toLowerCase();
-  let lowerQuery = query.toLowerCase();
-  let idx = lowerText.indexOf(lowerQuery);
-  if (idx === -1) {
-    return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
-  }
-  let before = text.slice(0, idx).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
-  let match = text.slice(idx, idx + __len(query)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
-  let after = text.slice(idx + __len(query)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
-  return before + "<mark>" + match + "</mark>" + after;
+  return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
 }
 
 function inputErrorClass(hasErr) {
@@ -2337,7 +2274,7 @@ async function showPost(slug) {
       renderRoute();
       return;
     }
-    let [_, content] = parseFrontmatter(mdText);
+    let content = stripFrontmatter(mdText);
     let toc = extractTOC(content);
     let html = parseMarkdown(content);
     html = injectHeadingIDs(html, toc);
@@ -2497,7 +2434,15 @@ function setSearchInput(v) {
   }
 }
 
+function setSearchQuery(q) {
+  searchQuery = q;
+  searchResults = performSearch(q);
+  setSearchInput(q);
+  renderSearchResults();
+}
+
 function openSearch() {
+  closeMenus();
   searchOpen = true;
   searchClosing = false;
   syncOverlays();
@@ -2505,21 +2450,12 @@ function openSearch() {
 }
 
 function openSearchWithTag(tag) {
-  searchOpen = true;
-  searchClosing = false;
-  searchQuery = tag;
-  searchResults = performSearch(tag);
-  setSearchInput(tag);
-  renderSearchResults();
-  syncOverlays();
-  focusLater("#search-page-input");
+  setSearchQuery(tag);
+  openSearch();
 }
 
 function clearSearch() {
-  searchQuery = "";
-  searchResults = [];
-  setSearchInput("");
-  renderSearchResults();
+  setSearchQuery("");
   syncOverlays();
   focusLater("#search-page-input");
 }
@@ -2533,10 +2469,7 @@ function closeSearch() {
   setTimeout(function() {
     searchOpen = false;
     searchClosing = false;
-    searchQuery = "";
-    searchResults = [];
-    setSearchInput("");
-    renderSearchResults();
+    setSearchQuery("");
     syncOverlays();
   }, 200);
 }
@@ -2675,71 +2608,62 @@ function t(key) {
   return key;
 }
 
-function updateMeta(selector, value) {
+function headEl(tag, attr, name) {
+  let el = document.querySelector(tag + "[" + attr + "=\"" + name + "\"]");
+  if (el == null) {
+    el = document.createElement(tag);
+    el.setAttribute(attr, name);
+    document.head.appendChild(el);
+  }
+  return el;
+}
+
+function updateMeta(attr, name, value) {
   if (value === "") {
     return;
   }
-  let el = document.querySelector(selector);
-  if (el == null) {
-    el = document.createElement("meta");
-    if (selector.startsWith("meta[name=\"")) {
-      let name = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(selector, "meta[name=\""), "\"]");
-      el.setAttribute("name", name);
-    } else if (selector.startsWith("meta[property=\"")) {
-      let prop = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(selector, "meta[property=\""), "\"]");
-      el.setAttribute("property", prop);
-    }
-    document.head.appendChild(el);
+  headEl("meta", attr, name).setAttribute("content", value);
+}
+
+function updateTitleMeta(title) {
+  if (title === "") {
+    return;
   }
-  el.setAttribute("content", value);
+  document.title = title;
+  updateMeta("property", "og:title", title);
+  updateMeta("property", "twitter:title", title);
+}
+
+function updateDescriptionMeta(description) {
+  updateMeta("name", "description", description);
+  updateMeta("property", "og:description", description);
+  updateMeta("property", "twitter:description", description);
 }
 
 function updateMetaTags() {
-  if (site.Title !== "") {
-    document.title = site.Title;
-  }
-  updateMeta("meta[name=\"description\"]", site.Description);
-  updateMeta("meta[name=\"author\"]", site.Author);
-  updateMeta("meta[name=\"theme-color\"]", site.DarkTheme.Primary);
-  updateMeta("meta[name=\"msapplication-TileColor\"]", site.DarkTheme.Primary);
-  updateMeta("meta[property=\"og:title\"]", site.Title);
-  updateMeta("meta[property=\"twitter:title\"]", site.Title);
-  updateMeta("meta[property=\"og:description\"]", site.Description);
-  updateMeta("meta[property=\"twitter:description\"]", site.Description);
+  updateTitleMeta(site.Title);
+  updateDescriptionMeta(site.Description);
+  updateMeta("name", "author", site.Author);
+  updateMeta("name", "theme-color", site.DarkTheme.Primary);
+  updateMeta("name", "msapplication-TileColor", site.DarkTheme.Primary);
 }
 
 function updateRouteMeta(title, description, canonicalPath) {
-  if (title !== "") {
-    document.title = title;
-    updateMeta("meta[property=\"og:title\"]", title);
-    updateMeta("meta[property=\"twitter:title\"]", title);
+  updateTitleMeta(title);
+  updateDescriptionMeta(description);
+  if (canonicalPath === "") {
+    return;
   }
-  if (description !== "") {
-    updateMeta("meta[name=\"description\"]", description);
-    updateMeta("meta[property=\"og:description\"]", description);
-    updateMeta("meta[property=\"twitter:description\"]", description);
-  }
-  if (canonicalPath !== "") {
-    let fullURL = canonicalPath;
-    if (canonicalPath.startsWith("/")) {
-      let origin = "";
-      if (window.location != null && window.location.origin != null) {
-        origin = String(window.location.origin);
-      }
-      if (origin === "" || origin === "null") {
-        origin = site.Url;
-      }
-      fullURL = origin + canonicalPath;
+  let fullURL = canonicalPath;
+  if (canonicalPath.startsWith("/")) {
+    let origin = strVal(window.location.origin);
+    if (origin === "" || origin === "null") {
+      origin = site.Url;
     }
-    updateMeta("meta[property=\"og:url\"]", fullURL);
-    let link = document.querySelector("link[rel=\"canonical\"]");
-    if (link == null) {
-      link = document.createElement("link");
-      link.setAttribute("rel", "canonical");
-      document.head.appendChild(link);
-    }
-    link.setAttribute("href", fullURL);
+    fullURL = origin + canonicalPath;
   }
+  updateMeta("property", "og:url", fullURL);
+  headEl("link", "rel", "canonical").setAttribute("href", fullURL);
 }
 
 function strVal(v) {
@@ -2763,43 +2687,35 @@ function intVal(v) {
   return Math.trunc(Number(v));
 }
 
+function strSlice(raw) {
+  let out = [];
+  if (raw != null) {
+    for (const [_$, v] of __s(raw).entries()) {
+      out = __append(out, strVal(v));
+    }
+  }
+  return out;
+}
+
 function postFromJSON(p) {
   let fn = strVal(p.filename);
   let slug = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(fn, ".md");
-  let tags = [];
-  if (p.tags != null) {
-    for (const [_$, tg] of __s(p.tags).entries()) {
-      tags = __append(tags, strVal(tg));
-    }
-  }
-  return new BlogPost({ ID: slug, Slug: slug, Title: strVal(p.title), Date: strVal(p.date), Excerpt: strVal(p.excerpt), Tags: tags, Filename: fn, Href: "/blog/" + slug });
+  return new BlogPost({ ID: slug, Slug: slug, Title: strVal(p.title), Date: strVal(p.date), Excerpt: strVal(p.excerpt), Tags: strSlice(p.tags), Filename: fn, Href: "/blog/" + slug });
 }
 
 function sortPostsByDate(list) {
   list.sort(function(a, b) {
+    if (a.Date === b.Date) {
+      return 0;
+    }
     if (a.Date < b.Date) {
       return 1;
     }
-    if (a.Date > b.Date) {
-      return -1;
-    }
-    return 0;
+    return -1;
   });
 }
 
 function projectFromJSON(p) {
-  let tags = [];
-  if (p.tags != null) {
-    for (const [_$, tg] of __s(p.tags).entries()) {
-      tags = __append(tags, strVal(tg));
-    }
-  }
-  let videos = [];
-  if (p.youtube_videos != null) {
-    for (const [_$, v] of __s(p.youtube_videos).entries()) {
-      videos = __append(videos, strVal(v));
-    }
-  }
   let links = [];
   if (p.links != null) {
     for (const [_$, l] of __s(p.links).entries()) {
@@ -2807,7 +2723,18 @@ function projectFromJSON(p) {
     }
   }
   let id = strVal(p.id);
-  return new Project({ ID: id, Title: strVal(p.title), Description: strVal(p.description), Tags: tags, Order: intVal(p.order), GithubRepo: strVal(p.github_repo), GithubBranch: strVal(p.github_branch), DemoUrl: strVal(p.demo_url), DemoLabel: strVal(p.demo_label), DemoInstructions: strVal(p.demo_instructions), DemoHeight: strVal(p.demo_height), DemoFullscreen: boolVal(p.demo_fullscreen), YoutubeVideos: videos, Links: links, Href: "/project/" + id });
+  return new Project({ ID: id, Title: strVal(p.title), Description: strVal(p.description), Tags: strSlice(p.tags), Order: intVal(p.order), GithubRepo: strVal(p.github_repo), GithubBranch: strVal(p.github_branch), DemoUrl: strVal(p.demo_url), DemoLabel: strVal(p.demo_label), DemoInstructions: strVal(p.demo_instructions), DemoHeight: strVal(p.demo_height), DemoFullscreen: boolVal(p.demo_fullscreen), YoutubeVideos: strSlice(p.youtube_videos), Links: links, Href: "/project/" + id });
+}
+
+function themeFromJSON(d, defaultCodeTheme) {
+  let tc = new ThemeColors({ Primary: strVal(d.primary), Secondary: strVal(d.secondary), Background: strVal(d.background), Text: strVal(d.text), TextLight: strVal(d.textLight), Border: strVal(d.border), Hover: strVal(d.hover), CodeTheme: defaultCodeTheme });
+  if (d.code != null) {
+    tc.CodeTheme = strVal(d.code.theme);
+  }
+  if (d.comments != null) {
+    tc.CommentsTheme = strVal(d.comments.theme);
+  }
+  return tc;
 }
 
 function sortProjectsByOrder(list) {
@@ -2844,24 +2771,10 @@ async function initData() {
     site.GithubUsername = strVal(siteData.github_username);
     if (siteData.theme != null) {
       if (siteData.theme.dark != null) {
-        let d = siteData.theme.dark;
-        site.DarkTheme = new ThemeColors({ Primary: strVal(d.primary), Secondary: strVal(d.secondary), Background: strVal(d.background), Text: strVal(d.text), TextLight: strVal(d.textLight), Border: strVal(d.border), Hover: strVal(d.hover), CodeTheme: "prism-tomorrow" });
-        if (d.code != null) {
-          site.DarkTheme.CodeTheme = strVal(d.code.theme);
-        }
-        if (d.comments != null) {
-          site.DarkTheme.CommentsTheme = strVal(d.comments.theme);
-        }
+        site.DarkTheme = themeFromJSON(siteData.theme.dark, "prism-tomorrow");
       }
       if (siteData.theme.light != null) {
-        let l = siteData.theme.light;
-        site.LightTheme = new ThemeColors({ Primary: strVal(l.primary), Secondary: strVal(l.secondary), Background: strVal(l.background), Text: strVal(l.text), TextLight: strVal(l.textLight), Border: strVal(l.border), Hover: strVal(l.hover), CodeTheme: "prism-coy" });
-        if (l.code != null) {
-          site.LightTheme.CodeTheme = strVal(l.code.theme);
-        }
-        if (l.comments != null) {
-          site.LightTheme.CommentsTheme = strVal(l.comments.theme);
-        }
+        site.LightTheme = themeFromJSON(siteData.theme.light, "prism-coy");
       }
     }
     if (siteData.search != null) {
@@ -3052,10 +2965,7 @@ function resetOverlays() {
   if (searchOpen || searchQuery !== "") {
     searchOpen = false;
     searchClosing = false;
-    searchQuery = "";
-    searchResults = [];
-    setSearchInput("");
-    renderSearchResults();
+    setSearchQuery("");
   }
   syncOverlays();
 }

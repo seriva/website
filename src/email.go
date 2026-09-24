@@ -22,14 +22,20 @@ async func preloadEmailJS() {
 	await loadEmailJS()
 }
 
+// resetContactForm clears the form back to its initial state and re-renders it.
+func resetContactForm() {
+	contactForm = ContactState{ButtonState: "send"}
+	renderContactForm()
+}
+
 func openContact() {
 	if site.EmailJS.Enabled {
 		preloadEmailJS()
 	}
+	closeMenus()
 	contactOpen = true
 	contactClosing = false
-	contactForm = ContactState{ButtonState: "send"}
-	renderContactForm()
+	resetContactForm()
 	syncOverlays()
 	focusLater("#contact-name")
 }
@@ -43,8 +49,7 @@ func closeContact() {
 	setTimeout(func() {
 		contactOpen = false
 		contactClosing = false
-		contactForm = ContactState{ButtonState: "send"}
-		renderContactForm()
+		resetContactForm()
 		syncOverlays()
 	}, 200)
 }
@@ -62,10 +67,7 @@ func updateContactField(field string, value string) {
 }
 
 func isValidEmail(email string) bool {
-	if len(email) < 5 || !strings.Contains(email, "@") || !strings.Contains(email, ".") || strings.Contains(email, " ") {
-		return false
-	}
-	return true
+	return len(email) >= 5 && strings.Contains(email, "@") && strings.Contains(email, ".") && !strings.Contains(email, " ")
 }
 
 // validateContact trims the fields and sets error flags/status text.

@@ -164,7 +164,7 @@ async func showPost(slug string) {
 			renderRoute()
 			return
 		}
-		_, content := parseFrontmatter(mdText)
+		content := stripFrontmatter(mdText)
 		toc := extractTOC(content)
 		html := parseMarkdown(content)
 		html = injectHeadingIDs(html, toc)
