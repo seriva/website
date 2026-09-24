@@ -1,0 +1,7 @@
+package main
+
+// Icon renders a named SVG icon from the registry in icons.go.
+// Unknown names render nothing.
+templ Icon(name string, size string) {
+	@templ.Raw(iconSvg(name, size))
+}

@@ -5,7 +5,7 @@ excerpt: "Moving from CDN dependencies to self-hosted bundles using a minimal bu
 tags: ["Web Development", "JavaScript", "Performance", "Microtastic"]
 ---
 
-Remember when I [vibe-coded my portfolio](/?blog=2025-10-21-vibing-portfolio-website) in a few hours? I went from Hugo to a vanilla JavaScript SPA with zero build process. No webpack, no Babel, just ES6 modules loading dependencies from CDNs.
+Remember when I [vibe-coded my portfolio](/blog/2025-10-21-vibing-portfolio-website) in a few hours? I went from Hugo to a vanilla JavaScript SPA with zero build process. No webpack, no Babel, just ES6 modules loading dependencies from CDNs.
 
 It worked great! But I started thinking: what if I wanted to self-host these dependencies?
 
@@ -33,7 +33,7 @@ The dilemma: how to bundle dependencies without drowning in tooling complexity?
 
 I wanted dependency bundling, not a full build system. Turns out, I'd already built the perfect tool for this.
 
-I originally created [Microtastic](https://github.com/scriptex/microtastic) for [simplefps](/?project=simplefps), another project of mine. It does exactly *one thing*: bundles your npm dependencies and gets out of the way.
+I originally created [Microtastic](https://github.com/scriptex/microtastic) for [simplefps](/project/simplefps), another project of mine. It does exactly *one thing*: bundles your npm dependencies and gets out of the way.
 
 ```bash
 microtastic prep  # Bundle dependencies

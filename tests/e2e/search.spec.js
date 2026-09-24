@@ -18,11 +18,16 @@ test.describe("Search", () => {
         await expect(page.locator("#search-page")).toBeVisible();
     });
 
-    test("search input is focused when overlay opens", async ({ page }) => {
+    test("search input is focused when overlay opens with valid placeholder", async ({ page }) => {
         await page.click("#search-toggle");
-        await expect(page.locator("#search-page-input")).toBeFocused({
+        const input = page.locator("#search-page-input");
+        await expect(input).toBeFocused({
             timeout: 2000,
         });
+        await expect(input).toHaveValue("");
+        const placeholder = await input.getAttribute("placeholder");
+        expect(placeholder).not.toBe("undefined");
+        expect(placeholder).toBe("Search...");
     });
 
     test("typing a query shows matching results", async ({ page }) => {
@@ -53,9 +58,34 @@ test.describe("Search", () => {
         });
     });
 
-    test("clicking a result navigates to the correct page", async ({
+    test("search overlay keeps double scrollbar by preserving outer html scroll", async ({
         page,
     }) => {
+        await page.click("#search-toggle");
+        await expect(page.locator("#search-page")).toBeVisible();
+
+        const htmlOverflow = await page.evaluate(
+            () => window.getComputedStyle(document.documentElement).overflowY
+        );
+        expect(htmlOverflow).not.toBe("hidden");
+
+        await page.click("#search-page-back");
+        await expect(page.locator("#search-page")).not.toBeVisible({
+            timeout: 1000,
+        });
+
+        const restoredOverflow = await page.evaluate(
+            () => window.getComputedStyle(document.documentElement).overflowY
+        );
+        expect(restoredOverflow).not.toBe("hidden");
+    });
+
+    test("clicking a result navigates to the correct page and resets scroll to top", async ({
+        page,
+    }) => {
+        await page.evaluate(() => window.scrollTo(0, 300));
+        await page.waitForTimeout(100);
+
         await page.click("#search-toggle");
         await fillSearch(page, "GoFront");
         await expect(page.locator(".search-result-item").first()).toBeVisible({
@@ -67,5 +97,75 @@ test.describe("Search", () => {
         const href = await firstResultLink.getAttribute("href");
         await firstResultLink.click();
         await expect(page).toHaveURL(href);
+        await expect(page.locator("#search-page")).not.toBeVisible();
+        await expect(page.locator("#main-content")).not.toHaveClass(
+            /page-transition-out/,
+            { timeout: 2000 }
+        );
+
+        const scrollY = await page.evaluate(() => window.scrollY);
+        expect(scrollY).toBe(0);
+    });
+
+    test("typing in search preserves cursor position and does not redraw main page", async ({
+        page,
+    }) => {
+        await page.click("#search-toggle");
+        await expect(page.locator("#search-page")).toBeVisible();
+
+        // Mark current main element in window to verify it is NOT replaced/redrawn
+        await page.evaluate(() => {
+            window.__mainEl = document.getElementById("main-content");
+            window.__mainEl.setAttribute("data-test-marker", "original");
+        });
+
+        const input = page.locator("#search-page-input");
+        await input.focus();
+
+        // Type first word
+        await page.keyboard.type("Go");
+        // Wait for debounce and search results mount
+        await expect(page.locator(".search-result-item").first()).toBeVisible({
+            timeout: 2000,
+        });
+
+        // Verify cursor is at position 2, not reset to 0
+        let cursor = await page.evaluate(() => {
+            const inp = document.getElementById("search-page-input");
+            return inp.selectionStart;
+        });
+        expect(cursor).toBe(2);
+
+        // Continue typing second word without cursor jumping to beginning
+        await page.keyboard.type("Front");
+        await page.waitForTimeout(200);
+
+        cursor = await page.evaluate(() => {
+            const inp = document.getElementById("search-page-input");
+            return inp.selectionStart;
+        });
+        expect(cursor).toBe(7); // "GoFront".length
+
+        // Verify input value is "GoFront" (not "FrontGo" or scrambled from cursor reset)
+        const value = await input.inputValue();
+        expect(value).toBe("GoFront");
+
+        // Verify main was NOT remounted/redrawn
+        const isSameMain = await page.evaluate(() => {
+            const currentMain = document.getElementById("main-content");
+            return currentMain === window.__mainEl &&
+                currentMain?.getAttribute("data-test-marker") === "original";
+        });
+        expect(isSameMain).toBe(true);
+
+        // Clear search using clear button and verify main is still not redrawn
+        await page.click("#search-page-clear");
+        await expect(input).toHaveValue("");
+        await expect(page.locator(".search-result-item")).toHaveCount(0);
+
+        const stillSameMain = await page.evaluate(() => {
+            return document.getElementById("main-content") === window.__mainEl;
+        });
+        expect(stillSameMain).toBe(true);
     });
 });

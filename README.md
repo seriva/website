@@ -1,27 +1,61 @@
 ## About
 
-Personal portfolio website built with vanilla JavaScript (ES6 modules), custom reactive system, and [Microtastic](https://github.com/scriptex/microtastic) for minimal build tooling. Content managed through YAML configuration and markdown files.
+Personal portfolio website built with [GoFront](https://github.com/seriva/gofront) using `.templ` component architecture. Content managed through YAML configuration and markdown files.
 
-**Key Features:** Reactive UI with signals • Path-based SPA routing • Markdown blog & pages • Fuzzy search (Fuse.js) • Light/Dark themes • GitHub integration • Optional comments (giscus) & contact form (EmailJS)
+**Key Features:** GoFront templ components • Path-based SPA routing • Markdown blog & pages • Fuzzy search (Fuse.js) • Light/Dark themes • GitHub integration • Optional comments (giscus) & contact form (EmailJS)
 
 ## Tech Stack
 
-- **Core**: Vanilla HTML/JS (ES6 modules) • CSS-in-JS (via reactive.js) • Custom reactive system (signals, computed, declarative binding)
-- **Build**: Microtastic (SPA dev server) • Biome (lint/format) • Node.js test runner (91 tests)
-- **Content**: YAML config + Markdown • Custom YAML parser (~4KB) • Marked.js • Prism.js v1.30
+- **Core**: GoFront (`.templ` components, Go-inspired frontend architecture)
+- **Build**: `gofront prep` & `npm run prod` • Biome (lint/format) • Playwright (10 E2E suites)
+- **Content**: YAML config + Markdown • Pure GoFront YAML parser • Marked.js • Prism.js v1.30
 - **Features**: Fuse.js (search) • EmailJS (contact form) • giscus (comments)
 - **Assets**: Raleway fonts • Inline SVG icons (local, no CDNs)
 
 ## Architecture
 
-The application follows a modular namespace pattern with reactive components:
+The application is written in GoFront under `src/` and compiles to native JavaScript ES modules.
 
-**Key Modules:**
-- **Core**: `main.js` (init, event delegation) • `utils/reactive.js` (signals, components) • `Context` (state, data, blog utilities) • `Router` (SPA routing)
-- **Components**: `MainContent` (main container) • `Navbar`, `Footer`, `BlogList`, `BlogPost`, `Project`, `Page` (self-contained reactive UI - each loads its own data)
-- **Features**: `Search` (Fuse.js, conditional) • `ContactForm` (EmailJS, conditional) • `Theme` (light/dark)
-- **Styles**: `styles/reset.styles.js` (global reset) • `styles/shared.styles.js` (shared utilities) • `styles/theme.styles.js` (CSS variables) • `styles/fonts.styles.js` (font loading) • `styles/main.styles.js` (main styles) • `[component].styles.js` (component-scoped)
-- **Utilities**: `Templates` (HTML generation) • `MarkdownLoader` (markdown parsing, copy code buttons) • `PrismLoader` • `YAMLParser` • `i18n`
+### Overview
+
+```mermaid
+flowchart LR
+    subgraph Source ["Source (src/)"]
+        SRC["Go & .templ Files"]
+        DATA["YAML & Markdown"]
+    end
+
+    subgraph Build ["Build Pipeline"]
+        GF["GoFront Compiler"]
+        PREP["gofront prep"]
+    end
+
+    subgraph Runtime ["Browser Runtime"]
+        APP["app.js (Router & UI)"]
+        VENDOR["vendor.js (Libs)"]
+        DOM["DOM (gom.Mount)"]
+    end
+
+    SRC --> GF --> APP --> DOM
+    DATA -.-> APP
+    PREP --> VENDOR --> DOM
+```
+
+### Request Lifecycle
+
+```mermaid
+flowchart TD
+    NAV["Navigation Event<br/>(Link click or popstate)"] --> ROUTE["Router<br/>Parse path & match route"]
+    ROUTE --> RESOLVE{"Content Cached?"}
+    RESOLVE -->|Yes| RENDER["Render View<br/>Mount .templ components to DOM"]
+    RESOLVE -->|No| FETCH["Fetch & Parse Markdown<br/>(Marked.js & Prism)"] --> RENDER
+```
+
+### Key Modules
+
+- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state, data, YAML parsing) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, async loaders) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
+- **Components (`src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
+- **Styles (`app/css/app.css`)**: single plain stylesheet linked from `index.html`, formatted and linted by Biome; loads in parallel with the JS bundles
 
 ## Development
 
@@ -47,20 +81,20 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
-- Run all tests (91 unit tests)
-- Copy assets (fonts, Prism themes) from node_modules
-- Bundle and minify dependencies
-- Output to `public/` directory
+- Bundle and minify vendor dependencies (`gofront prep --minify`)
+- Compile, minify, and mangle GoFront application bundle to `public/app.js`
+- Copy public assets (`index.html`, `404.html`, `data/`, `fonts/`, `css/`, metadata) to `public/`
+- Generate `sitemap.xml` and `rss.xml`
+- Output complete, self-contained site to `public/` directory
 
-### Asset Copying
+### Asset Management
 
-Fonts and Prism themes are automatically copied from npm packages when you run `npm run prepare`. The `assetCopy` configuration in `package.json` defines which assets to copy.
-
-Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they're auto-generated from npm packages.
+- **Vendor Assets (`assetCopy`)**: Fonts and Prism themes are copied from npm packages to `app/` during `npm run prepare` via GoFront's `assetCopy` configuration in `package.json`. Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they are generated from npm packages.
+- **Production Assets (`publicAssets`)**: Static web files and directories are synchronized from `app/` to `public/` during `npm run prod` via `publicAssets` in `package.json`.
 
 ### Code Quality Tools
 
-The project uses Biome for code formatting and linting:
+The project uses Biome for code formatting and linting (JavaScript in `scripts/`, and the stylesheet `app/css/app.css`):
 
 - **Format code**: `npm run format`
 - **Check code quality**: `npm run check`
@@ -70,65 +104,66 @@ All code changes must pass linting before deployment.
 
 ### Testing
 
-Uses Node.js built-in test runner (91 tests):
+The test suite covers unit tests and full end-to-end integration tests:
 
 ```bash
-npm run test:unit    # Run unit tests
-npm run test:e2e     # Run E2E tests (requires dev server)
-npm run test:all     # Run all tests
+npm run test:gofront # Run Go unit tests (gofront test, jsdom-backed for DOM code)
+npm run test:e2e     # Run E2E tests (Playwright, requires dev server)
+npm run test:all     # Run all tests (GoFront + Playwright)
 ```
 
 Tests cover:
-- Reactive system (signals, computed, batching, components)
-- HTML escaping and template utilities
-- Template generation
-- Search functionality
-- YAML parser
-- Routing logic
-- Markdown parsing
-- Internationalization
-- Theme management
-- Email controller
-- Error handler
-- UI utilities
-- Prism loader
+- **Go Unit Tests (`src/*_test.go`)**: route parsing and GitHub Pages redirect decoding, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
+- **End-to-End Tests (`tests/e2e/`)**: 10 Playwright test suites across Chromium and Firefox:
+  - Navigation, history, deep-linking, and route transitions
+  - Markdown blog rendering, pagination, and code syntax highlighting
+  - Project showcase, links, and tags
+  - Light/Dark theme switching and localStorage persistence
+  - Fuse.js search modal and query matching
+  - EmailJS contact form validation and submission
+  - Mobile hamburger navigation drawer
+  - 404 and error state fallbacks
+- **Type Checking**: GoFront type checker (`npx gofront src --check`)
 
-All tests must pass before production builds.
+All quality gates and tests must pass before production builds.
 
-## Reactive System
+## GoFront Component Architecture
 
-Custom signals-based reactive system (~5KB) with declarative binding:
+The frontend is built with [GoFront](https://github.com/seriva/gofront) v1.2.0 using declarative `.templ` components and Go:
 
-```javascript
-export class Counter extends Reactive.Component {
-  state() {
-    return {
-      count: this.signal(0),
-      doubled: this.computed(() => this.count() * 2),
-    };
-  }
-  template() {
-    return html`<button data-on-click="increment" data-text="count"></button>`;
-  }
-  increment() { this.count(this.count() + 1); }
+```templ
+package main
+
+templ BlogPostCard(post BlogPost) {
+    <article class="blog-post-card">
+        <h2 class="post-title">
+            <a href={ "/blog/" + post.Slug } data-action="nav">{ post.Title }</a>
+        </h2>
+        <div class="post-meta">
+            <time>{ post.Date }</time>
+        </div>
+        <p class="post-excerpt">{ post.Excerpt }</p>
+    </article>
 }
 ```
 
-**Declarative Bindings:** `data-text`, `data-html`, `data-attr-*`, `data-class-*`, `data-bool-*`, `data-visible`, `data-model`, `data-on-click/submit`
-
-**Benefits:** Direct DOM updates • Auto-batching • Computed values • No virtual DOM • No build step required
+**Architecture Highlights:**
+- **Zero Runtime Overhead:** `.templ` files compile directly to native DOM manipulation calls (`createElement`, `setAttribute`, `appendChild`) with no virtual DOM diffing.
+- **Go Syntax & Type Safety:** Components receive typed props and compile to clean ES modules.
+- **Dynamic Content Injection:** Markdown generated from `marked` is injected using `@templ.Raw(doc.HTML)`.
+- **Global Event Delegation:** Handled via `data-action` attributes registered centrally on `#app` in `src/main.go`.
 
 ## Routing & SPA Support
 
 **Path-based URLs:** `/`, `/blog/`, `/blog/post-slug`, `/project/id`, `/page/id`
 
-**Dev Server:** Microtastic modified (`node_modules/microtastic/index.js`) to serve `index.html` for routes without extensions, maintains hot reload
+**Dev Server:** `gofront src -o app/app.js --serve --port 8181` provides live reload and built-in SPA route fallback (serving `index.html` on clean paths)
 
-**GitHub Pages:** Custom `404.html` redirects via hash (`#!redirect=<path>`), `main.js` restores clean URL with `history.replaceState()`
+**GitHub Pages:** Custom `404.html` redirects deep links via hash (`#!redirect=<path>`), restored to clean URLs with `history.replaceState()` in `src/router.go`
 
-**Absolute Paths:** All resources use root-relative paths (`/src/main.js`, `/data/content.yaml`) to work from any route depth
+**Absolute Paths:** All resources use root-relative paths (`/app.js`, `/data/content.yaml`) to work from any route depth
 
-**Event Delegation:** Dynamic content uses `data-action` attributes (e.g., `<a data-action="email">`) handled globally in `main.js`
+**Event Delegation:** Dynamic content uses `data-action` attributes (e.g., `<a data-action="nav">`, `<button data-action="toggle-theme">`) handled centrally in `src/main.go`
 
 ## Features & Configuration
 

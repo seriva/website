@@ -53,8 +53,8 @@ jobs:
             git push
           fi
 
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Run GoFront unit tests
+        run: npm run test:gofront
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox

@@ -1,0 +1,110 @@
+package main
+
+templ BlogPostCard(post BlogPost, index int) {
+	<article
+		class="blog-post-card"
+		data-index={ index }
+		data-action="open-post"
+		data-href={ post.Href }
+		tabindex="0"
+		role="article"
+		aria-label={ post.Title }
+	>
+		<h2 class="blog-post-title">
+			<a href={ post.Href } data-action="nav">{ post.Title }</a>
+		</h2>
+		<div class="blog-post-meta">
+			<span class="blog-post-date">
+				@Icon("calendar", "1rem")
+				{ " " + post.Date }
+			</span>
+			if len(post.Tags) > 0 {
+				<span class="blog-post-tags">
+					for _, tag := range post.Tags {
+						<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
+					}
+				</span>
+			}
+		</div>
+		<p class="blog-post-excerpt">{ post.Excerpt }</p>
+	</article>
+}
+
+templ Pagination(currentPage int, totalPages int) {
+	<nav class="blog-pagination" aria-label="Blog pagination">
+		<ul class="pagination">
+			<li class={ pageItemPrevClass(currentPage) }>
+				<a class="page-link" href={ pageHref(1) } data-action="nav" aria-label="First" title="First Page">
+					@Icon("angles-left", "0.85em")
+				</a>
+			</li>
+			<li class={ pageItemPrevClass(currentPage) }>
+				<a class="page-link" href={ pageHref(currentPage - 1) } data-action="nav" aria-label="Previous" title="Previous Page">
+					@Icon("chevron-left", "0.85em")
+				</a>
+			</li>
+			for _, pageNum := range pageNumbers(totalPages) {
+				<li class={ pageItemClass(pageNum, currentPage) }>
+					<a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ pageNum }</a>
+				</li>
+			}
+			<li class={ pageItemNextClass(currentPage, totalPages) }>
+				<a class="page-link" href={ pageHref(currentPage + 1) } data-action="nav" aria-label="Next" title="Next Page">
+					@Icon("chevron-right", "0.85em")
+				</a>
+			</li>
+			<li class={ pageItemNextClass(currentPage, totalPages) }>
+				<a class="page-link" href={ pageHref(totalPages) } data-action="nav" aria-label="Last" title="Last Page">
+					@Icon("angles-right", "0.85em")
+				</a>
+			</li>
+		</ul>
+	</nav>
+}
+
+templ BlogList(allPosts []BlogPost, currentPage int, perPage int) {
+	<div class="blog-container">
+		<h1 class="sr-only">{ t("nav.blog") }</h1>
+		if len(allPosts) == 0 {
+			<p class="blog-empty">{ t("blog.noPosts") }</p>
+		} else {
+			<div class="blog-posts">
+				for i, post := range paginatedPosts(allPosts, currentPage, perPage) {
+					@BlogPostCard(post, i)
+				}
+			</div>
+			if calcTotalPages(len(allPosts), perPage) > 1 {
+				@Pagination(currentPage, calcTotalPages(len(allPosts), perPage))
+			}
+		}
+	</div>
+}
+
+templ BlogPostView(v ViewState, commentsEnabled bool) {
+	if v.Status == LoadNotFound || v.Status == LoadFailed {
+		<div class="error-message">
+			<h1>{ t("general.blogNotFound") }</h1>
+			<p>{ t("general.blogNotFoundMessage") }</p>
+		</div>
+	} else {
+		<div class="blog-post-view">
+			<h1 class="project-title">{ v.Post.Title }</h1>
+			<p class="project-description">{ v.Post.Date }</p>
+			if len(v.Post.Tags) > 0 {
+				<div class="project-tags">
+					for _, tag := range v.Post.Tags {
+						<span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
+					}
+				</div>
+			}
+			<div class="blog-post-content">
+				<div class="markdown-body">
+					@templ.Raw(v.HTML)
+				</div>
+			</div>
+			if commentsEnabled {
+				<div class="giscus-container"></div>
+			}
+		</div>
+	}
+}

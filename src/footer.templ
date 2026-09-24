@@ -1,0 +1,9 @@
+package main
+
+import "fmt"
+
+templ Footer(year int, author string) {
+	<footer>
+		{ fmt.Sprintf("© %d %s. %s.", year, author, t("footer.rights")) }
+	</footer>
+}

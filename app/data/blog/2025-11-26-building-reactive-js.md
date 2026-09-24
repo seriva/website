@@ -5,13 +5,13 @@ excerpt: "How I built a lightweight reactive state management library inspired b
 tags: ["JavaScript", "Web Development", "Reactive Programming", "Microtastic"]
 ---
 
-After [migrating to Microtastic](/?blog=2025-11-01-migrating-to-microtastic), I had a minimal build setup. But something was missing: a clean way to manage interactive state.
+After [migrating to Microtastic](/blog/2025-11-01-migrating-to-microtastic), I had a minimal build setup. But something was missing: a clean way to manage interactive state.
 
 So I built one. And then bundled it with Microtastic.
 
 ## Wait, Another Tool?
 
-I know, I know. I [championed simplicity](/?blog=2025-10-21-vibing-portfolio-website) and avoiding frameworks. But there's a difference between *avoiding complexity* and *avoiding tools*.
+I know, I know. I [championed simplicity](/blog/2025-10-21-vibing-portfolio-website) and avoiding frameworks. But there's a difference between *avoiding complexity* and *avoiding tools*.
 
 Heavy frameworks = configuration hell, massive dependencies, breaking changes every version.
 

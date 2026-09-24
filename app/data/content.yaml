@@ -7,7 +7,6 @@ site:
   description: "Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!"
   author: "Luuk van Venrooij"
   github_username: "seriva"
-  defaultRoute: "?blog"  # Options: "?blog", "?page=about", "?project=projectId"
   
   # Internationalization
   i18n:
@@ -104,6 +103,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2026-09-24-migrating-from-microtastic-to-gofront.md"
+      title: "Dogfooding GoFront: A Real-World Test Bed for My Compiler"
+      date: "2026-09-24"
+      excerpt: "Microtastic is still doing great work in SimpleFPS, but GoFront needed a serious production test bed. Here is how dogfooding the compiler exposed real bugs and hardened the toolchain."
+      tags: ["Go", "GoFront", "Web Development", "Microtastic"]
     - filename: "2026-09-21-bootstrapping-agentic-development.md"
       title: "Bootstrapping Agentic Development"
       date: "2026-09-21"
@@ -369,9 +373,7 @@ translations:
     "project.demo": "Demo"
     "project.demoInstructions": ""
     "project.fullscreen": "Go Fullscreen"
-    "project.loadingReadme": "Loading README from GitHub..."
     "project.readmeError": "Error loading README from GitHub."
-    "general.loading": "Loading..."
     "general.error": "Error loading page"
     "general.errorMessage": "Please try refreshing the page."
     "general.notFound": "Page Not Found"

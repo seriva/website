@@ -1,0 +1,34 @@
+package main
+
+templ RouteView(r RouteMatch) {
+	switch r.Kind {
+	case RoutePost:
+		@BlogPostView(view, site.Comments.BlogEnabled)
+	case RouteProject:
+		@ProjectDetail(view, site.Comments.ProjectsEnabled)
+	case RoutePage:
+		@PageView(view)
+	default:
+		@BlogList(posts, r.Page, site.PostsPerPage)
+	}
+}
+
+templ MainContent() {
+	<main id="main-content">
+		@RouteView(route)
+	</main>
+}
+
+templ AppShell() {
+	<div class="app-root">
+		<div id="navbar-slot">
+			@Navbar(route, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
+		</div>
+		<div id="content-slot">
+			@MainContent()
+		</div>
+		@Footer(currentYear(), site.Author)
+		@SearchModal(searchOpen, searchClosing, searchQuery, searchResults, searchPlaceholderText())
+		@ContactModal(contactOpen, contactClosing, contactForm)
+	</div>
+}
