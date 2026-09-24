@@ -67,15 +67,13 @@
         }
     </style>
     <link rel="stylesheet" href="/css/app.css">
-    <!-- Blocking on purpose: sets data-theme before first paint -->
+    <!-- Blocking on purpose: sets data-theme before first paint (external for CSP) -->
     <script src="/boot.js"></script>
 </head>
 <body>
     <!-- Main application root -->
     <div id="app"></div>
     <script type="module" src="/vendor.js"></script>
-    <script type="module" src="/js/prism-autoloader.min.js"></script>
-    <script type="module" src="/prism-init.js"></script>
     <script type="module" src="/app.js"></script>
 </body>
 </html>

@@ -14,10 +14,46 @@ Personal portfolio website built with [GoFront](https://github.com/seriva/gofron
 
 ## Architecture
 
-The application is written in GoFront under `src/` and compiles to native JavaScript ES modules:
+The application is written in GoFront under `src/` and compiles to native JavaScript ES modules.
 
-**Key Modules:**
-- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state, data, YAML parsing) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, async loaders) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry)
+### Overview
+
+```mermaid
+flowchart LR
+    subgraph Source ["Source (src/)"]
+        SRC["Go & .templ Files"]
+        DATA["YAML & Markdown"]
+    end
+
+    subgraph Build ["Build Pipeline"]
+        GF["GoFront Compiler"]
+        PREP["gofront prep"]
+    end
+
+    subgraph Runtime ["Browser Runtime"]
+        APP["app.js (Router & UI)"]
+        VENDOR["vendor.js (Libs)"]
+        DOM["DOM (gom.Mount)"]
+    end
+
+    SRC --> GF --> APP --> DOM
+    DATA -.-> APP
+    PREP --> VENDOR --> DOM
+```
+
+### Request Lifecycle
+
+```mermaid
+flowchart TD
+    NAV["Navigation Event<br/>(Link click or popstate)"] --> ROUTE["Router<br/>Parse path & match route"]
+    ROUTE --> RESOLVE{"Content Cached?"}
+    RESOLVE -->|Yes| RENDER["Render View<br/>Mount .templ components to DOM"]
+    RESOLVE -->|No| FETCH["Fetch & Parse Markdown<br/>(Marked.js & Prism)"] --> RENDER
+```
+
+### Key Modules
+
+- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state, data, YAML parsing) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, async loaders) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
 - **Components (`src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
 - **Styles (`app/css/app.css`)**: single plain stylesheet linked from `index.html`, formatted and linted by Biome; loads in parallel with the JS bundles
 
@@ -59,7 +95,7 @@ Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they're auto-ge
 
 ### Code Quality Tools
 
-The project uses Biome for code formatting and linting (JavaScript in `scripts/` and `tests/unit/`, and the stylesheet `app/css/app.css`):
+The project uses Biome for code formatting and linting (JavaScript in `scripts/`, and the stylesheet `app/css/app.css`):
 
 - **Format code**: `npm run format`
 - **Check code quality**: `npm run check`
@@ -73,14 +109,12 @@ The test suite covers unit tests and full end-to-end integration tests:
 
 ```bash
 npm run test:gofront # Run Go unit tests (gofront test, jsdom-backed for DOM code)
-npm run test:unit    # Run JS unit tests (Node.js test runner)
 npm run test:e2e     # Run E2E tests (Playwright, requires dev server)
-npm run test:all     # Run all tests
+npm run test:all     # Run all tests (GoFront + Playwright)
 ```
 
 Tests cover:
-- **Go Unit Tests (`src/*_test.go`, `src/utils/*_test.go`)**: route parsing and GitHub Pages redirect decoding, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), YAML→`BlogPost` mapping and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter parsing, contact validation, render helpers, YAML parser
-- **JS Unit Tests (`tests/unit/`)**: YAML configuration parser used by the SEO script (`tests/unit/yaml-parser.test.js`)
+- **Go Unit Tests (`src/*_test.go`)**: route parsing and GitHub Pages redirect decoding, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
 - **End-to-End Tests (`tests/e2e/`)**: 10 Playwright test suites across Chromium and Firefox:
   - Navigation, history, deep-linking, and route transitions
   - Markdown blog rendering, pagination, and code syntax highlighting
