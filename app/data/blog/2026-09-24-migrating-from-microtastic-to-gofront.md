@@ -52,6 +52,24 @@ Building a real app pushed GoFront far harder than isolated test cases, exposing
 - **Fast Go unit tests added** via `gofront test src --dom`.
 - **0 runtime type errors**: everything verified at compile time.
 
+## What the Site Gained Along the Way
+
+Once routing and rendering were typed Go, adding features got cheap. The site picked up a few:
+
+- **Table of contents** on posts and project READMEs (you are looking at one above).
+- **Mermaid diagrams** from ```` ```mermaid ```` fences, lazy-loaded only when a page needs them.
+- **Copy buttons** on every code block, plus older / newer post navigation.
+- **Keyboard shortcuts**: `Ctrl+K` or `/` opens search, `Esc` closes any overlay.
+- **Static HTML stubs** per route with proper Open Graph and canonical tags, so link previews finally work.
+
+```mermaid
+flowchart LR
+    A["/blog/slug"] --> B[parseRoute] --> C[resolvePost]
+    C -->|cache miss| D["fetch .md → marked → TOC"] --> E[renderRoute]
+    C -->|cache hit| E
+    E --> F["Prism + Mermaid + giscus"]
+```
+
 ## The Takeaway
 
 Microtastic is still the right tool for SimpleFPS, but dogfooding GoFront on my own site was the best move for the compiler. Finding real bugs, fixing awkward runtime interactions, and adding practical tooling turned an interesting side project into a battle-tested toolchain running in production.

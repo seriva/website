@@ -107,23 +107,24 @@ func updateRouteMeta(title string, description string, canonicalPath string) {
 }
 
 // ── Data Initialization ───────────────────────────────────────
+// `== nil` compiles to loose `== null`, so these also catch JS undefined.
 
 func strVal(v any) string {
-	if v == nil || string(v) == "undefined" {
+	if v == nil {
 		return ""
 	}
 	return string(v)
 }
 
 func boolVal(v any) bool {
-	if v == nil || string(v) == "undefined" || string(v) == "false" {
+	if v == nil || string(v) == "false" {
 		return false
 	}
 	return bool(v)
 }
 
 func intVal(v any) int {
-	if v == nil || string(v) == "undefined" {
+	if v == nil {
 		return 0
 	}
 	return int(v)

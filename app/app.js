@@ -318,11 +318,10 @@ function AppShell() {
   }};
 }
 
-function BlogPostCard(post, index) {
+function BlogPostCard(post) {
   return {Mount(___p) {
     const ___e5 = document.createElement("article");
     ___e5.className = "blog-post-card";
-    ___e5.setAttribute("data-index", String(index));
     ___e5.setAttribute("data-action", "open-post");
     ___e5.setAttribute("data-href", String(post.Href));
     ___e5.setAttribute("tabindex", "0");
@@ -447,8 +446,8 @@ function BlogList(allPosts, currentPage, perPage) {
     } else {
       const ___e28 = document.createElement("div");
       ___e28.className = "blog-posts";
-      for (const [i, post] of __s(paginatedPosts(allPosts, currentPage, perPage)).entries()) {
-        (BlogPostCard(post, i)).Mount(___e28);
+      for (const post of paginatedPosts(allPosts, currentPage, perPage)) {
+        (BlogPostCard(post)).Mount(___e28);
       }
       ___e25.appendChild(___e28);
       if (calcTotalPages(__len(allPosts), perPage) > 1) {
@@ -2667,21 +2666,21 @@ function updateRouteMeta(title, description, canonicalPath) {
 }
 
 function strVal(v) {
-  if (v == null || String(v) === "undefined") {
+  if (v == null) {
     return "";
   }
   return String(v);
 }
 
 function boolVal(v) {
-  if (v == null || String(v) === "undefined" || String(v) === "false") {
+  if (v == null || String(v) === "false") {
     return false;
   }
   return Boolean(v);
 }
 
 function intVal(v) {
-  if (v == null || String(v) === "undefined") {
+  if (v == null) {
     return 0;
   }
   return Math.trunc(Number(v));
@@ -3061,4 +3060,3 @@ function readmeURL(p, githubUsername) {
 }
 
 main();
-(function(){var es=new EventSource('/_gofront/events');es.addEventListener('reload',function(){location.reload();});})();

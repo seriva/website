@@ -167,7 +167,7 @@ test.describe("Blog", () => {
         const toc = page.locator(".blog-toc");
         await expect(toc).toBeVisible();
         const tocLinks = toc.locator(".blog-toc-item a");
-        await expect(tocLinks).toHaveCount(4);
+        await expect(tocLinks).toHaveCount(5);
 
         const firstHref = await tocLinks.first().getAttribute("href");
         expect(firstHref).toBe("#the-architecture");
