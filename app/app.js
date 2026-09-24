@@ -2631,3 +2631,4 @@ function readmeURL(p, githubUsername) {
 }
 
 main();
+(function(){var es=new EventSource('/_gofront/events');es.addEventListener('reload',function(){location.reload();});})();

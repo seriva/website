@@ -33,6 +33,7 @@
 /* CSS Custom Properties */
 :root {
 	--accent: #10b981;
+	--accent-glow: color-mix(in srgb, var(--accent) 25%, transparent);
 	--background-color: #0d1117;
 	--header-color: #111827;
 	--hover-color: #1a2332;
@@ -69,18 +70,21 @@ html {
 	height: 100%;
 	overflow-x: hidden;
 	overflow-y: scroll;
+	scrollbar-gutter: stable;
 	scroll-behavior: smooth;
 }
-html::after {
-	content: "";
-	display: block;
-	height: 101vh;
-	width: 1px;
-	position: absolute;
-	top: 0;
-	left: -1px;
-	pointer-events: none;
-	visibility: hidden;
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms;
+		animation-iteration-count: 1;
+		transition-duration: 0.01ms;
+	}
 }
 
 *,
@@ -230,8 +234,9 @@ a.icon:hover {
 
 /* About Page */
 .about-pic {
-	width: 15vh;
-	height: 15vh;
+	width: min(150px, 30vw);
+	aspect-ratio: 1 / 1;
+	height: auto;
 	border-radius: 50%;
 	margin-bottom: 20px;
 	object-fit: cover;
@@ -284,7 +289,9 @@ textarea:focus {
 
 /* Navbar */
 nav.navbar {
-	background-color: var(--header-color);
+	background-color: color-mix(in srgb, var(--header-color) 85%, transparent);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	border-bottom: var(--border-width) solid var(--accent);
 	position: fixed;
 	top: 0;
@@ -517,13 +524,15 @@ button.nav-link:active {
 	top: 100%;
 	left: 0;
 	min-width: 200px;
-	background-color: var(--header-color);
+	background-color: color-mix(in srgb, var(--header-color) 92%, transparent);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 	border: var(--border-width) solid var(--accent);
 	padding: 0;
 	margin: 0;
 	list-style: none;
 	z-index: var(--z-dropdown);
-	box-shadow: 0 6px 12px rgba(66, 155, 238, 0.2);
+	box-shadow: 0 6px 12px var(--accent-glow);
 	opacity: 0;
 	visibility: hidden;
 	transform: translateY(-5px);
@@ -743,7 +752,7 @@ button.nav-link:active {
 	background-color: rgba(255, 255, 255, 0.05);
 	border-color: var(--accent);
 	transform: translateY(-4px) scale(1.01);
-	box-shadow: 0 8px 25px rgba(66, 155, 238, 0.15);
+	box-shadow: 0 8px 25px var(--accent-glow);
 }
 .blog-post-title {
 	margin: 0 0 0.35rem 0;
@@ -949,7 +958,7 @@ button.nav-link:active {
 	background-color: var(--hover-color);
 	border-color: var(--accent);
 	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
+	box-shadow: 0 4px 12px var(--accent-glow);
 	color: var(--accent);
 	text-decoration: none;
 }
@@ -1085,6 +1094,11 @@ button.nav-link:active {
 pre:hover .copy-code-button {
 	opacity: 1;
 }
+@media (hover: none) {
+	.copy-code-button {
+		opacity: 1;
+	}
+}
 .copy-code-button:hover {
 	background-color: var(--accent);
 	color: var(--background-color);
@@ -1186,7 +1200,7 @@ pre:hover .copy-code-button {
 	outline: none;
 	border-color: var(--accent);
 	background-color: var(--background-color);
-	box-shadow: 0 0 0 3px rgba(66, 155, 238, 0.1);
+	box-shadow: 0 0 0 3px var(--accent-glow);
 }
 .search-page-clear {
 	position: absolute;
@@ -1239,7 +1253,9 @@ pre:hover .copy-code-button {
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background-color: rgba(0, 0, 0, 0.8);
+	background-color: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
 	z-index: 10000;
 	overflow-y: auto;
 	overscroll-behavior: contain;
@@ -1372,7 +1388,7 @@ pre:hover .copy-code-button {
 	border-color: var(--accent);
 	color: var(--accent);
 	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(66, 155, 238, 0.3);
+	box-shadow: 0 4px 12px var(--accent-glow);
 }
 .contact-form .btn:disabled {
 	opacity: 0.5;
