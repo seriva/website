@@ -79,14 +79,14 @@ test.describe("Contact Form", () => {
         });
     });
 
-    test("close button hides the modal and restores scrollbar", async ({ page }) => {
+    test("close button hides the modal and preserves outer scrollbar", async ({ page }) => {
         await page.click("#email-toggle");
         await expect(page.locator("#contact-modal")).toBeVisible();
 
-        const lockedOverflow = await page.evaluate(
+        const modalOverflow = await page.evaluate(
             () => window.getComputedStyle(document.documentElement).overflowY
         );
-        expect(lockedOverflow).toBe("hidden");
+        expect(modalOverflow).not.toBe("hidden");
 
         await page.click("#contact-modal-close");
         await expect(page.locator("#contact-modal")).not.toBeVisible({

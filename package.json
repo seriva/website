@@ -63,7 +63,7 @@
 			]
 		}
 	},
-	"staticAssets": [
+	"publicAssets": [
 		"index.html",
 		"404.html",
 		"boot.js",

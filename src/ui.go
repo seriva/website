@@ -67,8 +67,6 @@ func syncOverlays() {
 	modalVisible := contactOpen || contactClosing
 	setClass("#contact-modal", "show", modalVisible)
 	setClass("#contact-modal", "closing", contactClosing)
-	document.documentElement.classList.toggle("modal-open", modalVisible)
-	document.body.classList.toggle("modal-open", modalVisible)
 }
 
 // resetOverlays closes every overlay without animation (used on route change).
