@@ -80,6 +80,23 @@ templ BlogList(allPosts []BlogPost, currentPage int, perPage int) {
 	</div>
 }
 
+templ TableOfContents(items []TOCItem) {
+	if len(items) >= 2 {
+		<details class="blog-toc">
+			<summary class="blog-toc-title">{ t("blog.tableOfContents") }</summary>
+			<nav class="blog-toc-nav" aria-label={ t("blog.tableOfContents") }>
+				<ul class="blog-toc-list">
+					for _, item := range items {
+						<li class={ tocItemClass(item.Level) }>
+							<a href={ "#" + item.ID }>{ item.Text }</a>
+						</li>
+					}
+				</ul>
+			</nav>
+		</details>
+	}
+}
+
 templ BlogPostView(v ViewState, commentsEnabled bool) {
 	if v.Status == LoadNotFound || v.Status == LoadFailed {
 		<div class="error-message">
@@ -97,11 +114,28 @@ templ BlogPostView(v ViewState, commentsEnabled bool) {
 					}
 				</div>
 			}
+			@TableOfContents(v.TOC)
 			<div class="blog-post-content">
 				<div class="markdown-body">
 					@templ.Raw(v.HTML)
 				</div>
 			</div>
+			if v.HasPrev || v.HasNext {
+				<nav class="download-buttons blog-post-nav" aria-label="Post navigation">
+					if v.HasPrev {
+						<a href={ v.PrevPost.Href } class="download-btn blog-nav-prev" data-action="nav" title={ v.PrevPost.Title }>
+							@Icon("arrow-left", "1rem")
+							<span>{ t("blog.previousPost") }</span>
+						</a>
+					}
+					if v.HasNext {
+						<a href={ v.NextPost.Href } class="download-btn blog-nav-next" data-action="nav" title={ v.NextPost.Title }>
+							<span>{ t("blog.nextPost") }</span>
+							@Icon("arrow-right", "1rem")
+						</a>
+					}
+				</nav>
+			}
 			if commentsEnabled {
 				<div class="giscus-container"></div>
 			}

@@ -30,7 +30,9 @@ var view ViewState
 
 // Rendered-HTML caches keyed by post filename, project github repo and page id.
 var readmeCache map[string]string = map[string]string{}
+var readmeTOCCache map[string][]TOCItem = map[string][]TOCItem{}
 var postHtmlCache map[string]string = map[string]string{}
+var postTOCCache map[string][]TOCItem = map[string][]TOCItem{}
 var pageHtmlCache map[string]string = map[string]string{}
 
 // ── Translation Helper ────────────────────────────────────────
@@ -49,9 +51,18 @@ func updateMeta(selector string, value string) {
 		return
 	}
 	el := document.querySelector(selector)
-	if el != nil {
-		el.setAttribute("content", value)
+	if el == nil {
+		el = document.createElement("meta")
+		if strings.HasPrefix(selector, "meta[name=\"") {
+			name := strings.TrimSuffix(strings.TrimPrefix(selector, "meta[name=\""), "\"]")
+			el.setAttribute("name", name)
+		} else if strings.HasPrefix(selector, "meta[property=\"") {
+			prop := strings.TrimSuffix(strings.TrimPrefix(selector, "meta[property=\""), "\"]")
+			el.setAttribute("property", prop)
+		}
+		document.head.appendChild(el)
 	}
+	el.setAttribute("content", value)
 }
 
 func updateMetaTags() {
@@ -66,6 +77,40 @@ func updateMetaTags() {
 	updateMeta("meta[property=\"twitter:title\"]", site.Title)
 	updateMeta("meta[property=\"og:description\"]", site.Description)
 	updateMeta("meta[property=\"twitter:description\"]", site.Description)
+}
+
+func updateRouteMeta(title string, description string, canonicalPath string) {
+	if title != "" {
+		document.title = title
+		updateMeta("meta[property=\"og:title\"]", title)
+		updateMeta("meta[property=\"twitter:title\"]", title)
+	}
+	if description != "" {
+		updateMeta("meta[name=\"description\"]", description)
+		updateMeta("meta[property=\"og:description\"]", description)
+		updateMeta("meta[property=\"twitter:description\"]", description)
+	}
+	if canonicalPath != "" {
+		fullURL := canonicalPath
+		if strings.HasPrefix(canonicalPath, "/") {
+			origin := ""
+			if window.location != nil && window.location.origin != nil {
+				origin = string(window.location.origin)
+			}
+			if origin == "" || origin == "null" {
+				origin = site.Url
+			}
+			fullURL = origin + canonicalPath
+		}
+		updateMeta("meta[property=\"og:url\"]", fullURL)
+		link := document.querySelector("link[rel=\"canonical\"]")
+		if link == nil {
+			link = document.createElement("link")
+			link.setAttribute("rel", "canonical")
+			document.head.appendChild(link)
+		}
+		link.setAttribute("href", fullURL)
+	}
 }
 
 // ── Data Initialization ───────────────────────────────────────
@@ -91,8 +136,8 @@ func intVal(v any) int {
 	return int(v)
 }
 
-// postFromYAML maps one raw `blog.posts[]` entry to a BlogPost.
-func postFromYAML(p any) BlogPost {
+// postFromJSON maps one raw `blog.posts[]` entry to a BlogPost.
+func postFromJSON(p any) BlogPost {
 	fn := strVal(p.filename)
 	slug := strings.TrimSuffix(fn, ".md")
 	tags := []string{}
@@ -126,8 +171,8 @@ func sortPostsByDate(list []BlogPost) {
 	})
 }
 
-// projectFromYAML maps one raw `projects[]` entry to a Project.
-func projectFromYAML(p any) Project {
+// projectFromJSON maps one raw `projects[]` entry to a Project.
+func projectFromJSON(p any) Project {
 	tags := []string{}
 	if p.tags != nil {
 		for _, tg := range p.tags {
@@ -177,8 +222,8 @@ func sortProjectsByOrder(list []Project) {
 	})
 }
 
-// pageFromYAML maps one `pages.<id>` entry to a NavPage.
-func pageFromYAML(id string, p any) NavPage {
+// pageFromJSON maps one `pages.<id>` entry to a NavPage.
+func pageFromJSON(id string, p any) NavPage {
 	return NavPage{
 		ID:        id,
 		Title:     strVal(p.title),
@@ -208,6 +253,7 @@ async func initData() error {
 	siteData := data.site
 	if siteData != nil {
 		site.Title = strVal(siteData.title)
+		site.Url = strings.TrimSuffix(strVal(siteData.url), "/")
 		site.Description = strVal(siteData.description)
 		site.Author = strVal(siteData.author)
 		site.GithubUsername = strVal(siteData.github_username)
@@ -315,7 +361,7 @@ async func initData() error {
 		}
 		if data.blog.posts != nil {
 			for _, p := range data.blog.posts {
-				posts = append(posts, postFromYAML(p))
+				posts = append(posts, postFromJSON(p))
 			}
 			sortPostsByDate(posts)
 		}
@@ -324,7 +370,7 @@ async func initData() error {
 	// Projects
 	if data.projects != nil {
 		for _, p := range data.projects {
-			projects = append(projects, projectFromYAML(p))
+			projects = append(projects, projectFromJSON(p))
 		}
 		sortProjectsByOrder(projects)
 	}
@@ -332,7 +378,7 @@ async func initData() error {
 	// Pages
 	if data.pages != nil {
 		for id, p := range data.pages.(map[string]any) {
-			navPages = append(navPages, pageFromYAML(id, p))
+			navPages = append(navPages, pageFromJSON(id, p))
 		}
 		sortPagesByOrder(navPages)
 	}

@@ -5,6 +5,7 @@ import "testing"
 var testPosts = []BlogPost{
 	{ID: "hello", Slug: "hello", Title: "Hello", Filename: "hello.md", Tags: []string{}},
 	{ID: "second", Slug: "second", Title: "Second", Filename: "second.md", Tags: []string{}},
+	{ID: "third", Slug: "third", Title: "Third", Filename: "third.md", Tags: []string{}},
 }
 
 var testProjects = []Project{
@@ -21,7 +22,7 @@ func TestNewViewState(t *testing.T) {
 	if v.Status != LoadReady {
 		t.Errorf("expected zero status LoadReady, got %d", v.Status)
 	}
-	if len(v.Post.Tags) != 0 || len(v.Proj.Tags) != 0 || len(v.Proj.YoutubeVideos) != 0 || len(v.Proj.Links) != 0 {
+	if len(v.Post.Tags) != 0 || len(v.Proj.Tags) != 0 || len(v.Proj.YoutubeVideos) != 0 || len(v.Proj.Links) != 0 || len(v.TOC) != 0 {
 		t.Errorf("expected initialised empty slices")
 	}
 }
@@ -72,6 +73,40 @@ func TestResolvePost(t *testing.T) {
 		v, fetch := resolvePost("hello", testPosts, cache)
 		if v.Status != LoadPending || !fetch {
 			t.Errorf("expected pending fetch for empty cache entry")
+		}
+	})
+
+	t.Run("resolves adjacent posts for first, middle, and last", func(t *testing.T) {
+		resolve := func(slug string) ViewState {
+			v, _ := resolvePost(slug, testPosts, map[string]string{})
+			return v
+		}
+
+		// First post (newest): NextPost is empty / HasNext is false, PrevPost is "second" / HasPrev is true
+		v1 := resolve("hello")
+		if v1.HasNext {
+			t.Errorf("expected first post HasNext false, got %v", v1.HasNext)
+		}
+		if !v1.HasPrev || v1.PrevPost.Slug != "second" {
+			t.Errorf("expected first post PrevPost 'second', got %v", v1.PrevPost)
+		}
+
+		// Middle post: NextPost is "hello", PrevPost is "third"
+		v2 := resolve("second")
+		if !v2.HasNext || v2.NextPost.Slug != "hello" {
+			t.Errorf("expected middle post NextPost 'hello', got %v", v2.NextPost)
+		}
+		if !v2.HasPrev || v2.PrevPost.Slug != "third" {
+			t.Errorf("expected middle post PrevPost 'third', got %v", v2.PrevPost)
+		}
+
+		// Last post (oldest): NextPost is "second", PrevPost is nil
+		v3 := resolve("third")
+		if !v3.HasNext || v3.NextPost.Slug != "second" {
+			t.Errorf("expected last post NextPost 'second', got %v", v3.NextPost)
+		}
+		if v3.HasPrev {
+			t.Errorf("expected last post HasPrev false, got %v", v3.HasPrev)
 		}
 	})
 }

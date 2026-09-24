@@ -1,6 +1,7 @@
 {
   "site": {
     "title": "luukvanvenrooij.nl",
+    "url": "https://luukvanvenrooij.nl",
     "description": "Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!",
     "author": "Luuk van Venrooij",
     "github_username": "seriva",
@@ -477,6 +478,9 @@
       "search.noResults": "No results found",
       "search.loading": "Loading...",
       "blog.backToBlog": "← Back to Blog",
+      "blog.previousPost": "Older post",
+      "blog.nextPost": "Newer post",
+      "blog.tableOfContents": "Table of Contents",
       "blog.noPosts": "No blog posts yet. Check back soon!",
       "blog.previous": "Previous",
       "blog.next": "Next",
@@ -504,6 +508,7 @@
       "aria.toggleTheme": "Toggle theme",
       "theme.toggleTitle": "Toggle light/dark mode",
       "search.buttonTitle": "Search projects and blog posts",
+      "search.shortcutHint": "Ctrl+K or /",
       "contact.buttonTitle": "Get in touch",
       "dropdown.loadingProjects": "Loading projects...",
       "code.copy": "Copy",

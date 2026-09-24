@@ -6,12 +6,26 @@ import "strings"
 var contactClosing bool
 
 func initEmailJS() {
-	if site.EmailJS.Enabled && site.EmailJS.PublicKey != "" {
+	if site.EmailJS.Enabled && site.EmailJS.PublicKey != "" && window.emailjs != nil {
 		emailjs.init(site.EmailJS.PublicKey)
 	}
 }
 
+// preloadEmailJS warms the CDN script while the user types; failures are
+// swallowed here and surfaced by submitContact instead.
+async func preloadEmailJS() {
+	defer func() {
+		if r := recover(); r != nil {
+			console.warn("EmailJS preload failed:", r)
+		}
+	}()
+	await loadEmailJS()
+}
+
 func openContact() {
+	if site.EmailJS.Enabled {
+		preloadEmailJS()
+	}
 	contactOpen = true
 	contactClosing = false
 	contactForm = ContactState{ButtonState: "send"}
@@ -114,6 +128,9 @@ async func submitContact() {
 			renderContactForm()
 		}
 	}()
+
+	await loadEmailJS()
+	initEmailJS()
 
 	await emailjs.send(site.EmailJS.ServiceId, site.EmailJS.TemplateId, params, site.EmailJS.PublicKey)
 

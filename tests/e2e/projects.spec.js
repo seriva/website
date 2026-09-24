@@ -7,7 +7,7 @@ test.describe("Project page", () => {
             route.fulfill({
                 status: 200,
                 contentType: "text/plain",
-                body: "# Test README\n\nThis is a test readme.",
+                body: "# Test README\n\nThis is a test readme.\n\n## Overview\n\nOverview content.\n\n```mermaid\ngraph TD\n  A[Start] --> B[End]\n```\n\n## Features\n\nFeatures content.",
             }),
         );
         await page.goto("/project/gofront");
@@ -44,6 +44,23 @@ test.describe("Project page", () => {
         });
     });
 
+    test("renders mermaid diagrams and re-themes on toggle", async ({ page }) => {
+        const diagram = page.locator("#project-readme .mermaid");
+        await expect(diagram).toHaveCount(1);
+        await expect(page.locator("#project-readme code.language-mermaid")).toHaveCount(0);
+        await expect(diagram.locator("svg")).toBeVisible({ timeout: 15000 });
+        await expect(diagram).toContainText("Start");
+        // Diagrams are not code blocks: no copy button
+        await expect(diagram.locator(".copy-code-button")).toHaveCount(0);
+
+        const before = await diagram.locator("svg").getAttribute("id");
+        await page.locator(".theme-toggle").click();
+        await expect
+            .poll(async () => diagram.locator("svg").getAttribute("id"))
+            .not.toBe(before);
+        await expect(diagram.locator("svg")).toBeVisible();
+    });
+
     test("highlights active project in dropdown menu", async ({ page }) => {
         await page.goto("/project/gofront");
         await expect(page.locator(".project-title")).toBeVisible();
@@ -64,5 +81,20 @@ test.describe("Project page", () => {
         if (await inactiveItem.count() > 0) {
             await expect(inactiveItem).not.toHaveClass(/active/);
         }
+    });
+
+    test("renders table of contents for project and navigates to sections", async ({ page }) => {
+        const toc = page.locator(".blog-toc");
+        await expect(toc).toBeVisible();
+        if (!(await toc.evaluate(el => el.open))) {
+            await toc.locator("summary").click();
+        }
+        const tocLinks = toc.locator(".blog-toc-item a");
+        expect(await tocLinks.count()).toBeGreaterThanOrEqual(2);
+        const firstLink = tocLinks.first();
+        const href = await firstLink.getAttribute("href");
+        expect(href).toMatch(/^#/);
+        await firstLink.click();
+        await expect(page).toHaveURL(new RegExp(href + "$"));
     });
 });

@@ -8,7 +8,7 @@ Personal portfolio website built with [GoFront](https://github.com/seriva/gofron
 
 - **Core**: GoFront (`.templ` components, Go-inspired frontend architecture)
 - **Build**: `gofront prep` & `npm run prod` • Biome (lint/format) • Playwright (10 E2E suites)
-- **Content**: YAML config (compiled to JSON) + Markdown • Marked.js • Prism.js v1.30
+- **Content**: YAML config (compiled to JSON) + Markdown • Marked.js • Prism.js v1.30 • Mermaid (lazy-loaded from jsDelivr for ```` ```mermaid ```` fences)
 - **Features**: Fuse.js (search) • EmailJS (contact form) • giscus (comments)
 - **Assets**: Raleway fonts • Inline SVG icons (local, no CDNs)
 
@@ -84,7 +84,7 @@ This will:
 - Compile YAML configuration to `content.json`
 - Bundle and minify vendor dependencies (`gofront prep --minify`)
 - Compile, minify, and mangle GoFront application bundle to `public/app.js`
-- Copy public assets (`index.html`, `404.html`, `data/`, `fonts/`, `css/`, metadata) to `public/`
+- Copy public assets (`index.html`, `data/`, `fonts/`, `css/`, metadata) to `public/`; `404.html` is emitted as a copy of the processed `index.html`
 - Generate `sitemap.xml` and `rss.xml`
 - Output complete, self-contained site to `public/` directory
 
@@ -114,7 +114,7 @@ npm run test:all     # Run all tests (GoFront + Playwright)
 ```
 
 Tests cover:
-- **Go Unit Tests (`src/*_test.go`)**: route parsing and GitHub Pages redirect decoding, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
+- **Go Unit Tests (`src/*_test.go`)**: route parsing, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
 - **End-to-End Tests (`tests/e2e/`)**: 10 Playwright test suites across Chromium and Firefox:
   - Navigation, history, deep-linking, and route transitions
   - Markdown blog rendering, pagination, and code syntax highlighting
@@ -152,6 +152,7 @@ templ BlogPostCard(post BlogPost) {
 - **Zero Runtime Overhead:** `.templ` files compile directly to native DOM manipulation calls (`createElement`, `setAttribute`, `appendChild`) with no virtual DOM diffing.
 - **Go Syntax & Type Safety:** Components receive typed props and compile to clean ES modules.
 - **Dynamic Content Injection:** Markdown generated from `marked` is injected using `@templ.Raw(doc.HTML)`.
+- **Mermaid Diagrams:** ```` ```mermaid ```` fences in blog posts, pages and project READMEs are rendered as SVG. Mermaid is fetched from jsDelivr only when a rendered page contains a diagram, and diagrams are re-drawn with the matching `dark`/`default` theme when the theme toggles.
 - **Global Event Delegation:** Handled via `data-action` attributes registered centrally on `#app` in `src/main.go`.
 
 ## Routing & SPA Support
@@ -160,7 +161,7 @@ templ BlogPostCard(post BlogPost) {
 
 **Dev Server:** `gofront src -o app/app.js --serve --port 8181` provides live reload and built-in SPA route fallback (serving `index.html` on clean paths)
 
-**GitHub Pages:** Custom `404.html` redirects deep links via hash (`#!redirect=<path>`), restored to clean URLs with `history.replaceState()` in `src/router.go`
+**GitHub Pages:** Every known route gets a pre-generated `index.html` stub (200 with route-specific meta). `404.html` is the app shell itself — GitHub Pages serves it at the requested URL without redirecting, so `src/router.go` reads `location.pathname` directly for unknown deep links. No hash redirect.
 
 **Absolute Paths:** All resources use root-relative paths (`/app.js`, `/data/content.json`) to work from any route depth
 

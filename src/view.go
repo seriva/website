@@ -7,9 +7,12 @@ import "strings"
 // named-int fields compile to null, not 0.
 func newViewState() ViewState {
 	return ViewState{
-		Post:   BlogPost{Tags: []string{}},
-		Proj:   Project{Tags: []string{}, YoutubeVideos: []string{}, Links: []ProjectLink{}},
-		Status: LoadReady,
+		Post:     BlogPost{Tags: []string{}},
+		Proj:     Project{Tags: []string{}, YoutubeVideos: []string{}, Links: []ProjectLink{}},
+		Status:   LoadReady,
+		PrevPost: BlogPost{Tags: []string{}},
+		NextPost: BlogPost{Tags: []string{}},
+		TOC:      []TOCItem{},
 	}
 }
 
@@ -17,9 +20,17 @@ func newViewState() ViewState {
 // the markdown still has to be fetched.
 func resolvePost(slug string, all []BlogPost, cache map[string]string) (ViewState, bool) {
 	v := newViewState()
-	for _, p := range all {
+	for i, p := range all {
 		if p.Slug == slug || p.ID == slug {
 			v.Post = p
+			if i+1 < len(all) {
+				v.HasPrev = true
+				v.PrevPost = all[i+1]
+			}
+			if i > 0 {
+				v.HasNext = true
+				v.NextPost = all[i-1]
+			}
 			if html, ok := cache[p.Filename]; ok && html != "" {
 				v.HTML = html
 				return v, false

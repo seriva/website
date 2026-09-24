@@ -97,5 +97,37 @@ test.describe("Navigation", () => {
         const scrollAfter = await page.evaluate(() => window.scrollY);
         expect(scrollAfter).toBe(0);
     });
+
+    test("dynamic meta tags update on route navigation", async ({ page }) => {
+        await page.goto("/blog");
+        await expect(page.locator(".blog-post-card").first()).toBeVisible();
+
+        const defaultDesc = await page
+            .locator('meta[name="description"]')
+            .getAttribute("content");
+        expect(defaultDesc).toBeTruthy();
+
+        const firstTitle = (
+            await page
+                .locator(".blog-post-card .blog-post-title a")
+                .first()
+                .textContent()
+        )?.trim();
+
+        await page.locator(".blog-post-card .blog-post-title a").first().click();
+        await expect(page.locator(".blog-post-view")).toBeVisible();
+
+        await expect(page).toHaveTitle(new RegExp(firstTitle || ""));
+        const ogTitle = await page
+            .locator('meta[property="og:title"]')
+            .getAttribute("content");
+        expect(ogTitle).toContain(firstTitle || "");
+
+        const postDesc = await page
+            .locator('meta[name="description"]')
+            .getAttribute("content");
+        expect(postDesc).toBeTruthy();
+        expect(postDesc).not.toBe(defaultDesc);
+    });
 });
 

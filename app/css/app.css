@@ -884,6 +884,87 @@ button.nav-link:active {
 	}
 }
 
+/* Blog Table of Contents — Subtle Minimalist Style */
+.blog-toc {
+	background: transparent;
+	border: none;
+	border-left: 2px solid var(--border-color);
+	border-radius: 0;
+	padding: 0.25rem 0 0.25rem 0.85rem;
+	margin: 1.5rem 0 2rem 0;
+	text-align: left;
+	transition: border-color 0.2s ease;
+}
+.blog-toc:hover,
+.blog-toc[open] {
+	border-left-color: color-mix(in srgb, var(--accent) 50%, var(--border-color));
+}
+.blog-toc-title {
+	font-size: 1rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	cursor: pointer;
+	color: var(--text-light);
+	user-select: none;
+	transition: color 0.15s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+.blog-toc-title:hover {
+	color: var(--accent);
+}
+.blog-toc-title:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+.blog-toc-nav {
+	margin-top: 0.5rem;
+}
+.blog-toc-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.35rem;
+}
+.blog-toc-item {
+	text-align: left;
+}
+.blog-toc-item a {
+	color: var(--text-light);
+	text-decoration: none;
+	font-size: 1rem;
+	line-height: 1.5;
+	transition: color 0.15s ease;
+	display: inline-block;
+}
+.blog-toc-item a:hover {
+	color: var(--accent);
+	text-decoration: none;
+}
+.blog-toc-level-3 {
+	padding-left: 1.25rem;
+}
+.blog-toc-level-3 a {
+	font-size: 0.95rem;
+	opacity: 0.9;
+}
+
+/* Post Navigation (Previous / Next) — reuses .download-buttons / .download-btn */
+.download-buttons.blog-post-nav {
+	flex-wrap: nowrap;
+	justify-content: space-between;
+	margin: 2.5rem 0;
+}
+.blog-post-nav .blog-nav-next {
+	margin-left: auto;
+}
+
 /* Projects */
 .project-title {
 	color: var(--accent);
@@ -966,6 +1047,27 @@ button.nav-link:active {
 	transform: translateY(0) scale(0.95);
 	text-decoration: none;
 }
+.download-btn svg,
+.download-btn .icon {
+	flex-shrink: 0;
+	transition:
+		transform var(--transition-normal),
+		color var(--transition-normal);
+}
+.download-btn:hover svg,
+.download-btn:hover .icon,
+.download-btn:focus svg,
+.download-btn:focus .icon {
+	transform: scale(1.1);
+	color: var(--accent);
+}
+.download-btn span {
+	transition: color var(--transition-normal);
+}
+.download-btn:hover span,
+.download-btn:focus span {
+	color: var(--accent);
+}
 
 /* Markdown */
 .markdown-body {
@@ -992,9 +1094,11 @@ button.nav-link:active {
 }
 .markdown-body h2 {
 	font-size: 1.4em;
+	scroll-margin-top: 75px;
 }
 .markdown-body h3 {
 	font-size: 1.2em;
+	scroll-margin-top: 75px;
 }
 .markdown-body p,
 .markdown-body li {
@@ -1033,13 +1137,13 @@ button.nav-link:active {
 	line-height: 1.4;
 	position: relative;
 }
-.markdown-body a {
+.markdown-body a:not(.download-btn) {
 	color: var(--accent);
 	text-decoration: none;
 	display: inline-block;
 	transition: transform var(--transition-fast);
 }
-.markdown-body a:hover {
+.markdown-body a:not(.download-btn):hover {
 	text-decoration: none;
 	transform: translateY(-2px);
 }
@@ -1069,6 +1173,16 @@ button.nav-link:active {
 	border: none;
 	border-top: 1px solid var(--border-color);
 	margin: 0.5em 0;
+}
+.markdown-body .mermaid {
+	display: flex;
+	justify-content: center;
+	margin: 1em 0;
+	overflow-x: auto;
+}
+.markdown-body .mermaid svg {
+	max-width: 100%;
+	height: auto;
 }
 
 /* Copy Code Button */
@@ -1115,9 +1229,8 @@ pre:hover .copy-code-button {
 /* Giscus comments */
 .giscus-container {
 	max-width: 900px;
-	margin: 3rem auto;
-	padding: 2rem 1rem;
-	border-top: 2px solid var(--border-color);
+	margin: 2.5rem auto;
+	padding: 1rem 0;
 }
 .giscus-container iframe {
 	color-scheme: dark;

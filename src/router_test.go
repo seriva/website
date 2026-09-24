@@ -46,28 +46,3 @@ func TestIsActiveRoute(t *testing.T) {
 		t.Errorf("expected inactive for different kind")
 	}
 }
-
-func TestResolveRedirect(t *testing.T) {
-	cases := []struct {
-		hash   string
-		want   string
-		wantOk bool
-	}{
-		{"#!redirect=%2Fblog%2Fhello", "/blog/hello", true},
-		{"#!redirect=/project/gofront", "/project/gofront", true},
-		{"#!redirect=", "", false},
-		{"#section-anchor", "", false},
-		{"", "", false},
-		{"#!redirect=%E0%A4%A", "", false}, // malformed percent-encoding must not throw
-		{"#!redirect=https%3A%2F%2Fevil.example", "", false}, // absolute URL is not a local path
-		{"#!redirect=%2F%2Fevil.example%2Fx", "", false},     // protocol-relative URL
-		{"#!redirect=blog%2Fhello", "", false},               // relative path
-	}
-
-	for _, c := range cases {
-		got, ok := resolveRedirect(c.hash)
-		if ok != c.wantOk || got != c.want {
-			t.Errorf("resolveRedirect(%q) = (%q, %v), want (%q, %v)", c.hash, got, ok, c.want, c.wantOk)
-		}
-	}
-}

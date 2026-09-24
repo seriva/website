@@ -59,6 +59,9 @@ func applyTheme(theme string) {
 		applyPrismTheme(colors.CodeTheme)
 	}
 	updateGiscusTheme()
+	if window.mermaid != nil {
+		renderMermaid()
+	}
 }
 
 func nextTheme(current string) string {

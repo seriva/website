@@ -73,15 +73,26 @@ const (
 	LoadNotFound
 )
 
+type TOCItem struct {
+	ID    string
+	Text  string
+	Level int
+}
+
 // ViewState is the state of the current route's content region.
 // Only the field matching route.Kind is populated. Always build it with
 // newViewState(): a bare struct literal leaves Status as null, not LoadReady.
 type ViewState struct {
-	Post   BlogPost
-	Proj   Project // not `Project`: a field named after its type breaks the emitted constructor
-	Page   NavPage
-	HTML   string // rendered markdown for post, readme or page
-	Status LoadStatus
+	Post     BlogPost
+	Proj     Project // not `Project`: a field named after its type breaks the emitted constructor
+	Page     NavPage
+	HTML     string // rendered markdown for post, readme or page
+	Status   LoadStatus
+	HasPrev  bool
+	PrevPost BlogPost
+	HasNext  bool
+	NextPost BlogPost
+	TOC      []TOCItem
 }
 
 type SocialLink struct {
@@ -133,6 +144,7 @@ type SearchConfig struct {
 
 type SiteConfig struct {
 	Title          string
+	Url            string
 	Description    string
 	Author         string
 	GithubUsername string
