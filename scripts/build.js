@@ -5,11 +5,16 @@
 // ===========================================
 // Commands:
 //   content  — Compile app/data/content.yaml into content.json
+//   watch    — Watch app/data/content.yaml and recompile on change
+//   dev      — Run content watch + dev server concurrently
 //   sync     — Copy public assets from app/ to public/ (configured in package.json)
 //   seo      — Generate public/sitemap.xml and public/rss.xml
-//   post     — Run sync + seo (production post-build)
-//   all      — Run content + sync + seo
+//   routes   — Pre-generate static HTML route stubs with full meta tags
+//   post     — Run sync + seo + routes (production post-build)
+//   all      — Run content + sync + seo + routes
 
+import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
 	copyFileSync,
 	cpSync,
@@ -17,6 +22,7 @@ import {
 	mkdirSync,
 	readFileSync,
 	statSync,
+	watch,
 	writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
@@ -35,7 +41,6 @@ const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 
 const DEFAULT_PUBLIC_ASSETS = [
 	"index.html",
-	"404.html",
 	"boot.js",
 	"favicon.svg",
 	"og-image.jpg",
@@ -45,7 +50,7 @@ const DEFAULT_PUBLIC_ASSETS = [
 	"css",
 ];
 
-// ── 1. Content Compilation (YAML → JSON) ──────────────────────
+// ── 1. Content Compilation & Watching (YAML → JSON) ───────────
 
 function compileContent() {
 	const yamlPath = join(appDir, "data/content.yaml");
@@ -71,7 +76,60 @@ function compileContent() {
 	}
 }
 
-// ── 2. Public Asset Synchronization ───────────────────────────
+function watchContent() {
+	compileContent();
+	const dataDir = join(appDir, "data");
+	const yamlPath = join(dataDir, "content.yaml");
+	console.log(`Watching ${yamlPath} for changes...`);
+	let debounceTimer = null;
+	// Watch the directory, not the file: atomic-save editors replace the inode
+	// and a file watcher silently stops firing after the first save.
+	watch(dataDir, (_eventType, filename) => {
+		if (filename && filename !== "content.yaml") return;
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(() => {
+			try {
+				compileContent();
+			} catch (err) {
+				console.error("Failed to recompile content.yaml:", err);
+			}
+		}, 100);
+	});
+}
+
+function runDev() {
+	watchContent();
+
+	const child = spawn(
+		"npx",
+		["gofront", "src", "-o", "app/app.js", "--serve", "--port", "8181"],
+		{
+			cwd: rootDir,
+			stdio: "inherit",
+		},
+	);
+
+	child.on("exit", (code) => process.exit(code ?? 0));
+	process.on("SIGINT", () => {
+		child.kill("SIGINT");
+		process.exit(0);
+	});
+	process.on("SIGTERM", () => {
+		child.kill("SIGTERM");
+		process.exit(0);
+	});
+}
+
+function loadContentData() {
+	const jsonPath = join(appDir, "data/content.json");
+	if (existsSync(jsonPath)) {
+		return JSON.parse(readFileSync(jsonPath, "utf8"));
+	}
+	const yamlPath = join(appDir, "data/content.yaml");
+	return parse(readFileSync(yamlPath, "utf8"));
+}
+
+// ── 2. Public Asset Synchronization & Minification ─────────────
 
 const DEV_ORIGIN = /\s+(?:https?|wss?):\/\/localhost:\d+/g;
 
@@ -80,6 +138,51 @@ function stripDevOrigins(html) {
 		/(<meta http-equiv="Content-Security-Policy" content=")([^"]*)(")/,
 		(_m, open, csp, close) => open + csp.replace(DEV_ORIGIN, "") + close,
 	);
+}
+
+function minifyCss(css) {
+	// `+` and `-` are deliberately not in the collapse set: calc() requires
+	// whitespace around them, and adjacent-sibling combinators tolerate it.
+	return css
+		.replace(/\/\*[\s\S]*?\*\//g, "")
+		.replace(/\s+/g, " ")
+		.replace(/\s*([{}:;,>~])\s*/g, "$1")
+		.replace(/;}/g, "}")
+		.trim();
+}
+
+// One version for every emitted HTML file, derived from the shipped bundles so
+// unchanged deploys keep their cache and stubs/index never disagree.
+let assetVersion = null;
+function getAssetVersion() {
+	if (assetVersion) return assetVersion;
+	const hash = createHash("sha1");
+	let hashed = 0;
+	for (const rel of [
+		"public/app.js",
+		"public/vendor.js",
+		"app/css/app.css",
+		"app/boot.js",
+	]) {
+		const p = join(rootDir, rel);
+		if (existsSync(p)) {
+			hash.update(readFileSync(p));
+			hashed++;
+		}
+	}
+	assetVersion =
+		hashed > 0 ? hash.digest("hex").slice(0, 10) : Date.now().toString(36);
+	return assetVersion;
+}
+
+function applyCacheBusting(html, version) {
+	return html
+		.replace(/(href="\/css\/app\.css)(?:[^"]*)(")/g, `$1?v=${version}$2`)
+		.replace(/(href="\/vendor\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
+		.replace(/(href="\/app\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
+		.replace(/(src="\/boot\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
+		.replace(/(src="\/vendor\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
+		.replace(/(src="\/app\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`);
 }
 
 function syncPublicAssets() {
@@ -113,6 +216,42 @@ function syncPublicAssets() {
 			copiedCount++;
 			console.log(`✓ Copied file: ${item} → public/${item}`);
 		}
+	}
+
+	// Minify public CSS
+	const publicCssPath = join(publicDir, "css/app.css");
+	if (existsSync(publicCssPath)) {
+		const rawCss = readFileSync(publicCssPath, "utf8");
+		const minCss = minifyCss(rawCss);
+		writeFileSync(publicCssPath, minCss, "utf8");
+		const pct = Math.round((1 - minCss.length / rawCss.length) * 100);
+		console.log(
+			`✓ Minified ${publicCssPath} (${rawCss.length} → ${minCss.length} bytes, -${pct}%)`,
+		);
+	}
+
+	// Root index.html: site-level meta from content data + cache busting
+	const publicIndexPath = join(publicDir, "index.html");
+	if (existsSync(publicIndexPath)) {
+		const contentData = loadContentData();
+		const site = contentData.site || {};
+		const version = getAssetVersion();
+		let indexHtml = readFileSync(publicIndexPath, "utf8");
+		indexHtml = injectMetadata(indexHtml, {
+			title: site.title,
+			description: site.description,
+			url: getBaseUrl(contentData),
+			type: "website",
+		});
+		indexHtml = applyCacheBusting(indexHtml, version);
+		writeFileSync(publicIndexPath, indexHtml, "utf8");
+		console.log(
+			`✓ Applied site meta + cache busting (v=${version}) to public/index.html`,
+		);
+		// GitHub Pages serves 404.html at the requested URL without redirecting, so
+		// shipping the app shell as 404.html lets the SPA router handle unknown deep links.
+		writeFileSync(join(publicDir, "404.html"), indexHtml, "utf8");
+		console.log("✓ Wrote public/404.html as SPA shell");
 	}
 
 	console.log(`✓ Successfully copied ${copiedCount} public assets to public/`);
@@ -150,6 +289,7 @@ function generateSitemap(contentData, baseUrl) {
 	};
 
 	addUrl("", today, "weekly", "1.0");
+	addUrl("/blog", today, "weekly", "0.9");
 
 	if (contentData.blog?.posts) {
 		for (const post of contentData.blog.posts) {
@@ -245,15 +385,7 @@ function getBaseUrl(contentData) {
 }
 
 function generateSeo() {
-	const jsonPath = join(appDir, "data/content.json");
-	let contentData;
-	if (existsSync(jsonPath)) {
-		contentData = JSON.parse(readFileSync(jsonPath, "utf8"));
-	} else {
-		const yamlPath = join(appDir, "data/content.yaml");
-		contentData = parse(readFileSync(yamlPath, "utf8"));
-	}
-
+	const contentData = loadContentData();
 	const baseUrl = getBaseUrl(contentData);
 	mkdirSync(publicDir, { recursive: true });
 
@@ -270,6 +402,187 @@ function generateSeo() {
 	console.log(`✓ Generated RSS feed: ${rssPath} (${itemCount} posts)`);
 }
 
+// ── 4. Static HTML Route Generation ───────────────────────────
+
+function escapeHtml(str) {
+	if (!str) return "";
+	return String(str)
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
+
+function replaceOrInsertMeta(html, selectorAttr, contentValue) {
+	const regex = new RegExp(
+		`<meta\\s+[^>]*?${selectorAttr.replace(/([.*+?^=!:${}()|[\]/\\])/g, "\\$1")}[^>]*?>`,
+		"i",
+	);
+	if (regex.test(html)) {
+		return html.replace(regex, (match) => {
+			if (/content="[^"]*"/i.test(match)) {
+				return match.replace(/content="[^"]*"/i, `content="${contentValue}"`);
+			}
+			return match.replace(/>$/, ` content="${contentValue}">`);
+		});
+	}
+	const [attr, val] = selectorAttr.split("=");
+	return html.replace(
+		"</head>",
+		`    <meta ${attr}=${val} content="${contentValue}">\n</head>`,
+	);
+}
+
+function injectMetadata(html, { title, description, url, type = "website" }) {
+	let output = html;
+
+	if (title) {
+		const escapedTitle = escapeHtml(title);
+		output = output.replace(
+			/<title>.*?<\/title>/s,
+			`<title>${escapedTitle}</title>`,
+		);
+		output = replaceOrInsertMeta(output, 'property="og:title"', escapedTitle);
+		output = replaceOrInsertMeta(
+			output,
+			'property="twitter:title"',
+			escapedTitle,
+		);
+	}
+
+	if (description) {
+		const escapedDesc = escapeHtml(description);
+		output = replaceOrInsertMeta(output, 'name="description"', escapedDesc);
+		output = replaceOrInsertMeta(
+			output,
+			'property="og:description"',
+			escapedDesc,
+		);
+		output = replaceOrInsertMeta(
+			output,
+			'property="twitter:description"',
+			escapedDesc,
+		);
+	}
+
+	if (url) {
+		const escapedUrl = escapeHtml(url);
+		output = replaceOrInsertMeta(output, 'property="og:url"', escapedUrl);
+		if (output.includes('rel="canonical"')) {
+			output = output.replace(
+				/<link[^>]*rel="canonical"[^>]*>/i,
+				`<link rel="canonical" href="${escapedUrl}">`,
+			);
+		} else {
+			output = output.replace(
+				"</head>",
+				`    <link rel="canonical" href="${escapedUrl}">\n</head>`,
+			);
+		}
+	}
+
+	if (type) {
+		const escapedType = escapeHtml(type);
+		output = replaceOrInsertMeta(output, 'property="og:type"', escapedType);
+	}
+
+	return output;
+}
+
+function generateStaticRoutes(contentData, baseUrl) {
+	const indexPath = join(appDir, "index.html");
+	if (!existsSync(indexPath)) return;
+
+	const baseHtml = stripDevOrigins(readFileSync(indexPath, "utf8"));
+	const version = getAssetVersion();
+	const site = contentData.site || {};
+	const siteTitle = site.title || "Portfolio";
+	const siteDesc = site.description || "";
+	let generatedCount = 0;
+
+	const writeRoute = (relPath, meta) => {
+		const destFile = join(publicDir, relPath, "index.html");
+		mkdirSync(dirname(destFile), { recursive: true });
+		let html = injectMetadata(baseHtml, meta);
+		html = applyCacheBusting(html, version);
+		writeFileSync(destFile, html, "utf8");
+		generatedCount++;
+	};
+
+	// 1. Blog home
+	writeRoute("blog", {
+		title: siteTitle,
+		description: siteDesc,
+		url: `${baseUrl}/blog`,
+		type: "website",
+	});
+
+	// 2. Blog posts
+	if (contentData.blog?.posts) {
+		for (const post of contentData.blog.posts) {
+			const slug = post.filename.replace(/\.md$/, "");
+			const postTitle = post.title ? `${post.title} - ${siteTitle}` : siteTitle;
+			writeRoute(`blog/${slug}`, {
+				title: postTitle,
+				description: post.excerpt || siteDesc,
+				url: `${baseUrl}/blog/${slug}`,
+				type: "article",
+			});
+		}
+
+		// 3. Blog pagination
+		const perPage = contentData.blog.postsPerPage || 5;
+		const totalPages = Math.ceil(contentData.blog.posts.length / perPage);
+		for (let p = 1; p <= totalPages; p++) {
+			writeRoute(`blog/page/${p}`, {
+				title: p > 1 ? `Blog - ${siteTitle}` : siteTitle,
+				description: siteDesc,
+				url: `${baseUrl}/blog/page/${p}`,
+				type: "website",
+			});
+		}
+	}
+
+	// 4. Projects
+	if (contentData.projects) {
+		for (const proj of contentData.projects) {
+			const projTitle = proj.title ? `${proj.title} - ${siteTitle}` : siteTitle;
+			writeRoute(`project/${proj.id}`, {
+				title: projTitle,
+				description: proj.description || siteDesc,
+				url: `${baseUrl}/project/${proj.id}`,
+				type: "website",
+			});
+		}
+	}
+
+	// 5. Pages
+	if (contentData.pages) {
+		for (const [pageId, pageData] of Object.entries(contentData.pages)) {
+			const pageTitle = pageData.title
+				? `${pageData.title} - ${siteTitle}`
+				: siteTitle;
+			writeRoute(`page/${pageId}`, {
+				title: pageTitle,
+				description: siteDesc,
+				url: `${baseUrl}/page/${pageId}`,
+				type: "website",
+			});
+		}
+	}
+
+	console.log(
+		`✓ Pre-generated ${generatedCount} static HTML route stubs in public/`,
+	);
+}
+
+function generateRoutes() {
+	const contentData = loadContentData();
+	const baseUrl = getBaseUrl(contentData);
+	generateStaticRoutes(contentData, baseUrl);
+}
+
 // ── CLI Dispatch ──────────────────────────────────────────────
 
 const command = process.argv[2] || "all";
@@ -277,6 +590,12 @@ const command = process.argv[2] || "all";
 switch (command) {
 	case "content":
 		compileContent();
+		break;
+	case "watch":
+		watchContent();
+		break;
+	case "dev":
+		runDev();
 		break;
 	case "sync":
 	case "static":
@@ -286,17 +605,24 @@ switch (command) {
 	case "seo":
 		generateSeo();
 		break;
+	case "routes":
+		generateRoutes();
+		break;
 	case "post":
 		syncPublicAssets();
 		generateSeo();
+		generateRoutes();
 		break;
 	case "all":
 		compileContent();
 		syncPublicAssets();
 		generateSeo();
+		generateRoutes();
 		break;
 	default:
 		console.error(`Unknown command: ${command}`);
-		console.error("Usage: node scripts/build.js [content|sync|seo|post|all]");
+		console.error(
+			"Usage: node scripts/build.js [content|watch|dev|sync|seo|routes|post|all]",
+		);
 		process.exit(1);
 }

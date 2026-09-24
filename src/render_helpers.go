@@ -201,3 +201,12 @@ func formStatusClass(statusType string) string {
 func currentYear() int {
 	return time.Now().Year()
 }
+
+// ── TOC helpers ───────────────────────────────────────────────
+
+func tocItemClass(level int) string {
+	if level == 3 {
+		return "blog-toc-item blog-toc-level-3"
+	}
+	return "blog-toc-item blog-toc-level-2"
+}

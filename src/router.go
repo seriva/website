@@ -5,8 +5,38 @@ import "strconv"
 import "strings"
 import "time"
 
+var currentPath string
+
+func scrollToHash(hash string, smooth bool) {
+	if hash == "" {
+		return
+	}
+	id := strings.TrimPrefix(hash, "#")
+	if id == "" {
+		return
+	}
+	scroll := func() {
+		targetEl := document.getElementById(id)
+		if targetEl != nil {
+			behavior := "instant"
+			if smooth {
+				behavior = "smooth"
+			}
+			targetEl.scrollIntoView(map[string]any{"behavior": behavior})
+		}
+	}
+	scroll()
+	if !smooth {
+		setTimeout(scroll, 50)
+	}
+}
+
 func navigate(url string) {
-	if url != window.location.pathname {
+	curr := string(window.location.pathname)
+	if window.location.hash != nil && window.location.hash != "" {
+		curr += string(window.location.hash)
+	}
+	if url != curr {
 		window.history.pushState(map[string]any{}, "", url)
 	}
 	handleRoute()
@@ -49,36 +79,12 @@ var isInitialRoute = true
 // has been superseded and must not touch `view`.
 var routeSeq int
 
-// resolveRedirect decodes the GitHub Pages 404 fallback hash (`#!redirect=<path>`).
-// Malformed encodings and non-local targets are treated as no redirect rather than throwing.
-func resolveRedirect(hash string) (target string, ok bool) {
-	defer func() {
-		if r := recover(); r != nil {
-			target = ""
-			ok = false
-		}
-	}()
-	encoded, found := strings.CutPrefix(hash, "#!redirect=")
-	if !found || encoded == "" {
-		return "", false
-	}
-	decoded := string(decodeURIComponent(encoded))
-	// Only same-origin paths: "//host" and "scheme:" would make replaceState throw.
-	if !strings.HasPrefix(decoded, "/") || strings.HasPrefix(decoded, "//") {
-		return "", false
-	}
-	return decoded, true
-}
-
 async func handleRoute() {
 	resetOverlays()
 
+	// GitHub Pages serves 404.html (a copy of the app shell) at the original URL,
+	// so unknown deep links arrive here with their real pathname intact.
 	path := window.location.pathname
-
-	if redirect, ok := resolveRedirect(window.location.hash); ok {
-		window.history.replaceState(map[string]any{}, "", redirect)
-		path = redirect
-	}
 
 	if !isInitialRoute {
 		mainEl := document.querySelector("#main-content")
@@ -90,6 +96,7 @@ async func handleRoute() {
 	isInitialRoute = false
 
 	routeSeq++
+	currentPath = path
 	route = parseRoute(path)
 	view = newViewState()
 
@@ -117,14 +124,21 @@ async func handleRoute() {
 			mainEl.removeAttribute("tabindex")
 		}, 100)
 	}
+
+	hash := string(window.location.hash)
+	if hash != "" {
+		scrollToHash(hash, false)
+	}
 }
 
 func showBlog(page int) {
+	title := site.Title
+	canonical := "/blog"
 	if page > 1 {
-		document.title = t("nav.blog") + " - " + site.Title
-	} else {
-		document.title = site.Title
+		title = t("nav.blog") + " - " + site.Title
+		canonical = "/blog/page/" + strconv.Itoa(page)
 	}
+	updateRouteMeta(title, site.Description, canonical)
 	renderRoute()
 }
 
@@ -132,11 +146,12 @@ async func showPost(slug string) {
 	v, needsFetch := resolvePost(slug, posts, postHtmlCache)
 	view = v
 	if view.Status == LoadNotFound {
+		updateRouteMeta(t("general.blogNotFound")+" - "+site.Title, t("general.blogNotFoundMessage"), "/blog/"+slug)
 		renderRoute()
 		return
 	}
 
-	document.title = view.Post.Title + " - " + site.Title
+	updateRouteMeta(view.Post.Title+" - "+site.Title, view.Post.Excerpt, "/blog/"+view.Post.Slug)
 
 	if needsFetch {
 		seq := routeSeq
@@ -150,13 +165,21 @@ async func showPost(slug string) {
 			return
 		}
 		_, content := parseFrontmatter(mdText)
+		toc := extractTOC(content)
 		html := parseMarkdown(content)
+		html = injectHeadingIDs(html, toc)
 		postHtmlCache[v.Post.Filename] = html
+		postTOCCache[v.Post.Filename] = toc
 		if seq != routeSeq {
 			return
 		}
 		view.HTML = html
+		view.TOC = toc
 		view.Status = LoadReady
+	} else {
+		if cachedTOC, ok := postTOCCache[v.Post.Filename]; ok {
+			view.TOC = cachedTOC
+		}
 	}
 	renderRoute()
 	highlightCode()
@@ -167,19 +190,25 @@ async func showProject(id string) {
 	v, needsFetch := resolveProject(id, projects, readmeCache)
 	view = v
 	if view.Status == LoadNotFound {
+		updateRouteMeta(t("general.projectNotFound")+" - "+site.Title, t("general.projectNotFoundMessage"), "/project/"+id)
 		renderRoute()
 		return
 	}
 
-	document.title = view.Proj.Title + " - " + site.Title
+	updateRouteMeta(view.Proj.Title+" - "+site.Title, view.Proj.Description, "/project/"+view.Proj.ID)
 
 	if needsFetch {
 		seq := routeSeq
 		mdText, err := await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername))
 		html := ""
+		toc := []TOCItem{}
 		if err == nil {
+			readmeTOC := extractTOC(mdText)
 			html = parseMarkdown(mdText)
+			html = injectHeadingIDs(html, readmeTOC)
+			toc = extractProjectTOC(mdText, v.Proj)
 			readmeCache[v.Proj.GithubRepo] = html
+			readmeTOCCache[v.Proj.GithubRepo] = toc
 		}
 		if seq != routeSeq {
 			return
@@ -188,7 +217,14 @@ async func showProject(id string) {
 			view.Status = LoadFailed
 		} else {
 			view.HTML = html
+			view.TOC = toc
 			view.Status = LoadReady
+		}
+	} else {
+		if cachedTOC, ok := readmeTOCCache[v.Proj.GithubRepo]; ok {
+			view.TOC = cachedTOC
+		} else {
+			view.TOC = extractProjectTOC("", v.Proj)
 		}
 	}
 	renderRoute()
@@ -199,7 +235,11 @@ async func showProject(id string) {
 async func showPage(id string) {
 	v, needsFetch := resolvePage(id, navPages, pageHtmlCache)
 	view = v
-	document.title = view.Page.Title + " - " + site.Title
+	title := view.Page.Title + " - " + site.Title
+	if view.Page.Title == "" {
+		title = id + " - " + site.Title
+	}
+	updateRouteMeta(title, site.Description, "/page/"+id)
 
 	if needsFetch {
 		seq := routeSeq

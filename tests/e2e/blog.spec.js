@@ -101,4 +101,106 @@ test.describe("Blog", () => {
         await expect(page.locator("pre code .token").first()).toBeVisible();
         await expect(page.locator("pre .copy-code-button").first()).toBeVisible();
     });
+
+    test("previous and next post navigation cards navigate between adjacent posts", async ({ page }) => {
+        // Go to newest post
+        await page.goto("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        await expect(page.locator(".blog-nav-prev")).toBeVisible();
+        // Newest post has no next post
+        await expect(page.locator(".blog-nav-next")).toHaveCount(0);
+
+        // Click older post link
+        await page.locator(".blog-nav-prev").scrollIntoViewIfNeeded();
+        await page.locator(".blog-nav-prev").click();
+        await expect(page).toHaveURL("/blog/2026-09-21-bootstrapping-agentic-development");
+        await expect(page.locator(".blog-post-view")).toBeVisible();
+
+        // On middle post, both prev and next are visible
+        await expect(page.locator(".blog-nav-next")).toBeVisible();
+        await expect(page.locator(".blog-nav-prev")).toBeVisible();
+
+        // Click newer post to return
+        await page.locator(".blog-nav-next").scrollIntoViewIfNeeded();
+        await page.locator(".blog-nav-next").click();
+        await expect(page).toHaveURL("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+    });
+
+    test("renders compact older and newer post navigation buttons", async ({ page }) => {
+        // Desktop check on middle post with both buttons
+        await page.goto("/blog/2026-09-21-bootstrapping-agentic-development");
+        const nav = page.locator(".blog-post-nav");
+        await expect(nav).toBeVisible();
+        await nav.scrollIntoViewIfNeeded();
+
+        const prevBtn = nav.locator(".blog-nav-prev");
+        const nextBtn = nav.locator(".blog-nav-next");
+
+        await expect(prevBtn).toBeVisible();
+        await expect(nextBtn).toBeVisible();
+        await expect(prevBtn).toContainText("Older post");
+        await expect(nextBtn).toContainText("Newer post");
+
+        // Mobile viewport check
+        await page.setViewportSize({ width: 375, height: 667 });
+        await nav.scrollIntoViewIfNeeded();
+        await expect(prevBtn).toBeVisible();
+        await expect(nextBtn).toBeVisible();
+
+        // Check buttons are side-by-side (same top offset roughly)
+        const prevBox = await prevBtn.boundingBox();
+        const nextBox = await nextBtn.boundingBox();
+        expect(prevBox).not.toBeNull();
+        expect(nextBox).not.toBeNull();
+        expect(Math.abs(prevBox.y - nextBox.y)).toBeLessThan(5);
+
+        // Single post button on newest post
+        await page.goto("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        const navSingle = page.locator(".blog-post-nav");
+        await expect(navSingle).toBeVisible();
+        await navSingle.scrollIntoViewIfNeeded();
+        await expect(navSingle.locator(".blog-nav-prev")).toBeVisible();
+        await expect(navSingle.locator(".blog-nav-next")).toHaveCount(0);
+    });
+
+    test("table of contents renders and links to heading sections", async ({ page }) => {
+        await page.goto("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        const toc = page.locator(".blog-toc");
+        await expect(toc).toBeVisible();
+        const tocLinks = toc.locator(".blog-toc-item a");
+        await expect(tocLinks).toHaveCount(4);
+
+        const firstHref = await tocLinks.first().getAttribute("href");
+        expect(firstHref).toBe("#the-architecture");
+        const targetHeading = page.locator(firstHref);
+        await expect(targetHeading).toBeVisible();
+
+        // If TOC is collapsed, open it first
+        if (!(await toc.evaluate(el => el.open))) {
+            await toc.locator("summary").click();
+        }
+
+        // Click TOC link and verify in-page scroll navigation without full route reload
+        await tocLinks.first().click();
+        await expect(page).toHaveURL("/blog/2026-09-24-migrating-from-microtastic-to-gofront#the-architecture");
+
+        // Verify page scrolled down towards the heading
+        await expect.poll(async () => {
+            return await page.evaluate(() => window.scrollY);
+        }).toBeGreaterThan(100);
+
+        // Verify content remained intact and was not unmounted/reset
+        await expect(page.locator(".blog-post-view")).toBeVisible();
+
+        // Click browser back and verify URL returns to /blog/2026-09-24-migrating-from-microtastic-to-gofront without breaking view
+        await page.goBack();
+        await expect(page).toHaveURL("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        await expect(page.locator(".blog-post-view")).toBeVisible();
+    });
+
+    test("templ code snippets receive Prism syntax highlighting tokens", async ({ page }) => {
+        await page.goto("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        const templCode = page.locator("pre code.language-templ");
+        await expect(templCode).toBeVisible();
+        await expect(templCode.locator(".token").first()).toBeVisible();
+    });
 });

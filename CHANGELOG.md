@@ -8,11 +8,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added
 
+- Mermaid diagrams: ```` ```mermaid ```` code fences in blog posts, pages and project READMEs render as SVG. Mermaid is lazy-loaded from jsDelivr (same on-demand pattern as EmailJS) only when a rendered page contains a diagram, so `vendor.js` is unchanged; diagrams re-render with the matching Mermaid theme when toggling light/dark.
+- Website enhancements ([plan](docs/plans/archive/website-enhancements-plan.md)): `npm run prod` now pre-generates a static `index.html` stub for every blog post, project, page and blog pagination route with accurate `<title>`, description, OpenGraph, Twitter Card and canonical tags, so link previews and crawlers get real metadata instead of the 404 redirect; the SPA keeps `<head>` in sync on client-side navigation (`updateRouteMeta`). Blog posts gained a collapsible table of contents (h2/h3 anchors, matched by heading text) and older/newer post links; project pages reuse the TOC for README sections plus Media/Demo/Links. `Ctrl+K` / `Cmd+K` and `/` open search (ignored inside inputs and while the contact modal is open). `.templ` code fences are highlighted via the Go grammar.
+- Build tooling: `npm run dev` now watches `app/data/content.yaml` and recompiles `content.json` on save; `npm run check` also runs `gofront src --check`; production CSS is minified and every emitted HTML file shares one content-hash `?v=` cache-busting version; `public/index.html` gets its site-level meta from `content.yaml` at build time; added `site.url` to `content.yaml`.
 - Added `bootstrap` project entry and blog post.
 - Initial release.
 
 ### Changed
 
+- EmailJS is no longer bundled into `vendor.js`; it is loaded on demand from jsdelivr (pinned to 4.4.1 with an SRI hash) when the contact modal opens, shrinking the vendor bundle by roughly a third. Preloaded `content.json` and the Raleway 400 font from `index.html`. Renamed `postFromYAML`/`projectFromYAML`/`pageFromYAML` to `*FromJSON` to match the data pipeline.
 - Modernized stylesheet: replaced 101vh scrollbar hack with standard `scrollbar-gutter: stable`, added `prefers-reduced-motion` accessibility query, enabled code copy buttons on touch devices via `@media (hover: none)`, unified hover/focus glow shadows with dynamic `--accent-glow`, added glassmorphic `backdrop-filter` blur to navbar, dropdowns, and modal overlay, and re-enabled Biome's `complexity.noImportantStyles` lint rule.
 - Renamed `staticAssets` to `publicAssets` in `package.json` and `scripts/build.js` to clearly distinguish production distribution sync (`app/` → `public/`) from vendor dependency asset extraction (`assetCopy`).
 - Fixed scrollbar disappearance and layout shift when opening the contact/email overlay by preserving viewport scrollbar and adding `overscroll-behavior: contain` to modal container.

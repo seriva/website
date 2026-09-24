@@ -12,13 +12,13 @@
 	"scripts": {
 		"prepare": "lefthook install && npm run prep",
 		"prep": "node scripts/build.js content && gofront prep",
-		"dev": "node scripts/build.js content && gofront src -o app/app.js --serve --port 8181",
+		"dev": "node scripts/build.js dev",
 		"prod": "npm run check && node scripts/build.js content && gofront prep --minify && gofront src -o public/app.js --minify --mangle && node scripts/build.js post",
 		"test:gofront": "gofront test src --dom",
 		"test:e2e": "playwright test",
 		"test:all": "npm run test:gofront && npm run test:e2e",
 		"format": "biome format --write .",
-		"check": "biome check ."
+		"check": "biome check . && gofront src --check"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.14",
@@ -43,7 +43,6 @@
 		],
 		"minify": true,
 		"packages": [
-			"@emailjs/browser",
 			"fuse.js",
 			"marked",
 			"prismjs",
@@ -52,9 +51,6 @@
 			"prismjs/components/prism-yaml.js"
 		],
 		"globals": {
-			"@emailjs/browser": [
-				"emailjs"
-			],
 			"fuse.js": [
 				"Fuse"
 			],
@@ -65,7 +61,6 @@
 	},
 	"publicAssets": [
 		"index.html",
-		"404.html",
 		"boot.js",
 		"favicon.svg",
 		"og-image.jpg",

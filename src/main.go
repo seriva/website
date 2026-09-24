@@ -63,7 +63,19 @@ func setupEvents() {
 				}
 				href := btn.getAttribute("href")
 				if href != nil && href != "" {
-					navigate(string(href))
+					hrefStr := string(href)
+					if strings.HasPrefix(hrefStr, "#") {
+						id := strings.TrimPrefix(hrefStr, "#")
+						if id != "" {
+							scrollToHash(hrefStr, true)
+							window.history.pushState(map[string]any{}, "", hrefStr)
+						} else {
+							window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
+							window.history.pushState(map[string]any{}, "", window.location.pathname)
+						}
+						return
+					}
+					navigate(hrefStr)
 				}
 			case "toggle-mobile-nav":
 				e.preventDefault()
@@ -135,12 +147,39 @@ func setupEvents() {
 			return
 		}
 
-		// Fallback SPA link interceptor: standard <a href="/...">
+		// Fallback SPA link interceptor: standard <a href="...">
 		link := target.closest("a")
 		if link != nil {
 			href := string(link.getAttribute("href"))
 			targetAttr := link.getAttribute("target")
-			if strings.HasPrefix(href, "/") && (targetAttr == nil || targetAttr == "") {
+			if targetAttr != nil && targetAttr != "" && targetAttr != "_self" {
+				return
+			}
+
+			// In-page anchor hash link (#the-architecture)
+			if strings.HasPrefix(href, "#") {
+				e.preventDefault()
+				id := strings.TrimPrefix(href, "#")
+				if id != "" {
+					scrollToHash(href, true)
+					window.history.pushState(map[string]any{}, "", href)
+				} else {
+					window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
+					window.history.pushState(map[string]any{}, "", window.location.pathname)
+				}
+				return
+			}
+
+			if strings.HasPrefix(href, "/") {
+				// Same-page anchor with full path: /blog/slug#the-architecture
+				if currentPath != "" && strings.HasPrefix(href, currentPath+"#") {
+					e.preventDefault()
+					hash := strings.TrimPrefix(href, currentPath)
+					scrollToHash(hash, true)
+					window.history.pushState(map[string]any{}, "", href)
+					return
+				}
+
 				e.preventDefault()
 				navigate(href)
 				return
@@ -179,14 +218,55 @@ func setupEvents() {
 		}
 	})
 
-	// Keydown for Escape
+	// Keydown for Escape and search shortcut (Cmd+K / Ctrl+K and /)
 	window.addEventListener("keydown", func(e any) {
-		if e.key == "Escape" {
+		key := strVal(e.key)
+		if key == "Escape" {
 			if searchOpen {
 				closeSearch()
 			}
 			if contactOpen {
 				closeContact()
+			}
+			return
+		}
+
+		if site.Search.Enabled && !contactOpen {
+			isCmdK := (boolVal(e.metaKey) || boolVal(e.ctrlKey)) && (key == "k" || key == "K")
+			isSlash := key == "/"
+
+			if isCmdK || isSlash {
+				target := e.target
+				tagName := ""
+				isEditable := false
+				if target != nil {
+					if target.tagName != nil {
+						tagName = strings.ToUpper(strVal(target.tagName))
+					}
+					if target.isContentEditable != nil {
+						isEditable = boolVal(target.isContentEditable)
+					}
+				}
+
+				inInput := tagName == "INPUT" || tagName == "TEXTAREA" || tagName == "SELECT" || isEditable
+
+				if isCmdK {
+					e.preventDefault()
+					if searchOpen {
+						closeSearch()
+					} else {
+						closeMobileMenu()
+						closeProjectsDropdown()
+						openSearch()
+					}
+				} else if isSlash && !inInput {
+					e.preventDefault()
+					if !searchOpen {
+						closeMobileMenu()
+						closeProjectsDropdown()
+						openSearch()
+					}
+				}
 			}
 		}
 	})
@@ -211,6 +291,16 @@ func setupEvents() {
 
 	// Popstate handler
 	window.addEventListener("popstate", func(e any) {
+		newPath := string(window.location.pathname)
+		if newPath == currentPath {
+			hash := string(window.location.hash)
+			if hash != "" {
+				scrollToHash(hash, true)
+			} else {
+				window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
+			}
+			return
+		}
 		handleRoute()
 	})
 }
@@ -224,7 +314,6 @@ async func main() {
 
 	initTheme()
 	initSearch()
-	initEmailJS()
 
 	// Shell is mounted once; routes and overlays re-render their own regions.
 	gom.Mount("#app", AppShell())

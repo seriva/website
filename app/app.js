@@ -126,13 +126,26 @@ class NavPage {
 
 // type LoadStatus = int
 
+class TOCItem {
+  constructor({ ID = "", Text = "", Level = 0 } = {}) {
+    this.ID = ID;
+    this.Text = Text;
+    this.Level = Level;
+  }
+}
+
 class ViewState {
-  constructor({ Post = new BlogPost(), Proj = new Project(), Page = new NavPage(), HTML = "", Status = null } = {}) {
+  constructor({ Post = new BlogPost(), Proj = new Project(), Page = new NavPage(), HTML = "", Status = null, HasPrev = false, PrevPost = new BlogPost(), HasNext = false, NextPost = new BlogPost(), TOC = null } = {}) {
     this.Post = Post;
     this.Proj = Proj;
     this.Page = Page;
     this.HTML = HTML;
     this.Status = Status;
+    this.HasPrev = HasPrev;
+    this.PrevPost = PrevPost;
+    this.HasNext = HasNext;
+    this.NextPost = NextPost;
+    this.TOC = TOC;
   }
 }
 
@@ -194,8 +207,9 @@ class SearchConfig {
 }
 
 class SiteConfig {
-  constructor({ Title = "", Description = "", Author = "", GithubUsername = "", DarkTheme = new ThemeColors(), LightTheme = new ThemeColors(), Comments = new CommentsConfig(), EmailJS = new EmailJSConfig(), Search = new SearchConfig(), Social = null, PostsPerPage = 0 } = {}) {
+  constructor({ Title = "", Url = "", Description = "", Author = "", GithubUsername = "", DarkTheme = new ThemeColors(), LightTheme = new ThemeColors(), Comments = new CommentsConfig(), EmailJS = new EmailJSConfig(), Search = new SearchConfig(), Social = null, PostsPerPage = 0 } = {}) {
     this.Title = Title;
+    this.Url = Url;
     this.Description = Description;
     this.Author = Author;
     this.GithubUsername = GithubUsername;
@@ -239,7 +253,9 @@ let contactClosing = false;
 
 let iconAliases = { "angle-double-left": "angles-left", "angle-double-right": "angles-right" };
 
-let icons = { "sun": new iconDef({ ViewBox: "0 0 512 512", Path: "M361.5 1.2c5 2.1 8.6 6.6 9.6 11.9L391 121l107.9 19.8c5.3 1 9.8 4.6 11.9 9.6s1.5 10.7-1.6 15.2L446.9 256l62.3 90.3c3.1 4.5 3.7 10.2 1.6 15.2s-6.6 8.6-11.9 9.6L391 391 371.1 498.9c-1 5.3-4.6 9.8-9.6 11.9s-10.7 1.5-15.2-1.6L256 446.9l-90.3 62.3c-4.5 3.1-10.2 3.7-15.2 1.6s-8.6-6.6-9.6-11.9L121 391 13.1 371.1c-5.3-1-9.8-4.6-11.9-9.6s-1.5-10.7 1.6-15.2L65.1 256 2.8 165.7c-3.1-4.5-3.7-10.2-1.6-15.2s6.6-8.6 11.9-9.6L121 121l19.8-107.9c1-5.3 4.6-9.8 9.6-11.9s10.7-1.5 15.2 1.6L256 65.1 346.3 2.8c4.5-3.1 10.2-3.7 15.2-1.6zM160 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z" }), "moon": new iconDef({ ViewBox: "0 0 384 512", Path: "M223.5 32C100 32 0 132.3 0 256S100 480 223.5 480c60.6 0 115.5-24.2 155.8-63.4c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6c-96.9 0-175.5-78.8-175.5-176c0-65.8 36-123.1 89.3-153.3c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z" }), "search": new iconDef({ ViewBox: "0 0 512 512", Path: "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" }), "envelope": new iconDef({ ViewBox: "0 0 512 512", Path: "M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" }), "download": new iconDef({ ViewBox: "0 0 512 512", Path: "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H64zm280 60a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" }), "cube": new iconDef({ ViewBox: "0 0 512 512", Path: "M234.5 5.7c13.9-5 29.1-5 43.1 0l192 68.6C495 83.4 512 107.5 512 134.6V377.4c0 27-17 51.2-42.5 60.3l-192 68.6c-13.9 5-29.1 5-43.1 0l-192-68.6C17 428.6 0 404.5 0 377.4V134.6c0-27 17-51.2 42.5-60.3l192-68.6zM256 66L82.3 128 256 190l173.7-62L256 66zm32 368.6l192-68.6V135.4L288 204v230.6z" }), "calendar": new iconDef({ ViewBox: "0 0 448 512", Path: "M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z" }), "github": new iconDef({ ViewBox: "0 0 496 512", Path: "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3 .3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5 .3-6.2 2.3zm44.2-1.7c-2.9 .7-4.9 2.6-4.6 4.9 .3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 21 2.3-16.8 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3 .7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3 .3 2.9 2.3 3.9 1.6 1 3.6 .7 4.3-.7 .7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3 .7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3 .7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z" }), "youtube": new iconDef({ ViewBox: "0 0 576 512", Path: "M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z" }), "linkedin": new iconDef({ ViewBox: "0 0 448 512", Path: "M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z" }), "chevron-down": new iconDef({ ViewBox: "0 0 512 512", Path: "M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" }), "chevron-up": new iconDef({ ViewBox: "0 0 512 512", Path: "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8-12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z" }), "chevron-left": new iconDef({ ViewBox: "0 0 320 512", Path: "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z" }), "chevron-right": new iconDef({ ViewBox: "0 0 320 512", Path: "M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" }), "angles-left": new iconDef({ ViewBox: "0 0 512 512", Path: "M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160zm352-160l-160 160c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L301.3 256 438.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0z" }), "angles-right": new iconDef({ ViewBox: "0 0 512 512", Path: "M470.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 256 265.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160zm-352 160l160-160c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L210.7 256 73.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z" }), "times": new iconDef({ ViewBox: "0 0 384 512", Path: "M324.5 411.1c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6L214.6 256 347.1 123.5c6.2-6.2 6.2-16.4 0-22.6s-16.4-6.2-22.6 0L192 233.4 59.5 100.9c-6.2-6.2-16.4-6.2-22.6 0s-6.2 16.4 0 22.6L169.4 256 36.9 388.5c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L192 278.6 324.5 411.1z" }), "arrow-left": new iconDef({ ViewBox: "0 0 448 512", Path: "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z" }), "expand": new iconDef({ ViewBox: "0 0 448 512", Path: "M32 32C14.3 32 0 46.3 0 64v96c0 17.7 14.3 32 32 32s32-14.3 32-32V96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H32zM64 352c0-17.7-14.3-32-32-32S0 334.3 0 352v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V352zM352 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h64v64c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H352zM320 352c0-17.7 14.3-32 32-32s32 14.3 32 32v64h64c17.7 0 32 14.3 32 32s-14.3 32-32 32H384c-17.7 0-32-14.3-32-32V352z" }) };
+let icons = { "sun": new iconDef({ ViewBox: "0 0 512 512", Path: "M361.5 1.2c5 2.1 8.6 6.6 9.6 11.9L391 121l107.9 19.8c5.3 1 9.8 4.6 11.9 9.6s1.5 10.7-1.6 15.2L446.9 256l62.3 90.3c3.1 4.5 3.7 10.2 1.6 15.2s-6.6 8.6-11.9 9.6L391 391 371.1 498.9c-1 5.3-4.6 9.8-9.6 11.9s-10.7 1.5-15.2-1.6L256 446.9l-90.3 62.3c-4.5 3.1-10.2 3.7-15.2 1.6s-8.6-6.6-9.6-11.9L121 391 13.1 371.1c-5.3-1-9.8-4.6-11.9-9.6s-1.5-10.7 1.6-15.2L65.1 256 2.8 165.7c-3.1-4.5-3.7-10.2-1.6-15.2s6.6-8.6 11.9-9.6L121 121l19.8-107.9c1-5.3 4.6-9.8 9.6-11.9s10.7-1.5 15.2 1.6L256 65.1 346.3 2.8c4.5-3.1 10.2-3.7 15.2-1.6zM160 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z" }), "moon": new iconDef({ ViewBox: "0 0 384 512", Path: "M223.5 32C100 32 0 132.3 0 256S100 480 223.5 480c60.6 0 115.5-24.2 155.8-63.4c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6c-96.9 0-175.5-78.8-175.5-176c0-65.8 36-123.1 89.3-153.3c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z" }), "search": new iconDef({ ViewBox: "0 0 512 512", Path: "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" }), "envelope": new iconDef({ ViewBox: "0 0 512 512", Path: "M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" }), "download": new iconDef({ ViewBox: "0 0 512 512", Path: "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H64zm280 60a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" }), "cube": new iconDef({ ViewBox: "0 0 512 512", Path: "M234.5 5.7c13.9-5 29.1-5 43.1 0l192 68.6C495 83.4 512 107.5 512 134.6V377.4c0 27-17 51.2-42.5 60.3l-192 68.6c-13.9 5-29.1 5-43.1 0l-192-68.6C17 428.6 0 404.5 0 377.4V134.6c0-27 17-51.2 42.5-60.3l192-68.6zM256 66L82.3 128 256 190l173.7-62L256 66zm32 368.6l192-68.6V135.4L288 204v230.6z" }), "calendar": new iconDef({ ViewBox: "0 0 448 512", Path: "M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z" }), "github": new iconDef({ ViewBox: "0 0 496 512", Path: "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3 .3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5 .3-6.2 2.3zm44.2-1.7c-2.9 .7-4.9 2.6-4.6 4.9 .3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 21 2.3-16.8 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3 .7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3 .3 2.9 2.3 3.9 1.6 1 3.6 .7 4.3-.7 .7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3 .7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3 .7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z" }), "youtube": new iconDef({ ViewBox: "0 0 576 512", Path: "M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z" }), "linkedin": new iconDef({ ViewBox: "0 0 448 512", Path: "M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z" }), "chevron-down": new iconDef({ ViewBox: "0 0 512 512", Path: "M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" }), "chevron-up": new iconDef({ ViewBox: "0 0 512 512", Path: "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8-12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z" }), "chevron-left": new iconDef({ ViewBox: "0 0 320 512", Path: "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z" }), "chevron-right": new iconDef({ ViewBox: "0 0 320 512", Path: "M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" }), "angles-left": new iconDef({ ViewBox: "0 0 512 512", Path: "M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160zm352-160l-160 160c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L301.3 256 438.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0z" }), "angles-right": new iconDef({ ViewBox: "0 0 512 512", Path: "M470.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 256 265.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160zm-352 160l160-160c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L210.7 256 73.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z" }), "times": new iconDef({ ViewBox: "0 0 384 512", Path: "M324.5 411.1c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6L214.6 256 347.1 123.5c6.2-6.2 6.2-16.4 0-22.6s-16.4-6.2-22.6 0L192 233.4 59.5 100.9c-6.2-6.2-16.4-6.2-22.6 0s-6.2 16.4 0 22.6L169.4 256 36.9 388.5c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L192 278.6 324.5 411.1z" }), "arrow-left": new iconDef({ ViewBox: "0 0 448 512", Path: "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z" }), "arrow-right": new iconDef({ ViewBox: "0 0 448 512", Path: "M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" }), "expand": new iconDef({ ViewBox: "0 0 448 512", Path: "M32 32C14.3 32 0 46.3 0 64v96c0 17.7 14.3 32 32 32s32-14.3 32-32V96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H32zM64 352c0-17.7-14.3-32-32-32S0 334.3 0 352v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V352zM352 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h64v64c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H352zM320 352c0-17.7 14.3-32 32-32s32 14.3 32 32v64h64c17.7 0 32 14.3 32 32s-14.3 32-32 32H384c-17.7 0-32-14.3-32-32V352z" }) };
+
+let currentPath = "";
 
 let isInitialRoute = true;
 
@@ -283,7 +299,11 @@ let view = new ViewState();
 
 let readmeCache = {  };
 
+let readmeTOCCache = {  };
+
 let postHtmlCache = {  };
+
+let postTOCCache = {  };
 
 let pageHtmlCache = {  };
 
@@ -487,54 +507,115 @@ function BlogList(allPosts, currentPage, perPage) {
   }};
 }
 
+function TableOfContents(items) {
+  return {Mount(___p) {
+    if (__len(items) >= 2) {
+      const ___e29 = document.createElement("details");
+      ___e29.className = "blog-toc";
+      const ___e30 = document.createElement("summary");
+      ___e30.className = "blog-toc-title";
+      ___e30.appendChild(document.createTextNode(String(t("blog.tableOfContents"))));
+      ___e29.appendChild(___e30);
+      const ___e31 = document.createElement("nav");
+      ___e31.className = "blog-toc-nav";
+      ___e31.setAttribute("aria-label", String(t("blog.tableOfContents")));
+      const ___e32 = document.createElement("ul");
+      ___e32.className = "blog-toc-list";
+      for (const item of items) {
+        const ___e33 = document.createElement("li");
+        ___e33.className = tocItemClass(item.Level);
+        const ___e34 = document.createElement("a");
+        ___e34.setAttribute("href", String("#" + item.ID));
+        ___e34.appendChild(document.createTextNode(String(item.Text)));
+        ___e33.appendChild(___e34);
+        ___e32.appendChild(___e33);
+      }
+      ___e31.appendChild(___e32);
+      ___e29.appendChild(___e31);
+      ___p.appendChild(___e29);
+    }
+  }};
+}
+
 function BlogPostView(v, commentsEnabled) {
   return {Mount(___p) {
     if (v.Status === LoadNotFound || v.Status === LoadFailed) {
-      const ___e29 = document.createElement("div");
-      ___e29.className = "error-message";
-      const ___e30 = document.createElement("h1");
-      ___e30.appendChild(document.createTextNode(String(t("general.blogNotFound"))));
-      ___e29.appendChild(___e30);
-      const ___e31 = document.createElement("p");
-      ___e31.appendChild(document.createTextNode(String(t("general.blogNotFoundMessage"))));
-      ___e29.appendChild(___e31);
-      ___p.appendChild(___e29);
+      const ___e35 = document.createElement("div");
+      ___e35.className = "error-message";
+      const ___e36 = document.createElement("h1");
+      ___e36.appendChild(document.createTextNode(String(t("general.blogNotFound"))));
+      ___e35.appendChild(___e36);
+      const ___e37 = document.createElement("p");
+      ___e37.appendChild(document.createTextNode(String(t("general.blogNotFoundMessage"))));
+      ___e35.appendChild(___e37);
+      ___p.appendChild(___e35);
     } else {
-      const ___e32 = document.createElement("div");
-      ___e32.className = "blog-post-view";
-      const ___e33 = document.createElement("h1");
-      ___e33.className = "project-title";
-      ___e33.appendChild(document.createTextNode(String(v.Post.Title)));
-      ___e32.appendChild(___e33);
-      const ___e34 = document.createElement("p");
-      ___e34.className = "project-description";
-      ___e34.appendChild(document.createTextNode(String(v.Post.Date)));
-      ___e32.appendChild(___e34);
-      if (__len(v.Post.Tags) > 0) {
-        const ___e35 = document.createElement("div");
-        ___e35.className = "project-tags";
-        for (const tag of v.Post.Tags) {
-          const ___e36 = document.createElement("span");
-          ___e36.className = "item-tag clickable-tag";
-          ___e36.setAttribute("data-search-tag", String(tag));
-          ___e36.appendChild(document.createTextNode(String(tag)));
-          ___e35.appendChild(___e36);
-        }
-        ___e32.appendChild(___e35);
-      }
-      const ___e37 = document.createElement("div");
-      ___e37.className = "blog-post-content";
       const ___e38 = document.createElement("div");
-      ___e38.className = "markdown-body";
-      ___e38.insertAdjacentHTML("beforeend", v.HTML);
-      ___e37.appendChild(___e38);
-      ___e32.appendChild(___e37);
-      if (commentsEnabled) {
-        const ___e39 = document.createElement("div");
-        ___e39.className = "giscus-container";
-        ___e32.appendChild(___e39);
+      ___e38.className = "blog-post-view";
+      const ___e39 = document.createElement("h1");
+      ___e39.className = "project-title";
+      ___e39.appendChild(document.createTextNode(String(v.Post.Title)));
+      ___e38.appendChild(___e39);
+      const ___e40 = document.createElement("p");
+      ___e40.className = "project-description";
+      ___e40.appendChild(document.createTextNode(String(v.Post.Date)));
+      ___e38.appendChild(___e40);
+      if (__len(v.Post.Tags) > 0) {
+        const ___e41 = document.createElement("div");
+        ___e41.className = "project-tags";
+        for (const tag of v.Post.Tags) {
+          const ___e42 = document.createElement("span");
+          ___e42.className = "item-tag clickable-tag";
+          ___e42.setAttribute("data-search-tag", String(tag));
+          ___e42.appendChild(document.createTextNode(String(tag)));
+          ___e41.appendChild(___e42);
+        }
+        ___e38.appendChild(___e41);
       }
-      ___p.appendChild(___e32);
+      (TableOfContents(v.TOC)).Mount(___e38);
+      const ___e43 = document.createElement("div");
+      ___e43.className = "blog-post-content";
+      const ___e44 = document.createElement("div");
+      ___e44.className = "markdown-body";
+      ___e44.insertAdjacentHTML("beforeend", v.HTML);
+      ___e43.appendChild(___e44);
+      ___e38.appendChild(___e43);
+      if (v.HasPrev || v.HasNext) {
+        const ___e45 = document.createElement("nav");
+        ___e45.className = "download-buttons blog-post-nav";
+        ___e45.setAttribute("aria-label", "Post navigation");
+        if (v.HasPrev) {
+          const ___e46 = document.createElement("a");
+          ___e46.setAttribute("href", String(v.PrevPost.Href));
+          ___e46.className = "download-btn blog-nav-prev";
+          ___e46.setAttribute("data-action", "nav");
+          ___e46.setAttribute("title", String(v.PrevPost.Title));
+          (Icon("arrow-left", "1rem")).Mount(___e46);
+          const ___e47 = document.createElement("span");
+          ___e47.appendChild(document.createTextNode(String(t("blog.previousPost"))));
+          ___e46.appendChild(___e47);
+          ___e45.appendChild(___e46);
+        }
+        if (v.HasNext) {
+          const ___e48 = document.createElement("a");
+          ___e48.setAttribute("href", String(v.NextPost.Href));
+          ___e48.className = "download-btn blog-nav-next";
+          ___e48.setAttribute("data-action", "nav");
+          ___e48.setAttribute("title", String(v.NextPost.Title));
+          const ___e49 = document.createElement("span");
+          ___e49.appendChild(document.createTextNode(String(t("blog.nextPost"))));
+          ___e48.appendChild(___e49);
+          (Icon("arrow-right", "1rem")).Mount(___e48);
+          ___e45.appendChild(___e48);
+        }
+        ___e38.appendChild(___e45);
+      }
+      if (commentsEnabled) {
+        const ___e50 = document.createElement("div");
+        ___e50.className = "giscus-container";
+        ___e38.appendChild(___e50);
+      }
+      ___p.appendChild(___e38);
     }
   }};
 }
@@ -583,118 +664,142 @@ function updateGiscusTheme() {
 
 function ContactFormFields(form) {
   return {Mount(___p) {
-    const ___e40 = document.createElement("div");
-    ___e40.className = "form-group";
-    const ___e41 = document.createElement("label");
-    ___e41.setAttribute("for", "contact-name");
-    ___e41.appendChild(document.createTextNode(String(t("contact.name"))));
-    ___e41.appendChild(document.createTextNode("*"));
-    ___e40.appendChild(___e41);
-    const ___e42 = document.createElement("input");
-    ___e42.setAttribute("type", "text");
-    ___e42.setAttribute("id", "contact-name");
-    ___e42.setAttribute("name", "name");
-    ___e42.setAttribute("required", "");
-    ___e42.className = inputErrorClass(form.ErrName);
-    ___e42.setAttribute("aria-invalid", String(String(form.ErrName)));
-    ___e42.setAttribute("value", String(form.Name));
-    ___e40.appendChild(___e42);
-    ___p.appendChild(___e40);
-    const ___e43 = document.createElement("div");
-    ___e43.className = "form-group";
-    const ___e44 = document.createElement("label");
-    ___e44.setAttribute("for", "contact-email");
-    ___e44.appendChild(document.createTextNode(String(t("contact.email"))));
-    ___e44.appendChild(document.createTextNode("*"));
-    ___e43.appendChild(___e44);
-    const ___e45 = document.createElement("input");
-    ___e45.setAttribute("type", "email");
-    ___e45.setAttribute("id", "contact-email");
-    ___e45.setAttribute("name", "email");
-    ___e45.setAttribute("required", "");
-    ___e45.className = inputErrorClass(form.ErrEmail);
-    ___e45.setAttribute("aria-invalid", String(String(form.ErrEmail)));
-    ___e45.setAttribute("value", String(form.Email));
-    ___e43.appendChild(___e45);
-    ___p.appendChild(___e43);
-    const ___e46 = document.createElement("div");
-    ___e46.className = "form-group";
-    const ___e47 = document.createElement("label");
-    ___e47.setAttribute("for", "contact-message");
-    ___e47.appendChild(document.createTextNode(String(t("contact.message"))));
-    ___e47.appendChild(document.createTextNode("*"));
-    ___e46.appendChild(___e47);
-    const ___e48 = document.createElement("textarea");
-    ___e48.setAttribute("id", "contact-message");
-    ___e48.setAttribute("name", "message");
-    ___e48.setAttribute("rows", "6");
-    ___e48.setAttribute("required", "");
-    ___e48.className = inputErrorClass(form.ErrMessage);
-    ___e48.setAttribute("aria-invalid", String(String(form.ErrMessage)));
-    ___e48.appendChild(document.createTextNode(String(form.Message)));
-    ___e46.appendChild(___e48);
-    ___p.appendChild(___e46);
-    const ___e49 = document.createElement("div");
-    ___e49.className = formStatusClass(form.StatusType);
-    ___e49.setAttribute("id", "contact-status");
-    ___e49.setAttribute("aria-live", "polite");
-    const ___e50 = document.createElement("span");
-    ___e50.appendChild(document.createTextNode(String(form.StatusText)));
-    ___e49.appendChild(___e50);
-    ___p.appendChild(___e49);
-    const ___e51 = document.createElement("button");
-    ___e51.setAttribute("type", "submit");
-    ___e51.className = "btn btn-primary";
-    ___e51.setAttribute("id", "contact-submit");
-    if(form.ButtonDisabled)___e51.setAttribute("disabled", "");
-    ___e51.appendChild(document.createTextNode(String(t("contact." + form.ButtonState))));
+    const ___e51 = document.createElement("div");
+    ___e51.className = "form-group";
+    const ___e52 = document.createElement("label");
+    ___e52.setAttribute("for", "contact-name");
+    ___e52.appendChild(document.createTextNode(String(t("contact.name"))));
+    ___e52.appendChild(document.createTextNode("*"));
+    ___e51.appendChild(___e52);
+    const ___e53 = document.createElement("input");
+    ___e53.setAttribute("type", "text");
+    ___e53.setAttribute("id", "contact-name");
+    ___e53.setAttribute("name", "name");
+    ___e53.setAttribute("required", "");
+    ___e53.className = inputErrorClass(form.ErrName);
+    ___e53.setAttribute("aria-invalid", String(String(form.ErrName)));
+    ___e53.setAttribute("value", String(form.Name));
+    ___e51.appendChild(___e53);
     ___p.appendChild(___e51);
+    const ___e54 = document.createElement("div");
+    ___e54.className = "form-group";
+    const ___e55 = document.createElement("label");
+    ___e55.setAttribute("for", "contact-email");
+    ___e55.appendChild(document.createTextNode(String(t("contact.email"))));
+    ___e55.appendChild(document.createTextNode("*"));
+    ___e54.appendChild(___e55);
+    const ___e56 = document.createElement("input");
+    ___e56.setAttribute("type", "email");
+    ___e56.setAttribute("id", "contact-email");
+    ___e56.setAttribute("name", "email");
+    ___e56.setAttribute("required", "");
+    ___e56.className = inputErrorClass(form.ErrEmail);
+    ___e56.setAttribute("aria-invalid", String(String(form.ErrEmail)));
+    ___e56.setAttribute("value", String(form.Email));
+    ___e54.appendChild(___e56);
+    ___p.appendChild(___e54);
+    const ___e57 = document.createElement("div");
+    ___e57.className = "form-group";
+    const ___e58 = document.createElement("label");
+    ___e58.setAttribute("for", "contact-message");
+    ___e58.appendChild(document.createTextNode(String(t("contact.message"))));
+    ___e58.appendChild(document.createTextNode("*"));
+    ___e57.appendChild(___e58);
+    const ___e59 = document.createElement("textarea");
+    ___e59.setAttribute("id", "contact-message");
+    ___e59.setAttribute("name", "message");
+    ___e59.setAttribute("rows", "6");
+    ___e59.setAttribute("required", "");
+    ___e59.className = inputErrorClass(form.ErrMessage);
+    ___e59.setAttribute("aria-invalid", String(String(form.ErrMessage)));
+    ___e59.appendChild(document.createTextNode(String(form.Message)));
+    ___e57.appendChild(___e59);
+    ___p.appendChild(___e57);
+    const ___e60 = document.createElement("div");
+    ___e60.className = formStatusClass(form.StatusType);
+    ___e60.setAttribute("id", "contact-status");
+    ___e60.setAttribute("aria-live", "polite");
+    const ___e61 = document.createElement("span");
+    ___e61.appendChild(document.createTextNode(String(form.StatusText)));
+    ___e60.appendChild(___e61);
+    ___p.appendChild(___e60);
+    const ___e62 = document.createElement("button");
+    ___e62.setAttribute("type", "submit");
+    ___e62.className = "btn btn-primary";
+    ___e62.setAttribute("id", "contact-submit");
+    if(form.ButtonDisabled)___e62.setAttribute("disabled", "");
+    ___e62.appendChild(document.createTextNode(String(t("contact." + form.ButtonState))));
+    ___p.appendChild(___e62);
   }};
 }
 
 function ContactModal(open, closing, form) {
   return {Mount(___p) {
-    const ___e52 = document.createElement("div");
-    ___e52.setAttribute("id", "contact-modal");
-    ___e52.className = overlayClass(open, closing);
-    ___e52.setAttribute("role", "dialog");
-    ___e52.setAttribute("aria-modal", "true");
-    ___e52.setAttribute("aria-labelledby", "contact-modal-title");
-    const ___e53 = document.createElement("div");
-    ___e53.className = "contact-modal-content";
-    const ___e54 = document.createElement("div");
-    ___e54.className = "contact-modal-header";
-    const ___e55 = document.createElement("h2");
-    ___e55.setAttribute("id", "contact-modal-title");
-    ___e55.appendChild(document.createTextNode(String(t("contact.title"))));
-    ___e54.appendChild(___e55);
-    const ___e56 = document.createElement("button");
-    ___e56.setAttribute("type", "button");
-    ___e56.className = "contact-modal-close";
-    ___e56.setAttribute("id", "contact-modal-close");
-    ___e56.setAttribute("aria-label", String(t("contact.close")));
-    ___e56.setAttribute("data-action", "close-contact");
-    (Icon("times", "1.2rem")).Mount(___e56);
-    ___e54.appendChild(___e56);
-    ___e53.appendChild(___e54);
-    const ___e57 = document.createElement("form");
-    ___e57.className = "contact-form";
-    ___e57.setAttribute("id", "contact-form");
-    ___e57.setAttribute("novalidate", "");
-    (ContactFormFields(form)).Mount(___e57);
-    ___e53.appendChild(___e57);
-    ___e52.appendChild(___e53);
-    ___p.appendChild(___e52);
+    const ___e63 = document.createElement("div");
+    ___e63.setAttribute("id", "contact-modal");
+    ___e63.className = overlayClass(open, closing);
+    ___e63.setAttribute("role", "dialog");
+    ___e63.setAttribute("aria-modal", "true");
+    ___e63.setAttribute("aria-labelledby", "contact-modal-title");
+    const ___e64 = document.createElement("div");
+    ___e64.className = "contact-modal-content";
+    const ___e65 = document.createElement("div");
+    ___e65.className = "contact-modal-header";
+    const ___e66 = document.createElement("h2");
+    ___e66.setAttribute("id", "contact-modal-title");
+    ___e66.appendChild(document.createTextNode(String(t("contact.title"))));
+    ___e65.appendChild(___e66);
+    const ___e67 = document.createElement("button");
+    ___e67.setAttribute("type", "button");
+    ___e67.className = "contact-modal-close";
+    ___e67.setAttribute("id", "contact-modal-close");
+    ___e67.setAttribute("aria-label", String(t("contact.close")));
+    ___e67.setAttribute("data-action", "close-contact");
+    (Icon("times", "1.2rem")).Mount(___e67);
+    ___e65.appendChild(___e67);
+    ___e64.appendChild(___e65);
+    const ___e68 = document.createElement("form");
+    ___e68.className = "contact-form";
+    ___e68.setAttribute("id", "contact-form");
+    ___e68.setAttribute("novalidate", "");
+    (ContactFormFields(form)).Mount(___e68);
+    ___e64.appendChild(___e68);
+    ___e63.appendChild(___e64);
+    ___p.appendChild(___e63);
   }};
 }
 
 function initEmailJS() {
-  if (site.EmailJS.Enabled && site.EmailJS.PublicKey !== "") {
+  if (site.EmailJS.Enabled && site.EmailJS.PublicKey !== "" && window.emailjs != null) {
     emailjs.init(site.EmailJS.PublicKey);
   }
 }
 
+async function preloadEmailJS() {
+  const __defers = [];
+  let __panic = null;
+  try {
+    __defers.push(() => { (function() {
+      {
+        let r = (typeof __panic !== "undefined" && __panic !== null ? (() => { const __r = __panic.message ?? String(__panic); __panic = null; return __r; })() : null);
+        if (r != null) {
+          console.warn("EmailJS preload failed:", r);
+        }
+      }
+    })(); });
+    await loadEmailJS();
+  } catch (__err) {
+    __panic = __err;
+  } finally {
+    for (let __i = __defers.length - 1; __i >= 0; __i--) __defers[__i]();
+    if (__panic !== null) throw __panic;
+  }
+}
+
 function openContact() {
+  if (site.EmailJS.Enabled) {
+    preloadEmailJS();
+  }
   contactOpen = true;
   contactClosing = false;
   contactForm = new ContactState({ ButtonState: "send" });
@@ -814,6 +919,8 @@ async function submitContact() {
         }
       }
     })(); });
+    await loadEmailJS();
+    initEmailJS();
     await emailjs.send(site.EmailJS.ServiceId, site.EmailJS.TemplateId, params, site.EmailJS.PublicKey);
     contactForm.StatusText = t("contact.success");
     contactForm.StatusType = "success";
@@ -832,9 +939,9 @@ async function submitContact() {
 
 function Footer(year, author) {
   return {Mount(___p) {
-    const ___e58 = document.createElement("footer");
-    ___e58.appendChild(document.createTextNode(String(__sprintf("© %d %s. %s.", year, author, t("footer.rights")))));
-    ___p.appendChild(___e58);
+    const ___e69 = document.createElement("footer");
+    ___e69.appendChild(document.createTextNode(String(__sprintf("© %d %s. %s.", year, author, t("footer.rights")))));
+    ___p.appendChild(___e69);
   }};
 }
 
@@ -916,7 +1023,19 @@ function setupEvents() {
           }
           let href = btn.getAttribute("href");
           if (href != null && href !== "") {
-            navigate(String(href));
+            let hrefStr = String(href);
+            if (hrefStr.startsWith("#")) {
+              let id = ((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(hrefStr, "#");
+              if (id !== "") {
+                scrollToHash(hrefStr, true);
+                window.history.pushState({  }, "", hrefStr);
+              } else {
+                window.scrollTo({ "top": 0, "left": 0, "behavior": "smooth" });
+                window.history.pushState({  }, "", window.location.pathname);
+              }
+              return;
+            }
+            navigate(hrefStr);
           }
           break;
         }
@@ -1026,7 +1145,29 @@ function setupEvents() {
     if (link != null) {
       let href = String(link.getAttribute("href"));
       let targetAttr = link.getAttribute("target");
-      if (href.startsWith("/") && targetAttr == null || targetAttr === "") {
+      if (targetAttr != null && targetAttr !== "" && targetAttr !== "_self") {
+        return;
+      }
+      if (href.startsWith("#")) {
+        e.preventDefault();
+        let id = ((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(href, "#");
+        if (id !== "") {
+          scrollToHash(href, true);
+          window.history.pushState({  }, "", href);
+        } else {
+          window.scrollTo({ "top": 0, "left": 0, "behavior": "smooth" });
+          window.history.pushState({  }, "", window.location.pathname);
+        }
+        return;
+      }
+      if (href.startsWith("/")) {
+        if (currentPath !== "" && href.startsWith(currentPath + "#")) {
+          e.preventDefault();
+          let hash = ((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(href, currentPath);
+          scrollToHash(hash, true);
+          window.history.pushState({  }, "", href);
+          return;
+        }
         e.preventDefault();
         navigate(href);
         return;
@@ -1057,12 +1198,49 @@ function setupEvents() {
     }
   });
   window.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") {
+    let key = strVal(e.key);
+    if (key === "Escape") {
       if (searchOpen) {
         closeSearch();
       }
       if (contactOpen) {
         closeContact();
+      }
+      return;
+    }
+    if (site.Search.Enabled && !contactOpen) {
+      let isCmdK = boolVal(e.metaKey) || boolVal(e.ctrlKey) && key === "k" || key === "K";
+      let isSlash = key === "/";
+      if (isCmdK || isSlash) {
+        let target = e.target;
+        let tagName = "";
+        let isEditable = false;
+        if (target != null) {
+          if (target.tagName != null) {
+            tagName = strVal(target.tagName).toUpperCase();
+          }
+          if (target.isContentEditable != null) {
+            isEditable = boolVal(target.isContentEditable);
+          }
+        }
+        let inInput = tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT" || isEditable;
+        if (isCmdK) {
+          e.preventDefault();
+          if (searchOpen) {
+            closeSearch();
+          } else {
+            closeMobileMenu();
+            closeProjectsDropdown();
+            openSearch();
+          }
+        } else if (isSlash && !inInput) {
+          e.preventDefault();
+          if (!searchOpen) {
+            closeMobileMenu();
+            closeProjectsDropdown();
+            openSearch();
+          }
+        }
       }
     }
   });
@@ -1082,6 +1260,16 @@ function setupEvents() {
     }
   });
   window.addEventListener("popstate", function(e) {
+    let newPath = String(window.location.pathname);
+    if (newPath === currentPath) {
+      let hash = String(window.location.hash);
+      if (hash !== "") {
+        scrollToHash(hash, true);
+      } else {
+        window.scrollTo({ "top": 0, "left": 0, "behavior": "smooth" });
+      }
+      return;
+    }
     handleRoute();
   });
 }
@@ -1094,11 +1282,189 @@ async function main() {
   }
   initTheme();
   initSearch();
-  initEmailJS();
   ((sel,n)=>{const e=document.querySelector(sel);e.innerHTML="";n.Mount(e)})("#app",AppShell());
   setupEvents();
   await handleRoute();
   document.body.classList.add("app-ready");
+}
+
+function slugify(text) {
+  text = text.trim().toLowerCase();
+  let b = { _buf: "" };
+  for (let i = 0; i < __len(text); i++) {
+    let c = text.charCodeAt(i);
+    if (c >= 97 && c <= 122 || c >= 48 && c <= 57) {
+      (b._buf += String.fromCodePoint(c));
+    } else if (c === 32 || c === 45 || c === 95) {
+      if (b._buf.length > 0 && b._buf.charCodeAt(b._buf.length - 1) !== 45) {
+        (b._buf += String.fromCodePoint(45));
+      }
+    }
+  }
+  let res = b._buf.replace(new RegExp(`^[${"-"}]+|[${"-"}]+$`, "g"), "");
+  if (res === "") {
+    res = "section";
+  }
+  return res;
+}
+
+function cleanHeadingText(text) {
+  text = text.trim();
+  text = text.replace(new RegExp(`[${"#"}]+$`), "");
+  text = text.trim();
+  let b = { _buf: "" };
+  let i = 0;
+  while (i < __len(text)) {
+    let c = text.charCodeAt(i);
+    switch (true) {
+      case c === 96 || c === 42 || c === 91:
+      {
+        i++;
+        break;
+      }
+      case c === 93:
+      {
+        i++;
+        if (i < __len(text) && text.charCodeAt(i) === 40) {
+          {
+            let end = (text.slice(i)).indexOf(String.fromCharCode(41));
+            if (end !== -1) {
+              i += end + 1;
+            }
+          }
+        }
+        break;
+      }
+      default:
+      {
+        (b._buf += String.fromCodePoint(c));
+        i++;
+        break;
+      }
+    }
+  }
+  return b._buf.trim();
+}
+
+function extractTOC(markdown) {
+  let items = [];
+  if (markdown === "") {
+    return items;
+  }
+  let lines = markdown.split("\n");
+  let inCode = false;
+  let slugCounts = {  };
+  for (const [_$, line] of __s(lines).entries()) {
+    let trimmed = line.trim();
+    if (trimmed.startsWith("```") || trimmed.startsWith("~~~")) {
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) {
+      continue;
+    }
+    let level = 0;
+    let headingText = "";
+    if (trimmed.startsWith("## ")) {
+      level = 2;
+      headingText = cleanHeadingText(trimmed.slice(3));
+    } else if (trimmed.startsWith("### ")) {
+      level = 3;
+      headingText = cleanHeadingText(trimmed.slice(4));
+    }
+    if (level > 0 && headingText !== "") {
+      let slug = slugify(headingText);
+      let id = slug;
+      {
+        let count = slugCounts[slug];
+        let ok = (slug) in slugCounts;
+        if (ok) {
+          id = slug + "-" + String(count);
+          slugCounts[slug] = count + 1;
+        } else {
+          slugCounts[slug] = 1;
+        }
+      }
+      items = __append(items, new TOCItem({ ID: id, Text: headingText, Level: level }));
+    }
+  }
+  return items;
+}
+
+function extractProjectTOC(markdown, p) {
+  let items = extractTOC(markdown);
+  if (__len(p.YoutubeVideos) > 0) {
+    items = __append(items, new TOCItem({ ID: "project-media", Text: t("project.media"), Level: 2 }));
+  }
+  if (p.DemoUrl !== "") {
+    items = __append(items, new TOCItem({ ID: "project-demo", Text: demoLabel(p), Level: 2 }));
+  }
+  if (__len(p.Links) > 0) {
+    items = __append(items, new TOCItem({ ID: "project-links", Text: t("project.links"), Level: 2 }));
+  }
+  return items;
+}
+
+function headingTextKey(inner) {
+  let b = { _buf: "" };
+  let inTag = false;
+  for (let i = 0; i < __len(inner); i++) {
+    let c = inner.charCodeAt(i);
+    if (c === 60) {
+      inTag = true;
+      continue;
+    }
+    if (c === 62) {
+      inTag = false;
+      continue;
+    }
+    if (!inTag) {
+      (b._buf += String.fromCodePoint(c));
+    }
+  }
+  let text = b._buf;
+  text = text.replaceAll("&amp;", "&");
+  text = text.replaceAll("&lt;", "<");
+  text = text.replaceAll("&gt;", ">");
+  text = text.replaceAll("&quot;", "\"");
+  text = text.replaceAll("&#39;", "'");
+  return slugify(text);
+}
+
+function injectHeadingIDs(html, toc) {
+  if (__len(toc) === 0 || html === "") {
+    return html;
+  }
+  let pending = {  };
+  for (const [_$, item] of __s(toc).entries()) {
+    let key = slugify(item.Text);
+    pending[key] = __append((pending[key] ?? null), item.ID);
+  }
+  let b = { _buf: "" };
+  let idx = 0;
+  while (idx < __len(html)) {
+    let rest = html.slice(idx);
+    if (rest.startsWith("<h2") || rest.startsWith("<h3")) {
+      let closeBracket = rest.indexOf(">");
+      let closeTag = rest.indexOf("</h");
+      if (closeBracket !== -1 && closeTag !== -1 && closeBracket < closeTag) {
+        let openTag = rest.slice(0, closeBracket + 1);
+        let key = headingTextKey(rest.slice(closeBracket + 1, closeTag));
+        let ids = (pending[key] ?? null);
+        if (__len(ids) > 0 && !openTag.includes("id=")) {
+          pending[key] = ids.slice(1);
+          (b._buf += openTag.slice(0, 3) + " id=\"" + ids[0] + "\"" + openTag.slice(3), [openTag.slice(0, 3) + " id=\"" + ids[0] + "\"" + openTag.slice(3).length, null]);
+        } else {
+          (b._buf += openTag, [openTag.length, null]);
+        }
+        idx += closeBracket + 1;
+        continue;
+      }
+    }
+    (b._buf += String.fromCodePoint(html.charCodeAt(idx)));
+    idx++;
+  }
+  return b._buf;
 }
 
 function parseMarkdown(content) {
@@ -1208,8 +1574,66 @@ function highlightCode() {
         }
       }
     })(); });
+    convertMermaidBlocks();
+    if (Prism.languages.templ == null && Prism.languages.go != null) {
+      Prism.languages.templ = Prism.languages.go;
+    }
     Prism.highlightAll();
     attachCopyButtons();
+    renderMermaid();
+  } catch (__err) {
+    __panic = __err;
+  } finally {
+    for (let __i = __defers.length - 1; __i >= 0; __i--) __defers[__i]();
+    if (__panic !== null) throw __panic;
+  }
+}
+
+function convertMermaidBlocks() {
+  let codes = document.querySelectorAll("pre > code.language-mermaid");
+  for (let i = 0; i < __len(codes); i++) {
+    let code = codes[i];
+    let src = String(code.textContent);
+    let div = document.createElement("div");
+    div.className = "mermaid";
+    div.setAttribute("data-mermaid-src", src);
+    div.textContent = src;
+    code.parentElement.replaceWith(div);
+  }
+  return __len(codes);
+}
+
+function mermaidTheme(theme) {
+  if (theme === "light") {
+    return "default";
+  }
+  return "dark";
+}
+
+async function renderMermaid() {
+  const __defers = [];
+  let __panic = null;
+  try {
+    __defers.push(() => { (function() {
+      {
+        let r = (typeof __panic !== "undefined" && __panic !== null ? (() => { const __r = __panic.message ?? String(__panic); __panic = null; return __r; })() : null);
+        if (r != null) {
+          console.warn("Mermaid render error:", r);
+        }
+      }
+    })(); });
+    let nodes = document.querySelectorAll(".mermaid[data-mermaid-src]");
+    if (__len(nodes) === 0) {
+      return;
+    }
+    await loadMermaid();
+    for (let i = 0; i < __len(nodes); i++) {
+      let n = nodes[i];
+      n.removeAttribute("data-processed");
+      n.textContent = n.getAttribute("data-mermaid-src");
+    }
+    mermaid.initialize({ "startOnLoad": false, "theme": mermaidTheme(currentTheme), "securityLevel": "strict" });
+    await mermaid.run({ "nodes": nodes });
   } catch (__err) {
     __panic = __err;
   } finally {
@@ -1220,169 +1644,170 @@ function highlightCode() {
 
 function Navbar(r, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
   return {Mount(___p) {
-    const ___e59 = document.createElement("nav");
-    ___e59.className = "navbar";
-    const ___e60 = document.createElement("div");
-    ___e60.className = "navbar-inner";
-    const ___e61 = document.createElement("a");
-    ___e61.className = "navbar-brand";
-    ___e61.setAttribute("href", "/");
-    ___e61.setAttribute("data-action", "nav");
-    ___e61.appendChild(document.createTextNode(String(siteConfig.Title)));
-    ___e60.appendChild(___e61);
-    const ___e62 = document.createElement("button");
-    ___e62.setAttribute("type", "button");
-    ___e62.className = toggleBtnClass(mobileOpen);
-    ___e62.setAttribute("aria-label", "Toggle navigation");
-    ___e62.setAttribute("aria-expanded", String(String(mobileOpen)));
-    ___e62.setAttribute("data-action", "toggle-mobile-nav");
-    const ___e63 = document.createElement("span");
-    ___e63.className = "navbar-toggle-icon";
-    ___e62.appendChild(___e63);
-    ___e60.appendChild(___e62);
-    const ___e64 = document.createElement("div");
-    ___e64.className = navbarCollapseClass(mobileOpen);
-    const ___e65 = document.createElement("ul");
-    ___e65.className = "navbar-nav left";
-    const ___e66 = document.createElement("li");
-    ___e66.className = "nav-item navbar-menu";
-    const ___e67 = document.createElement("a");
-    ___e67.className = navLinkClass(r.Kind === RouteBlog);
-    ___e67.setAttribute("href", "/blog");
-    ___e67.setAttribute("data-action", "nav");
-    ___e67.appendChild(document.createTextNode(String(t("nav.blog"))));
-    ___e66.appendChild(___e67);
-    ___e65.appendChild(___e66);
-    const ___e68 = document.createElement("li");
-    ___e68.className = dropdownClass(dropdownOpen);
-    const ___e69 = document.createElement("button");
-    ___e69.setAttribute("type", "button");
-    ___e69.className = dropdownToggleClass(r.Kind === RouteProject);
-    ___e69.setAttribute("aria-haspopup", "true");
-    ___e69.setAttribute("aria-controls", "projects-dropdown");
-    ___e69.setAttribute("aria-expanded", String(String(dropdownOpen)));
-    ___e69.setAttribute("data-action", "toggle-projects-dropdown");
-    ___e69.appendChild(document.createTextNode(String(t("nav.projects"))));
-    const ___e70 = document.createElement("span");
-    ___e70.className = "dropdown-chevron dropdown-chevron-down";
-    (Icon("chevron-down", "0.8em")).Mount(___e70);
-    ___e69.appendChild(___e70);
-    const ___e71 = document.createElement("span");
-    ___e71.className = "dropdown-chevron dropdown-chevron-up";
-    (Icon("chevron-up", "0.8em")).Mount(___e71);
-    ___e69.appendChild(___e71);
-    ___e68.appendChild(___e69);
-    const ___e72 = document.createElement("ul");
-    ___e72.className = "dropdown-menu";
-    ___e72.setAttribute("id", "projects-dropdown");
+    const ___e70 = document.createElement("nav");
+    ___e70.className = "navbar";
+    const ___e71 = document.createElement("div");
+    ___e71.className = "navbar-inner";
+    const ___e72 = document.createElement("a");
+    ___e72.className = "navbar-brand";
+    ___e72.setAttribute("href", "/");
+    ___e72.setAttribute("data-action", "nav");
+    ___e72.appendChild(document.createTextNode(String(siteConfig.Title)));
+    ___e71.appendChild(___e72);
+    const ___e73 = document.createElement("button");
+    ___e73.setAttribute("type", "button");
+    ___e73.className = toggleBtnClass(mobileOpen);
+    ___e73.setAttribute("aria-label", "Toggle navigation");
+    ___e73.setAttribute("aria-expanded", String(String(mobileOpen)));
+    ___e73.setAttribute("data-action", "toggle-mobile-nav");
+    const ___e74 = document.createElement("span");
+    ___e74.className = "navbar-toggle-icon";
+    ___e73.appendChild(___e74);
+    ___e71.appendChild(___e73);
+    const ___e75 = document.createElement("div");
+    ___e75.className = navbarCollapseClass(mobileOpen);
+    const ___e76 = document.createElement("ul");
+    ___e76.className = "navbar-nav left";
+    const ___e77 = document.createElement("li");
+    ___e77.className = "nav-item navbar-menu";
+    const ___e78 = document.createElement("a");
+    ___e78.className = navLinkClass(r.Kind === RouteBlog);
+    ___e78.setAttribute("href", "/blog");
+    ___e78.setAttribute("data-action", "nav");
+    ___e78.appendChild(document.createTextNode(String(t("nav.blog"))));
+    ___e77.appendChild(___e78);
+    ___e76.appendChild(___e77);
+    const ___e79 = document.createElement("li");
+    ___e79.className = dropdownClass(dropdownOpen);
+    const ___e80 = document.createElement("button");
+    ___e80.setAttribute("type", "button");
+    ___e80.className = dropdownToggleClass(r.Kind === RouteProject);
+    ___e80.setAttribute("aria-haspopup", "true");
+    ___e80.setAttribute("aria-controls", "projects-dropdown");
+    ___e80.setAttribute("aria-expanded", String(String(dropdownOpen)));
+    ___e80.setAttribute("data-action", "toggle-projects-dropdown");
+    ___e80.appendChild(document.createTextNode(String(t("nav.projects"))));
+    const ___e81 = document.createElement("span");
+    ___e81.className = "dropdown-chevron dropdown-chevron-down";
+    (Icon("chevron-down", "0.8em")).Mount(___e81);
+    ___e80.appendChild(___e81);
+    const ___e82 = document.createElement("span");
+    ___e82.className = "dropdown-chevron dropdown-chevron-up";
+    (Icon("chevron-up", "0.8em")).Mount(___e82);
+    ___e80.appendChild(___e82);
+    ___e79.appendChild(___e80);
+    const ___e83 = document.createElement("ul");
+    ___e83.className = "dropdown-menu";
+    ___e83.setAttribute("id", "projects-dropdown");
     for (const p of projects) {
-      const ___e73 = document.createElement("li");
-      const ___e74 = document.createElement("a");
-      ___e74.className = dropdownItemClass(isActiveRoute(r, RouteProject, p.ID));
-      ___e74.setAttribute("href", String(p.Href));
-      ___e74.setAttribute("data-action", "nav");
-      ___e74.appendChild(document.createTextNode(String(p.Title)));
-      ___e73.appendChild(___e74);
-      ___e72.appendChild(___e73);
+      const ___e84 = document.createElement("li");
+      const ___e85 = document.createElement("a");
+      ___e85.className = dropdownItemClass(isActiveRoute(r, RouteProject, p.ID));
+      ___e85.setAttribute("href", String(p.Href));
+      ___e85.setAttribute("data-action", "nav");
+      ___e85.appendChild(document.createTextNode(String(p.Title)));
+      ___e84.appendChild(___e85);
+      ___e83.appendChild(___e84);
     }
-    ___e68.appendChild(___e72);
-    ___e65.appendChild(___e68);
+    ___e79.appendChild(___e83);
+    ___e76.appendChild(___e79);
     for (const page of pages) {
       if (page.ShowInNav) {
-        const ___e75 = document.createElement("li");
-        ___e75.className = "nav-item navbar-menu";
-        const ___e76 = document.createElement("a");
-        ___e76.className = navLinkClass(isActiveRoute(r, RoutePage, page.ID));
-        ___e76.setAttribute("href", String(page.Href));
-        ___e76.setAttribute("data-action", "nav");
-        ___e76.appendChild(document.createTextNode(String(page.Title)));
-        ___e75.appendChild(___e76);
-        ___e65.appendChild(___e75);
+        const ___e86 = document.createElement("li");
+        ___e86.className = "nav-item navbar-menu";
+        const ___e87 = document.createElement("a");
+        ___e87.className = navLinkClass(isActiveRoute(r, RoutePage, page.ID));
+        ___e87.setAttribute("href", String(page.Href));
+        ___e87.setAttribute("data-action", "nav");
+        ___e87.appendChild(document.createTextNode(String(page.Title)));
+        ___e86.appendChild(___e87);
+        ___e76.appendChild(___e86);
       }
     }
-    ___e64.appendChild(___e65);
-    const ___e77 = document.createElement("ul");
-    ___e77.className = "navbar-nav right";
+    ___e75.appendChild(___e76);
+    const ___e88 = document.createElement("ul");
+    ___e88.className = "navbar-nav right";
     if (siteConfig.Search.Enabled) {
-      const ___e78 = document.createElement("li");
-      ___e78.className = "nav-item navbar-icon";
-      const ___e79 = document.createElement("button");
-      ___e79.setAttribute("type", "button");
-      ___e79.className = "nav-link search-toggle";
-      ___e79.setAttribute("id", "search-toggle");
-      ___e79.setAttribute("aria-label", String(t("aria.search")));
-      ___e79.setAttribute("title", String(t("search.buttonTitle")));
-      ___e79.setAttribute("data-action", "open-search");
-      (Icon("search", "1.35rem")).Mount(___e79);
-      ___e78.appendChild(___e79);
-      ___e77.appendChild(___e78);
+      const ___e89 = document.createElement("li");
+      ___e89.className = "nav-item navbar-icon";
+      const ___e90 = document.createElement("button");
+      ___e90.setAttribute("type", "button");
+      ___e90.className = "nav-link search-toggle";
+      ___e90.setAttribute("id", "search-toggle");
+      ___e90.setAttribute("aria-label", String(t("aria.search")));
+      ___e90.setAttribute("title", String(t("search.buttonTitle") + " (" + t("search.shortcutHint") + ")"));
+      ___e90.setAttribute("aria-keyshortcuts", "Control+K Meta+K /");
+      ___e90.setAttribute("data-action", "open-search");
+      (Icon("search", "1.35rem")).Mount(___e90);
+      ___e89.appendChild(___e90);
+      ___e88.appendChild(___e89);
     }
-    const ___e80 = document.createElement("li");
-    ___e80.className = "nav-item navbar-icon";
-    const ___e81 = document.createElement("button");
-    ___e81.setAttribute("type", "button");
-    ___e81.setAttribute("id", "theme-toggle");
-    ___e81.className = "theme-toggle nav-link";
-    ___e81.setAttribute("aria-label", String(t("aria.toggleTheme")));
-    ___e81.setAttribute("title", String(t("theme.toggleTitle")));
-    ___e81.setAttribute("data-action", "toggle-theme");
-    (Icon("sun", "1.35rem")).Mount(___e81);
-    (Icon("moon", "1.35rem")).Mount(___e81);
-    ___e80.appendChild(___e81);
-    ___e77.appendChild(___e80);
+    const ___e91 = document.createElement("li");
+    ___e91.className = "nav-item navbar-icon";
+    const ___e92 = document.createElement("button");
+    ___e92.setAttribute("type", "button");
+    ___e92.setAttribute("id", "theme-toggle");
+    ___e92.className = "theme-toggle nav-link";
+    ___e92.setAttribute("aria-label", String(t("aria.toggleTheme")));
+    ___e92.setAttribute("title", String(t("theme.toggleTitle")));
+    ___e92.setAttribute("data-action", "toggle-theme");
+    (Icon("sun", "1.35rem")).Mount(___e92);
+    (Icon("moon", "1.35rem")).Mount(___e92);
+    ___e91.appendChild(___e92);
+    ___e88.appendChild(___e91);
     if (siteConfig.EmailJS.Enabled) {
-      const ___e82 = document.createElement("li");
-      ___e82.className = "nav-item navbar-icon";
-      const ___e83 = document.createElement("button");
-      ___e83.setAttribute("type", "button");
-      ___e83.className = "nav-link email-toggle";
-      ___e83.setAttribute("id", "email-toggle");
-      ___e83.setAttribute("aria-label", String(t("contact.title")));
-      ___e83.setAttribute("title", String(t("contact.buttonTitle")));
-      ___e83.setAttribute("data-action", "open-contact");
-      (Icon("envelope", "1.35rem")).Mount(___e83);
-      ___e82.appendChild(___e83);
-      ___e77.appendChild(___e82);
+      const ___e93 = document.createElement("li");
+      ___e93.className = "nav-item navbar-icon";
+      const ___e94 = document.createElement("button");
+      ___e94.setAttribute("type", "button");
+      ___e94.className = "nav-link email-toggle";
+      ___e94.setAttribute("id", "email-toggle");
+      ___e94.setAttribute("aria-label", String(t("contact.title")));
+      ___e94.setAttribute("title", String(t("contact.buttonTitle")));
+      ___e94.setAttribute("data-action", "open-contact");
+      (Icon("envelope", "1.35rem")).Mount(___e94);
+      ___e93.appendChild(___e94);
+      ___e88.appendChild(___e93);
     }
     for (const s of siteConfig.Social) {
-      const ___e84 = document.createElement("li");
-      ___e84.className = "nav-item navbar-icon";
-      const ___e85 = document.createElement("a");
-      ___e85.className = "nav-link";
-      ___e85.setAttribute("href", String(s.Href));
-      ___e85.setAttribute("target", String(s.Target));
-      ___e85.setAttribute("rel", String(s.Rel));
-      (Icon(s.Icon, "1.35rem")).Mount(___e85);
-      ___e84.appendChild(___e85);
-      ___e77.appendChild(___e84);
+      const ___e95 = document.createElement("li");
+      ___e95.className = "nav-item navbar-icon";
+      const ___e96 = document.createElement("a");
+      ___e96.className = "nav-link";
+      ___e96.setAttribute("href", String(s.Href));
+      ___e96.setAttribute("target", String(s.Target));
+      ___e96.setAttribute("rel", String(s.Rel));
+      (Icon(s.Icon, "1.35rem")).Mount(___e96);
+      ___e95.appendChild(___e96);
+      ___e88.appendChild(___e95);
     }
-    ___e64.appendChild(___e77);
-    ___e60.appendChild(___e64);
-    ___e59.appendChild(___e60);
-    ___p.appendChild(___e59);
+    ___e75.appendChild(___e88);
+    ___e71.appendChild(___e75);
+    ___e70.appendChild(___e71);
+    ___p.appendChild(___e70);
   }};
 }
 
 function PageView(v) {
   return {Mount(___p) {
     if (v.Status === LoadFailed) {
-      const ___e86 = document.createElement("div");
-      ___e86.className = "error-message";
-      const ___e87 = document.createElement("h1");
-      ___e87.appendChild(document.createTextNode(String(t("general.notFound"))));
-      ___e86.appendChild(___e87);
-      const ___e88 = document.createElement("p");
-      ___e88.appendChild(document.createTextNode(String(t("general.notFoundMessage"))));
-      ___e86.appendChild(___e88);
-      ___p.appendChild(___e86);
+      const ___e97 = document.createElement("div");
+      ___e97.className = "error-message";
+      const ___e98 = document.createElement("h1");
+      ___e98.appendChild(document.createTextNode(String(t("general.notFound"))));
+      ___e97.appendChild(___e98);
+      const ___e99 = document.createElement("p");
+      ___e99.appendChild(document.createTextNode(String(t("general.notFoundMessage"))));
+      ___e97.appendChild(___e99);
+      ___p.appendChild(___e97);
     } else {
-      const ___e89 = document.createElement("div");
-      ___e89.className = "page-view";
-      const ___e90 = document.createElement("div");
-      ___e90.className = "markdown-body";
-      ___e90.insertAdjacentHTML("beforeend", v.HTML);
-      ___e89.appendChild(___e90);
-      ___p.appendChild(___e89);
+      const ___e100 = document.createElement("div");
+      ___e100.className = "page-view";
+      const ___e101 = document.createElement("div");
+      ___e101.className = "markdown-body";
+      ___e101.insertAdjacentHTML("beforeend", v.HTML);
+      ___e100.appendChild(___e101);
+      ___p.appendChild(___e100);
     }
   }};
 }
@@ -1391,18 +1816,18 @@ function ProjectReadme(v) {
   return {Mount(___p) {
     if (v.Proj.GithubRepo !== "") {
       if (v.Status === LoadFailed) {
-        const ___e91 = document.createElement("div");
-        ___e91.setAttribute("id", "project-readme");
-        const ___e92 = document.createElement("p");
-        ___e92.appendChild(document.createTextNode(String(t("project.readmeError"))));
-        ___e91.appendChild(___e92);
-        ___p.appendChild(___e91);
+        const ___e102 = document.createElement("div");
+        ___e102.setAttribute("id", "project-readme");
+        const ___e103 = document.createElement("p");
+        ___e103.appendChild(document.createTextNode(String(t("project.readmeError"))));
+        ___e102.appendChild(___e103);
+        ___p.appendChild(___e102);
       } else if (v.HTML !== "") {
-        const ___e93 = document.createElement("div");
-        ___e93.setAttribute("id", "project-readme");
-        ___e93.className = "markdown-body";
-        ___e93.insertAdjacentHTML("beforeend", v.HTML);
-        ___p.appendChild(___e93);
+        const ___e104 = document.createElement("div");
+        ___e104.setAttribute("id", "project-readme");
+        ___e104.className = "markdown-body";
+        ___e104.insertAdjacentHTML("beforeend", v.HTML);
+        ___p.appendChild(___e104);
       }
     }
   }};
@@ -1411,27 +1836,28 @@ function ProjectReadme(v) {
 function ProjectMedia(videos) {
   return {Mount(___p) {
     if (__len(videos) > 0) {
-      const ___e94 = document.createElement("div");
-      ___e94.className = "markdown-body";
-      const ___e95 = document.createElement("h2");
-      ___e95.appendChild(document.createTextNode(String(t("project.media"))));
-      ___e94.appendChild(___e95);
+      const ___e105 = document.createElement("div");
+      ___e105.className = "markdown-body";
+      const ___e106 = document.createElement("h2");
+      ___e106.setAttribute("id", "project-media");
+      ___e106.appendChild(document.createTextNode(String(t("project.media"))));
+      ___e105.appendChild(___e106);
       for (const v of videos) {
-        const ___e96 = document.createElement("div");
-        ___e96.className = "youtube-video";
-        const ___e97 = document.createElement("div");
-        ___e97.className = "iframeWrapper";
-        const ___e98 = document.createElement("iframe");
-        ___e98.setAttribute("width", "560");
-        ___e98.setAttribute("height", "349");
-        ___e98.setAttribute("src", String("https://www.youtube.com/embed/" + v + "?rel=0&hd=1"));
-        ___e98.setAttribute("title", "YouTube video player");
-        ___e98.setAttribute("allowfullscreen", "");
-        ___e97.appendChild(___e98);
-        ___e96.appendChild(___e97);
-        ___e94.appendChild(___e96);
+        const ___e107 = document.createElement("div");
+        ___e107.className = "youtube-video";
+        const ___e108 = document.createElement("div");
+        ___e108.className = "iframeWrapper";
+        const ___e109 = document.createElement("iframe");
+        ___e109.setAttribute("width", "560");
+        ___e109.setAttribute("height", "349");
+        ___e109.setAttribute("src", String("https://www.youtube.com/embed/" + v + "?rel=0&hd=1"));
+        ___e109.setAttribute("title", "YouTube video player");
+        ___e109.setAttribute("allowfullscreen", "");
+        ___e108.appendChild(___e109);
+        ___e107.appendChild(___e108);
+        ___e105.appendChild(___e107);
       }
-      ___p.appendChild(___e94);
+      ___p.appendChild(___e105);
     }
   }};
 }
@@ -1439,43 +1865,44 @@ function ProjectMedia(videos) {
 function ProjectDemo(p) {
   return {Mount(___p) {
     if (p.DemoUrl !== "") {
-      const ___e99 = document.createElement("div");
-      ___e99.className = "markdown-body";
-      const ___e100 = document.createElement("h2");
-      ___e100.appendChild(document.createTextNode(String(demoLabel(p))));
-      ___e99.appendChild(___e100);
+      const ___e110 = document.createElement("div");
+      ___e110.className = "markdown-body";
+      const ___e111 = document.createElement("h2");
+      ___e111.setAttribute("id", "project-demo");
+      ___e111.appendChild(document.createTextNode(String(demoLabel(p))));
+      ___e110.appendChild(___e111);
       if (p.DemoInstructions !== "") {
-        const ___e101 = document.createElement("p");
-        ___e101.appendChild(document.createTextNode(String(p.DemoInstructions)));
-        ___e99.appendChild(___e101);
+        const ___e112 = document.createElement("p");
+        ___e112.appendChild(document.createTextNode(String(p.DemoInstructions)));
+        ___e110.appendChild(___e112);
       }
-      const ___e102 = document.createElement("div");
-      ___e102.className = demoWrapperClass(p.DemoHeight);
-      const ___e103 = document.createElement("iframe");
-      ___e103.setAttribute("id", "demo");
-      ___e103.setAttribute("src", String(p.DemoUrl));
-      ___e103.setAttribute("title", String(p.Title + " demo"));
-      ___e103.setAttribute("allowfullscreen", "");
-      ___e102.appendChild(___e103);
-      ___e99.appendChild(___e102);
+      const ___e113 = document.createElement("div");
+      ___e113.className = demoWrapperClass(p.DemoHeight);
+      const ___e114 = document.createElement("iframe");
+      ___e114.setAttribute("id", "demo");
+      ___e114.setAttribute("src", String(p.DemoUrl));
+      ___e114.setAttribute("title", String(p.Title + " demo"));
+      ___e114.setAttribute("allowfullscreen", "");
+      ___e113.appendChild(___e114);
+      ___e110.appendChild(___e113);
       if (p.DemoFullscreen) {
-        const ___e104 = document.createElement("br");
-        ___e99.appendChild(___e104);
-        const ___e105 = document.createElement("div");
-        ___e105.className = "text-center";
-        const ___e106 = document.createElement("button");
-        ___e106.setAttribute("type", "button");
-        ___e106.setAttribute("id", "fullscreen");
-        ___e106.className = "download-btn";
-        ___e106.setAttribute("data-action", "toggle-fullscreen");
-        (Icon("expand", "1rem")).Mount(___e106);
-        const ___e107 = document.createElement("span");
-        ___e107.appendChild(document.createTextNode(String(t("project.fullscreen"))));
-        ___e106.appendChild(___e107);
-        ___e105.appendChild(___e106);
-        ___e99.appendChild(___e105);
+        const ___e115 = document.createElement("br");
+        ___e110.appendChild(___e115);
+        const ___e116 = document.createElement("div");
+        ___e116.className = "text-center";
+        const ___e117 = document.createElement("button");
+        ___e117.setAttribute("type", "button");
+        ___e117.setAttribute("id", "fullscreen");
+        ___e117.className = "download-btn";
+        ___e117.setAttribute("data-action", "toggle-fullscreen");
+        (Icon("expand", "1rem")).Mount(___e117);
+        const ___e118 = document.createElement("span");
+        ___e118.appendChild(document.createTextNode(String(t("project.fullscreen"))));
+        ___e117.appendChild(___e118);
+        ___e116.appendChild(___e117);
+        ___e110.appendChild(___e116);
       }
-      ___p.appendChild(___e99);
+      ___p.appendChild(___e110);
     }
   }};
 }
@@ -1483,27 +1910,28 @@ function ProjectDemo(p) {
 function ProjectLinks(links) {
   return {Mount(___p) {
     if (__len(links) > 0) {
-      const ___e108 = document.createElement("div");
-      ___e108.className = "markdown-body";
-      const ___e109 = document.createElement("h2");
-      ___e109.appendChild(document.createTextNode(String(t("project.links"))));
-      ___e108.appendChild(___e109);
-      const ___e110 = document.createElement("div");
-      ___e110.className = "download-buttons";
+      const ___e119 = document.createElement("div");
+      ___e119.className = "markdown-body";
+      const ___e120 = document.createElement("h2");
+      ___e120.setAttribute("id", "project-links");
+      ___e120.appendChild(document.createTextNode(String(t("project.links"))));
+      ___e119.appendChild(___e120);
+      const ___e121 = document.createElement("div");
+      ___e121.className = "download-buttons";
       for (const link of links) {
-        const ___e111 = document.createElement("a");
-        ___e111.setAttribute("href", String(link.Href));
-        ___e111.setAttribute("target", "_blank");
-        ___e111.setAttribute("rel", "noopener noreferrer");
-        ___e111.className = "download-btn";
-        (Icon(link.Icon, "1rem")).Mount(___e111);
-        const ___e112 = document.createElement("span");
-        ___e112.appendChild(document.createTextNode(String(link.Title)));
-        ___e111.appendChild(___e112);
-        ___e110.appendChild(___e111);
+        const ___e122 = document.createElement("a");
+        ___e122.setAttribute("href", String(link.Href));
+        ___e122.setAttribute("target", "_blank");
+        ___e122.setAttribute("rel", "noopener noreferrer");
+        ___e122.className = "download-btn";
+        (Icon(link.Icon, "1rem")).Mount(___e122);
+        const ___e123 = document.createElement("span");
+        ___e123.appendChild(document.createTextNode(String(link.Title)));
+        ___e122.appendChild(___e123);
+        ___e121.appendChild(___e122);
       }
-      ___e108.appendChild(___e110);
-      ___p.appendChild(___e108);
+      ___e119.appendChild(___e121);
+      ___p.appendChild(___e119);
     }
   }};
 }
@@ -1511,48 +1939,49 @@ function ProjectLinks(links) {
 function ProjectDetail(v, commentsEnabled) {
   return {Mount(___p) {
     if (v.Status === LoadNotFound) {
-      const ___e113 = document.createElement("div");
-      ___e113.className = "error-message";
-      const ___e114 = document.createElement("h1");
-      ___e114.appendChild(document.createTextNode(String(t("general.projectNotFound"))));
-      ___e113.appendChild(___e114);
-      const ___e115 = document.createElement("p");
-      ___e115.appendChild(document.createTextNode(String(t("general.projectNotFoundMessage"))));
-      ___e113.appendChild(___e115);
-      ___p.appendChild(___e113);
+      const ___e124 = document.createElement("div");
+      ___e124.className = "error-message";
+      const ___e125 = document.createElement("h1");
+      ___e125.appendChild(document.createTextNode(String(t("general.projectNotFound"))));
+      ___e124.appendChild(___e125);
+      const ___e126 = document.createElement("p");
+      ___e126.appendChild(document.createTextNode(String(t("general.projectNotFoundMessage"))));
+      ___e124.appendChild(___e126);
+      ___p.appendChild(___e124);
     } else {
-      const ___e116 = document.createElement("div");
-      ___e116.className = "project-detail";
-      const ___e117 = document.createElement("h1");
-      ___e117.className = "project-title";
-      ___e117.appendChild(document.createTextNode(String(v.Proj.Title)));
-      ___e116.appendChild(___e117);
-      const ___e118 = document.createElement("p");
-      ___e118.className = "project-description";
-      ___e118.appendChild(document.createTextNode(String(v.Proj.Description)));
-      ___e116.appendChild(___e118);
+      const ___e127 = document.createElement("div");
+      ___e127.className = "project-detail";
+      const ___e128 = document.createElement("h1");
+      ___e128.className = "project-title";
+      ___e128.appendChild(document.createTextNode(String(v.Proj.Title)));
+      ___e127.appendChild(___e128);
+      const ___e129 = document.createElement("p");
+      ___e129.className = "project-description";
+      ___e129.appendChild(document.createTextNode(String(v.Proj.Description)));
+      ___e127.appendChild(___e129);
       if (__len(v.Proj.Tags) > 0) {
-        const ___e119 = document.createElement("div");
-        ___e119.className = "project-tags";
+        const ___e130 = document.createElement("div");
+        ___e130.className = "project-tags";
         for (const tag of v.Proj.Tags) {
-          const ___e120 = document.createElement("span");
-          ___e120.className = "item-tag clickable-tag";
-          ___e120.setAttribute("data-search-tag", String(tag));
-          ___e120.appendChild(document.createTextNode(String(tag)));
-          ___e119.appendChild(___e120);
+          const ___e131 = document.createElement("span");
+          ___e131.className = "item-tag clickable-tag";
+          ___e131.setAttribute("data-search-tag", String(tag));
+          ___e131.appendChild(document.createTextNode(String(tag)));
+          ___e130.appendChild(___e131);
         }
-        ___e116.appendChild(___e119);
+        ___e127.appendChild(___e130);
       }
-      (ProjectReadme(v)).Mount(___e116);
-      (ProjectMedia(v.Proj.YoutubeVideos)).Mount(___e116);
-      (ProjectDemo(v.Proj)).Mount(___e116);
-      (ProjectLinks(v.Proj.Links)).Mount(___e116);
+      (TableOfContents(v.TOC)).Mount(___e127);
+      (ProjectReadme(v)).Mount(___e127);
+      (ProjectMedia(v.Proj.YoutubeVideos)).Mount(___e127);
+      (ProjectDemo(v.Proj)).Mount(___e127);
+      (ProjectLinks(v.Proj.Links)).Mount(___e127);
       if (commentsEnabled) {
-        const ___e121 = document.createElement("div");
-        ___e121.className = "giscus-container";
-        ___e116.appendChild(___e121);
+        const ___e132 = document.createElement("div");
+        ___e132.className = "giscus-container";
+        ___e127.appendChild(___e132);
       }
-      ___p.appendChild(___e116);
+      ___p.appendChild(___e127);
     }
   }};
 }
@@ -1739,8 +2168,43 @@ function currentYear() {
   return {_d: new Date()}._d.getFullYear();
 }
 
+function tocItemClass(level) {
+  if (level === 3) {
+    return "blog-toc-item blog-toc-level-3";
+  }
+  return "blog-toc-item blog-toc-level-2";
+}
+
+function scrollToHash(hash, smooth) {
+  if (hash === "") {
+    return;
+  }
+  let id = ((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(hash, "#");
+  if (id === "") {
+    return;
+  }
+  let scroll = function() {
+    let targetEl = document.getElementById(id);
+    if (targetEl != null) {
+      let behavior = "instant";
+      if (smooth) {
+        behavior = "smooth";
+      }
+      targetEl.scrollIntoView({ "behavior": behavior });
+    }
+  };
+  scroll();
+  if (!smooth) {
+    setTimeout(scroll, 50);
+  }
+}
+
 function navigate(url) {
-  if (url !== window.location.pathname) {
+  let curr = String(window.location.pathname);
+  if (window.location.hash != null && window.location.hash !== "") {
+    curr += String(window.location.hash);
+  }
+  if (url !== curr) {
     window.history.pushState({  }, "", url);
   }
   handleRoute();
@@ -1788,49 +2252,9 @@ function parseRoute(path) {
   return new RouteMatch({ Kind: RouteBlog, Page: 1 });
 }
 
-function resolveRedirect(hash) {
-  let target = "";
-  let ok = false;
-  const __defers = [];
-  let __panic = null;
-  try {
-    __defers.push(() => { (function() {
-      {
-        let r = (typeof __panic !== "undefined" && __panic !== null ? (() => { const __r = __panic.message ?? String(__panic); __panic = null; return __r; })() : null);
-        if (r != null) {
-          target = "";
-          ok = false;
-        }
-      }
-    })(); });
-    let [encoded, found] = (hash).startsWith("#!redirect=") ? [(hash).slice(("#!redirect=").length), true] : [hash, false];
-    if (!found || encoded === "") {
-      return ["", false];
-    }
-    let decoded = String(decodeURIComponent(encoded));
-    if (!decoded.startsWith("/") || decoded.startsWith("//")) {
-      return ["", false];
-    }
-    return [decoded, true];
-  } catch (__err) {
-    __panic = __err;
-  } finally {
-    for (let __i = __defers.length - 1; __i >= 0; __i--) __defers[__i]();
-    if (__panic !== null) throw __panic;
-  }
-  return [target, ok];
-}
-
 async function handleRoute() {
   resetOverlays();
   let path = window.location.pathname;
-  {
-    let [redirect, ok] = resolveRedirect(window.location.hash);
-    if (ok) {
-      window.history.replaceState({  }, "", redirect);
-      path = redirect;
-    }
-  }
   if (!isInitialRoute) {
     let mainEl = document.querySelector("#main-content");
     if (mainEl != null) {
@@ -1840,6 +2264,7 @@ async function handleRoute() {
   }
   isInitialRoute = false;
   routeSeq++;
+  currentPath = path;
   route = parseRoute(path);
   view = newViewState();
   window.scrollTo({ "top": 0, "left": 0, "behavior": "instant" });
@@ -1875,14 +2300,20 @@ async function handleRoute() {
       mainEl.removeAttribute("tabindex");
     }, 100);
   }
+  let hash = String(window.location.hash);
+  if (hash !== "") {
+    scrollToHash(hash, false);
+  }
 }
 
 function showBlog(page) {
+  let title = site.Title;
+  let canonical = "/blog";
   if (page > 1) {
-    document.title = t("nav.blog") + " - " + site.Title;
-  } else {
-    document.title = site.Title;
+    title = t("nav.blog") + " - " + site.Title;
+    canonical = "/blog/page/" + String(page);
   }
+  updateRouteMeta(title, site.Description, canonical);
   renderRoute();
 }
 
@@ -1890,10 +2321,11 @@ async function showPost(slug) {
   let [v, needsFetch] = resolvePost(slug, posts, postHtmlCache);
   view = v;
   if (view.Status === LoadNotFound) {
+    updateRouteMeta(t("general.blogNotFound") + " - " + site.Title, t("general.blogNotFoundMessage"), "/blog/" + slug);
     renderRoute();
     return;
   }
-  document.title = view.Post.Title + " - " + site.Title;
+  updateRouteMeta(view.Post.Title + " - " + site.Title, view.Post.Excerpt, "/blog/" + view.Post.Slug);
   if (needsFetch) {
     let seq = routeSeq;
     let [mdText, err] = await loadMarkdownFile("/data/blog/" + v.Post.Filename);
@@ -1906,13 +2338,25 @@ async function showPost(slug) {
       return;
     }
     let [_, content] = parseFrontmatter(mdText);
+    let toc = extractTOC(content);
     let html = parseMarkdown(content);
+    html = injectHeadingIDs(html, toc);
     postHtmlCache[v.Post.Filename] = html;
+    postTOCCache[v.Post.Filename] = toc;
     if (seq !== routeSeq) {
       return;
     }
     view.HTML = html;
+    view.TOC = toc;
     view.Status = LoadReady;
+  } else {
+    {
+      let cachedTOC = postTOCCache[v.Post.Filename];
+      let ok = (v.Post.Filename) in postTOCCache;
+      if (ok) {
+        view.TOC = cachedTOC;
+      }
+    }
   }
   renderRoute();
   highlightCode();
@@ -1923,17 +2367,23 @@ async function showProject(id) {
   let [v, needsFetch] = resolveProject(id, projects, readmeCache);
   view = v;
   if (view.Status === LoadNotFound) {
+    updateRouteMeta(t("general.projectNotFound") + " - " + site.Title, t("general.projectNotFoundMessage"), "/project/" + id);
     renderRoute();
     return;
   }
-  document.title = view.Proj.Title + " - " + site.Title;
+  updateRouteMeta(view.Proj.Title + " - " + site.Title, view.Proj.Description, "/project/" + view.Proj.ID);
   if (needsFetch) {
     let seq = routeSeq;
     let [mdText, err] = await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername));
     let html = "";
+    let toc = [];
     if (err == null) {
+      let readmeTOC = extractTOC(mdText);
       html = parseMarkdown(mdText);
+      html = injectHeadingIDs(html, readmeTOC);
+      toc = extractProjectTOC(mdText, v.Proj);
       readmeCache[v.Proj.GithubRepo] = html;
+      readmeTOCCache[v.Proj.GithubRepo] = toc;
     }
     if (seq !== routeSeq) {
       return;
@@ -1942,7 +2392,18 @@ async function showProject(id) {
       view.Status = LoadFailed;
     } else {
       view.HTML = html;
+      view.TOC = toc;
       view.Status = LoadReady;
+    }
+  } else {
+    {
+      let cachedTOC = readmeTOCCache[v.Proj.GithubRepo];
+      let ok = (v.Proj.GithubRepo) in readmeTOCCache;
+      if (ok) {
+        view.TOC = cachedTOC;
+      } else {
+        view.TOC = extractProjectTOC("", v.Proj);
+      }
     }
   }
   renderRoute();
@@ -1953,7 +2414,11 @@ async function showProject(id) {
 async function showPage(id) {
   let [v, needsFetch] = resolvePage(id, navPages, pageHtmlCache);
   view = v;
-  document.title = view.Page.Title + " - " + site.Title;
+  let title = view.Page.Title + " - " + site.Title;
+  if (view.Page.Title === "") {
+    title = id + " - " + site.Title;
+  }
+  updateRouteMeta(title, site.Description, "/page/" + id);
   if (needsFetch) {
     let seq = routeSeq;
     let [mdText, err] = await loadMarkdownFile("/data/pages/" + id + ".md");
@@ -2091,55 +2556,55 @@ function handleSearchInput(value) {
 function SearchResultsList(results, query) {
   return {Mount(___p) {
     if (query !== "" && __len(results) === 0) {
-      const ___e122 = document.createElement("div");
-      ___e122.className = "search-no-results";
-      (Icon("search", "3rem")).Mount(___e122);
-      const ___e123 = document.createElement("p");
-      ___e123.appendChild(document.createTextNode(String(t("search.noResults"))));
-      ___e122.appendChild(___e123);
-      ___p.appendChild(___e122);
+      const ___e133 = document.createElement("div");
+      ___e133.className = "search-no-results";
+      (Icon("search", "3rem")).Mount(___e133);
+      const ___e134 = document.createElement("p");
+      ___e134.appendChild(document.createTextNode(String(t("search.noResults"))));
+      ___e133.appendChild(___e134);
+      ___p.appendChild(___e133);
     } else {
       for (const item of results) {
-        const ___e124 = document.createElement("article");
-        ___e124.className = "search-result-item blog-post-card";
-        ___e124.setAttribute("data-action", "open-post");
-        ___e124.setAttribute("data-href", String(item.Url));
-        const ___e125 = document.createElement("h2");
-        ___e125.className = "blog-post-title";
-        const ___e126 = document.createElement("a");
-        ___e126.setAttribute("href", String(item.Url));
-        ___e126.setAttribute("data-action", "nav");
-        ___e126.insertAdjacentHTML("beforeend", highlightMatch(item.Title, query));
-        ___e125.appendChild(___e126);
-        ___e124.appendChild(___e125);
-        const ___e127 = document.createElement("div");
-        ___e127.className = "blog-post-meta";
-        const ___e128 = document.createElement("span");
-        ___e128.className = "blog-post-tags";
+        const ___e135 = document.createElement("article");
+        ___e135.className = "search-result-item blog-post-card";
+        ___e135.setAttribute("data-action", "open-post");
+        ___e135.setAttribute("data-href", String(item.Url));
+        const ___e136 = document.createElement("h2");
+        ___e136.className = "blog-post-title";
+        const ___e137 = document.createElement("a");
+        ___e137.setAttribute("href", String(item.Url));
+        ___e137.setAttribute("data-action", "nav");
+        ___e137.insertAdjacentHTML("beforeend", highlightMatch(item.Title, query));
+        ___e136.appendChild(___e137);
+        ___e135.appendChild(___e136);
+        const ___e138 = document.createElement("div");
+        ___e138.className = "blog-post-meta";
+        const ___e139 = document.createElement("span");
+        ___e139.className = "blog-post-tags";
         if (item.ItemType === "project") {
-          const ___e129 = document.createElement("span");
-          ___e129.className = "item-tag";
-          ___e129.appendChild(document.createTextNode(String(t("badges.project"))));
-          ___e128.appendChild(___e129);
+          const ___e140 = document.createElement("span");
+          ___e140.className = "item-tag";
+          ___e140.appendChild(document.createTextNode(String(t("badges.project"))));
+          ___e139.appendChild(___e140);
         } else {
-          const ___e130 = document.createElement("span");
-          ___e130.className = "item-tag";
-          ___e130.appendChild(document.createTextNode(String(t("badges.blog"))));
-          ___e128.appendChild(___e130);
+          const ___e141 = document.createElement("span");
+          ___e141.className = "item-tag";
+          ___e141.appendChild(document.createTextNode(String(t("badges.blog"))));
+          ___e139.appendChild(___e141);
         }
         for (const tag of item.Tags) {
-          const ___e131 = document.createElement("span");
-          ___e131.className = "item-tag";
-          ___e131.appendChild(document.createTextNode(String(tag)));
-          ___e128.appendChild(___e131);
+          const ___e142 = document.createElement("span");
+          ___e142.className = "item-tag";
+          ___e142.appendChild(document.createTextNode(String(tag)));
+          ___e139.appendChild(___e142);
         }
-        ___e127.appendChild(___e128);
-        ___e124.appendChild(___e127);
-        const ___e132 = document.createElement("p");
-        ___e132.className = "blog-post-excerpt";
-        ___e132.insertAdjacentHTML("beforeend", highlightMatch(item.Description, query));
-        ___e124.appendChild(___e132);
-        ___p.appendChild(___e124);
+        ___e138.appendChild(___e139);
+        ___e135.appendChild(___e138);
+        const ___e143 = document.createElement("p");
+        ___e143.className = "blog-post-excerpt";
+        ___e143.insertAdjacentHTML("beforeend", highlightMatch(item.Description, query));
+        ___e135.appendChild(___e143);
+        ___p.appendChild(___e135);
       }
     }
   }};
@@ -2147,55 +2612,55 @@ function SearchResultsList(results, query) {
 
 function SearchModal(open, closing, query, results, placeholder) {
   return {Mount(___p) {
-    const ___e133 = document.createElement("div");
-    ___e133.setAttribute("id", "search-page");
-    ___e133.className = overlayClass(open, closing);
-    ___e133.setAttribute("role", "dialog");
-    ___e133.setAttribute("aria-modal", "true");
-    ___e133.setAttribute("aria-label", String(t("aria.search")));
-    const ___e134 = document.createElement("div");
-    ___e134.className = "search-page-header";
-    const ___e135 = document.createElement("div");
-    ___e135.className = "search-page-header-content";
-    const ___e136 = document.createElement("button");
-    ___e136.setAttribute("type", "button");
-    ___e136.className = "search-page-back";
-    ___e136.setAttribute("id", "search-page-back");
-    ___e136.setAttribute("aria-label", String(t("aria.goBack")));
-    ___e136.setAttribute("data-action", "close-search");
-    (Icon("arrow-left", "1.2rem")).Mount(___e136);
-    ___e135.appendChild(___e136);
-    const ___e137 = document.createElement("div");
-    ___e137.className = "search-page-input-wrapper";
-    const ___e138 = document.createElement("input");
-    ___e138.setAttribute("type", "search");
-    ___e138.setAttribute("id", "search-page-input");
-    ___e138.className = "search-page-input";
-    ___e138.setAttribute("placeholder", String(placeholder));
-    ___e138.setAttribute("autocomplete", "off");
-    ___e138.setAttribute("aria-label", String(t("aria.search")));
-    ___e138.setAttribute("value", String(query));
-    ___e137.appendChild(___e138);
-    const ___e139 = document.createElement("button");
-    ___e139.setAttribute("type", "button");
-    ___e139.className = searchClearClass(query);
-    ___e139.setAttribute("id", "search-page-clear");
-    ___e139.setAttribute("aria-label", String(t("aria.clearSearch")));
-    ___e139.setAttribute("data-action", "clear-search");
-    (Icon("times", "1.2rem")).Mount(___e139);
-    ___e137.appendChild(___e139);
-    ___e135.appendChild(___e137);
-    ___e134.appendChild(___e135);
-    ___e133.appendChild(___e134);
-    const ___e140 = document.createElement("div");
-    ___e140.className = "search-page-content";
-    const ___e141 = document.createElement("div");
-    ___e141.className = "search-page-results";
-    ___e141.setAttribute("id", "search-page-results");
-    (SearchResultsList(results, query)).Mount(___e141);
-    ___e140.appendChild(___e141);
-    ___e133.appendChild(___e140);
-    ___p.appendChild(___e133);
+    const ___e144 = document.createElement("div");
+    ___e144.setAttribute("id", "search-page");
+    ___e144.className = overlayClass(open, closing);
+    ___e144.setAttribute("role", "dialog");
+    ___e144.setAttribute("aria-modal", "true");
+    ___e144.setAttribute("aria-label", String(t("aria.search")));
+    const ___e145 = document.createElement("div");
+    ___e145.className = "search-page-header";
+    const ___e146 = document.createElement("div");
+    ___e146.className = "search-page-header-content";
+    const ___e147 = document.createElement("button");
+    ___e147.setAttribute("type", "button");
+    ___e147.className = "search-page-back";
+    ___e147.setAttribute("id", "search-page-back");
+    ___e147.setAttribute("aria-label", String(t("aria.goBack")));
+    ___e147.setAttribute("data-action", "close-search");
+    (Icon("arrow-left", "1.2rem")).Mount(___e147);
+    ___e146.appendChild(___e147);
+    const ___e148 = document.createElement("div");
+    ___e148.className = "search-page-input-wrapper";
+    const ___e149 = document.createElement("input");
+    ___e149.setAttribute("type", "search");
+    ___e149.setAttribute("id", "search-page-input");
+    ___e149.className = "search-page-input";
+    ___e149.setAttribute("placeholder", String(placeholder));
+    ___e149.setAttribute("autocomplete", "off");
+    ___e149.setAttribute("aria-label", String(t("aria.search")));
+    ___e149.setAttribute("value", String(query));
+    ___e148.appendChild(___e149);
+    const ___e150 = document.createElement("button");
+    ___e150.setAttribute("type", "button");
+    ___e150.className = searchClearClass(query);
+    ___e150.setAttribute("id", "search-page-clear");
+    ___e150.setAttribute("aria-label", String(t("aria.clearSearch")));
+    ___e150.setAttribute("data-action", "clear-search");
+    (Icon("times", "1.2rem")).Mount(___e150);
+    ___e148.appendChild(___e150);
+    ___e146.appendChild(___e148);
+    ___e145.appendChild(___e146);
+    ___e144.appendChild(___e145);
+    const ___e151 = document.createElement("div");
+    ___e151.className = "search-page-content";
+    const ___e152 = document.createElement("div");
+    ___e152.className = "search-page-results";
+    ___e152.setAttribute("id", "search-page-results");
+    (SearchResultsList(results, query)).Mount(___e152);
+    ___e151.appendChild(___e152);
+    ___e144.appendChild(___e151);
+    ___p.appendChild(___e144);
   }};
 }
 
@@ -2215,9 +2680,18 @@ function updateMeta(selector, value) {
     return;
   }
   let el = document.querySelector(selector);
-  if (el != null) {
-    el.setAttribute("content", value);
+  if (el == null) {
+    el = document.createElement("meta");
+    if (selector.startsWith("meta[name=\"")) {
+      let name = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(selector, "meta[name=\""), "\"]");
+      el.setAttribute("name", name);
+    } else if (selector.startsWith("meta[property=\"")) {
+      let prop = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(((s, pre) => s.startsWith(pre) ? s.slice(pre.length) : s)(selector, "meta[property=\""), "\"]");
+      el.setAttribute("property", prop);
+    }
+    document.head.appendChild(el);
   }
+  el.setAttribute("content", value);
 }
 
 function updateMetaTags() {
@@ -2232,6 +2706,40 @@ function updateMetaTags() {
   updateMeta("meta[property=\"twitter:title\"]", site.Title);
   updateMeta("meta[property=\"og:description\"]", site.Description);
   updateMeta("meta[property=\"twitter:description\"]", site.Description);
+}
+
+function updateRouteMeta(title, description, canonicalPath) {
+  if (title !== "") {
+    document.title = title;
+    updateMeta("meta[property=\"og:title\"]", title);
+    updateMeta("meta[property=\"twitter:title\"]", title);
+  }
+  if (description !== "") {
+    updateMeta("meta[name=\"description\"]", description);
+    updateMeta("meta[property=\"og:description\"]", description);
+    updateMeta("meta[property=\"twitter:description\"]", description);
+  }
+  if (canonicalPath !== "") {
+    let fullURL = canonicalPath;
+    if (canonicalPath.startsWith("/")) {
+      let origin = "";
+      if (window.location != null && window.location.origin != null) {
+        origin = String(window.location.origin);
+      }
+      if (origin === "" || origin === "null") {
+        origin = site.Url;
+      }
+      fullURL = origin + canonicalPath;
+    }
+    updateMeta("meta[property=\"og:url\"]", fullURL);
+    let link = document.querySelector("link[rel=\"canonical\"]");
+    if (link == null) {
+      link = document.createElement("link");
+      link.setAttribute("rel", "canonical");
+      document.head.appendChild(link);
+    }
+    link.setAttribute("href", fullURL);
+  }
 }
 
 function strVal(v) {
@@ -2255,7 +2763,7 @@ function intVal(v) {
   return Math.trunc(Number(v));
 }
 
-function postFromYAML(p) {
+function postFromJSON(p) {
   let fn = strVal(p.filename);
   let slug = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(fn, ".md");
   let tags = [];
@@ -2279,7 +2787,7 @@ function sortPostsByDate(list) {
   });
 }
 
-function projectFromYAML(p) {
+function projectFromJSON(p) {
   let tags = [];
   if (p.tags != null) {
     for (const [_$, tg] of __s(p.tags).entries()) {
@@ -2308,7 +2816,7 @@ function sortProjectsByOrder(list) {
   });
 }
 
-function pageFromYAML(id, p) {
+function pageFromJSON(id, p) {
   return new NavPage({ ID: id, Title: strVal(p.title), Order: intVal(p.order), ShowInNav: boolVal(p.showInNav), Href: "/page/" + id });
 }
 
@@ -2330,6 +2838,7 @@ async function initData() {
   let siteData = data.site;
   if (siteData != null) {
     site.Title = strVal(siteData.title);
+    site.Url = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(strVal(siteData.url), "/");
     site.Description = strVal(siteData.description);
     site.Author = strVal(siteData.author);
     site.GithubUsername = strVal(siteData.github_username);
@@ -2383,20 +2892,20 @@ async function initData() {
     }
     if (data.blog.posts != null) {
       for (const [_$, p] of __s(data.blog.posts).entries()) {
-        posts = __append(posts, postFromYAML(p));
+        posts = __append(posts, postFromJSON(p));
       }
       sortPostsByDate(posts);
     }
   }
   if (data.projects != null) {
     for (const [_$, p] of __s(data.projects).entries()) {
-      projects = __append(projects, projectFromYAML(p));
+      projects = __append(projects, projectFromJSON(p));
     }
     sortProjectsByOrder(projects);
   }
   if (data.pages != null) {
     for (const [id, p] of Object.entries(data.pages)) {
-      navPages = __append(navPages, pageFromYAML(id, p));
+      navPages = __append(navPages, pageFromJSON(id, p));
     }
     sortPagesByOrder(navPages);
   }
@@ -2458,6 +2967,9 @@ function applyTheme(theme) {
     applyPrismTheme(colors.CodeTheme);
   }
   updateGiscusTheme();
+  if (window.mermaid != null) {
+    renderMermaid();
+  }
 }
 
 function nextTheme(current) {
@@ -2549,14 +3061,22 @@ function resetOverlays() {
 }
 
 function newViewState() {
-  return new ViewState({ Post: new BlogPost({ Tags: [] }), Proj: new Project({ Tags: [], YoutubeVideos: [], Links: [] }), Status: LoadReady });
+  return new ViewState({ Post: new BlogPost({ Tags: [] }), Proj: new Project({ Tags: [], YoutubeVideos: [], Links: [] }), Status: LoadReady, PrevPost: new BlogPost({ Tags: [] }), NextPost: new BlogPost({ Tags: [] }), TOC: [] });
 }
 
 function resolvePost(slug, all, cache) {
   let v = newViewState();
-  for (const [_$, p] of __s(all).entries()) {
+  for (const [i, p] of __s(all).entries()) {
     if (p.Slug === slug || p.ID === slug) {
       v.Post = p;
+      if (i + 1 < __len(all)) {
+        v.HasPrev = true;
+        v.PrevPost = all[i + 1];
+      }
+      if (i > 0) {
+        v.HasNext = true;
+        v.NextPost = all[i - 1];
+      }
       {
         let html = cache[p.Filename];
         let ok = (p.Filename) in cache;

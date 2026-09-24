@@ -37,7 +37,7 @@ templ Navbar(r RouteMatch, pages []NavPage, projects []Project, dropdownOpen boo
 				<ul class="navbar-nav right">
 					if siteConfig.Search.Enabled {
 						<li class="nav-item navbar-icon">
-							<button type="button" class="nav-link search-toggle" id="search-toggle" aria-label={ t("aria.search") } title={ t("search.buttonTitle") } data-action="open-search">
+							<button type="button" class="nav-link search-toggle" id="search-toggle" aria-label={ t("aria.search") } title={ t("search.buttonTitle") + " (" + t("search.shortcutHint") + ")" } aria-keyshortcuts="Control+K Meta+K /" data-action="open-search">
 								@Icon("search", "1.35rem")
 							</button>
 						</li>

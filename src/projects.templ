@@ -17,7 +17,7 @@ templ ProjectReadme(v ViewState) {
 templ ProjectMedia(videos []string) {
 	if len(videos) > 0 {
 		<div class="markdown-body">
-			<h2>{ t("project.media") }</h2>
+			<h2 id="project-media">{ t("project.media") }</h2>
 			for _, v := range videos {
 				<div class="youtube-video">
 					<div class="iframeWrapper">
@@ -32,7 +32,7 @@ templ ProjectMedia(videos []string) {
 templ ProjectDemo(p Project) {
 	if p.DemoUrl != "" {
 		<div class="markdown-body">
-			<h2>{ demoLabel(p) }</h2>
+			<h2 id="project-demo">{ demoLabel(p) }</h2>
 			if p.DemoInstructions != "" {
 				<p>{ p.DemoInstructions }</p>
 			}
@@ -55,7 +55,7 @@ templ ProjectDemo(p Project) {
 templ ProjectLinks(links []ProjectLink) {
 	if len(links) > 0 {
 		<div class="markdown-body">
-			<h2>{ t("project.links") }</h2>
+			<h2 id="project-links">{ t("project.links") }</h2>
 			<div class="download-buttons">
 				for _, link := range links {
 					<a href={ link.Href } target="_blank" rel="noopener noreferrer" class="download-btn">
@@ -85,6 +85,7 @@ templ ProjectDetail(v ViewState, commentsEnabled bool) {
 					}
 				</div>
 			}
+			@TableOfContents(v.TOC)
 			@ProjectReadme(v)
 			@ProjectMedia(v.Proj.YoutubeVideos)
 			@ProjectDemo(v.Proj)

@@ -1,5 +1,7 @@
 package main
 
+import "js:./browser.d.ts"
+import "strings"
 import "testing"
 
 func testTranslate(key string) string {
@@ -34,9 +36,9 @@ func TestTranslation(tt *testing.T) {
 	})
 }
 
-func TestPostFromYAML(t *testing.T) {
+func TestPostFromJSON(t *testing.T) {
 	t.Run("maps all fields and strips .md", func(t *testing.T) {
-		p := postFromYAML(map[string]any{
+		p := postFromJSON(map[string]any{
 			"filename": "2026-01-01-hello.md",
 			"title":    "Hello",
 			"date":     "2026-01-01",
@@ -61,21 +63,21 @@ func TestPostFromYAML(t *testing.T) {
 	})
 
 	t.Run("filename without extension is kept as slug", func(t *testing.T) {
-		p := postFromYAML(map[string]any{"filename": "plain"})
+		p := postFromJSON(map[string]any{"filename": "plain"})
 		if p.Slug != "plain" || p.Filename != "plain" {
 			t.Errorf("slug/filename = %q/%q", p.Slug, p.Filename)
 		}
 	})
 
 	t.Run("only trailing .md is removed", func(t *testing.T) {
-		p := postFromYAML(map[string]any{"filename": "about.md.md"})
+		p := postFromJSON(map[string]any{"filename": "about.md.md"})
 		if p.Slug != "about.md" {
 			t.Errorf("slug = %q", p.Slug)
 		}
 	})
 
 	t.Run("missing fields default to empty", func(t *testing.T) {
-		p := postFromYAML(map[string]any{"filename": "x.md"})
+		p := postFromJSON(map[string]any{"filename": "x.md"})
 		if p.Title != "" || p.Date != "" || p.Excerpt != "" {
 			t.Errorf("expected empty defaults, got %+v", p)
 		}
@@ -101,9 +103,9 @@ func TestSortPostsByDate(t *testing.T) {
 	}
 }
 
-func TestProjectFromYAML(t *testing.T) {
+func TestProjectFromJSON(t *testing.T) {
 	t.Run("maps all fields", func(t *testing.T) {
-		p := projectFromYAML(map[string]any{
+		p := projectFromJSON(map[string]any{
 			"id":                "gofront",
 			"title":             "GoFront",
 			"description":       "Go to JS",
@@ -145,7 +147,7 @@ func TestProjectFromYAML(t *testing.T) {
 	})
 
 	t.Run("missing collections are empty, not nil", func(t *testing.T) {
-		p := projectFromYAML(map[string]any{"id": "bare"})
+		p := projectFromJSON(map[string]any{"id": "bare"})
 		if p.Tags == nil || len(p.Tags) != 0 {
 			t.Errorf("tags = %v", p.Tags)
 		}
@@ -169,9 +171,9 @@ func TestSortProjectsByOrder(t *testing.T) {
 	}
 }
 
-func TestPageFromYAML(t *testing.T) {
+func TestPageFromJSON(t *testing.T) {
 	t.Run("maps fields and builds href from id", func(t *testing.T) {
-		p := pageFromYAML("about", map[string]any{"title": "About", "order": 5, "showInNav": true})
+		p := pageFromJSON("about", map[string]any{"title": "About", "order": 5, "showInNav": true})
 		if p.ID != "about" || p.Href != "/page/about" {
 			t.Errorf("id/href = %q/%q", p.ID, p.Href)
 		}
@@ -181,7 +183,7 @@ func TestPageFromYAML(t *testing.T) {
 	})
 
 	t.Run("missing fields default", func(t *testing.T) {
-		p := pageFromYAML("x", map[string]any{})
+		p := pageFromJSON("x", map[string]any{})
 		if p.Title != "" || p.Order != 0 || p.ShowInNav {
 			t.Errorf("defaults = %+v", p)
 		}
@@ -193,5 +195,29 @@ func TestSortPagesByOrder(t *testing.T) {
 	sortPagesByOrder(list)
 	if list[0].ID != "m" || list[1].ID != "z" {
 		t.Errorf("order = %s %s", list[0].ID, list[1].ID)
+	}
+}
+
+func TestUpdateRouteMeta(t *testing.T) {
+	site.Title = "luukvanvenrooij.nl"
+	updateRouteMeta("My Test Post - luukvanvenrooij.nl", "A detailed test excerpt", "/blog/test-post")
+
+	if document.title != "My Test Post - luukvanvenrooij.nl" {
+		t.Errorf("expected document.title 'My Test Post - luukvanvenrooij.nl', got %q", document.title)
+	}
+
+	metaDesc := document.querySelector("meta[name=\"description\"]")
+	if metaDesc == nil || string(metaDesc.getAttribute("content")) != "A detailed test excerpt" {
+		t.Errorf("expected meta description 'A detailed test excerpt'")
+	}
+
+	ogTitle := document.querySelector("meta[property=\"og:title\"]")
+	if ogTitle == nil || string(ogTitle.getAttribute("content")) != "My Test Post - luukvanvenrooij.nl" {
+		t.Errorf("expected og:title 'My Test Post - luukvanvenrooij.nl'")
+	}
+
+	canonical := document.querySelector("link[rel=\"canonical\"]")
+	if canonical == nil || !strings.Contains(string(canonical.getAttribute("href")), "/blog/test-post") {
+		t.Errorf("expected canonical link containing '/blog/test-post'")
 	}
 }

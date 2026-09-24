@@ -168,4 +168,33 @@ test.describe("Search", () => {
         });
         expect(stillSameMain).toBe(true);
     });
+
+    test("Control+k and / shortcuts trigger search overlay", async ({ page }) => {
+        // Press Control+k to open search
+        await page.keyboard.press("Control+k");
+        await expect(page.locator("#search-page")).toBeVisible();
+
+        // Escape to close
+        await page.keyboard.press("Escape");
+        await expect(page.locator("#search-page")).not.toBeVisible();
+
+        // Press / to open search
+        await page.keyboard.press("/");
+        await expect(page.locator("#search-page")).toBeVisible();
+    });
+
+    test("typing / inside text inputs does not trigger search shortcut", async ({ page }) => {
+        // Open contact modal to focus an input
+        await page.click("#email-toggle");
+        await expect(page.locator("#contact-modal")).toBeVisible();
+        const input = page.locator("#contact-name");
+        await input.click();
+        await input.fill("test");
+        await page.keyboard.type("/");
+
+        // Search overlay should NOT open
+        await expect(page.locator("#search-page")).not.toBeVisible();
+        // The slash character should be in the input
+        await expect(input).toHaveValue("test/");
+    });
 });
