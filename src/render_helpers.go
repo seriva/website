@@ -11,46 +11,15 @@ func isActiveRoute(r RouteMatch, kind Route, param string) bool {
 	return r.Kind == kind && r.Param == param
 }
 
-func toggleBtnClass(open bool) string {
-	if open {
-		return "navbar-toggle active"
+// cls appends extra to base when on is true.
+func cls(base string, on bool, extra string) string {
+	if !on {
+		return base
 	}
-	return "navbar-toggle"
-}
-
-func navbarCollapseClass(open bool) string {
-	if open {
-		return "navbar-collapse show"
+	if base == "" {
+		return extra
 	}
-	return "navbar-collapse"
-}
-
-func dropdownClass(open bool) string {
-	if open {
-		return "nav-item navbar-menu dropdown show"
-	}
-	return "nav-item navbar-menu dropdown"
-}
-
-func navLinkClass(active bool) string {
-	if active {
-		return "nav-link active"
-	}
-	return "nav-link"
-}
-
-func dropdownToggleClass(active bool) string {
-	if active {
-		return "nav-link dropdown-toggle active"
-	}
-	return "nav-link dropdown-toggle"
-}
-
-func dropdownItemClass(active bool) string {
-	if active {
-		return "dropdown-item active"
-	}
-	return "dropdown-item"
+	return base + " " + extra
 }
 
 // ── Blog & pagination helpers ─────────────────────────────────
@@ -79,37 +48,18 @@ func calcTotalPages(totalCount int, perPage int) int {
 	return num / perPage
 }
 
-func pageItemPrevClass(page int) string {
-	if page <= 1 {
-		return "page-item disabled"
-	}
-	return "page-item"
-}
-
-func pageItemNextClass(page int, totalPages int) string {
-	if page >= totalPages {
-		return "page-item disabled"
-	}
-	return "page-item"
-}
-
-func pageItemClass(page int, currentPage int) string {
-	if page == currentPage {
-		return "page-item active"
-	}
-	return "page-item"
-}
-
+// pageHref returns the canonical URL for a blog page; page 1 is /blog.
 func pageHref(page int) string {
-	if page < 1 {
-		page = 1
+	if page <= 1 {
+		return "/blog"
 	}
 	return "/blog/page/" + strconv.Itoa(page)
 }
 
-func pageNumbers(totalPages int) []int {
-	nums := []int{}
-	for i := 1; i <= totalPages; i++ {
+// pageNumbers returns 1..n for templ range loops (templ `for` only supports range).
+func pageNumbers(n int) []int {
+	nums := make([]int, 0, n)
+	for i := 1; i <= n; i++ {
 		nums = append(nums, i)
 	}
 	return nums
@@ -131,27 +81,7 @@ func demoWrapperClass(height string) string {
 	return "iframeWrapper"
 }
 
-// ── Overlay helpers ───────────────────────────────────────────
-
-// overlayClass is shared by the search page and contact modal.
-func overlayClass(open bool, closing bool) string {
-	if closing {
-		return "show closing"
-	}
-	if open {
-		return "show"
-	}
-	return ""
-}
-
-// ── Search helpers ────────────────────────────────────────────
-
-func searchClearClass(q string) string {
-	if q != "" {
-		return "search-page-clear show"
-	}
-	return "search-page-clear"
-}
+// ── Search helpers ───────────────────────────────────────────
 
 func searchPlaceholderText() string {
 	if site.Search.Placeholder != "" {
@@ -176,13 +106,6 @@ func highlightMatch(text string, query string) string {
 
 // ── Contact helpers ───────────────────────────────────────────
 
-func inputErrorClass(hasErr bool) string {
-	if hasErr {
-		return "error"
-	}
-	return ""
-}
-
 func formStatusClass(statusType string) string {
 	if statusType != "" {
 		return "form-status " + statusType
@@ -196,11 +119,3 @@ func currentYear() int {
 	return time.Now().Year()
 }
 
-// ── TOC helpers ───────────────────────────────────────────────
-
-func tocItemClass(level int) string {
-	if level == 3 {
-		return "blog-toc-item blog-toc-level-3"
-	}
-	return "blog-toc-item blog-toc-level-2"
-}

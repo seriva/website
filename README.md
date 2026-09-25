@@ -53,7 +53,7 @@ flowchart TD
 
 ### Key Modules
 
-- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state & data store, JSON hydration) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, async loaders) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
+- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state & data store, JSON hydration, `contentCache`) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, `loadRoute` fetch/cache/render path) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
 - **Components (`src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
 - **Styles (`app/css/app.css`)**: single plain stylesheet linked from `index.html`, formatted and linted by Biome; loads in parallel with the JS bundles
 
@@ -114,7 +114,7 @@ npm run test:all     # Run all tests (GoFront + Playwright)
 ```
 
 Tests cover:
-- **Go Unit Tests (`src/*_test.go`)**: route parsing, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
+- **Go Unit Tests (`src/*_test.go`)**: route parsing, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), `loadRoute` (stubbed `fetch`, superseded navigation), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
 - **End-to-End Tests (`tests/e2e/`)**: 10 Playwright test suites across Chromium and Firefox:
   - Navigation, history, deep-linking, and route transitions
   - Markdown blog rendering, pagination, and code syntax highlighting

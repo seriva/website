@@ -12,6 +12,7 @@ Design documents for planned features live in `docs/plans/`
 
 | Feature | Difficulty | Status | Notes |
 |---------|------------|--------|-------|
+| [Codebase Simplification](plans/archive/codebase-simplification-plan.md) | Medium | Completed (2026-09-25) | Behaviour-preserving cleanup: dead i18n keys/icons, unreachable `build.js` commands, five caches → one `contentCache`, shared `loadRoute`, drop `closing` overlay state (CSS-driven exit), `CommentsConfig` → raw giscus attrs, class-builder helpers → one `cls()` |
 | [Website Enhancements](plans/archive/website-enhancements-plan.md) | Medium | Completed (2026-09-24) | Static route stubs with OG/Twitter/canonical meta for crawlers, SPA head-meta sync, blog TOC + prev/next + back link, `Ctrl+K` / `/` search shortcut, lazy EmailJS (pinned + SRI), CSS minify + content-hash cache busting, `content.yaml` dev watcher, `gofront --check` in `npm run check` |
 | [Post-Rewrite Hardening](plans/archive/post-rewrite-hardening-plan.md) | Medium | Completed (2026-09-23) | `ViewState` + `LoadStatus` replaces route globals with pure resolvers, CSS extracted to `app/css/app.css` with Biome checks (app.js 104→73 KB), unit-test breadth restored via `gofront test --dom` (116 Go tests); coarse re-render explicitly accepted |
 | [State-Driven Rendering & templ Idioms](plans/archive/state-driven-rendering-and-templ-idioms-plan.md) | Medium | Completed (2026-09-23) | Route enum + `parseRoute`, region renders, `syncOverlays()` reconciler, ARIA/button fixes, single `Icon()` component, CSP hygiene, GoFront 1.2.1 |

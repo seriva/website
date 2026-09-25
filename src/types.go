@@ -44,7 +44,6 @@ type Project struct {
 }
 
 type BlogPost struct {
-	ID       string
 	Slug     string
 	Title    string
 	Date     string
@@ -77,6 +76,12 @@ type TOCItem struct {
 	ID    string
 	Text  string
 	Level int
+}
+
+// cachedContent is a rendered route body; an empty HTML counts as a cache miss.
+type cachedContent struct {
+	HTML string
+	TOC  []TOCItem
 }
 
 // ViewState is the state of the current route's content region.
@@ -114,19 +119,12 @@ type ThemeColors struct {
 	CommentsTheme string
 }
 
+// CommentsConfig holds the two page toggles; Attrs is the raw giscus config
+// object whose camelCase keys map 1:1 to data-* attributes on the client script.
 type CommentsConfig struct {
-	BlogEnabled      bool
-	ProjectsEnabled  bool
-	Repo             string
-	RepoId           string
-	Category         string
-	CategoryId       string
-	Mapping          string
-	Strict           string
-	ReactionsEnabled string
-	EmitMetadata     string
-	InputPosition    string
-	Lang             string
+	BlogEnabled     bool
+	ProjectsEnabled bool
+	Attrs           any
 }
 
 type EmailJSConfig struct {

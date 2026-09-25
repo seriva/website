@@ -16,12 +16,23 @@ func newViewState() ViewState {
 	}
 }
 
+// fromCache copies a cache hit into v and reports whether there was one.
+func fromCache(v *ViewState, cache map[string]cachedContent, key string) bool {
+	c, ok := cache[key]
+	if !ok || c.HTML == "" {
+		return false
+	}
+	v.HTML = c.HTML
+	v.TOC = c.TOC
+	return true
+}
+
 // resolvePost builds the view for a blog post slug. The bool reports whether
 // the markdown still has to be fetched.
-func resolvePost(slug string, all []BlogPost, cache map[string]string) (ViewState, bool) {
+func resolvePost(slug string, all []BlogPost, cache map[string]cachedContent) (ViewState, bool) {
 	v := newViewState()
 	for i, p := range all {
-		if p.Slug == slug || p.ID == slug {
+		if p.Slug == slug {
 			v.Post = p
 			if i+1 < len(all) {
 				v.HasPrev = true
@@ -31,8 +42,7 @@ func resolvePost(slug string, all []BlogPost, cache map[string]string) (ViewStat
 				v.HasNext = true
 				v.NextPost = all[i-1]
 			}
-			if html, ok := cache[p.Filename]; ok && html != "" {
-				v.HTML = html
+			if fromCache(&v, cache, p.Href) {
 				return v, false
 			}
 			v.Status = LoadPending
@@ -45,16 +55,16 @@ func resolvePost(slug string, all []BlogPost, cache map[string]string) (ViewStat
 
 // resolveProject builds the view for a project id. Projects without a GitHub
 // repo are ready immediately; otherwise the README cache decides.
-func resolveProject(id string, all []Project, cache map[string]string) (ViewState, bool) {
+func resolveProject(id string, all []Project, cache map[string]cachedContent) (ViewState, bool) {
 	v := newViewState()
 	for _, p := range all {
 		if p.ID == id {
 			v.Proj = p
 			if p.GithubRepo == "" {
+				v.TOC = extractProjectTOC("", p)
 				return v, false
 			}
-			if html, ok := cache[p.GithubRepo]; ok && html != "" {
-				v.HTML = html
+			if fromCache(&v, cache, p.Href) {
 				return v, false
 			}
 			v.Status = LoadPending
@@ -67,17 +77,19 @@ func resolveProject(id string, all []Project, cache map[string]string) (ViewStat
 
 // resolvePage builds the view for a custom page id. Unknown ids still fetch,
 // so the markdown file (or its 404) is the source of truth.
-func resolvePage(id string, all []NavPage, cache map[string]string) (ViewState, bool) {
+func resolvePage(id string, all []NavPage, cache map[string]cachedContent) (ViewState, bool) {
 	v := newViewState()
-	v.Page = NavPage{ID: id, Title: id}
+	v.Page = NavPage{ID: id, Title: id, Href: navPageHref(id)}
 	for _, p := range all {
 		if p.ID == id {
 			v.Page = p
 			break
 		}
 	}
-	if html, ok := cache[id]; ok && html != "" {
-		v.HTML = html
+	if v.Page.Title == "" {
+		v.Page.Title = id
+	}
+	if fromCache(&v, cache, v.Page.Href) {
 		return v, false
 	}
 	v.Status = LoadPending

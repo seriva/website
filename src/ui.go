@@ -60,13 +60,9 @@ func syncOverlays() {
 	setClass(".dropdown", "show", projectsDropdownOpen)
 	setAttr(".dropdown-toggle", "aria-expanded", strconv.FormatBool(projectsDropdownOpen))
 
-	setClass("#search-page", "show", searchOpen || searchClosing)
-	setClass("#search-page", "closing", searchClosing)
+	setClass("#search-page", "show", searchOpen)
 	setClass("#search-page-clear", "show", searchQuery != "")
-
-	modalVisible := contactOpen || contactClosing
-	setClass("#contact-modal", "show", modalVisible)
-	setClass("#contact-modal", "closing", contactClosing)
+	setClass("#contact-modal", "show", contactOpen)
 }
 
 // resetOverlays closes every overlay without animation (used on route change).
@@ -74,10 +70,8 @@ func resetOverlays() {
 	mobileMenuOpen = false
 	projectsDropdownOpen = false
 	contactOpen = false
-	contactClosing = false
 	if searchOpen || searchQuery != "" {
 		searchOpen = false
-		searchClosing = false
 		setSearchQuery("")
 	}
 	syncOverlays()

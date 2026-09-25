@@ -3,15 +3,10 @@
 // ===========================================
 // UNIFIED WEBSITE BUILD UTILITY
 // ===========================================
-// Commands:
+// Commands (see package.json scripts):
 //   content  — Compile app/data/content.yaml into content.json
-//   watch    — Watch app/data/content.yaml and recompile on change
 //   dev      — Run content watch + dev server concurrently
-//   sync     — Copy public assets from app/ to public/ (configured in package.json)
-//   seo      — Generate public/sitemap.xml and public/rss.xml
-//   routes   — Pre-generate static HTML route stubs with full meta tags
-//   post     — Run sync + seo + routes (production post-build)
-//   all      — Run content + sync + seo + routes
+//   post     — Sync public assets, generate sitemap/RSS and route stubs
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -38,17 +33,6 @@ const publicDir = join(rootDir, "public");
 
 const pkgPath = join(rootDir, "package.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-
-const DEFAULT_PUBLIC_ASSETS = [
-	"index.html",
-	"boot.js",
-	"favicon.svg",
-	"og-image.jpg",
-	"robots.txt",
-	"data",
-	"fonts",
-	"css",
-];
 
 // ── 1. Content Compilation & Watching (YAML → JSON) ───────────
 
@@ -120,13 +104,10 @@ function runDev() {
 	});
 }
 
+// loadContentData reads the JSON produced by the `content` step, which always
+// runs first in `npm run prep` / `npm run prod`.
 function loadContentData() {
-	const jsonPath = join(appDir, "data/content.json");
-	if (existsSync(jsonPath)) {
-		return JSON.parse(readFileSync(jsonPath, "utf8"));
-	}
-	const yamlPath = join(appDir, "data/content.yaml");
-	return parse(readFileSync(yamlPath, "utf8"));
+	return JSON.parse(readFileSync(join(appDir, "data/content.json"), "utf8"));
 }
 
 // ── 2. Public Asset Synchronization & Minification ─────────────
@@ -178,8 +159,6 @@ function getAssetVersion() {
 function applyCacheBusting(html, version) {
 	return html
 		.replace(/(href="\/css\/app\.css)(?:[^"]*)(")/g, `$1?v=${version}$2`)
-		.replace(/(href="\/vendor\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
-		.replace(/(href="\/app\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
 		.replace(/(src="\/boot\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
 		.replace(/(src="\/vendor\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`)
 		.replace(/(src="\/app\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`);
@@ -188,11 +167,9 @@ function applyCacheBusting(html, version) {
 function syncPublicAssets() {
 	mkdirSync(publicDir, { recursive: true });
 
-	const assetsToCopy =
-		pkg.publicAssets || pkg.staticAssets || DEFAULT_PUBLIC_ASSETS;
 	let copiedCount = 0;
 
-	for (const item of assetsToCopy) {
+	for (const item of pkg.publicAssets) {
 		const srcPath = join(appDir, item);
 		const destPath = join(publicDir, item);
 
@@ -375,13 +352,12 @@ function generateRssFeed(contentData, baseUrl) {
 }
 
 function getBaseUrl(contentData) {
-	if (contentData.site?.url) {
-		return contentData.site.url.replace(/\/$/, "");
+	const url = contentData.site?.url;
+	if (!url) {
+		console.error("Error: site.url is not set in app/data/content.yaml");
+		process.exit(1);
 	}
-	if (contentData.site?.title?.includes(".")) {
-		return `https://${contentData.site.title}`;
-	}
-	return "https://example.com";
+	return url.replace(/\/$/, "");
 }
 
 function generateSeo() {
@@ -534,11 +510,12 @@ function generateStaticRoutes(contentData, baseUrl) {
 		// 3. Blog pagination
 		const perPage = contentData.blog.postsPerPage || 5;
 		const totalPages = Math.ceil(contentData.blog.posts.length / perPage);
+		// blog/page/1 is kept as an alias; its canonical is /blog like the SPA's.
 		for (let p = 1; p <= totalPages; p++) {
 			writeRoute(`blog/page/${p}`, {
 				title: p > 1 ? `Blog - ${siteTitle}` : siteTitle,
 				description: siteDesc,
-				url: `${baseUrl}/blog/page/${p}`,
+				url: p > 1 ? `${baseUrl}/blog/page/${p}` : `${baseUrl}/blog`,
 				type: "website",
 			});
 		}
@@ -585,44 +562,22 @@ function generateRoutes() {
 
 // ── CLI Dispatch ──────────────────────────────────────────────
 
-const command = process.argv[2] || "all";
+const command = process.argv[2];
 
 switch (command) {
 	case "content":
 		compileContent();
 		break;
-	case "watch":
-		watchContent();
-		break;
 	case "dev":
 		runDev();
-		break;
-	case "sync":
-	case "static":
-	case "public":
-		syncPublicAssets();
-		break;
-	case "seo":
-		generateSeo();
-		break;
-	case "routes":
-		generateRoutes();
 		break;
 	case "post":
 		syncPublicAssets();
 		generateSeo();
 		generateRoutes();
 		break;
-	case "all":
-		compileContent();
-		syncPublicAssets();
-		generateSeo();
-		generateRoutes();
-		break;
 	default:
 		console.error(`Unknown command: ${command}`);
-		console.error(
-			"Usage: node scripts/build.js [content|watch|dev|sync|seo|routes|post|all]",
-		);
+		console.error("Usage: node scripts/build.js [content|dev|post]");
 		process.exit(1);
 }

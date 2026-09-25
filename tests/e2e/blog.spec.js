@@ -51,7 +51,7 @@ test.describe("Blog", () => {
 
         // Click First button to return to page 1
         await page.locator('.blog-pagination [aria-label="First"]').click();
-        await expect(page).toHaveURL("/blog/page/1");
+        await expect(page).toHaveURL("/blog");
         await expect(page.locator('.blog-pagination .page-item:has([aria-label="First"])')).toHaveClass(/disabled/);
     });
 

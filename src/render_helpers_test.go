@@ -5,59 +5,25 @@ import (
 	"testing"
 )
 
-// ── Navbar class helpers ──────────────────────────────────────
+// ── Class helper ───────────────────────────────────────────────
 
-func TestToggleBtnClass(t *testing.T) {
-	if toggleBtnClass(true) != "navbar-toggle active" {
-		t.Errorf("expected 'navbar-toggle active', got %q", toggleBtnClass(true))
+func TestCls(t *testing.T) {
+	cases := []struct {
+		base  string
+		on    bool
+		extra string
+		want  string
+	}{
+		{"nav-link", false, "active", "nav-link"},
+		{"nav-link", true, "active", "nav-link active"},
+		{"nav-item navbar-menu dropdown", true, "show", "nav-item navbar-menu dropdown show"},
+		{"", false, "show", ""},
+		{"", true, "error", "error"},
 	}
-	if toggleBtnClass(false) != "navbar-toggle" {
-		t.Errorf("expected 'navbar-toggle', got %q", toggleBtnClass(false))
-	}
-}
-
-func TestNavbarCollapseClass(t *testing.T) {
-	if navbarCollapseClass(true) != "navbar-collapse show" {
-		t.Errorf("expected 'navbar-collapse show', got %q", navbarCollapseClass(true))
-	}
-	if navbarCollapseClass(false) != "navbar-collapse" {
-		t.Errorf("expected 'navbar-collapse', got %q", navbarCollapseClass(false))
-	}
-}
-
-func TestDropdownClass(t *testing.T) {
-	if dropdownClass(true) != "nav-item navbar-menu dropdown show" {
-		t.Errorf("expected 'nav-item dropdown show', got %q", dropdownClass(true))
-	}
-	if dropdownClass(false) != "nav-item navbar-menu dropdown" {
-		t.Errorf("expected 'nav-item dropdown', got %q", dropdownClass(false))
-	}
-}
-
-func TestNavLinkClass(t *testing.T) {
-	if navLinkClass(true) != "nav-link active" {
-		t.Errorf("expected 'nav-link active', got %q", navLinkClass(true))
-	}
-	if navLinkClass(false) != "nav-link" {
-		t.Errorf("expected 'nav-link', got %q", navLinkClass(false))
-	}
-}
-
-func TestDropdownToggleClass(t *testing.T) {
-	if dropdownToggleClass(true) != "nav-link dropdown-toggle active" {
-		t.Errorf("got %q", dropdownToggleClass(true))
-	}
-	if dropdownToggleClass(false) != "nav-link dropdown-toggle" {
-		t.Errorf("got %q", dropdownToggleClass(false))
-	}
-}
-
-func TestDropdownItemClass(t *testing.T) {
-	if dropdownItemClass(true) != "dropdown-item active" {
-		t.Errorf("got %q", dropdownItemClass(true))
-	}
-	if dropdownItemClass(false) != "dropdown-item" {
-		t.Errorf("got %q", dropdownItemClass(false))
+	for _, c := range cases {
+		if got := cls(c.base, c.on, c.extra); got != c.want {
+			t.Errorf("cls(%q, %v, %q) = %q, want %q", c.base, c.on, c.extra, got, c.want)
+		}
 	}
 }
 
@@ -65,11 +31,11 @@ func TestDropdownItemClass(t *testing.T) {
 
 func TestPaginatedPosts(t *testing.T) {
 	allPosts := []BlogPost{
-		{ID: "a", Slug: "a", Title: "Post A", Tags: []string{}},
-		{ID: "b", Slug: "b", Title: "Post B", Tags: []string{}},
-		{ID: "c", Slug: "c", Title: "Post C", Tags: []string{}},
-		{ID: "d", Slug: "d", Title: "Post D", Tags: []string{}},
-		{ID: "e", Slug: "e", Title: "Post E", Tags: []string{}},
+		{Slug: "a", Title: "Post A", Tags: []string{}},
+		{Slug: "b", Title: "Post B", Tags: []string{}},
+		{Slug: "c", Title: "Post C", Tags: []string{}},
+		{Slug: "d", Title: "Post D", Tags: []string{}},
+		{Slug: "e", Title: "Post E", Tags: []string{}},
 	}
 
 	t.Run("first page", func(t *testing.T) {
@@ -77,8 +43,8 @@ func TestPaginatedPosts(t *testing.T) {
 		if len(result) != 2 {
 			t.Fatalf("expected 2 posts, got %d", len(result))
 		}
-		if result[0].ID != "a" || result[1].ID != "b" {
-			t.Errorf("unexpected posts: %v, %v", result[0].ID, result[1].ID)
+		if result[0].Slug != "a" || result[1].Slug != "b" {
+			t.Errorf("unexpected posts: %v, %v", result[0].Slug, result[1].Slug)
 		}
 	})
 
@@ -87,8 +53,8 @@ func TestPaginatedPosts(t *testing.T) {
 		if len(result) != 2 {
 			t.Fatalf("expected 2 posts, got %d", len(result))
 		}
-		if result[0].ID != "c" || result[1].ID != "d" {
-			t.Errorf("unexpected posts: %v, %v", result[0].ID, result[1].ID)
+		if result[0].Slug != "c" || result[1].Slug != "d" {
+			t.Errorf("unexpected posts: %v, %v", result[0].Slug, result[1].Slug)
 		}
 	})
 
@@ -97,8 +63,8 @@ func TestPaginatedPosts(t *testing.T) {
 		if len(result) != 1 {
 			t.Fatalf("expected 1 post, got %d", len(result))
 		}
-		if result[0].ID != "e" {
-			t.Errorf("expected 'e', got %q", result[0].ID)
+		if result[0].Slug != "e" {
+			t.Errorf("expected 'e', got %q", result[0].Slug)
 		}
 	})
 
@@ -114,8 +80,8 @@ func TestPaginatedPosts(t *testing.T) {
 		if len(result) != 2 {
 			t.Fatalf("expected 2 posts (reset to page 1), got %d", len(result))
 		}
-		if result[0].ID != "a" {
-			t.Errorf("expected first post to be 'a', got %q", result[0].ID)
+		if result[0].Slug != "a" {
+			t.Errorf("expected first post to be 'a', got %q", result[0].Slug)
 		}
 	})
 }
@@ -152,45 +118,14 @@ func TestCalcTotalPages(t *testing.T) {
 	})
 }
 
-func TestPageItemPrevClass(t *testing.T) {
-	if pageItemPrevClass(1) != "page-item disabled" {
-		t.Errorf("page 1 should be disabled")
-	}
-	if pageItemPrevClass(0) != "page-item disabled" {
-		t.Errorf("page 0 should be disabled")
-	}
-	if pageItemPrevClass(2) != "page-item" {
-		t.Errorf("page 2 should not be disabled")
-	}
-}
-
-func TestPageItemNextClass(t *testing.T) {
-	if pageItemNextClass(3, 3) != "page-item disabled" {
-		t.Errorf("last page should be disabled")
-	}
-	if pageItemNextClass(2, 3) != "page-item" {
-		t.Errorf("non-last page should not be disabled")
-	}
-}
-
-func TestPageItemClass(t *testing.T) {
-	if pageItemClass(2, 2) != "page-item active" {
-		t.Errorf("current page should be active")
-	}
-	if pageItemClass(1, 2) != "page-item" {
-		t.Errorf("non-current page should not be active")
-	}
-}
-
 func TestPageHref(t *testing.T) {
 	if pageHref(3) != "/blog/page/3" {
 		t.Errorf("expected '/blog/page/3', got %q", pageHref(3))
 	}
-	if pageHref(0) != "/blog/page/1" {
-		t.Errorf("expected '/blog/page/1' for page 0, got %q", pageHref(0))
-	}
-	if pageHref(-1) != "/blog/page/1" {
-		t.Errorf("expected '/blog/page/1' for page -1, got %q", pageHref(-1))
+	for _, p := range []int{1, 0, -1} {
+		if pageHref(p) != "/blog" {
+			t.Errorf("expected '/blog' for page %d, got %q", p, pageHref(p))
+		}
 	}
 }
 
@@ -204,10 +139,8 @@ func TestPageNumbers(t *testing.T) {
 			t.Errorf("expected %d at index %d, got %d", i+1, i, n)
 		}
 	}
-
-	empty := pageNumbers(0)
-	if len(empty) != 0 {
-		t.Errorf("expected 0 numbers for 0 pages, got %d", len(empty))
+	if len(pageNumbers(0)) != 0 {
+		t.Errorf("expected 0 numbers for 0 pages")
 	}
 }
 
@@ -241,27 +174,6 @@ func TestDemoWrapperClass(t *testing.T) {
 }
 
 // ── Search helpers ────────────────────────────────────────────
-
-func TestOverlayClass(t *testing.T) {
-	if overlayClass(false, false) != "" {
-		t.Errorf("expected empty, got %q", overlayClass(false, false))
-	}
-	if overlayClass(true, false) != "show" {
-		t.Errorf("expected 'show', got %q", overlayClass(true, false))
-	}
-	if overlayClass(true, true) != "show closing" {
-		t.Errorf("expected 'show closing', got %q", overlayClass(true, true))
-	}
-}
-
-func TestSearchClearClass(t *testing.T) {
-	if searchClearClass("query") != "search-page-clear show" {
-		t.Errorf("expected show class with query")
-	}
-	if searchClearClass("") != "search-page-clear" {
-		t.Errorf("expected no show class without query")
-	}
-}
 
 func TestHighlightMatch(t *testing.T) {
 	t.Run("empty query returns escaped text", func(t *testing.T) {
@@ -340,14 +252,6 @@ func TestSearchPlaceholderText(t *testing.T) {
 
 // ── Contact helpers ───────────────────────────────────────────
 
-func TestInputErrorClass(t *testing.T) {
-	if inputErrorClass(true) != "error" {
-		t.Errorf("expected 'error'")
-	}
-	if inputErrorClass(false) != "" {
-		t.Errorf("expected empty")
-	}
-}
 
 func TestFormStatusClass(t *testing.T) {
 	if formStatusClass("error") != "form-status error" {

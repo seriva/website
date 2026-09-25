@@ -28,12 +28,8 @@ var contactForm ContactState
 // here: globals are emitted in file order, so LoadReady (types.go) would be in TDZ.
 var view ViewState
 
-// Rendered-HTML caches keyed by post filename, project github repo and page id.
-var readmeCache map[string]string = map[string]string{}
-var readmeTOCCache map[string][]TOCItem = map[string][]TOCItem{}
-var postHtmlCache map[string]string = map[string]string{}
-var postTOCCache map[string][]TOCItem = map[string][]TOCItem{}
-var pageHtmlCache map[string]string = map[string]string{}
+// Rendered route content keyed by route path (/blog/<slug>, /project/<id>, /page/<id>).
+var contentCache = map[string]cachedContent{}
 
 // ── Translation Helper ────────────────────────────────────────
 
@@ -85,7 +81,6 @@ func updateMetaTags() {
 	updateDescriptionMeta(site.Description)
 	updateMeta("name", "author", site.Author)
 	updateMeta("name", "theme-color", site.DarkTheme.Primary)
-	updateMeta("name", "msapplication-TileColor", site.DarkTheme.Primary)
 }
 
 func updateRouteMeta(title string, description string, canonicalPath string) {
@@ -146,7 +141,6 @@ func postFromJSON(p any) BlogPost {
 	fn := strVal(p.filename)
 	slug := strings.TrimSuffix(fn, ".md")
 	return BlogPost{
-		ID:       slug,
 		Slug:     slug,
 		Title:    strVal(p.title),
 		Date:     strVal(p.date),
@@ -230,6 +224,11 @@ func sortProjectsByOrder(list []Project) {
 	})
 }
 
+// navPageHref is the route for a custom page id.
+func navPageHref(id string) string {
+	return "/page/" + id
+}
+
 // pageFromJSON maps one `pages.<id>` entry to a NavPage.
 func pageFromJSON(id string, p any) NavPage {
 	return NavPage{
@@ -237,7 +236,7 @@ func pageFromJSON(id string, p any) NavPage {
 		Title:     strVal(p.title),
 		Order:     intVal(p.order),
 		ShowInNav: boolVal(p.showInNav),
-		Href:      "/page/" + id,
+		Href:      navPageHref(id),
 	}
 }
 
@@ -293,20 +292,10 @@ async func initData() error {
 		}
 
 		if siteData.comments != nil {
-			c := siteData.comments
 			site.Comments = CommentsConfig{
-				BlogEnabled:      boolVal(c.blogEnabled),
-				ProjectsEnabled:  boolVal(c.projectsEnabled),
-				Repo:             strVal(c.repo),
-				RepoId:           strVal(c.repoId),
-				Category:         strVal(c.category),
-				CategoryId:       strVal(c.categoryId),
-				Mapping:          strVal(c.mapping),
-				Strict:           strVal(c.strict),
-				ReactionsEnabled: strVal(c.reactionsEnabled),
-				EmitMetadata:     strVal(c.emitMetadata),
-				InputPosition:    strVal(c.inputPosition),
-				Lang:             strVal(c.lang),
+				BlogEnabled:     boolVal(siteData.comments.blogEnabled),
+				ProjectsEnabled: boolVal(siteData.comments.projectsEnabled),
+				Attrs:           siteData.comments,
 			}
 		}
 
