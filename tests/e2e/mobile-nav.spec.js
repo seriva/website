@@ -32,7 +32,7 @@ test.describe("Mobile navigation", () => {
         await page.click(".navbar-toggle");
         await expect(page.locator(".navbar-collapse")).toHaveClass(/show/);
         // Click a nav link (blog)
-        await page.click('a[href="/blog"]');
+        await page.click('.nav-link[href="/blog"]');
         await expect(page.locator(".navbar-collapse")).not.toHaveClass(/show/, {
             timeout: 2000,
         });

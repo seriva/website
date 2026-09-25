@@ -142,8 +142,53 @@ func showBlog(page int) {
 	renderRoute()
 }
 
+// loadRoute fetches url, renders it with transform and caches the result under
+// key. It reports whether the route is still current; when superseded by a
+// newer navigation the cache is filled but view is left untouched.
+async func loadRoute(key string, url string, transform func(string) cachedContent) bool {
+	seq := routeSeq
+	mdText, err := await loadMarkdownFile(url)
+	if err == nil {
+		contentCache[key] = transform(mdText)
+	}
+	if seq != routeSeq {
+		return false
+	}
+	if err != nil {
+		view.Status = LoadFailed
+		return true
+	}
+	c := contentCache[key]
+	view.HTML = c.HTML
+	view.TOC = c.TOC
+	view.Status = LoadReady
+	return true
+}
+
+// renderPost turns a blog markdown file into cached content.
+func renderPost(mdText string) cachedContent {
+	content := stripFrontmatter(mdText)
+	toc := extractTOC(content)
+	return cachedContent{HTML: injectHeadingIDs(parseMarkdown(content), toc), TOC: toc}
+}
+
+// renderReadme turns a project README into cached content whose TOC also
+// covers the Media/Demo/Links sections.
+func renderReadme(p Project) func(string) cachedContent {
+	return func(mdText string) cachedContent {
+		return cachedContent{
+			HTML: injectHeadingIDs(parseMarkdown(mdText), extractTOC(mdText)),
+			TOC:  extractProjectTOC(mdText, p),
+		}
+	}
+}
+
+func renderPage(mdText string) cachedContent {
+	return cachedContent{HTML: parseMarkdown(mdText), TOC: []TOCItem{}}
+}
+
 async func showPost(slug string) {
-	v, needsFetch := resolvePost(slug, posts, postHtmlCache)
+	v, needsFetch := resolvePost(slug, posts, contentCache)
 	view = v
 	if view.Status == LoadNotFound {
 		updateRouteMeta(t("general.blogNotFound")+" - "+site.Title, t("general.blogNotFoundMessage"), "/blog/"+slug)
@@ -151,43 +196,22 @@ async func showPost(slug string) {
 		return
 	}
 
-	updateRouteMeta(view.Post.Title+" - "+site.Title, view.Post.Excerpt, "/blog/"+view.Post.Slug)
-
+	updateRouteMeta(view.Post.Title+" - "+site.Title, view.Post.Excerpt, view.Post.Href)
 	if needsFetch {
-		seq := routeSeq
-		mdText, err := await loadMarkdownFile("/data/blog/" + v.Post.Filename)
-		if err != nil {
-			if seq != routeSeq {
-				return
-			}
-			view.Status = LoadFailed
-			renderRoute()
+		if !await loadRoute(view.Post.Href, "/data/blog/"+view.Post.Filename, renderPost) {
 			return
-		}
-		content := stripFrontmatter(mdText)
-		toc := extractTOC(content)
-		html := parseMarkdown(content)
-		html = injectHeadingIDs(html, toc)
-		postHtmlCache[v.Post.Filename] = html
-		postTOCCache[v.Post.Filename] = toc
-		if seq != routeSeq {
-			return
-		}
-		view.HTML = html
-		view.TOC = toc
-		view.Status = LoadReady
-	} else {
-		if cachedTOC, ok := postTOCCache[v.Post.Filename]; ok {
-			view.TOC = cachedTOC
 		}
 	}
 	renderRoute()
+	if view.Status != LoadReady {
+		return
+	}
 	highlightCode()
 	loadGiscus()
 }
 
 async func showProject(id string) {
-	v, needsFetch := resolveProject(id, projects, readmeCache)
+	v, needsFetch := resolveProject(id, projects, contentCache)
 	view = v
 	if view.Status == LoadNotFound {
 		updateRouteMeta(t("general.projectNotFound")+" - "+site.Title, t("general.projectNotFoundMessage"), "/project/"+id)
@@ -195,36 +219,10 @@ async func showProject(id string) {
 		return
 	}
 
-	updateRouteMeta(view.Proj.Title+" - "+site.Title, view.Proj.Description, "/project/"+view.Proj.ID)
-
+	updateRouteMeta(view.Proj.Title+" - "+site.Title, view.Proj.Description, view.Proj.Href)
 	if needsFetch {
-		seq := routeSeq
-		mdText, err := await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername))
-		html := ""
-		toc := []TOCItem{}
-		if err == nil {
-			readmeTOC := extractTOC(mdText)
-			html = parseMarkdown(mdText)
-			html = injectHeadingIDs(html, readmeTOC)
-			toc = extractProjectTOC(mdText, v.Proj)
-			readmeCache[v.Proj.GithubRepo] = html
-			readmeTOCCache[v.Proj.GithubRepo] = toc
-		}
-		if seq != routeSeq {
+		if !await loadRoute(view.Proj.Href, readmeURL(view.Proj, site.GithubUsername), renderReadme(view.Proj)) {
 			return
-		}
-		if err != nil {
-			view.Status = LoadFailed
-		} else {
-			view.HTML = html
-			view.TOC = toc
-			view.Status = LoadReady
-		}
-	} else {
-		if cachedTOC, ok := readmeTOCCache[v.Proj.GithubRepo]; ok {
-			view.TOC = cachedTOC
-		} else {
-			view.TOC = extractProjectTOC("", v.Proj)
 		}
 	}
 	renderRoute()
@@ -233,30 +231,12 @@ async func showProject(id string) {
 }
 
 async func showPage(id string) {
-	v, needsFetch := resolvePage(id, navPages, pageHtmlCache)
+	v, needsFetch := resolvePage(id, navPages, contentCache)
 	view = v
-	title := view.Page.Title + " - " + site.Title
-	if view.Page.Title == "" {
-		title = id + " - " + site.Title
-	}
-	updateRouteMeta(title, site.Description, "/page/"+id)
-
+	updateRouteMeta(view.Page.Title+" - "+site.Title, site.Description, view.Page.Href)
 	if needsFetch {
-		seq := routeSeq
-		mdText, err := await loadMarkdownFile("/data/pages/" + id + ".md")
-		html := ""
-		if err == nil {
-			html = parseMarkdown(mdText)
-			pageHtmlCache[id] = html
-		}
-		if seq != routeSeq {
+		if !await loadRoute(view.Page.Href, "/data/pages/"+id+".md", renderPage) {
 			return
-		}
-		if err != nil {
-			view.Status = LoadFailed
-		} else {
-			view.HTML = html
-			view.Status = LoadReady
 		}
 	}
 	renderRoute()

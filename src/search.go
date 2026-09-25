@@ -5,7 +5,6 @@ import "strings"
 
 var fuseInstance any
 var searchDebounceTimer any
-var searchClosing bool
 
 func initSearch() {
 	var searchItems []any
@@ -18,7 +17,7 @@ func initSearch() {
 			"description": p.Description,
 			"tags":        p.Tags,
 			"type":        "project",
-			"url":         "/project/" + p.ID,
+			"url":         p.Href,
 		}
 		searchItems = append(searchItems, item)
 	}
@@ -31,7 +30,7 @@ func initSearch() {
 			"description": p.Excerpt,
 			"tags":        p.Tags,
 			"type":        "blog",
-			"url":         "/blog/" + p.Slug,
+			"url":         p.Href,
 		}
 		searchItems = append(searchItems, item)
 	}
@@ -113,16 +112,17 @@ func setSearchQuery(q string) {
 }
 
 func openSearch() {
-	closeMenus()
-	searchOpen = true
-	searchClosing = false
-	syncOverlays()
-	focusLater("#search-page-input")
+	openSearchWithTag("")
 }
 
+// openSearchWithTag resets the query on open (not on close) so the results
+// don't vanish while the overlay is still fading out.
 func openSearchWithTag(tag string) {
+	closeMenus()
+	searchOpen = true
 	setSearchQuery(tag)
-	openSearch()
+	syncOverlays()
+	focusLater("#search-page-input")
 }
 
 func clearSearch() {
@@ -131,18 +131,13 @@ func clearSearch() {
 	focusLater("#search-page-input")
 }
 
+// closeSearch hides the overlay; the exit fade is CSS-only (#search-page transition).
 func closeSearch() {
 	if !searchOpen {
 		return
 	}
-	searchClosing = true
+	searchOpen = false
 	syncOverlays()
-	setTimeout(func() {
-		searchOpen = false
-		searchClosing = false
-		setSearchQuery("")
-		syncOverlays()
-	}, 200)
 }
 
 func handleSearchInput(value string) {

@@ -5,12 +5,12 @@ test.describe("Navigation", () => {
         await page.goto("/");
         await expect(page.locator("nav:has(.navbar-brand)")).toBeVisible();
         await expect(page.locator(".navbar-brand")).toBeAttached();
-        await expect(page.locator('a[href="/blog"]')).toBeVisible();
+        await expect(page.locator('.nav-link[href="/blog"]')).toBeVisible();
     });
 
     test("blog nav link navigates to /blog", async ({ page }) => {
         await page.goto("/");
-        await page.click('a[href="/blog"]');
+        await page.click('.nav-link[href="/blog"]');
         await expect(page).toHaveURL("/blog");
         await expect(page.locator(".blog-post-card").first()).toBeVisible();
     });
@@ -47,7 +47,7 @@ test.describe("Navigation", () => {
 
     test("browser back returns to previous route", async ({ page }) => {
         await page.goto("/");
-        await page.click('a[href="/blog"]');
+        await page.click('.nav-link[href="/blog"]');
         await expect(page).toHaveURL("/blog");
         await page.goBack();
         await expect(page).toHaveURL("/");

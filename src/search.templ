@@ -30,8 +30,8 @@ templ SearchResultsList(results []SearchResultItem, query string) {
 	}
 }
 
-templ SearchModal(open bool, closing bool, query string, results []SearchResultItem, placeholder string) {
-	<div id="search-page" class={ overlayClass(open, closing) } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
+templ SearchModal(open bool, query string, results []SearchResultItem, placeholder string) {
+	<div id="search-page" class={ cls("", open, "show") } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
 		<div class="search-page-header">
 			<div class="search-page-header-content">
 				<button type="button" class="search-page-back" id="search-page-back" aria-label={ t("aria.goBack") } data-action="close-search">
@@ -39,7 +39,7 @@ templ SearchModal(open bool, closing bool, query string, results []SearchResultI
 				</button>
 				<div class="search-page-input-wrapper">
 					<input type="search" id="search-page-input" class="search-page-input" placeholder={ placeholder } autocomplete="off" aria-label={ t("aria.search") } value={ query }/>
-					<button type="button" class={ searchClearClass(query) } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
+					<button type="button" class={ cls("search-page-clear", query != "", "show") } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
 						@Icon("times", "1.2rem")
 					</button>
 				</div>

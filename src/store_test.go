@@ -45,8 +45,8 @@ func TestPostFromJSON(t *testing.T) {
 			"excerpt":  "Hi there",
 			"tags":     []any{"go", "web"},
 		})
-		if p.Slug != "2026-01-01-hello" || p.ID != p.Slug {
-			t.Errorf("slug/id = %q/%q", p.Slug, p.ID)
+		if p.Slug != "2026-01-01-hello" {
+			t.Errorf("slug = %q", p.Slug)
 		}
 		if p.Filename != "2026-01-01-hello.md" {
 			t.Errorf("filename = %q", p.Filename)

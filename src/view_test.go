@@ -3,19 +3,23 @@ package main
 import "testing"
 
 var testPosts = []BlogPost{
-	{ID: "hello", Slug: "hello", Title: "Hello", Filename: "hello.md", Tags: []string{}},
-	{ID: "second", Slug: "second", Title: "Second", Filename: "second.md", Tags: []string{}},
-	{ID: "third", Slug: "third", Title: "Third", Filename: "third.md", Tags: []string{}},
+	{Slug: "hello", Title: "Hello", Filename: "hello.md", Href: "/blog/hello", Tags: []string{}},
+	{Slug: "second", Title: "Second", Filename: "second.md", Href: "/blog/second", Tags: []string{}},
+	{Slug: "third", Title: "Third", Filename: "third.md", Href: "/blog/third", Tags: []string{}},
 }
 
 var testProjects = []Project{
-	{ID: "gofront", Title: "GoFront", GithubRepo: "gofront", Tags: []string{}, YoutubeVideos: []string{}, Links: []ProjectLink{}},
-	{ID: "norepo", Title: "No Repo", Tags: []string{}, YoutubeVideos: []string{}, Links: []ProjectLink{}},
+	{ID: "gofront", Title: "GoFront", GithubRepo: "gofront", Href: "/project/gofront", Tags: []string{}, YoutubeVideos: []string{}, Links: []ProjectLink{}},
+	{ID: "norepo", Title: "No Repo", DemoUrl: "https://demo", Href: "/project/norepo", Tags: []string{}, YoutubeVideos: []string{}, Links: []ProjectLink{}},
 }
 
 var testPages = []NavPage{
-	{ID: "about", Title: "About"},
+	{ID: "about", Title: "About", Href: "/page/about"},
 }
+
+var emptyCache = map[string]cachedContent{}
+
+var testTOC = []TOCItem{{ID: "a", Text: "A", Level: 2}}
 
 func TestNewViewState(t *testing.T) {
 	v := newViewState()
@@ -29,17 +33,21 @@ func TestNewViewState(t *testing.T) {
 
 func TestResolvePost(t *testing.T) {
 	t.Run("unknown slug is not found and needs no fetch", func(t *testing.T) {
-		v, fetch := resolvePost("missing", testPosts, map[string]string{})
+		cache := map[string]cachedContent{"/blog/missing": {HTML: "<p>stale</p>", TOC: testTOC}}
+		v, fetch := resolvePost("missing", testPosts, cache)
 		if v.Status != LoadNotFound {
 			t.Errorf("expected LoadNotFound, got %d", v.Status)
 		}
 		if fetch {
 			t.Errorf("expected no fetch for unknown slug")
 		}
+		if v.HTML != "" {
+			t.Errorf("unknown slug must not consult the cache, got %q", v.HTML)
+		}
 	})
 
-	t.Run("cache hit is ready without fetch", func(t *testing.T) {
-		cache := map[string]string{"hello.md": "<p>hi</p>"}
+	t.Run("cache hit is ready without fetch and restores TOC", func(t *testing.T) {
+		cache := map[string]cachedContent{"/blog/hello": {HTML: "<p>hi</p>", TOC: testTOC}}
 		v, fetch := resolvePost("hello", testPosts, cache)
 		if v.Status != LoadReady {
 			t.Errorf("expected LoadReady, got %d", v.Status)
@@ -50,13 +58,16 @@ func TestResolvePost(t *testing.T) {
 		if v.HTML != "<p>hi</p>" {
 			t.Errorf("expected cached html, got %q", v.HTML)
 		}
+		if len(v.TOC) != 1 || v.TOC[0].ID != "a" {
+			t.Errorf("expected cached TOC, got %v", v.TOC)
+		}
 		if v.Post.Title != "Hello" {
 			t.Errorf("expected post to be set, got %q", v.Post.Title)
 		}
 	})
 
 	t.Run("cache miss is pending and needs fetch", func(t *testing.T) {
-		v, fetch := resolvePost("second", testPosts, map[string]string{})
+		v, fetch := resolvePost("second", testPosts, emptyCache)
 		if v.Status != LoadPending {
 			t.Errorf("expected LoadPending, got %d", v.Status)
 		}
@@ -69,16 +80,19 @@ func TestResolvePost(t *testing.T) {
 	})
 
 	t.Run("empty cached html counts as a miss", func(t *testing.T) {
-		cache := map[string]string{"hello.md": ""}
+		cache := map[string]cachedContent{"/blog/hello": {HTML: "", TOC: testTOC}}
 		v, fetch := resolvePost("hello", testPosts, cache)
 		if v.Status != LoadPending || !fetch {
 			t.Errorf("expected pending fetch for empty cache entry")
+		}
+		if len(v.TOC) != 0 {
+			t.Errorf("a miss must not copy the stale TOC")
 		}
 	})
 
 	t.Run("resolves adjacent posts for first, middle, and last", func(t *testing.T) {
 		resolve := func(slug string) ViewState {
-			v, _ := resolvePost(slug, testPosts, map[string]string{})
+			v, _ := resolvePost(slug, testPosts, emptyCache)
 			return v
 		}
 
@@ -113,7 +127,7 @@ func TestResolvePost(t *testing.T) {
 
 func TestResolveProject(t *testing.T) {
 	t.Run("unknown id is not found", func(t *testing.T) {
-		v, fetch := resolveProject("missing", testProjects, map[string]string{})
+		v, fetch := resolveProject("missing", testProjects, emptyCache)
 		if v.Status != LoadNotFound || fetch {
 			t.Errorf("expected LoadNotFound without fetch, got %d / %v", v.Status, fetch)
 		}
@@ -122,18 +136,21 @@ func TestResolveProject(t *testing.T) {
 		}
 	})
 
-	t.Run("project without repo is ready without fetch", func(t *testing.T) {
-		v, fetch := resolveProject("norepo", testProjects, map[string]string{})
+	t.Run("project without repo is ready without fetch and gets a section TOC", func(t *testing.T) {
+		v, fetch := resolveProject("norepo", testProjects, emptyCache)
 		if v.Status != LoadReady || fetch {
 			t.Errorf("expected LoadReady without fetch, got %d / %v", v.Status, fetch)
 		}
 		if v.HTML != "" {
 			t.Errorf("expected empty html, got %q", v.HTML)
 		}
+		if len(v.TOC) != 1 || v.TOC[0].ID != "project-demo" {
+			t.Errorf("expected demo section in TOC, got %v", v.TOC)
+		}
 	})
 
-	t.Run("cache hit is ready without fetch", func(t *testing.T) {
-		cache := map[string]string{"gofront": "<h1>README</h1>"}
+	t.Run("cache hit is ready without fetch and restores TOC", func(t *testing.T) {
+		cache := map[string]cachedContent{"/project/gofront": {HTML: "<h1>README</h1>", TOC: testTOC}}
 		v, fetch := resolveProject("gofront", testProjects, cache)
 		if v.Status != LoadReady || fetch {
 			t.Errorf("expected LoadReady without fetch, got %d / %v", v.Status, fetch)
@@ -141,10 +158,13 @@ func TestResolveProject(t *testing.T) {
 		if v.HTML != "<h1>README</h1>" {
 			t.Errorf("expected cached html, got %q", v.HTML)
 		}
+		if len(v.TOC) != 1 || v.TOC[0].ID != "a" {
+			t.Errorf("expected cached TOC, got %v", v.TOC)
+		}
 	})
 
 	t.Run("cache miss is pending and needs fetch", func(t *testing.T) {
-		v, fetch := resolveProject("gofront", testProjects, map[string]string{})
+		v, fetch := resolveProject("gofront", testProjects, emptyCache)
 		if v.Status != LoadPending || !fetch {
 			t.Errorf("expected LoadPending with fetch, got %d / %v", v.Status, fetch)
 		}
@@ -154,7 +174,7 @@ func TestResolveProject(t *testing.T) {
 	})
 
 	t.Run("empty cached html counts as a miss", func(t *testing.T) {
-		cache := map[string]string{"gofront": ""}
+		cache := map[string]cachedContent{"/project/gofront": {HTML: ""}}
 		v, fetch := resolveProject("gofront", testProjects, cache)
 		if v.Status != LoadPending || !fetch {
 			t.Errorf("expected pending fetch for empty cache entry")
@@ -190,7 +210,7 @@ func TestReadmeURL(t *testing.T) {
 
 func TestResolvePage(t *testing.T) {
 	t.Run("known page with cache hit is ready", func(t *testing.T) {
-		cache := map[string]string{"about": "<p>about</p>"}
+		cache := map[string]cachedContent{"/page/about": {HTML: "<p>about</p>"}}
 		v, fetch := resolvePage("about", testPages, cache)
 		if v.Status != LoadReady || fetch {
 			t.Errorf("expected LoadReady without fetch, got %d / %v", v.Status, fetch)
@@ -201,18 +221,18 @@ func TestResolvePage(t *testing.T) {
 	})
 
 	t.Run("known page with cache miss is pending", func(t *testing.T) {
-		v, fetch := resolvePage("about", testPages, map[string]string{})
+		v, fetch := resolvePage("about", testPages, emptyCache)
 		if v.Status != LoadPending || !fetch {
 			t.Errorf("expected LoadPending with fetch, got %d / %v", v.Status, fetch)
 		}
 	})
 
 	t.Run("unknown page falls back to id as title and still fetches", func(t *testing.T) {
-		v, fetch := resolvePage("secret", testPages, map[string]string{})
+		v, fetch := resolvePage("secret", testPages, emptyCache)
 		if v.Status != LoadPending || !fetch {
 			t.Errorf("expected LoadPending with fetch, got %d / %v", v.Status, fetch)
 		}
-		if v.Page.ID != "secret" || v.Page.Title != "secret" {
+		if v.Page.ID != "secret" || v.Page.Title != "secret" || v.Page.Href != "/page/secret" {
 			t.Errorf("expected fallback page, got %+v", v.Page)
 		}
 	})

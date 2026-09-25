@@ -6,30 +6,30 @@ templ Navbar(r RouteMatch, pages []NavPage, projects []Project, dropdownOpen boo
 	<nav class="navbar">
 		<div class="navbar-inner">
 			<a class="navbar-brand" href="/" data-action="nav">{ siteConfig.Title }</a>
-			<button type="button" class={ toggleBtnClass(mobileOpen) } aria-label="Toggle navigation" aria-expanded={ strconv.FormatBool(mobileOpen) } data-action="toggle-mobile-nav">
+			<button type="button" class={ cls("navbar-toggle", mobileOpen, "active") } aria-label="Toggle navigation" aria-expanded={ strconv.FormatBool(mobileOpen) } data-action="toggle-mobile-nav">
 				<span class="navbar-toggle-icon"></span>
 			</button>
-			<div class={ navbarCollapseClass(mobileOpen) }>
+			<div class={ cls("navbar-collapse", mobileOpen, "show") }>
 				<ul class="navbar-nav left">
 					<li class="nav-item navbar-menu">
-						<a class={ navLinkClass(r.Kind == RouteBlog) } href="/blog" data-action="nav">{ t("nav.blog") }</a>
+						<a class={ cls("nav-link", r.Kind == RouteBlog, "active") } href="/blog" data-action="nav">{ t("nav.blog") }</a>
 					</li>
-					<li class={ dropdownClass(dropdownOpen) }>
-						<button type="button" class={ dropdownToggleClass(r.Kind == RouteProject) } aria-haspopup="true" aria-controls="projects-dropdown" aria-expanded={ strconv.FormatBool(dropdownOpen) } data-action="toggle-projects-dropdown">
+					<li class={ cls("nav-item navbar-menu dropdown", dropdownOpen, "show") }>
+						<button type="button" class={ cls("nav-link dropdown-toggle", r.Kind == RouteProject, "active") } aria-haspopup="true" aria-controls="projects-dropdown" aria-expanded={ strconv.FormatBool(dropdownOpen) } data-action="toggle-projects-dropdown">
 							{ t("nav.projects") }
 							<span class="dropdown-chevron dropdown-chevron-down">@Icon("chevron-down", "0.8em")</span>
 							<span class="dropdown-chevron dropdown-chevron-up">@Icon("chevron-up", "0.8em")</span>
 						</button>
 						<ul class="dropdown-menu" id="projects-dropdown">
 							for _, p := range projects {
-								<li><a class={ dropdownItemClass(isActiveRoute(r, RouteProject, p.ID)) } href={ p.Href } data-action="nav">{ p.Title }</a></li>
+								<li><a class={ cls("dropdown-item", isActiveRoute(r, RouteProject, p.ID), "active") } href={ p.Href } data-action="nav">{ p.Title }</a></li>
 							}
 						</ul>
 					</li>
 					for _, page := range pages {
 						if page.ShowInNav {
 							<li class="nav-item navbar-menu">
-								<a class={ navLinkClass(isActiveRoute(r, RoutePage, page.ID)) } href={ page.Href } data-action="nav">{ page.Title }</a>
+								<a class={ cls("nav-link", isActiveRoute(r, RoutePage, page.ID), "active") } href={ page.Href } data-action="nav">{ page.Title }</a>
 							</li>
 						}
 					}

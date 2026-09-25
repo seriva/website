@@ -1,5 +1,7 @@
 package main
 
+import "strconv"
+
 templ BlogPostCard(post BlogPost) {
     <article
     class="blog-post-card"
@@ -32,27 +34,27 @@ templ BlogPostCard(post BlogPost) {
         templ Pagination(currentPage int, totalPages int) {
             <nav class="blog-pagination" aria-label="Blog pagination">
                 <ul class="pagination">
-                    <li class={ pageItemPrevClass(currentPage) }>
+                    <li class={ cls("page-item", currentPage <= 1, "disabled") }>
                         <a class="page-link" href={ pageHref(1) } data-action="nav" aria-label="First" title="First Page">
                             @Icon("angles-left", "0.85em")
                         </a>
                     </li>
-                    <li class={ pageItemPrevClass(currentPage) }>
+                    <li class={ cls("page-item", currentPage <= 1, "disabled") }>
                         <a class="page-link" href={ pageHref(currentPage - 1) } data-action="nav" aria-label="Previous" title="Previous Page">
                             @Icon("chevron-left", "0.85em")
                         </a>
                     </li>
                     for _, pageNum := range pageNumbers(totalPages) {
-                        <li class={ pageItemClass(pageNum, currentPage) }>
+                        <li class={ cls("page-item", pageNum == currentPage, "active") }>
                             <a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ pageNum }</a>
                             </li>
                         }
-                        <li class={ pageItemNextClass(currentPage, totalPages) }>
+                        <li class={ cls("page-item", currentPage >= totalPages, "disabled") }>
                             <a class="page-link" href={ pageHref(currentPage + 1) } data-action="nav" aria-label="Next" title="Next Page">
                                 @Icon("chevron-right", "0.85em")
                             </a>
                         </li>
-                        <li class={ pageItemNextClass(currentPage, totalPages) }>
+                        <li class={ cls("page-item", currentPage >= totalPages, "disabled") }>
                             <a class="page-link" href={ pageHref(totalPages) } data-action="nav" aria-label="Last" title="Last Page">
                                 @Icon("angles-right", "0.85em")
                             </a>
@@ -86,7 +88,7 @@ templ BlogPostCard(post BlogPost) {
                                     <nav class="blog-toc-nav" aria-label={ t("blog.tableOfContents") }>
                                         <ul class="blog-toc-list">
                                             for _, item := range items {
-                                                <li class={ tocItemClass(item.Level) }>
+                                                <li class={ "blog-toc-item blog-toc-level-" + strconv.Itoa(item.Level) }>
                                                     <a href={ "#" + item.ID }>{ item.Text }</a>
                                                     </li>
                                                 }

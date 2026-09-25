@@ -1238,7 +1238,7 @@ pre:hover .copy-code-button {
 
 /* Search Page / Overlay */
 #search-page {
-	display: none;
+	display: flex;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -1248,15 +1248,22 @@ pre:hover .copy-code-button {
 	z-index: 2000;
 	flex-direction: column;
 	overflow: hidden;
+	visibility: hidden;
 	opacity: 0;
 	transform: scale(0.95);
-	animation: scaleFadeIn 0.25s ease-out forwards;
+	transition:
+		opacity 0.2s ease-in,
+		transform 0.2s ease-in,
+		visibility 0s linear 0.2s;
 }
 #search-page.show {
-	display: flex;
-}
-#search-page.closing {
-	animation: scaleFadeOut 0.2s ease-in forwards;
+	visibility: visible;
+	opacity: 1;
+	transform: scale(1);
+	transition:
+		opacity 0.25s ease-out,
+		transform 0.25s ease-out,
+		visibility 0s;
 }
 .search-page-header {
 	display: flex;
@@ -1266,6 +1273,8 @@ pre:hover .copy-code-button {
 	padding: 0 1rem;
 	background-color: var(--header-color);
 	border-bottom: var(--border-width) solid var(--accent);
+}
+#search-page.show .search-page-header {
 	animation: slideDown var(--transition-normal) ease-out;
 }
 .search-page-header-content {
@@ -1338,6 +1347,8 @@ pre:hover .copy-code-button {
 	padding: 1rem;
 	display: flex;
 	justify-content: center;
+}
+#search-page.show .search-page-content {
 	animation: fadeIn 0.4s ease-out 0.1s both;
 }
 .search-page-results {
@@ -1360,7 +1371,9 @@ pre:hover .copy-code-button {
 
 /* Contact Modal */
 #contact-modal {
-	display: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -1373,14 +1386,18 @@ pre:hover .copy-code-button {
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	padding: 2rem 1rem;
+	visibility: hidden;
+	opacity: 0;
+	transition:
+		opacity 0.2s ease-in-out,
+		visibility 0s linear 0.2s;
 }
 #contact-modal.show {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-#contact-modal.closing {
-	animation: fadeOut 0.2s ease-in-out forwards;
+	visibility: visible;
+	opacity: 1;
+	transition:
+		opacity 0.25s ease-out,
+		visibility 0s;
 }
 .contact-modal-content {
 	background-color: var(--background-color);
@@ -1393,7 +1410,16 @@ pre:hover .copy-code-button {
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 	opacity: 0;
 	transform: scale(0.95);
-	animation: scaleFadeIn 0.25s ease-out forwards;
+	transition:
+		opacity 0.2s ease-in,
+		transform 0.2s ease-in;
+}
+#contact-modal.show .contact-modal-content {
+	opacity: 1;
+	transform: scale(1);
+	transition:
+		opacity 0.25s ease-out,
+		transform 0.25s ease-out;
 }
 .contact-modal-header {
 	display: flex;
@@ -1509,26 +1535,6 @@ pre:hover .copy-code-button {
 	transform: none;
 }
 
-@keyframes scaleFadeIn {
-	from {
-		opacity: 0;
-		transform: scale(0.95);
-	}
-	to {
-		opacity: 1;
-		transform: scale(1);
-	}
-}
-@keyframes scaleFadeOut {
-	from {
-		opacity: 1;
-		transform: scale(1);
-	}
-	to {
-		opacity: 0;
-		transform: scale(0.95);
-	}
-}
 @keyframes slideDown {
 	from {
 		transform: translateY(-100%);

@@ -54,8 +54,7 @@ class Project {
 }
 
 class BlogPost {
-  constructor({ ID = "", Slug = "", Title = "", Date = "", Excerpt = "", Tags = null, Filename = "", Href = "" } = {}) {
-    this.ID = ID;
+  constructor({ Slug = "", Title = "", Date = "", Excerpt = "", Tags = null, Filename = "", Href = "" } = {}) {
     this.Slug = Slug;
     this.Title = Title;
     this.Date = Date;
@@ -83,6 +82,13 @@ class TOCItem {
     this.ID = ID;
     this.Text = Text;
     this.Level = Level;
+  }
+}
+
+class cachedContent {
+  constructor({ HTML = "", TOC = null } = {}) {
+    this.HTML = HTML;
+    this.TOC = TOC;
   }
 }
 
@@ -125,19 +131,10 @@ class ThemeColors {
 }
 
 class CommentsConfig {
-  constructor({ BlogEnabled = false, ProjectsEnabled = false, Repo = "", RepoId = "", Category = "", CategoryId = "", Mapping = "", Strict = "", ReactionsEnabled = "", EmitMetadata = "", InputPosition = "", Lang = "" } = {}) {
+  constructor({ BlogEnabled = false, ProjectsEnabled = false, Attrs = null } = {}) {
     this.BlogEnabled = BlogEnabled;
     this.ProjectsEnabled = ProjectsEnabled;
-    this.Repo = Repo;
-    this.RepoId = RepoId;
-    this.Category = Category;
-    this.CategoryId = CategoryId;
-    this.Mapping = Mapping;
-    this.Strict = Strict;
-    this.ReactionsEnabled = ReactionsEnabled;
-    this.EmitMetadata = EmitMetadata;
-    this.InputPosition = InputPosition;
-    this.Lang = Lang;
+    this.Attrs = Attrs;
   }
 }
 
@@ -201,13 +198,9 @@ class ContactState {
   }
 }
 
-let contactClosing = false;
-
 const emailJSSrc = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js";
 
 const emailJSIntegrity = "sha384-SALc35EccAf6RzGw4iNsyj7kTPr33K7RoGzYu+7heZhT8s0GZouafRiCg1qy44AS";
-
-let iconAliases = { "angle-double-left": "angles-left", "angle-double-right": "angles-right" };
 
 let icons = { "sun": new iconDef({ ViewBox: "0 0 512 512", Path: "M361.5 1.2c5 2.1 8.6 6.6 9.6 11.9L391 121l107.9 19.8c5.3 1 9.8 4.6 11.9 9.6s1.5 10.7-1.6 15.2L446.9 256l62.3 90.3c3.1 4.5 3.7 10.2 1.6 15.2s-6.6 8.6-11.9 9.6L391 391 371.1 498.9c-1 5.3-4.6 9.8-9.6 11.9s-10.7 1.5-15.2-1.6L256 446.9l-90.3 62.3c-4.5 3.1-10.2 3.7-15.2 1.6s-8.6-6.6-9.6-11.9L121 391 13.1 371.1c-5.3-1-9.8-4.6-11.9-9.6s-1.5-10.7 1.6-15.2L65.1 256 2.8 165.7c-3.1-4.5-3.7-10.2-1.6-15.2s6.6-8.6 11.9-9.6L121 121l19.8-107.9c1-5.3 4.6-9.8 9.6-11.9s10.7-1.5 15.2 1.6L256 65.1 346.3 2.8c4.5-3.1 10.2-3.7 15.2-1.6zM160 256a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zm224 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z" }), "moon": new iconDef({ ViewBox: "0 0 384 512", Path: "M223.5 32C100 32 0 132.3 0 256S100 480 223.5 480c60.6 0 115.5-24.2 155.8-63.4c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6c-96.9 0-175.5-78.8-175.5-176c0-65.8 36-123.1 89.3-153.3c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z" }), "search": new iconDef({ ViewBox: "0 0 512 512", Path: "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" }), "envelope": new iconDef({ ViewBox: "0 0 512 512", Path: "M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" }), "download": new iconDef({ ViewBox: "0 0 512 512", Path: "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H64zm280 60a24 24 0 1 1 0 48 24 24 0 1 1 0-48z" }), "cube": new iconDef({ ViewBox: "0 0 512 512", Path: "M234.5 5.7c13.9-5 29.1-5 43.1 0l192 68.6C495 83.4 512 107.5 512 134.6V377.4c0 27-17 51.2-42.5 60.3l-192 68.6c-13.9 5-29.1 5-43.1 0l-192-68.6C17 428.6 0 404.5 0 377.4V134.6c0-27 17-51.2 42.5-60.3l192-68.6zM256 66L82.3 128 256 190l173.7-62L256 66zm32 368.6l192-68.6V135.4L288 204v230.6z" }), "calendar": new iconDef({ ViewBox: "0 0 448 512", Path: "M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z" }), "github": new iconDef({ ViewBox: "0 0 496 512", Path: "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3 .3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5 .3-6.2 2.3zm44.2-1.7c-2.9 .7-4.9 2.6-4.6 4.9 .3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 21 2.3-16.8 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3 .7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3 .3 2.9 2.3 3.9 1.6 1 3.6 .7 4.3-.7 .7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3 .7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3 .7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z" }), "youtube": new iconDef({ ViewBox: "0 0 576 512", Path: "M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z" }), "linkedin": new iconDef({ ViewBox: "0 0 448 512", Path: "M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z" }), "chevron-down": new iconDef({ ViewBox: "0 0 512 512", Path: "M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" }), "chevron-up": new iconDef({ ViewBox: "0 0 512 512", Path: "M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8-12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z" }), "chevron-left": new iconDef({ ViewBox: "0 0 320 512", Path: "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l192 192c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256 246.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-192 192z" }), "chevron-right": new iconDef({ ViewBox: "0 0 320 512", Path: "M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z" }), "angles-left": new iconDef({ ViewBox: "0 0 512 512", Path: "M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160zm352-160l-160 160c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L301.3 256 438.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0z" }), "angles-right": new iconDef({ ViewBox: "0 0 512 512", Path: "M470.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 256 265.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160zm-352 160l160-160c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L210.7 256 73.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0z" }), "times": new iconDef({ ViewBox: "0 0 384 512", Path: "M324.5 411.1c6.2 6.2 16.4 6.2 22.6 0s6.2-16.4 0-22.6L214.6 256 347.1 123.5c6.2-6.2 6.2-16.4 0-22.6s-16.4-6.2-22.6 0L192 233.4 59.5 100.9c-6.2-6.2-16.4-6.2-22.6 0s-6.2 16.4 0 22.6L169.4 256 36.9 388.5c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L192 278.6 324.5 411.1z" }), "arrow-left": new iconDef({ ViewBox: "0 0 448 512", Path: "M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z" }), "arrow-right": new iconDef({ ViewBox: "0 0 448 512", Path: "M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" }), "expand": new iconDef({ ViewBox: "0 0 448 512", Path: "M32 32C14.3 32 0 46.3 0 64v96c0 17.7 14.3 32 32 32s32-14.3 32-32V96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H32zM64 352c0-17.7-14.3-32-32-32S0 334.3 0 352v96c0 17.7 14.3 32 32 32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H64V352zM352 32c-17.7 0-32 14.3-32 32s14.3 32 32 32h64v64c0 17.7 14.3 32 32 32s32-14.3 32-32V64c0-17.7-14.3-32-32-32H352zM320 352c0-17.7 14.3-32 32-32s32 14.3 32 32v64h64c17.7 0 32 14.3 32 32s-14.3 32-32 32H384c-17.7 0-32-14.3-32-32V352z" }) };
 
@@ -224,8 +217,6 @@ let routeSeq = 0;
 let fuseInstance = null;
 
 let searchDebounceTimer = null;
-
-let searchClosing = false;
 
 let site = new SiteConfig({ Social: [] });
 
@@ -257,15 +248,7 @@ let contactForm = new ContactState();
 
 let view = new ViewState();
 
-let readmeCache = {  };
-
-let readmeTOCCache = {  };
-
-let postHtmlCache = {  };
-
-let postTOCCache = {  };
-
-let pageHtmlCache = {  };
+let contentCache = {  };
 
 const themeStorageKey = "theme-preference";
 
@@ -320,8 +303,8 @@ function AppShell() {
     (MainContent()).Mount(___e4);
     ___e2.appendChild(___e4);
     (Footer(currentYear(), site.Author)).Mount(___e2);
-    (SearchModal(searchOpen, searchClosing, searchQuery, searchResults, searchPlaceholderText())).Mount(___e2);
-    (ContactModal(contactOpen, contactClosing, contactForm)).Mount(___e2);
+    (SearchModal(searchOpen, searchQuery, searchResults, searchPlaceholderText())).Mount(___e2);
+    (ContactModal(contactOpen, contactForm)).Mount(___e2);
     ___p.appendChild(___e2);
   }};
 }
@@ -379,7 +362,7 @@ function Pagination(currentPage, totalPages) {
     const ___e14 = document.createElement("ul");
     ___e14.className = "pagination";
     const ___e15 = document.createElement("li");
-    ___e15.className = pageItemPrevClass(currentPage);
+    ___e15.className = cls("page-item", currentPage <= 1, "disabled");
     const ___e16 = document.createElement("a");
     ___e16.className = "page-link";
     ___e16.setAttribute("href", String(pageHref(1)));
@@ -390,7 +373,7 @@ function Pagination(currentPage, totalPages) {
     ___e15.appendChild(___e16);
     ___e14.appendChild(___e15);
     const ___e17 = document.createElement("li");
-    ___e17.className = pageItemPrevClass(currentPage);
+    ___e17.className = cls("page-item", currentPage <= 1, "disabled");
     const ___e18 = document.createElement("a");
     ___e18.className = "page-link";
     ___e18.setAttribute("href", String(pageHref(currentPage - 1)));
@@ -402,7 +385,7 @@ function Pagination(currentPage, totalPages) {
     ___e14.appendChild(___e17);
     for (const pageNum of pageNumbers(totalPages)) {
       const ___e19 = document.createElement("li");
-      ___e19.className = pageItemClass(pageNum, currentPage);
+      ___e19.className = cls("page-item", pageNum === currentPage, "active");
       const ___e20 = document.createElement("a");
       ___e20.className = "page-link";
       ___e20.setAttribute("href", String(pageHref(pageNum)));
@@ -412,7 +395,7 @@ function Pagination(currentPage, totalPages) {
       ___e14.appendChild(___e19);
     }
     const ___e21 = document.createElement("li");
-    ___e21.className = pageItemNextClass(currentPage, totalPages);
+    ___e21.className = cls("page-item", currentPage >= totalPages, "disabled");
     const ___e22 = document.createElement("a");
     ___e22.className = "page-link";
     ___e22.setAttribute("href", String(pageHref(currentPage + 1)));
@@ -423,7 +406,7 @@ function Pagination(currentPage, totalPages) {
     ___e21.appendChild(___e22);
     ___e14.appendChild(___e21);
     const ___e23 = document.createElement("li");
-    ___e23.className = pageItemNextClass(currentPage, totalPages);
+    ___e23.className = cls("page-item", currentPage >= totalPages, "disabled");
     const ___e24 = document.createElement("a");
     ___e24.className = "page-link";
     ___e24.setAttribute("href", String(pageHref(totalPages)));
@@ -482,7 +465,7 @@ function TableOfContents(items) {
       ___e32.className = "blog-toc-list";
       for (const item of items) {
         const ___e33 = document.createElement("li");
-        ___e33.className = tocItemClass(item.Level);
+        ___e33.className = "blog-toc-item blog-toc-level-" + String(item.Level);
         const ___e34 = document.createElement("a");
         ___e34.setAttribute("href", String("#" + item.ID));
         ___e34.appendChild(document.createTextNode(String(item.Text)));
@@ -589,6 +572,33 @@ function giscusTheme() {
   return currentTheme;
 }
 
+function kebab(s) {
+  let b = { _buf: "" };
+  for (let i = 0; i < __len(s); i++) {
+    let c = s.charCodeAt(i);
+    if (c >= 65 && c <= 90) {
+      (b._buf += String.fromCodePoint(45));
+      (b._buf += String.fromCodePoint(c + 97 - 65));
+    } else {
+      (b._buf += String.fromCodePoint(c));
+    }
+  }
+  return b._buf;
+}
+
+function giscusAttrs(raw, theme) {
+  let attrs = { "data-theme": theme };
+  if (raw != null) {
+    for (const [k, v] of Object.entries(raw)) {
+      if (k === "blogEnabled" || k === "projectsEnabled") {
+        continue;
+      }
+      attrs["data-" + kebab(k)] = strVal(v);
+    }
+  }
+  return attrs;
+}
+
 function loadGiscus() {
   let container = document.querySelector(".giscus-container");
   if (container == null) {
@@ -597,17 +607,9 @@ function loadGiscus() {
   container.innerHTML = "";
   let script = document.createElement("script");
   script.src = "https://giscus.app/client.js";
-  script.setAttribute("data-repo", site.Comments.Repo);
-  script.setAttribute("data-repo-id", site.Comments.RepoId);
-  script.setAttribute("data-category", site.Comments.Category);
-  script.setAttribute("data-category-id", site.Comments.CategoryId);
-  script.setAttribute("data-mapping", site.Comments.Mapping);
-  script.setAttribute("data-strict", site.Comments.Strict);
-  script.setAttribute("data-reactions-enabled", site.Comments.ReactionsEnabled);
-  script.setAttribute("data-emit-metadata", site.Comments.EmitMetadata);
-  script.setAttribute("data-input-position", site.Comments.InputPosition);
-  script.setAttribute("data-theme", giscusTheme());
-  script.setAttribute("data-lang", site.Comments.Lang);
+  for (const [name, value] of Object.entries(giscusAttrs(site.Comments.Attrs, giscusTheme()))) {
+    script.setAttribute(name, value);
+  }
   script.setAttribute("crossorigin", "anonymous");
   script.async = true;
   container.appendChild(script);
@@ -635,7 +637,7 @@ function ContactFormFields(form) {
     ___e53.setAttribute("id", "contact-name");
     ___e53.setAttribute("name", "name");
     ___e53.setAttribute("required", "");
-    ___e53.className = inputErrorClass(form.ErrName);
+    ___e53.className = cls("", form.ErrName, "error");
     ___e53.setAttribute("aria-invalid", String(String(form.ErrName)));
     ___e53.setAttribute("value", String(form.Name));
     ___e51.appendChild(___e53);
@@ -652,7 +654,7 @@ function ContactFormFields(form) {
     ___e56.setAttribute("id", "contact-email");
     ___e56.setAttribute("name", "email");
     ___e56.setAttribute("required", "");
-    ___e56.className = inputErrorClass(form.ErrEmail);
+    ___e56.className = cls("", form.ErrEmail, "error");
     ___e56.setAttribute("aria-invalid", String(String(form.ErrEmail)));
     ___e56.setAttribute("value", String(form.Email));
     ___e54.appendChild(___e56);
@@ -669,7 +671,7 @@ function ContactFormFields(form) {
     ___e59.setAttribute("name", "message");
     ___e59.setAttribute("rows", "6");
     ___e59.setAttribute("required", "");
-    ___e59.className = inputErrorClass(form.ErrMessage);
+    ___e59.className = cls("", form.ErrMessage, "error");
     ___e59.setAttribute("aria-invalid", String(String(form.ErrMessage)));
     ___e59.appendChild(document.createTextNode(String(form.Message)));
     ___e57.appendChild(___e59);
@@ -692,11 +694,11 @@ function ContactFormFields(form) {
   }};
 }
 
-function ContactModal(open, closing, form) {
+function ContactModal(open, form) {
   return {Mount(___p) {
     const ___e63 = document.createElement("div");
     ___e63.setAttribute("id", "contact-modal");
-    ___e63.className = overlayClass(open, closing);
+    ___e63.className = cls("", open, "show");
     ___e63.setAttribute("role", "dialog");
     ___e63.setAttribute("aria-modal", "true");
     ___e63.setAttribute("aria-labelledby", "contact-modal-title");
@@ -770,7 +772,6 @@ function openContact() {
   }
   closeMenus();
   contactOpen = true;
-  contactClosing = false;
   resetContactForm();
   syncOverlays();
   focusLater("#contact-name");
@@ -780,14 +781,8 @@ function closeContact() {
   if (!contactOpen) {
     return;
   }
-  contactClosing = true;
+  contactOpen = false;
   syncOverlays();
-  setTimeout(function() {
-    contactOpen = false;
-    contactClosing = false;
-    resetContactForm();
-    syncOverlays();
-  }, 200);
 }
 
 function updateContactField(field, value) {
@@ -910,13 +905,6 @@ function Footer(year, author) {
 }
 
 function iconSvg(name, size) {
-  {
-    let alias = iconAliases[name];
-    let ok = (name) in iconAliases;
-    if (ok) {
-      name = alias;
-    }
-  }
   let def = icons[name];
   let ok = (name) in icons;
   if (!ok) {
@@ -1637,7 +1625,7 @@ function Navbar(r, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
     ___e71.appendChild(___e72);
     const ___e73 = document.createElement("button");
     ___e73.setAttribute("type", "button");
-    ___e73.className = toggleBtnClass(mobileOpen);
+    ___e73.className = cls("navbar-toggle", mobileOpen, "active");
     ___e73.setAttribute("aria-label", "Toggle navigation");
     ___e73.setAttribute("aria-expanded", String(String(mobileOpen)));
     ___e73.setAttribute("data-action", "toggle-mobile-nav");
@@ -1646,23 +1634,23 @@ function Navbar(r, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
     ___e73.appendChild(___e74);
     ___e71.appendChild(___e73);
     const ___e75 = document.createElement("div");
-    ___e75.className = navbarCollapseClass(mobileOpen);
+    ___e75.className = cls("navbar-collapse", mobileOpen, "show");
     const ___e76 = document.createElement("ul");
     ___e76.className = "navbar-nav left";
     const ___e77 = document.createElement("li");
     ___e77.className = "nav-item navbar-menu";
     const ___e78 = document.createElement("a");
-    ___e78.className = navLinkClass(r.Kind === RouteBlog);
+    ___e78.className = cls("nav-link", r.Kind === RouteBlog, "active");
     ___e78.setAttribute("href", "/blog");
     ___e78.setAttribute("data-action", "nav");
     ___e78.appendChild(document.createTextNode(String(t("nav.blog"))));
     ___e77.appendChild(___e78);
     ___e76.appendChild(___e77);
     const ___e79 = document.createElement("li");
-    ___e79.className = dropdownClass(dropdownOpen);
+    ___e79.className = cls("nav-item navbar-menu dropdown", dropdownOpen, "show");
     const ___e80 = document.createElement("button");
     ___e80.setAttribute("type", "button");
-    ___e80.className = dropdownToggleClass(r.Kind === RouteProject);
+    ___e80.className = cls("nav-link dropdown-toggle", r.Kind === RouteProject, "active");
     ___e80.setAttribute("aria-haspopup", "true");
     ___e80.setAttribute("aria-controls", "projects-dropdown");
     ___e80.setAttribute("aria-expanded", String(String(dropdownOpen)));
@@ -1683,7 +1671,7 @@ function Navbar(r, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
     for (const p of projects) {
       const ___e84 = document.createElement("li");
       const ___e85 = document.createElement("a");
-      ___e85.className = dropdownItemClass(isActiveRoute(r, RouteProject, p.ID));
+      ___e85.className = cls("dropdown-item", isActiveRoute(r, RouteProject, p.ID), "active");
       ___e85.setAttribute("href", String(p.Href));
       ___e85.setAttribute("data-action", "nav");
       ___e85.appendChild(document.createTextNode(String(p.Title)));
@@ -1697,7 +1685,7 @@ function Navbar(r, pages, projects, dropdownOpen, mobileOpen, siteConfig) {
         const ___e86 = document.createElement("li");
         ___e86.className = "nav-item navbar-menu";
         const ___e87 = document.createElement("a");
-        ___e87.className = navLinkClass(isActiveRoute(r, RoutePage, page.ID));
+        ___e87.className = cls("nav-link", isActiveRoute(r, RoutePage, page.ID), "active");
         ___e87.setAttribute("href", String(page.Href));
         ___e87.setAttribute("data-action", "nav");
         ___e87.appendChild(document.createTextNode(String(page.Title)));
@@ -1971,46 +1959,14 @@ function isActiveRoute(r, kind, param) {
   return r.Kind === kind && r.Param === param;
 }
 
-function toggleBtnClass(open) {
-  if (open) {
-    return "navbar-toggle active";
+function cls(base, on, extra) {
+  if (!on) {
+    return base;
   }
-  return "navbar-toggle";
-}
-
-function navbarCollapseClass(open) {
-  if (open) {
-    return "navbar-collapse show";
+  if (base === "") {
+    return extra;
   }
-  return "navbar-collapse";
-}
-
-function dropdownClass(open) {
-  if (open) {
-    return "nav-item navbar-menu dropdown show";
-  }
-  return "nav-item navbar-menu dropdown";
-}
-
-function navLinkClass(active) {
-  if (active) {
-    return "nav-link active";
-  }
-  return "nav-link";
-}
-
-function dropdownToggleClass(active) {
-  if (active) {
-    return "nav-link dropdown-toggle active";
-  }
-  return "nav-link dropdown-toggle";
-}
-
-function dropdownItemClass(active) {
-  if (active) {
-    return "dropdown-item active";
-  }
-  return "dropdown-item";
+  return base + " " + extra;
 }
 
 function paginatedPosts(allPosts, page, perPage) {
@@ -2037,37 +1993,16 @@ function calcTotalPages(totalCount, perPage) {
   return Math.trunc(num / perPage);
 }
 
-function pageItemPrevClass(page) {
-  if (page <= 1) {
-    return "page-item disabled";
-  }
-  return "page-item";
-}
-
-function pageItemNextClass(page, totalPages) {
-  if (page >= totalPages) {
-    return "page-item disabled";
-  }
-  return "page-item";
-}
-
-function pageItemClass(page, currentPage) {
-  if (page === currentPage) {
-    return "page-item active";
-  }
-  return "page-item";
-}
-
 function pageHref(page) {
-  if (page < 1) {
-    page = 1;
+  if (page <= 1) {
+    return "/blog";
   }
   return "/blog/page/" + String(page);
 }
 
-function pageNumbers(totalPages) {
-  let nums = [];
-  for (let i = 1; i <= totalPages; i++) {
+function pageNumbers(n) {
+  let nums = new Array(0).fill(0);
+  for (let i = 1; i <= n; i++) {
     nums = __append(nums, i);
   }
   return nums;
@@ -2085,23 +2020,6 @@ function demoWrapperClass(height) {
     return "demo-iframe-wrapper";
   }
   return "iframeWrapper";
-}
-
-function overlayClass(open, closing) {
-  if (closing) {
-    return "show closing";
-  }
-  if (open) {
-    return "show";
-  }
-  return "";
-}
-
-function searchClearClass(q) {
-  if (q !== "") {
-    return "search-page-clear show";
-  }
-  return "search-page-clear";
 }
 
 function searchPlaceholderText() {
@@ -2130,13 +2048,6 @@ function highlightMatch(text, query) {
   return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&#34;").replace(/'/g,"&#39;");
 }
 
-function inputErrorClass(hasErr) {
-  if (hasErr) {
-    return "error";
-  }
-  return "";
-}
-
 function formStatusClass(statusType) {
   if (statusType !== "") {
     return "form-status " + statusType;
@@ -2146,13 +2057,6 @@ function formStatusClass(statusType) {
 
 function currentYear() {
   return {_d: new Date()}._d.getFullYear();
-}
-
-function tocItemClass(level) {
-  if (level === 3) {
-    return "blog-toc-item blog-toc-level-3";
-  }
-  return "blog-toc-item blog-toc-level-2";
 }
 
 function scrollToHash(hash, smooth) {
@@ -2297,93 +2201,76 @@ function showBlog(page) {
   renderRoute();
 }
 
+async function loadRoute(key, url, transform) {
+  let seq = routeSeq;
+  let [mdText, err] = await loadMarkdownFile(url);
+  if (err == null) {
+    contentCache[key] = transform(mdText);
+  }
+  if (seq !== routeSeq) {
+    return false;
+  }
+  if (err != null) {
+    view.Status = LoadFailed;
+    return true;
+  }
+  let c = (contentCache[key] ?? new cachedContent());
+  view.HTML = c.HTML;
+  view.TOC = c.TOC;
+  view.Status = LoadReady;
+  return true;
+}
+
+function renderPost(mdText) {
+  let content = stripFrontmatter(mdText);
+  let toc = extractTOC(content);
+  return new cachedContent({ HTML: injectHeadingIDs(parseMarkdown(content), toc), TOC: toc });
+}
+
+function renderReadme(p) {
+  return function(mdText) {
+    return new cachedContent({ HTML: injectHeadingIDs(parseMarkdown(mdText), extractTOC(mdText)), TOC: extractProjectTOC(mdText, p) });
+  };
+}
+
+function renderPage(mdText) {
+  return new cachedContent({ HTML: parseMarkdown(mdText), TOC: [] });
+}
+
 async function showPost(slug) {
-  let [v, needsFetch] = resolvePost(slug, posts, postHtmlCache);
+  let [v, needsFetch] = resolvePost(slug, posts, contentCache);
   view = v;
   if (view.Status === LoadNotFound) {
     updateRouteMeta(t("general.blogNotFound") + " - " + site.Title, t("general.blogNotFoundMessage"), "/blog/" + slug);
     renderRoute();
     return;
   }
-  updateRouteMeta(view.Post.Title + " - " + site.Title, view.Post.Excerpt, "/blog/" + view.Post.Slug);
+  updateRouteMeta(view.Post.Title + " - " + site.Title, view.Post.Excerpt, view.Post.Href);
   if (needsFetch) {
-    let seq = routeSeq;
-    let [mdText, err] = await loadMarkdownFile("/data/blog/" + v.Post.Filename);
-    if (err != null) {
-      if (seq !== routeSeq) {
-        return;
-      }
-      view.Status = LoadFailed;
-      renderRoute();
+    if (!await loadRoute(view.Post.Href, "/data/blog/" + view.Post.Filename, renderPost)) {
       return;
-    }
-    let content = stripFrontmatter(mdText);
-    let toc = extractTOC(content);
-    let html = parseMarkdown(content);
-    html = injectHeadingIDs(html, toc);
-    postHtmlCache[v.Post.Filename] = html;
-    postTOCCache[v.Post.Filename] = toc;
-    if (seq !== routeSeq) {
-      return;
-    }
-    view.HTML = html;
-    view.TOC = toc;
-    view.Status = LoadReady;
-  } else {
-    {
-      let cachedTOC = postTOCCache[v.Post.Filename];
-      let ok = (v.Post.Filename) in postTOCCache;
-      if (ok) {
-        view.TOC = cachedTOC;
-      }
     }
   }
   renderRoute();
+  if (view.Status !== LoadReady) {
+    return;
+  }
   highlightCode();
   loadGiscus();
 }
 
 async function showProject(id) {
-  let [v, needsFetch] = resolveProject(id, projects, readmeCache);
+  let [v, needsFetch] = resolveProject(id, projects, contentCache);
   view = v;
   if (view.Status === LoadNotFound) {
     updateRouteMeta(t("general.projectNotFound") + " - " + site.Title, t("general.projectNotFoundMessage"), "/project/" + id);
     renderRoute();
     return;
   }
-  updateRouteMeta(view.Proj.Title + " - " + site.Title, view.Proj.Description, "/project/" + view.Proj.ID);
+  updateRouteMeta(view.Proj.Title + " - " + site.Title, view.Proj.Description, view.Proj.Href);
   if (needsFetch) {
-    let seq = routeSeq;
-    let [mdText, err] = await loadMarkdownFile(readmeURL(v.Proj, site.GithubUsername));
-    let html = "";
-    let toc = [];
-    if (err == null) {
-      let readmeTOC = extractTOC(mdText);
-      html = parseMarkdown(mdText);
-      html = injectHeadingIDs(html, readmeTOC);
-      toc = extractProjectTOC(mdText, v.Proj);
-      readmeCache[v.Proj.GithubRepo] = html;
-      readmeTOCCache[v.Proj.GithubRepo] = toc;
-    }
-    if (seq !== routeSeq) {
+    if (!await loadRoute(view.Proj.Href, readmeURL(view.Proj, site.GithubUsername), renderReadme(view.Proj))) {
       return;
-    }
-    if (err != null) {
-      view.Status = LoadFailed;
-    } else {
-      view.HTML = html;
-      view.TOC = toc;
-      view.Status = LoadReady;
-    }
-  } else {
-    {
-      let cachedTOC = readmeTOCCache[v.Proj.GithubRepo];
-      let ok = (v.Proj.GithubRepo) in readmeTOCCache;
-      if (ok) {
-        view.TOC = cachedTOC;
-      } else {
-        view.TOC = extractProjectTOC("", v.Proj);
-      }
     }
   }
   renderRoute();
@@ -2392,29 +2279,12 @@ async function showProject(id) {
 }
 
 async function showPage(id) {
-  let [v, needsFetch] = resolvePage(id, navPages, pageHtmlCache);
+  let [v, needsFetch] = resolvePage(id, navPages, contentCache);
   view = v;
-  let title = view.Page.Title + " - " + site.Title;
-  if (view.Page.Title === "") {
-    title = id + " - " + site.Title;
-  }
-  updateRouteMeta(title, site.Description, "/page/" + id);
+  updateRouteMeta(view.Page.Title + " - " + site.Title, site.Description, view.Page.Href);
   if (needsFetch) {
-    let seq = routeSeq;
-    let [mdText, err] = await loadMarkdownFile("/data/pages/" + id + ".md");
-    let html = "";
-    if (err == null) {
-      html = parseMarkdown(mdText);
-      pageHtmlCache[id] = html;
-    }
-    if (seq !== routeSeq) {
+    if (!await loadRoute(view.Page.Href, "/data/pages/" + id + ".md", renderPage)) {
       return;
-    }
-    if (err != null) {
-      view.Status = LoadFailed;
-    } else {
-      view.HTML = html;
-      view.Status = LoadReady;
     }
   }
   renderRoute();
@@ -2424,11 +2294,11 @@ async function showPage(id) {
 function initSearch() {
   let searchItems = null;
   for (const [_$, p] of __s(projects).entries()) {
-    let item = { "id": p.ID, "title": p.Title, "description": p.Description, "tags": p.Tags, "type": "project", "url": "/project/" + p.ID };
+    let item = { "id": p.ID, "title": p.Title, "description": p.Description, "tags": p.Tags, "type": "project", "url": p.Href };
     searchItems = __append(searchItems, item);
   }
   for (const [_$, p] of __s(posts).entries()) {
-    let item = { "id": p.Slug, "title": p.Title, "description": p.Excerpt, "tags": p.Tags, "type": "blog", "url": "/blog/" + p.Slug };
+    let item = { "id": p.Slug, "title": p.Title, "description": p.Excerpt, "tags": p.Tags, "type": "blog", "url": p.Href };
     searchItems = __append(searchItems, item);
   }
   let options = { "keys": [{ "name": "title", "weight": 0.4 }, { "name": "description", "weight": 0.3 }, { "name": "tags", "weight": 0.2 }], "threshold": 0.4, "minMatchCharLength": searchMinChars() };
@@ -2485,16 +2355,15 @@ function setSearchQuery(q) {
 }
 
 function openSearch() {
-  closeMenus();
-  searchOpen = true;
-  searchClosing = false;
-  syncOverlays();
-  focusLater("#search-page-input");
+  openSearchWithTag("");
 }
 
 function openSearchWithTag(tag) {
+  closeMenus();
+  searchOpen = true;
   setSearchQuery(tag);
-  openSearch();
+  syncOverlays();
+  focusLater("#search-page-input");
 }
 
 function clearSearch() {
@@ -2507,14 +2376,8 @@ function closeSearch() {
   if (!searchOpen) {
     return;
   }
-  searchClosing = true;
+  searchOpen = false;
   syncOverlays();
-  setTimeout(function() {
-    searchOpen = false;
-    searchClosing = false;
-    setSearchQuery("");
-    syncOverlays();
-  }, 200);
 }
 
 function handleSearchInput(value) {
@@ -2586,11 +2449,11 @@ function SearchResultsList(results, query) {
   }};
 }
 
-function SearchModal(open, closing, query, results, placeholder) {
+function SearchModal(open, query, results, placeholder) {
   return {Mount(___p) {
     const ___e144 = document.createElement("div");
     ___e144.setAttribute("id", "search-page");
-    ___e144.className = overlayClass(open, closing);
+    ___e144.className = cls("", open, "show");
     ___e144.setAttribute("role", "dialog");
     ___e144.setAttribute("aria-modal", "true");
     ___e144.setAttribute("aria-label", String(t("aria.search")));
@@ -2619,7 +2482,7 @@ function SearchModal(open, closing, query, results, placeholder) {
     ___e148.appendChild(___e149);
     const ___e150 = document.createElement("button");
     ___e150.setAttribute("type", "button");
-    ___e150.className = searchClearClass(query);
+    ___e150.className = cls("search-page-clear", query !== "", "show");
     ___e150.setAttribute("id", "search-page-clear");
     ___e150.setAttribute("aria-label", String(t("aria.clearSearch")));
     ___e150.setAttribute("data-action", "clear-search");
@@ -2688,7 +2551,6 @@ function updateMetaTags() {
   updateDescriptionMeta(site.Description);
   updateMeta("name", "author", site.Author);
   updateMeta("name", "theme-color", site.DarkTheme.Primary);
-  updateMeta("name", "msapplication-TileColor", site.DarkTheme.Primary);
 }
 
 function updateRouteMeta(title, description, canonicalPath) {
@@ -2743,7 +2605,7 @@ function strSlice(raw) {
 function postFromJSON(p) {
   let fn = strVal(p.filename);
   let slug = ((s, suf) => !suf.length || !s.endsWith(suf) ? s : s.slice(0, -suf.length))(fn, ".md");
-  return new BlogPost({ ID: slug, Slug: slug, Title: strVal(p.title), Date: strVal(p.date), Excerpt: strVal(p.excerpt), Tags: strSlice(p.tags), Filename: fn, Href: "/blog/" + slug });
+  return new BlogPost({ Slug: slug, Title: strVal(p.title), Date: strVal(p.date), Excerpt: strVal(p.excerpt), Tags: strSlice(p.tags), Filename: fn, Href: "/blog/" + slug });
 }
 
 function sortPostsByDate(list) {
@@ -2786,8 +2648,12 @@ function sortProjectsByOrder(list) {
   });
 }
 
+function navPageHref(id) {
+  return "/page/" + id;
+}
+
 function pageFromJSON(id, p) {
-  return new NavPage({ ID: id, Title: strVal(p.title), Order: intVal(p.order), ShowInNav: boolVal(p.showInNav), Href: "/page/" + id });
+  return new NavPage({ ID: id, Title: strVal(p.title), Order: intVal(p.order), ShowInNav: boolVal(p.showInNav), Href: navPageHref(id) });
 }
 
 function sortPagesByOrder(list) {
@@ -2827,8 +2693,7 @@ async function initData() {
       site.EmailJS = new EmailJSConfig({ Enabled: boolVal(siteData.emailjs.enabled), ServiceId: strVal(siteData.emailjs.serviceId), TemplateId: strVal(siteData.emailjs.templateId), PublicKey: strVal(siteData.emailjs.publicKey) });
     }
     if (siteData.comments != null) {
-      let c = siteData.comments;
-      site.Comments = new CommentsConfig({ BlogEnabled: boolVal(c.blogEnabled), ProjectsEnabled: boolVal(c.projectsEnabled), Repo: strVal(c.repo), RepoId: strVal(c.repoId), Category: strVal(c.category), CategoryId: strVal(c.categoryId), Mapping: strVal(c.mapping), Strict: strVal(c.strict), ReactionsEnabled: strVal(c.reactionsEnabled), EmitMetadata: strVal(c.emitMetadata), InputPosition: strVal(c.inputPosition), Lang: strVal(c.lang) });
+      site.Comments = new CommentsConfig({ BlogEnabled: boolVal(siteData.comments.blogEnabled), ProjectsEnabled: boolVal(siteData.comments.projectsEnabled), Attrs: siteData.comments });
     }
     if (siteData.social != null) {
       for (const [_$, item] of __s(siteData.social).entries()) {
@@ -2992,22 +2857,17 @@ function syncOverlays() {
   setClass(".navbar-collapse", "show", mobileMenuOpen);
   setClass(".dropdown", "show", projectsDropdownOpen);
   setAttr(".dropdown-toggle", "aria-expanded", String(projectsDropdownOpen));
-  setClass("#search-page", "show", searchOpen || searchClosing);
-  setClass("#search-page", "closing", searchClosing);
+  setClass("#search-page", "show", searchOpen);
   setClass("#search-page-clear", "show", searchQuery !== "");
-  let modalVisible = contactOpen || contactClosing;
-  setClass("#contact-modal", "show", modalVisible);
-  setClass("#contact-modal", "closing", contactClosing);
+  setClass("#contact-modal", "show", contactOpen);
 }
 
 function resetOverlays() {
   mobileMenuOpen = false;
   projectsDropdownOpen = false;
   contactOpen = false;
-  contactClosing = false;
   if (searchOpen || searchQuery !== "") {
     searchOpen = false;
-    searchClosing = false;
     setSearchQuery("");
   }
   syncOverlays();
@@ -3017,10 +2877,21 @@ function newViewState() {
   return new ViewState({ Post: new BlogPost({ Tags: [] }), Proj: new Project({ Tags: [], YoutubeVideos: [], Links: [] }), Status: LoadReady, PrevPost: new BlogPost({ Tags: [] }), NextPost: new BlogPost({ Tags: [] }), TOC: [] });
 }
 
+function fromCache(v, cache, key) {
+  let c = cache[key];
+  let ok = (key) in cache;
+  if (!ok || c.HTML === "") {
+    return false;
+  }
+  v.value.HTML = c.HTML;
+  v.value.TOC = c.TOC;
+  return true;
+}
+
 function resolvePost(slug, all, cache) {
   let v = newViewState();
   for (const [i, p] of __s(all).entries()) {
-    if (p.Slug === slug || p.ID === slug) {
+    if (p.Slug === slug) {
       v.Post = p;
       if (i + 1 < __len(all)) {
         v.HasPrev = true;
@@ -3030,13 +2901,8 @@ function resolvePost(slug, all, cache) {
         v.HasNext = true;
         v.NextPost = all[i - 1];
       }
-      {
-        let html = cache[p.Filename];
-        let ok = (p.Filename) in cache;
-        if (ok && html !== "") {
-          v.HTML = html;
-          return [v, false];
-        }
+      if (fromCache({ value: v }, cache, p.Href)) {
+        return [v, false];
       }
       v.Status = LoadPending;
       return [v, true];
@@ -3052,15 +2918,11 @@ function resolveProject(id, all, cache) {
     if (p.ID === id) {
       v.Proj = p;
       if (p.GithubRepo === "") {
+        v.TOC = extractProjectTOC("", p);
         return [v, false];
       }
-      {
-        let html = cache[p.GithubRepo];
-        let ok = (p.GithubRepo) in cache;
-        if (ok && html !== "") {
-          v.HTML = html;
-          return [v, false];
-        }
+      if (fromCache({ value: v }, cache, p.Href)) {
+        return [v, false];
       }
       v.Status = LoadPending;
       return [v, true];
@@ -3072,20 +2934,18 @@ function resolveProject(id, all, cache) {
 
 function resolvePage(id, all, cache) {
   let v = newViewState();
-  v.Page = new NavPage({ ID: id, Title: id });
+  v.Page = new NavPage({ ID: id, Title: id, Href: navPageHref(id) });
   for (const [_$, p] of __s(all).entries()) {
     if (p.ID === id) {
       v.Page = p;
       break;
     }
   }
-  {
-    let html = cache[id];
-    let ok = (id) in cache;
-    if (ok && html !== "") {
-      v.HTML = html;
-      return [v, false];
-    }
+  if (v.Page.Title === "") {
+    v.Page.Title = id;
+  }
+  if (fromCache({ value: v }, cache, v.Page.Href)) {
+    return [v, false];
   }
   v.Status = LoadPending;
   return [v, true];

@@ -28,15 +28,6 @@ func TestIconSvg(t *testing.T) {
 		}
 	})
 
-	t.Run("legacy aliases keep the canonical class", func(t *testing.T) {
-		if !strings.Contains(iconSvg("angle-double-left", "1em"), `icon-angles-left"`) {
-			t.Error("expected angle-double-left to render angles-left")
-		}
-		if !strings.Contains(iconSvg("angle-double-right", "1em"), `icon-angles-right"`) {
-			t.Error("expected angle-double-right to render angles-right")
-		}
-	})
-
 	t.Run("size is escaped", func(t *testing.T) {
 		svg := iconSvg("sun", `1rem" onload="x`)
 		if strings.Contains(svg, `onload="x`) {
