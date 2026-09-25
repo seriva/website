@@ -5,6 +5,14 @@ import "strings"
 
 var contactClosing bool
 
+// Pinned + SRI: keep version and hash in sync with @emailjs/browser in package.json
+const emailJSSrc = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"
+const emailJSIntegrity = "sha384-SALc35EccAf6RzGw4iNsyj7kTPr33K7RoGzYu+7heZhT8s0GZouafRiCg1qy44AS"
+
+func loadEmailJS() any {
+	return loadScript(emailJSSrc, emailJSIntegrity)
+}
+
 func initEmailJS() {
 	if site.EmailJS.Enabled && site.EmailJS.PublicKey != "" && window.emailjs != nil {
 		emailjs.init(site.EmailJS.PublicKey)

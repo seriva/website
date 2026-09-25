@@ -46,7 +46,8 @@ func initSearch() {
 		"minMatchCharLength": searchMinChars(),
 	}
 
-	fuseInstance = createFuse(searchItems, options)
+	// Go has no `new`; Fuse is a class exposed on window by vendor.js
+	fuseInstance = Reflect.construct(window.Fuse, []any{searchItems, options})
 }
 
 func searchMinChars() int {
