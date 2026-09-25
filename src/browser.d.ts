@@ -9,9 +9,9 @@ declare namespace Prism {
     const languages: any;
 }
 
-declare function createFuse(list: any[], options?: any): any;
-declare function loadEmailJS(): Promise<any>;
-declare function loadMermaid(): Promise<any>;
+declare namespace Reflect {
+    function construct(target: any, args: any[]): any;
+}
 
 declare namespace mermaid {
     function initialize(config: any): void;

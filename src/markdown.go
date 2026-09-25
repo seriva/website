@@ -317,6 +317,12 @@ func mermaidTheme(theme string) string {
 	return "dark"
 }
 
+const mermaidSrc = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"
+
+func loadMermaid() any {
+	return loadScript(mermaidSrc, "")
+}
+
 // renderMermaid lazy-loads mermaid on first use and (re)draws every diagram
 // on the page with the current theme.
 async func renderMermaid() {
