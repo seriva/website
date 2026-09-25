@@ -22,6 +22,9 @@ func TestBlogPostCardMount(t *testing.T) {
 	if string(card.getAttribute("data-href")) != "/blog/hello" || string(card.getAttribute("data-action")) != "open-post" {
 		t.Errorf("unexpected card attributes")
 	}
+	if card.hasAttribute("tabindex") {
+		t.Errorf("card must not be a tab stop; its title link already is")
+	}
 	link := card.querySelector("h2 a")
 	if link == nil || string(link.getAttribute("href")) != "/blog/hello" || string(link.textContent) != "Hello" {
 		t.Errorf("expected title link to /blog/hello")

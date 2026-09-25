@@ -203,4 +203,32 @@ test.describe("Blog", () => {
         await expect(templCode).toBeVisible();
         await expect(templCode.locator(".token").first()).toBeVisible();
     });
+
+    test("tabbing stops on each title link but never on a card", async ({ page }) => {
+        const titles = (await page.locator(".blog-post-title a").allTextContents()).map((t) => t.trim());
+        const seen = [];
+        let cardFocused = false;
+        for (let i = 0; i < 60 && seen.length < titles.length; i++) {
+            await page.keyboard.press("Tab");
+            const active = await page.evaluate(() => {
+                const el = document.activeElement;
+                return {
+                    card: el?.classList.contains("blog-post-card") ?? false,
+                    title: el?.closest(".blog-post-title") ? el.textContent.trim() : null,
+                };
+            });
+            cardFocused ||= active.card;
+            if (active.title && !seen.includes(active.title)) seen.push(active.title);
+        }
+        expect(cardFocused).toBe(false);
+        expect(seen).toEqual(titles);
+    });
+
+    test("clicking the card body outside the link still opens the post", async ({ page }) => {
+        const card = page.locator(".blog-post-card").first();
+        const href = await card.locator(".blog-post-title a").getAttribute("href");
+        await card.locator(".blog-post-excerpt").click();
+        await expect(page).toHaveURL(href);
+        await expect(page.locator(".blog-post-view")).toBeVisible();
+    });
 });

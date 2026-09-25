@@ -81,21 +81,22 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
+- Remove the previous `public/` output so removed posts and routes never linger
 - Compile YAML configuration to `content.json`
 - Bundle and minify vendor dependencies (`gofront prep --minify`)
 - Compile, minify, and mangle GoFront application bundle to `public/app.js`
-- Copy public assets (`index.html`, `data/`, `fonts/`, `css/`, metadata) to `public/`; `404.html` is emitted as a copy of the processed `index.html`
+- Copy runtime data (`content.json` plus blog/page Markdown) to `public/data/` and public assets (`index.html`, `fonts/`, `css/`, metadata) to `public/`; `404.html` is emitted as a copy of the processed `index.html`
 - Generate `sitemap.xml` and `rss.xml`
 - Output complete, self-contained site to `public/` directory
 
 ### Asset Management
 
 - **Vendor Assets (`assetCopy`)**: Fonts and Prism themes are copied from npm packages to `app/` during `npm run prepare` via GoFront's `assetCopy` configuration in `package.json`. Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they are generated from npm packages.
-- **Production Assets (`publicAssets`)**: Static web files and directories are synchronized from `app/` to `public/` during `npm run prod` via `publicAssets` in `package.json`.
+- **Production Assets (`publicAssets`)**: Static web files and directories are synchronized from `app/` to `public/` during `npm run prod` via `publicAssets` in `package.json`. Runtime data is handled separately: only `content.json` and the Markdown referenced by routes are copied to `public/data/` (never `content.yaml`).
 
 ### Code Quality Tools
 
-The project uses Biome for code formatting and linting (JavaScript in `scripts/`, and the stylesheet `app/css/app.css`):
+The project uses Biome for code formatting and linting (JavaScript in `scripts/` and `tests/build/`, and the stylesheet `app/css/app.css`):
 
 - **Format code**: `npm run format`
 - **Check code quality**: `npm run check`
@@ -110,7 +111,8 @@ The test suite covers unit tests and full end-to-end integration tests:
 ```bash
 npm run test:gofront # Run Go unit tests (gofront test, jsdom-backed for DOM code)
 npm run test:e2e     # Run E2E tests (Playwright, requires dev server)
-npm run test:all     # Run all tests (GoFront + Playwright)
+npm run test:build   # Run the production build and verify public/ output (node:test; rebuilds public/)
+npm run test:all     # Run all tests (GoFront + Playwright + build; runs last, rebuilds public/)
 ```
 
 Tests cover:

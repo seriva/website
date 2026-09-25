@@ -79,7 +79,16 @@ var isInitialRoute = true
 // has been superseded and must not touch `view`.
 var routeSeq int
 
+// beginNavigation claims the next routeSeq and returns a check that reports
+// whether that navigation is still the latest one.
+func beginNavigation() func() bool {
+	routeSeq++
+	seq := routeSeq
+	return func() bool { return seq == routeSeq }
+}
+
 async func handleRoute() {
+	isCurrent := beginNavigation()
 	resetOverlays()
 
 	// GitHub Pages serves 404.html (a copy of the app shell) at the original URL,
@@ -95,7 +104,11 @@ async func handleRoute() {
 	}
 	isInitialRoute = false
 
-	routeSeq++
+	// A navigation that started during the fade owns the view from here on.
+	if !isCurrent() {
+		return
+	}
+
 	currentPath = path
 	route = parseRoute(path)
 	view = newViewState()
@@ -114,6 +127,11 @@ async func handleRoute() {
 		await showPage(route.Param)
 	default:
 		showBlog(route.Page)
+	}
+
+	// The loader may have awaited a fetch while a newer navigation took over.
+	if !isCurrent() {
+		return
 	}
 
 	mainEl := document.querySelector("#main-content")
