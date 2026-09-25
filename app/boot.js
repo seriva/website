@@ -3,12 +3,15 @@
 (() => {
 	try {
 		const saved = localStorage.getItem("theme-preference");
-		if (saved) {
-			document.documentElement.setAttribute("data-theme", saved);
-		} else if (window.matchMedia?.("(prefers-color-scheme: light)").matches) {
-			document.documentElement.setAttribute("data-theme", "light");
-		} else {
-			document.documentElement.setAttribute("data-theme", "dark");
+		const theme =
+			saved ||
+			(window.matchMedia?.("(prefers-color-scheme: light)").matches
+				? "light"
+				: "dark");
+		document.documentElement.setAttribute("data-theme", theme);
+		const meta = document.querySelector('meta[name="theme-color"]');
+		if (meta) {
+			meta.setAttribute("content", theme === "light" ? "#FFFFFF" : "#0D1117");
 		}
 	} catch (_e) {
 		// localStorage unavailable (privacy mode); fall back to CSS default

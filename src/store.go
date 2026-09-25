@@ -80,12 +80,28 @@ func updateMetaTags() {
 	updateTitleMeta(site.Title)
 	updateDescriptionMeta(site.Description)
 	updateMeta("name", "author", site.Author)
-	updateMeta("name", "theme-color", site.DarkTheme.Primary)
+	themeBg := site.DarkTheme.Background
+	if currentTheme == "light" && site.LightTheme.Background != "" {
+		themeBg = site.LightTheme.Background
+	}
+	updateMeta("name", "theme-color", themeBg)
+}
+
+func announceRoute(title string) {
+	announcer := document.getElementById("route-announcer")
+	if announcer != nil {
+		prefix := t("general.routeAnnounce")
+		if prefix == "general.routeAnnounce" {
+			prefix = "Navigated to "
+		}
+		announcer.textContent = prefix + title
+	}
 }
 
 func updateRouteMeta(title string, description string, canonicalPath string) {
 	updateTitleMeta(title)
 	updateDescriptionMeta(description)
+	announceRoute(title)
 	if canonicalPath == "" {
 		return
 	}
@@ -247,12 +263,18 @@ func sortPagesByOrder(list []NavPage) {
 }
 
 async func initData() error {
-	res := await fetch("/data/content.json")
-	if res == nil || !res.ok {
-		return errors.New("failed to fetch /data/content.json")
+	var data any
+	el := document.getElementById("site-data")
+	if el != nil && el.textContent != nil && el.textContent != "" {
+		data = JSON.parse(strVal(el.textContent))
+	} else {
+		res := await fetch("/data/content.json")
+		if res == nil || !res.ok {
+			return errors.New("failed to fetch /data/content.json")
+		}
+		data = await res.json()
 	}
 
-	data := await res.json()
 	if data == nil {
 		return errors.New("failed to parse /data/content.json")
 	}

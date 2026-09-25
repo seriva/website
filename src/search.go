@@ -91,8 +91,56 @@ func performSearch(q string) []SearchResultItem {
 	return out
 }
 
+var searchSelectedIndex = -1
+
+func scrollSelectedSearchResultIntoView() {
+	el := document.querySelector(".search-result-item.selected")
+	if el != nil {
+		el.scrollIntoView(map[string]any{"block": "nearest", "behavior": "smooth"})
+	}
+}
+
+func searchSelectNext() {
+	if len(searchResults) == 0 {
+		return
+	}
+	searchSelectedIndex++
+	if searchSelectedIndex >= len(searchResults) {
+		searchSelectedIndex = 0
+	}
+	renderSearchResults()
+	scrollSelectedSearchResultIntoView()
+}
+
+func searchSelectPrev() {
+	if len(searchResults) == 0 {
+		return
+	}
+	searchSelectedIndex--
+	if searchSelectedIndex < 0 {
+		searchSelectedIndex = len(searchResults) - 1
+	}
+	renderSearchResults()
+	scrollSelectedSearchResultIntoView()
+}
+
+func searchHasSelection() bool {
+	return searchSelectedIndex >= 0 && searchSelectedIndex < len(searchResults)
+}
+
+func searchOpenSelected() {
+	if searchHasSelection() {
+		url := searchResults[searchSelectedIndex].Url
+		closeSearch()
+		navigate(url)
+	}
+}
+
 func renderSearchResults() {
-	gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery))
+	el := document.querySelector("#search-page-results")
+	if el != nil {
+		gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery, searchSelectedIndex))
+	}
 }
 
 // setSearchInput writes the input's value; it is user-owned DOM state, not derived.
@@ -106,6 +154,7 @@ func setSearchInput(v string) {
 // setSearchQuery updates query + results together and re-renders the list.
 func setSearchQuery(q string) {
 	searchQuery = q
+	searchSelectedIndex = -1
 	searchResults = performSearch(q)
 	setSearchInput(q)
 	renderSearchResults()
@@ -142,6 +191,7 @@ func closeSearch() {
 
 func handleSearchInput(value string) {
 	searchQuery = value
+	searchSelectedIndex = -1
 	syncOverlays()
 	if searchDebounceTimer != nil {
 		clearTimeout(searchDebounceTimer)

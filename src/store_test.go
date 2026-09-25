@@ -221,3 +221,16 @@ func TestUpdateRouteMeta(t *testing.T) {
 		t.Errorf("expected canonical link containing '/blog/test-post'")
 	}
 }
+
+func TestAnnounceRoute(t *testing.T) {
+	announcer := document.createElement("div")
+	announcer.id = "route-announcer"
+	document.body.appendChild(announcer)
+	defer announcer.remove()
+
+	announceRoute("Test Page")
+	expected := "Navigated to Test Page"
+	if string(announcer.textContent) != expected {
+		t.Errorf("expected announcer %q, got %q", expected, string(announcer.textContent))
+	}
+}

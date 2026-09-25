@@ -231,6 +231,24 @@ func setupEvents() {
 			return
 		}
 
+		if searchOpen {
+			if key == "ArrowDown" {
+				e.preventDefault()
+				searchSelectNext()
+				return
+			}
+			if key == "ArrowUp" {
+				e.preventDefault()
+				searchSelectPrev()
+				return
+			}
+			if key == "Enter" && searchHasSelection() {
+				e.preventDefault()
+				searchOpenSelected()
+				return
+			}
+		}
+
 		if site.Search.Enabled && !contactOpen {
 			isCmdK := (boolVal(e.metaKey) || boolVal(e.ctrlKey)) && (key == "k" || key == "K")
 			isSlash := key == "/"
@@ -306,6 +324,7 @@ async func main() {
 
 	initTheme()
 	initSearch()
+	initInitialRoute()
 
 	// Shell is mounted once; routes and overlays re-render their own regions.
 	gom.Mount("#app", AppShell())

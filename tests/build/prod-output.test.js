@@ -56,21 +56,24 @@ test("npm run prod replaces stale output with a complete build", () => {
 		"css/app.css",
 		"sitemap.xml",
 		"rss.xml",
-		"blog/index.html",
-		"blog/page/1/index.html",
 	];
 	for (const post of content.blog.posts) {
-		const slug = post.filename.replace(/\.md$/, "");
-		expected.push(`data/blog/${post.filename}`, `blog/${slug}/index.html`);
+		expected.push(`data/blog/${post.filename}`);
 	}
 	for (const id of Object.keys(content.pages)) {
-		expected.push(`data/pages/${id}.md`, `page/${id}/index.html`);
-	}
-	for (const proj of content.projects) {
-		expected.push(`project/${proj.id}/index.html`);
+		expected.push(`data/pages/${id}.md`);
 	}
 	for (const rel of expected) {
 		assert.equal(existsSync(join(publicDir, rel)), true, `${rel} missing`);
+	}
+
+	// Pure SPA: no redundant static route stub directories exist in public/
+	for (const dir of ["blog", "project", "page"]) {
+		assert.equal(
+			existsSync(join(publicDir, dir)),
+			false,
+			`${dir}/ directory should not exist in pure SPA build`,
+		);
 	}
 
 	// Only Markdown or a file a live route actually references may ship.
@@ -87,25 +90,31 @@ test("npm run prod replaces stale output with a complete build", () => {
 		}
 	}
 
-	// Route-specific metadata and a shared asset version across every shell.
+	// Site metadata and shared asset version between index.html and 404.html shell.
 	const baseUrl = content.site.url.replace(/\/$/, "");
-	const slug = content.blog.posts[0].filename.replace(/\.md$/, "");
-	const stub = readPublic(`blog/${slug}/index.html`);
+	const indexHtml = readPublic("index.html");
 	assert.ok(
-		stub.includes(`<link rel="canonical" href="${baseUrl}/blog/${slug}">`),
-		"post stub canonical",
+		indexHtml.includes(`<link rel="canonical" href="${baseUrl}">`),
+		"index canonical",
 	);
-	assert.match(stub, /property="og:type" content="article"/);
-	const version = stub.match(/src="\/app\.js\?v=([0-9a-z]+)"/)?.[1];
-	assert.ok(version, "post stub is cache-busted");
-	for (const rel of ["index.html", "404.html", "blog/index.html"]) {
+	assert.match(indexHtml, /property="og:type" content="website"/);
+	const version = indexHtml.match(/src="\/app\.js\?v=([0-9a-z]+)"/)?.[1];
+	assert.ok(version, "index is cache-busted");
+	for (const rel of ["index.html", "404.html"]) {
 		assert.ok(
 			readPublic(rel).includes(`src="/app.js?v=${version}"`),
 			`${rel} shares asset version`,
 		);
+		assert.ok(
+			readPublic(rel).includes(
+				'<script id="site-data" type="application/json">',
+			),
+			`${rel} has inlined site data`,
+		);
 	}
 	assert.doesNotMatch(readPublic("index.html"), /localhost:\d+/);
 
+	const slug = content.blog.posts[0].filename.replace(/\.md$/, "");
 	assert.match(
 		readPublic("sitemap.xml"),
 		new RegExp(`${baseUrl}/blog/${slug}`),

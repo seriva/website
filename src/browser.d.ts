@@ -22,3 +22,8 @@ declare namespace emailjs {
     function init(publicKey: string): void;
     function send(serviceId: string, templateId: string, templateParams: any, publicKey?: string): Promise<any>;
 }
+
+declare namespace JSON {
+    function parse(text: string): any;
+    function stringify(value: any): string;
+}

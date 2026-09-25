@@ -122,18 +122,25 @@ func TestNavbarMount(t *testing.T) {
 }
 
 func TestSearchResultsListMount(t *testing.T) {
-	empty := mountTempl(SearchResultsList([]SearchResultItem{}, "zzz"))
+	empty := mountTempl(SearchResultsList([]SearchResultItem{}, "zzz", -1))
 	if empty.querySelector(".search-no-results") == nil {
 		t.Errorf("expected no-results block for a non-empty query")
 	}
 
-	idle := mountTempl(SearchResultsList([]SearchResultItem{}, ""))
+	idle := mountTempl(SearchResultsList([]SearchResultItem{}, "", -1))
 	if idle.children.length != 0 {
 		t.Errorf("expected nothing rendered for empty query")
 	}
 
-	results := []SearchResultItem{{ID: "a", Title: "Go & Web", Description: "desc", Tags: []string{"go"}, ItemType: "project", Url: "/project/a"}}
-	c := mountTempl(SearchResultsList(results, "go"))
+	results := []SearchResultItem{
+		{ID: "a", Title: "Go & Web", Description: "desc", Tags: []string{"go"}, ItemType: "project", Url: "/project/a"},
+		{ID: "b", Title: "Second Item", Description: "desc2", Tags: []string{"go"}, ItemType: "blog", Url: "/blog/b"},
+	}
+	c := mountTempl(SearchResultsList(results, "go", 0))
+	firstItem := c.querySelector(".search-result-item")
+	if firstItem == nil || !strings.Contains(string(firstItem.className), "selected") {
+		t.Errorf("expected first result to have selected class")
+	}
 	title := c.querySelector(".blog-post-title a")
 	if title == nil || string(title.getAttribute("href")) != "/project/a" {
 		t.Fatalf("expected result link")

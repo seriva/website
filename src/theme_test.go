@@ -172,3 +172,30 @@ func TestToggleThemePersists(t *testing.T) {
 		t.Errorf("getInitialTheme after toggle = %q", got)
 	}
 }
+
+func TestUpdateThemeColorMeta(t *testing.T) {
+	resetThemeDOM()
+	defer resetThemeDOM()
+
+	meta := document.createElement("meta")
+	meta.setAttribute("name", "theme-color")
+	meta.setAttribute("content", "#0D1117")
+	document.head.appendChild(meta)
+	defer meta.remove()
+
+	restore := withThemes(
+		ThemeColors{Background: "#0D1117"},
+		ThemeColors{Background: "#FFFFFF"},
+	)
+	defer restore()
+
+	applyTheme("light")
+	if got := string(meta.getAttribute("content")); got != "#FFFFFF" {
+		t.Errorf("expected light theme-color '#FFFFFF', got %q", got)
+	}
+
+	applyTheme("dark")
+	if got := string(meta.getAttribute("content")); got != "#0D1117" {
+		t.Errorf("expected dark theme-color '#0D1117', got %q", got)
+	}
+}

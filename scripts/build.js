@@ -7,7 +7,7 @@
 //   clean    — Remove the generated public/ directory (never touches app/)
 //   content  — Compile app/data/content.yaml into content.json
 //   dev      — Run content watch + dev server concurrently
-//   post     — Sync public assets, generate sitemap/RSS and route stubs
+//   post     — Sync public assets and generate sitemap/RSS
 
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -283,9 +283,10 @@ function syncPublicAssets() {
 			type: "website",
 		});
 		indexHtml = applyCacheBusting(indexHtml, version);
+		indexHtml = injectSiteData(indexHtml, contentData);
 		writeFileSync(publicIndexPath, indexHtml, "utf8");
 		console.log(
-			`✓ Applied site meta + cache busting (v=${version}) to public/index.html`,
+			`✓ Applied site meta + cache busting (v=${version}) + inlined site data to public/index.html`,
 		);
 		// GitHub Pages serves 404.html at the requested URL without redirecting, so
 		// shipping the app shell as 404.html lets the SPA router handle unknown deep links.
@@ -440,7 +441,7 @@ function generateSeo() {
 	console.log(`✓ Generated RSS feed: ${rssPath} (${itemCount} posts)`);
 }
 
-// ── 4. Static HTML Route Generation ───────────────────────────
+// ── 4. Metadata Injection Helpers ─────────────────────────────
 
 function escapeHtml(str) {
 	if (!str) return "";
@@ -528,98 +529,12 @@ function injectMetadata(html, { title, description, url, type = "website" }) {
 	return output;
 }
 
-function generateStaticRoutes(contentData, baseUrl) {
-	const indexPath = join(appDir, "index.html");
-	if (!existsSync(indexPath)) return;
-
-	const baseHtml = stripDevOrigins(readFileSync(indexPath, "utf8"));
-	const version = getAssetVersion();
-	const site = contentData.site || {};
-	const siteTitle = site.title || "Portfolio";
-	const siteDesc = site.description || "";
-	let generatedCount = 0;
-
-	const writeRoute = (relPath, meta) => {
-		const destFile = join(publicDir, relPath, "index.html");
-		mkdirSync(dirname(destFile), { recursive: true });
-		let html = injectMetadata(baseHtml, meta);
-		html = applyCacheBusting(html, version);
-		writeFileSync(destFile, html, "utf8");
-		generatedCount++;
-	};
-
-	// 1. Blog home
-	writeRoute("blog", {
-		title: siteTitle,
-		description: siteDesc,
-		url: `${baseUrl}/blog`,
-		type: "website",
-	});
-
-	// 2. Blog posts
-	if (contentData.blog?.posts) {
-		for (const post of contentData.blog.posts) {
-			const slug = post.filename.replace(/\.md$/, "");
-			const postTitle = post.title ? `${post.title} - ${siteTitle}` : siteTitle;
-			writeRoute(`blog/${slug}`, {
-				title: postTitle,
-				description: post.excerpt || siteDesc,
-				url: `${baseUrl}/blog/${slug}`,
-				type: "article",
-			});
-		}
-
-		// 3. Blog pagination
-		const perPage = contentData.blog.postsPerPage || 5;
-		const totalPages = Math.ceil(contentData.blog.posts.length / perPage);
-		// blog/page/1 is kept as an alias; its canonical is /blog like the SPA's.
-		for (let p = 1; p <= totalPages; p++) {
-			writeRoute(`blog/page/${p}`, {
-				title: p > 1 ? `Blog - ${siteTitle}` : siteTitle,
-				description: siteDesc,
-				url: p > 1 ? `${baseUrl}/blog/page/${p}` : `${baseUrl}/blog`,
-				type: "website",
-			});
-		}
-	}
-
-	// 4. Projects
-	if (contentData.projects) {
-		for (const proj of contentData.projects) {
-			const projTitle = proj.title ? `${proj.title} - ${siteTitle}` : siteTitle;
-			writeRoute(`project/${proj.id}`, {
-				title: projTitle,
-				description: proj.description || siteDesc,
-				url: `${baseUrl}/project/${proj.id}`,
-				type: "website",
-			});
-		}
-	}
-
-	// 5. Pages
-	if (contentData.pages) {
-		for (const [pageId, pageData] of Object.entries(contentData.pages)) {
-			const pageTitle = pageData.title
-				? `${pageData.title} - ${siteTitle}`
-				: siteTitle;
-			writeRoute(`page/${pageId}`, {
-				title: pageTitle,
-				description: siteDesc,
-				url: `${baseUrl}/page/${pageId}`,
-				type: "website",
-			});
-		}
-	}
-
-	console.log(
-		`✓ Pre-generated ${generatedCount} static HTML route stubs in public/`,
+function injectSiteData(html, contentData) {
+	const json = JSON.stringify(contentData).replace(/<\/script/gi, "<\\/script");
+	return html.replace(
+		"</head>",
+		`    <script id="site-data" type="application/json">${json}</script>\n</head>`,
 	);
-}
-
-function generateRoutes() {
-	const contentData = loadContentData();
-	const baseUrl = getBaseUrl(contentData);
-	generateStaticRoutes(contentData, baseUrl);
 }
 
 // ── CLI Dispatch ──────────────────────────────────────────────
@@ -639,7 +554,6 @@ switch (command) {
 	case "post":
 		syncPublicAssets();
 		generateSeo();
-		generateRoutes();
 		break;
 	default:
 		console.error(`Unknown command: ${command}`);

@@ -53,13 +53,13 @@ test.describe("Navigation", () => {
         await expect(page).toHaveURL("/");
     });
 
-    test("direct navigation to unknown route falls back gracefully", async ({
+    test("direct navigation to unknown route renders 404 view", async ({
         page,
     }) => {
         await page.goto("/this-does-not-exist");
         await expect(page.locator("#main-content")).toBeVisible();
-        // Router falls back to BlogList for unknown paths
-        await expect(page.locator(".blog-post-card").first()).toBeVisible();
+        await expect(page.locator(".error-message")).toBeVisible();
+        await expect(page.locator(".error-message h1")).toContainText("Page Not Found");
     });
 
     test("pagination navigation resets scroll position to top", async ({
@@ -128,6 +128,25 @@ test.describe("Navigation", () => {
             .getAttribute("content");
         expect(postDesc).toBeTruthy();
         expect(postDesc).not.toBe(defaultDesc);
+    });
+
+    test("skip link is present, focusable and points to main content", async ({ page }) => {
+        await page.goto("/");
+        const skipLink = page.locator(".skip-link");
+        await expect(skipLink).toBeAttached();
+        await expect(skipLink).toHaveAttribute("href", "#main-content");
+        await skipLink.focus();
+        await expect(skipLink).toBeVisible();
+        await page.keyboard.press("Enter");
+        await expect(page.locator("#main-content")).toBeFocused();
+    });
+
+    test("route announcer element is present with aria-live polite", async ({ page }) => {
+        await page.goto("/");
+        const announcer = page.locator("#route-announcer");
+        await expect(announcer).toBeAttached();
+        await expect(announcer).toHaveAttribute("aria-live", "polite");
+        await expect(announcer).toHaveAttribute("aria-atomic", "true");
     });
 });
 

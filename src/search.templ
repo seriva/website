@@ -1,14 +1,14 @@
 package main
 
-templ SearchResultsList(results []SearchResultItem, query string) {
+templ SearchResultsList(results []SearchResultItem, query string, selectedIndex int) {
 	if query != "" && len(results) == 0 {
 		<div class="search-no-results">
 			@Icon("search", "3rem")
 			<p>{ t("search.noResults") }</p>
 		</div>
 	} else {
-		for _, item := range results {
-			<article class="search-result-item blog-post-card" data-action="open-post" data-href={ item.Url }>
+		for i, item := range results {
+			<article class={ cls("search-result-item blog-post-card", i == selectedIndex, "selected") } data-action="open-post" data-href={ item.Url }>
 				<h2 class="blog-post-title">
 					<a href={ item.Url } data-action="nav">@templ.Raw(highlightMatch(item.Title, query))</a>
 				</h2>
@@ -30,7 +30,7 @@ templ SearchResultsList(results []SearchResultItem, query string) {
 	}
 }
 
-templ SearchModal(open bool, query string, results []SearchResultItem, placeholder string) {
+templ SearchModal(open bool, query string, results []SearchResultItem, selectedIndex int, placeholder string) {
 	<div id="search-page" class={ cls("", open, "show") } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
 		<div class="search-page-header">
 			<div class="search-page-header-content">
@@ -47,7 +47,7 @@ templ SearchModal(open bool, query string, results []SearchResultItem, placehold
 		</div>
 		<div class="search-page-content">
 			<div class="search-page-results" id="search-page-results">
-				@SearchResultsList(results, query)
+				@SearchResultsList(results, query, selectedIndex)
 			</div>
 		</div>
 	</div>

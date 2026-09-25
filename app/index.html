@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Luuk van Venrooij - Full-stack developer specializing in graphics, games, and web development. Check out my projects and get in touch!">
     <meta name="author" content="Luuk van Venrooij">
-    <meta name="theme-color" content="#10B981">
+    <meta name="theme-color" content="#0D1117">
     
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://giscus.app; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://giscus.app; img-src 'self' data: https://raw.githubusercontent.com https://avatars.githubusercontent.com https://i.imgur.com https://i.ytimg.com https://img.youtube.com; font-src 'self' data:; connect-src 'self' http://localhost:8181 ws://localhost:8181 wss://localhost:8181 https://raw.githubusercontent.com https://api.emailjs.com; frame-src 'self' http://localhost:8181 https://giscus.app https://www.youtube.com https://youtube.com https://seriva.github.io; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests;">
@@ -69,7 +69,20 @@
 </head>
 <body>
     <!-- Main application root -->
-    <div id="app"></div>
+    <div id="app">
+        <header class="navbar">
+            <div class="navbar-container">
+                <a class="navbar-brand" href="/">Luuk van Venrooij</a>
+            </div>
+        </header>
+        <main id="main-content" tabindex="-1">
+            <div class="page-loading-skeleton" aria-hidden="true">
+                <div class="skeleton-header"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+        </main>
+    </div>
     <script type="module" src="/vendor.js"></script>
     <script type="module" src="/app.js"></script>
 </body>

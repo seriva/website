@@ -19,11 +19,11 @@ func TestParseRoute(t *testing.T) {
 		{"/blog/hello-world/", RouteMatch{Kind: RoutePost, Param: "hello-world"}},
 		{"/blog/post/legacy-slug", RouteMatch{Kind: RoutePost, Param: "legacy-slug"}},
 		{"/project/gofront", RouteMatch{Kind: RouteProject, Param: "gofront"}},
-		{"/project/", RouteMatch{Kind: RouteBlog, Page: 1}},
+		{"/project/", RouteMatch{Kind: RouteNotFound}},
 		{"/page/about", RouteMatch{Kind: RoutePage, Param: "about"}},
-		{"/page/", RouteMatch{Kind: RouteBlog, Page: 1}},
-		{"/does/not/exist", RouteMatch{Kind: RouteBlog, Page: 1}},
-		{"/projects", RouteMatch{Kind: RouteBlog, Page: 1}},
+		{"/page/", RouteMatch{Kind: RouteNotFound}},
+		{"/does/not/exist", RouteMatch{Kind: RouteNotFound}},
+		{"/projects", RouteMatch{Kind: RouteNotFound}},
 	}
 
 	for _, c := range cases {
