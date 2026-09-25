@@ -59,4 +59,15 @@ test.describe("Theme", () => {
         const restored = await page.locator("html").getAttribute("data-theme");
         expect(restored).toBe(original);
     });
+
+    test("clicking toggle updates meta[name='theme-color']", async ({ page }) => {
+        const initialColor = await page
+            .locator('meta[name="theme-color"]')
+            .getAttribute("content");
+        await page.click("#theme-toggle");
+        const newColor = await page
+            .locator('meta[name="theme-color"]')
+            .getAttribute("content");
+        expect(newColor).not.toBe(initialColor);
+    });
 });

@@ -23,6 +23,10 @@ func scrollToHash(hash string, smooth bool) {
 				behavior = "smooth"
 			}
 			targetEl.scrollIntoView(map[string]any{"behavior": behavior})
+			if id == "main-content" {
+				targetEl.setAttribute("tabindex", "-1")
+				targetEl.focus(map[string]any{"preventScroll": true})
+			}
 		}
 	}
 	scroll()
@@ -42,7 +46,7 @@ func navigate(url string) {
 	handleRoute()
 }
 
-// parseRoute maps a URL path to a RouteMatch. Unknown paths fall back to the blog list.
+// parseRoute maps a URL path to a RouteMatch. Unknown paths resolve to RouteNotFound.
 func parseRoute(path string) RouteMatch {
 	if len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
@@ -60,17 +64,39 @@ func parseRoute(path string) RouteMatch {
 	if slug, ok := strings.CutPrefix(path, "/blog/"); ok {
 		slug = strings.TrimPrefix(slug, "post/")
 		if slug == "" {
-			return RouteMatch{Kind: RouteBlog, Page: 1}
+			return RouteMatch{Kind: RouteNotFound}
 		}
 		return RouteMatch{Kind: RoutePost, Param: slug}
 	}
 	if id, ok := strings.CutPrefix(path, "/project/"); ok {
+		if id == "" {
+			return RouteMatch{Kind: RouteNotFound}
+		}
 		return RouteMatch{Kind: RouteProject, Param: id}
 	}
 	if id, ok := strings.CutPrefix(path, "/page/"); ok {
+		if id == "" {
+			return RouteMatch{Kind: RouteNotFound}
+		}
 		return RouteMatch{Kind: RoutePage, Param: id}
 	}
-	return RouteMatch{Kind: RouteBlog, Page: 1}
+	return RouteMatch{Kind: RouteNotFound}
+}
+
+func initInitialRoute() {
+	path := strVal(window.location.pathname)
+	currentPath = path
+	route = parseRoute(path)
+	switch route.Kind {
+	case RoutePost:
+		view, _ = resolvePost(route.Param, posts, contentCache)
+	case RouteProject:
+		view, _ = resolveProject(route.Param, projects, contentCache)
+	case RoutePage:
+		view, _ = resolvePage(route.Param, navPages, contentCache)
+	default:
+		view = newViewState()
+	}
 }
 
 var isInitialRoute = true
@@ -125,6 +151,8 @@ async func handleRoute() {
 		await showProject(route.Param)
 	case RoutePage:
 		await showPage(route.Param)
+	case RouteNotFound:
+		showNotFound()
 	default:
 		showBlog(route.Page)
 	}
@@ -157,6 +185,11 @@ func showBlog(page int) {
 		canonical = "/blog/page/" + strconv.Itoa(page)
 	}
 	updateRouteMeta(title, site.Description, canonical)
+	renderRoute()
+}
+
+func showNotFound() {
+	updateRouteMeta(t("general.notFound")+" - "+site.Title, t("general.notFoundMessage"), currentPath)
 	renderRoute()
 }
 

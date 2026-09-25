@@ -21,4 +21,15 @@ test.describe("Error states", () => {
         await expect(error).toBeVisible({ timeout: 3000 });
         await expect(error).not.toBeEmpty();
     });
+
+    test("arbitrary non-existent URL shows 404 error page and back to home link", async ({ page }) => {
+        await page.goto("/arbitrary-unknown-path-12345");
+        const error = page.locator(".error-message");
+        await expect(error).toBeVisible({ timeout: 5000 });
+        await expect(error.locator("h1")).toContainText("Page Not Found");
+        const backBtn = error.locator("a[data-action='nav']");
+        await expect(backBtn).toBeVisible();
+        await backBtn.click();
+        await expect(page).toHaveURL("/");
+    });
 });

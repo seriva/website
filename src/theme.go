@@ -50,11 +50,22 @@ func applyPrismTheme(themeName string) {
 	}
 }
 
+func updateThemeColorMeta(theme string) {
+	meta := document.querySelector("meta[name=\"theme-color\"]")
+	if meta != nil {
+		colors := getThemeColors(theme)
+		if colors.Background != "" {
+			meta.setAttribute("content", colors.Background)
+		}
+	}
+}
+
 func applyTheme(theme string) {
 	currentTheme = theme
 	document.documentElement.setAttribute("data-theme", theme)
 	colors := getThemeColors(theme)
 	applyColorScheme(colors)
+	updateThemeColorMeta(theme)
 	if colors.CodeTheme != "" {
 		applyPrismTheme(colors.CodeTheme)
 	}

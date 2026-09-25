@@ -9,6 +9,7 @@ const (
 	RoutePost
 	RouteProject
 	RoutePage
+	RouteNotFound
 )
 
 type RouteMatch struct {

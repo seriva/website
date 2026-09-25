@@ -89,3 +89,47 @@ func TestPerformSearch(t *testing.T) {
 		}
 	})
 }
+
+func TestSearchKeyboardNavigation(t *testing.T) {
+	prevResults, prevIdx := searchResults, searchSelectedIndex
+	defer func() {
+		searchResults = prevResults
+		searchSelectedIndex = prevIdx
+	}()
+
+	searchResults = []SearchResultItem{
+		{ID: "1", Title: "First", Url: "/blog/1"},
+		{ID: "2", Title: "Second", Url: "/blog/2"},
+		{ID: "3", Title: "Third", Url: "/blog/3"},
+	}
+	searchSelectedIndex = -1
+
+	if searchHasSelection() {
+		t.Errorf("expected false for index -1")
+	}
+
+	searchSelectNext()
+	if searchSelectedIndex != 0 || !searchHasSelection() {
+		t.Errorf("expected index 0, got %d", searchSelectedIndex)
+	}
+
+	searchSelectNext()
+	if searchSelectedIndex != 1 {
+		t.Errorf("expected index 1, got %d", searchSelectedIndex)
+	}
+
+	searchSelectPrev()
+	if searchSelectedIndex != 0 {
+		t.Errorf("expected index 0, got %d", searchSelectedIndex)
+	}
+
+	searchSelectPrev() // wraps to last
+	if searchSelectedIndex != 2 {
+		t.Errorf("expected wrap to last index 2, got %d", searchSelectedIndex)
+	}
+
+	searchSelectNext() // wraps to first
+	if searchSelectedIndex != 0 {
+		t.Errorf("expected wrap to first index 0, got %d", searchSelectedIndex)
+	}
+}

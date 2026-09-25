@@ -197,4 +197,35 @@ test.describe("Search", () => {
         // The slash character should be in the input
         await expect(input).toHaveValue("test/");
     });
+
+    test("ArrowDown and ArrowUp navigate search results and Enter opens selected", async ({ page }) => {
+        await page.click("#search-toggle");
+        await fillSearch(page, "Go");
+        const results = page.locator(".search-result-item");
+        await expect(results.first()).toBeVisible({ timeout: 2000 });
+
+        // Initial state: no selected class
+        await expect(page.locator(".search-result-item.selected")).toHaveCount(0);
+
+        // ArrowDown selects the first result
+        await page.keyboard.press("ArrowDown");
+        await expect(results.nth(0)).toHaveClass(/selected/);
+
+        // ArrowDown moves to the second result
+        await page.keyboard.press("ArrowDown");
+        await expect(results.nth(1)).toHaveClass(/selected/);
+        await expect(results.nth(0)).not.toHaveClass(/selected/);
+
+        // ArrowUp moves back to the first result
+        await page.keyboard.press("ArrowUp");
+        await expect(results.nth(0)).toHaveClass(/selected/);
+
+        // Get href of the selected result
+        const targetHref = await results.nth(0).locator("h2 a").getAttribute("href");
+
+        // Enter opens the selected result
+        await page.keyboard.press("Enter");
+        await expect(page.locator("#search-page")).not.toBeVisible();
+        await expect(page).toHaveURL(targetHref);
+    });
 });
