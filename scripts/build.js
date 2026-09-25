@@ -4,6 +4,7 @@
 // UNIFIED WEBSITE BUILD UTILITY
 // ===========================================
 // Commands (see package.json scripts):
+//   clean    — Remove the generated public/ directory (never touches app/)
 //   content  — Compile app/data/content.yaml into content.json
 //   dev      — Run content watch + dev server concurrently
 //   post     — Sync public assets, generate sitemap/RSS and route stubs
@@ -15,7 +16,9 @@ import {
 	cpSync,
 	existsSync,
 	mkdirSync,
+	readdirSync,
 	readFileSync,
+	rmSync,
 	statSync,
 	watch,
 	writeFileSync,
@@ -33,6 +36,15 @@ const publicDir = join(rootDir, "public");
 
 const pkgPath = join(rootDir, "package.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+
+// ── 0. Clean generated output ─────────────────────────────────
+
+// Runs first in `npm run prod`, before `gofront prep` and the compiler emit
+// bundles into public/, so stale stubs and removed posts never survive a build.
+function cleanPublic() {
+	rmSync(publicDir, { recursive: true, force: true });
+	console.log(`✓ Cleaned ${publicDir}`);
+}
 
 // ── 1. Content Compilation & Watching (YAML → JSON) ───────────
 
@@ -164,8 +176,59 @@ function applyCacheBusting(html, version) {
 		.replace(/(src="\/app\.js)(?:[^"]*)(")/g, `$1?v=${version}$2`);
 }
 
+// Only runtime data ships: content.json plus the Markdown the router fetches
+// from /data/blog/<filename> and /data/pages/<id>.md. Source content.yaml,
+// .keep markers and leftover .html never reach public/.
+function syncRuntimeData(contentData) {
+	const srcDataDir = join(appDir, "data");
+	const destDataDir = join(publicDir, "data");
+	mkdirSync(destDataDir, { recursive: true });
+	copyFileSync(
+		join(srcDataDir, "content.json"),
+		join(destDataDir, "content.json"),
+	);
+
+	const files = new Set();
+	for (const dir of ["blog", "pages"]) {
+		const srcDir = join(srcDataDir, dir);
+		if (!existsSync(srcDir)) continue;
+		for (const name of readdirSync(srcDir)) {
+			if (name.endsWith(".md")) files.add(`${dir}/${name}`);
+		}
+	}
+	// Referenced files are kept whatever their extension so a live route never
+	// silently loses its content.
+	for (const post of contentData.blog?.posts ?? []) {
+		if (post.filename) files.add(`blog/${post.filename}`);
+	}
+	// Already covered by the readdir above when present; a page whose Markdown
+	// is missing surfaces as a warning below instead of a silent 404.
+	for (const pageId of Object.keys(contentData.pages ?? {})) {
+		files.add(`pages/${pageId}.md`);
+	}
+
+	let copied = 0;
+	for (const rel of [...files].sort()) {
+		const srcPath = join(srcDataDir, rel);
+		if (!existsSync(srcPath)) {
+			console.warn(`[sync] Warning: data/${rel} not found in app/ — skipping`);
+			continue;
+		}
+		const destPath = join(destDataDir, rel);
+		mkdirSync(dirname(destPath), { recursive: true });
+		copyFileSync(srcPath, destPath);
+		copied++;
+	}
+	console.log(
+		`✓ Copied runtime data: content.json + ${copied} content files → public/data/`,
+	);
+}
+
 function syncPublicAssets() {
 	mkdirSync(publicDir, { recursive: true });
+
+	const contentData = loadContentData();
+	syncRuntimeData(contentData);
 
 	let copiedCount = 0;
 
@@ -210,7 +273,6 @@ function syncPublicAssets() {
 	// Root index.html: site-level meta from content data + cache busting
 	const publicIndexPath = join(publicDir, "index.html");
 	if (existsSync(publicIndexPath)) {
-		const contentData = loadContentData();
 		const site = contentData.site || {};
 		const version = getAssetVersion();
 		let indexHtml = readFileSync(publicIndexPath, "utf8");
@@ -565,6 +627,9 @@ function generateRoutes() {
 const command = process.argv[2];
 
 switch (command) {
+	case "clean":
+		cleanPublic();
+		break;
 	case "content":
 		compileContent();
 		break;
@@ -578,6 +643,6 @@ switch (command) {
 		break;
 	default:
 		console.error(`Unknown command: ${command}`);
-		console.error("Usage: node scripts/build.js [content|dev|post]");
+		console.error("Usage: node scripts/build.js [clean|content|dev|post]");
 		process.exit(1);
 }

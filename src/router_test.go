@@ -76,6 +76,20 @@ func upperContent(md string) cachedContent {
 	return cachedContent{HTML: "<p>" + md + "</p>", TOC: []TOCItem{{ID: "hello", Text: "Hello", Level: 2}}}
 }
 
+func TestBeginNavigation(t *testing.T) {
+	first := beginNavigation()
+	if !first() {
+		t.Fatalf("expected a fresh navigation to be current")
+	}
+	second := beginNavigation()
+	if first() {
+		t.Errorf("expected the older navigation to be superseded")
+	}
+	if !second() {
+		t.Errorf("expected the latest navigation to stay current")
+	}
+}
+
 async func TestLoadRoute(t *testing.T) {
 	origFetch := fetch
 	defer func() {

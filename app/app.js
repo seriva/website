@@ -315,7 +315,6 @@ function BlogPostCard(post) {
     ___e5.className = "blog-post-card";
     ___e5.setAttribute("data-action", "open-post");
     ___e5.setAttribute("data-href", String(post.Href));
-    ___e5.setAttribute("tabindex", "0");
     ___e5.setAttribute("role", "article");
     ___e5.setAttribute("aria-label", String(post.Title));
     const ___e6 = document.createElement("h2");
@@ -2136,7 +2135,16 @@ function parseRoute(path) {
   return new RouteMatch({ Kind: RouteBlog, Page: 1 });
 }
 
+function beginNavigation() {
+  routeSeq++;
+  let seq = routeSeq;
+  return function() {
+    return seq === routeSeq;
+  };
+}
+
 async function handleRoute() {
+  let isCurrent = beginNavigation();
   resetOverlays();
   let path = window.location.pathname;
   if (!isInitialRoute) {
@@ -2147,7 +2155,9 @@ async function handleRoute() {
     }
   }
   isInitialRoute = false;
-  routeSeq++;
+  if (!isCurrent()) {
+    return;
+  }
   currentPath = path;
   route = parseRoute(path);
   view = newViewState();
@@ -2175,6 +2185,9 @@ async function handleRoute() {
       showBlog(route.Page);
       break;
     }
+  }
+  if (!isCurrent()) {
+    return;
   }
   let mainEl = document.querySelector("#main-content");
   if (mainEl != null) {
@@ -2964,4 +2977,3 @@ function readmeURL(p, githubUsername) {
 }
 
 main();
-(function(){var es=new EventSource('/_gofront/events');es.addEventListener('reload',function(){location.reload();});})();

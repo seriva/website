@@ -131,3 +131,72 @@ test.describe("Navigation", () => {
     });
 });
 
+test.describe("Rapid navigation", () => {
+    async function firstTwoPosts(page) {
+        await page.goto("/blog");
+        const links = page.locator(".blog-post-title a");
+        await expect(links.nth(1)).toBeVisible();
+        return {
+            hrefA: await links.nth(0).getAttribute("href"),
+            hrefB: await links.nth(1).getAttribute("href"),
+            titleB: (await links.nth(1).textContent()).trim(),
+        };
+    }
+
+    async function expectPostB(page, hrefB, titleB) {
+        await expect(page).toHaveURL(hrefB);
+        await expect(page.locator("#main-content h1.project-title")).toHaveText(titleB);
+        expect(await page.title()).toContain(titleB);
+        const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
+        expect(canonical.endsWith(hrefB)).toBe(true);
+    }
+
+    test("two clicks inside the fade paint only the latest post and fetch once", async ({ page }) => {
+        const fetched = [];
+        await page.route("**/data/blog/*.md", async (route) => {
+            fetched.push(new URL(route.request().url()).pathname);
+            await route.continue();
+        });
+        const { hrefA, hrefB, titleB } = await firstTwoPosts(page);
+
+        // Same tick: the second navigation starts during the first one's 200 ms fade.
+        await page.evaluate(([a, b]) => {
+            document.querySelector(`.blog-post-title a[href="${a}"]`).click();
+            document.querySelector(`.blog-post-title a[href="${b}"]`).click();
+        }, [hrefA, hrefB]);
+
+        await expectPostB(page, hrefB, titleB);
+        await page.waitForTimeout(400);
+        expect(fetched).toHaveLength(1);
+        await expectPostB(page, hrefB, titleB);
+    });
+
+    test("a slow fetch from a superseded route never overwrites the newer one", async ({ page }) => {
+        let delayed = false;
+        await page.route("**/data/blog/*.md", async (route) => {
+            if (!delayed) {
+                delayed = true;
+                await new Promise((resolve) => setTimeout(resolve, 1500));
+            }
+            await route.continue();
+        });
+        const { hrefA, hrefB, titleB } = await firstTwoPosts(page);
+
+        await page.locator(`.blog-post-title a[href="${hrefA}"]`).click();
+        await expect(page).toHaveURL(hrefA);
+        await page.waitForTimeout(300); // post A is now waiting on its slow fetch
+        await page.evaluate((b) => {
+            history.pushState({}, "", b);
+            dispatchEvent(new PopStateEvent("popstate"));
+        }, hrefB);
+
+        await expectPostB(page, hrefB, titleB);
+        // The stale navigation must not move focus once its fetch finally lands.
+        await page.locator('.nav-link[href="/blog"]').focus();
+        await page.waitForTimeout(1700); // let post A's fetch resolve
+        await expectPostB(page, hrefB, titleB);
+        expect(delayed).toBe(true);
+        expect(await page.evaluate(() => document.activeElement?.getAttribute("href"))).toBe("/blog");
+    });
+});
+
