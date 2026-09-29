@@ -8,8 +8,9 @@
 //   content  — Compile app/data/content.yaml into content.json
 //   dev      — Run content watch + dev server concurrently
 //   post     — Sync public assets and generate sitemap/RSS
+//   prod     — Complete production build (clean + compile + bundle + sync + SEO)
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
 	copyFileSync,
@@ -96,14 +97,10 @@ function watchContent() {
 function runDev() {
 	watchContent();
 
-	const child = spawn(
-		"npx",
-		["gofront", "src", "-o", "app/app.js", "--serve", "--port", "8181"],
-		{
-			cwd: rootDir,
-			stdio: "inherit",
-		},
-	);
+	const child = spawn("npx", ["gofront", "dev"], {
+		cwd: rootDir,
+		stdio: "inherit",
+	});
 
 	child.on("exit", (code) => process.exit(code ?? 0));
 	process.on("SIGINT", () => {
@@ -129,7 +126,14 @@ const DEV_ORIGIN = /\s+(?:https?|wss?):\/\/localhost:\d+/g;
 function stripDevOrigins(html) {
 	return html.replace(
 		/(<meta http-equiv="Content-Security-Policy" content=")([^"]*)(")/,
-		(_m, open, csp, close) => open + csp.replace(DEV_ORIGIN, "") + close,
+		(_m, open, csp, close) => {
+			let cleaned = csp.replace(DEV_ORIGIN, "");
+			cleaned = cleaned.replace(
+				/(script-src\s+[^;]*?)'unsafe-inline'\s*/,
+				"$1",
+			);
+			return open + cleaned + close;
+		},
 	);
 }
 
@@ -537,6 +541,20 @@ function injectSiteData(html, contentData) {
 	);
 }
 
+function runProd() {
+	cleanPublic();
+	compileContent();
+	const res = spawnSync("npx", ["gofront", "build"], {
+		cwd: rootDir,
+		stdio: "inherit",
+	});
+	if (res.status !== 0) {
+		process.exit(res.status ?? 1);
+	}
+	syncPublicAssets();
+	generateSeo();
+}
+
 // ── CLI Dispatch ──────────────────────────────────────────────
 
 const command = process.argv[2];
@@ -555,8 +573,11 @@ switch (command) {
 		syncPublicAssets();
 		generateSeo();
 		break;
+	case "prod":
+		runProd();
+		break;
 	default:
 		console.error(`Unknown command: ${command}`);
-		console.error("Usage: node scripts/build.js [clean|content|dev|post]");
+		console.error("Usage: node scripts/build.js [clean|content|dev|post|prod]");
 		process.exit(1);
 }
