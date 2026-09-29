@@ -113,6 +113,10 @@ test("npm run prod replaces stale output with a complete build", () => {
 		);
 	}
 	assert.doesNotMatch(readPublic("index.html"), /localhost:\d+/);
+	assert.doesNotMatch(
+		readPublic("index.html"),
+		/script-src [^;]*'unsafe-inline'/,
+	);
 
 	const slug = content.blog.posts[0].filename.replace(/\.md$/, "");
 	assert.match(

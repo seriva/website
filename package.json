@@ -13,19 +13,26 @@
 		"prepare": "lefthook install && npm run prep",
 		"prep": "node scripts/build.js content && gofront prep",
 		"dev": "node scripts/build.js dev",
-		"prod": "npm run check && node scripts/build.js clean && node scripts/build.js content && gofront prep --minify && gofront src -o public/app.js --minify --mangle && node scripts/build.js post",
-		"test:gofront": "gofront test src --dom",
+		"prod": "npm run check && node scripts/build.js prod",
+		"test:gofront": "gofront test --dom",
 		"test:e2e": "playwright test",
 		"test:build": "node --test \"tests/build/**/*.test.js\"",
 		"test:all": "npm run test:gofront && npm run test:e2e && npm run test:build",
 		"format": "biome format --write .",
-		"check": "biome check . && gofront src --check"
+		"check": "biome check . && gofront check"
+	},
+	"gofront": {
+		"src": "src",
+		"serveDir": "app",
+		"output": "app/app.js",
+		"outDir": "public",
+		"port": 8181
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.14",
 		"@fontsource/raleway": "^5.3.0",
 		"@playwright/test": "^1.63.0",
-		"gofront": "^1.2.3",
+		"gofront": "^1.3.2",
 		"jsdom": "^30.1.0",
 		"lefthook": "^2.1.14",
 		"rolldown": "^1.1.2",
