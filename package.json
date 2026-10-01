@@ -88,14 +88,5 @@
 		"fuse.js": "^7.5.0",
 		"marked": "^18.0.13",
 		"prismjs": "^1.30.0"
-	},
-	"publicAssets": [
-		"index.html",
-		"boot.js",
-		"favicon.svg",
-		"og-image.jpg",
-		"robots.txt",
-		"fonts",
-		"css"
-	]
+	}
 }
