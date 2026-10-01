@@ -4,23 +4,19 @@
 // UNIFIED WEBSITE BUILD UTILITY
 // ===========================================
 // Commands (see package.json scripts):
-//   clean    — Remove the generated public/ directory (never touches app/)
 //   content  — Compile app/data/content.yaml into content.json
 //   dev      — Run content watch + dev server concurrently
-//   post     — Sync public assets and generate sitemap/RSS
-//   prod     — Complete production build (clean + compile + bundle + sync + SEO)
+//   post     — Finalize runtime content/assets and generate sitemap/RSS
+//   prod     — Complete production build (compile + GoFront build + finalize + SEO)
 
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
 	copyFileSync,
-	cpSync,
 	existsSync,
 	mkdirSync,
 	readdirSync,
 	readFileSync,
-	rmSync,
-	statSync,
 	watch,
 	writeFileSync,
 } from "node:fs";
@@ -34,18 +30,6 @@ const __dirname = dirname(__filename);
 const rootDir = join(__dirname, "..");
 const appDir = join(rootDir, "app");
 const publicDir = join(rootDir, "public");
-
-const pkgPath = join(rootDir, "package.json");
-const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-
-// ── 0. Clean generated output ─────────────────────────────────
-
-// Runs first in `npm run prod`, before `gofront prep` and the compiler emit
-// bundles into public/, so stale stubs and removed posts never survive a build.
-function cleanPublic() {
-	rmSync(publicDir, { recursive: true, force: true });
-	console.log(`✓ Cleaned ${publicDir}`);
-}
 
 // ── 1. Content Compilation & Watching (YAML → JSON) ───────────
 
@@ -64,13 +48,6 @@ function compileContent() {
 	mkdirSync(dirname(appJsonPath), { recursive: true });
 	writeFileSync(appJsonPath, jsonText, "utf8");
 	console.log(`✓ Compiled ${yamlPath} → ${appJsonPath}`);
-
-	const publicDataDir = join(publicDir, "data");
-	if (existsSync(publicDataDir)) {
-		const publicJsonPath = join(publicDataDir, "content.json");
-		writeFileSync(publicJsonPath, jsonText, "utf8");
-		console.log(`✓ Synchronized → ${publicJsonPath}`);
-	}
 }
 
 function watchContent() {
@@ -228,39 +205,9 @@ function syncRuntimeData(contentData) {
 	);
 }
 
-function syncPublicAssets() {
-	mkdirSync(publicDir, { recursive: true });
-
+function finalizePublicAssets() {
 	const contentData = loadContentData();
 	syncRuntimeData(contentData);
-
-	let copiedCount = 0;
-
-	for (const item of pkg.publicAssets) {
-		const srcPath = join(appDir, item);
-		const destPath = join(publicDir, item);
-
-		if (!existsSync(srcPath)) {
-			console.warn(`[sync] Warning: ${item} not found in app/ — skipping`);
-			continue;
-		}
-
-		const stat = statSync(srcPath);
-		if (stat.isDirectory()) {
-			cpSync(srcPath, destPath, { recursive: true, force: true });
-			copiedCount++;
-			console.log(`✓ Copied directory: ${item}/ → public/${item}/`);
-		} else {
-			mkdirSync(dirname(destPath), { recursive: true });
-			if (item === "index.html") {
-				writeFileSync(destPath, stripDevOrigins(readFileSync(srcPath, "utf8")));
-			} else {
-				copyFileSync(srcPath, destPath);
-			}
-			copiedCount++;
-			console.log(`✓ Copied file: ${item} → public/${item}`);
-		}
-	}
 
 	// Minify public CSS
 	const publicCssPath = join(publicDir, "css/app.css");
@@ -279,7 +226,7 @@ function syncPublicAssets() {
 	if (existsSync(publicIndexPath)) {
 		const site = contentData.site || {};
 		const version = getAssetVersion();
-		let indexHtml = readFileSync(publicIndexPath, "utf8");
+		let indexHtml = stripDevOrigins(readFileSync(publicIndexPath, "utf8"));
 		indexHtml = injectMetadata(indexHtml, {
 			title: site.title,
 			description: site.description,
@@ -297,8 +244,6 @@ function syncPublicAssets() {
 		writeFileSync(join(publicDir, "404.html"), indexHtml, "utf8");
 		console.log("✓ Wrote public/404.html as SPA shell");
 	}
-
-	console.log(`✓ Successfully copied ${copiedCount} public assets to public/`);
 }
 
 // ── 3. Sitemap & RSS Generation ───────────────────────────────
@@ -542,7 +487,6 @@ function injectSiteData(html, contentData) {
 }
 
 function runProd() {
-	cleanPublic();
 	compileContent();
 	const res = spawnSync("npx", ["gofront", "build"], {
 		cwd: rootDir,
@@ -551,7 +495,7 @@ function runProd() {
 	if (res.status !== 0) {
 		process.exit(res.status ?? 1);
 	}
-	syncPublicAssets();
+	finalizePublicAssets();
 	generateSeo();
 }
 
@@ -560,9 +504,6 @@ function runProd() {
 const command = process.argv[2];
 
 switch (command) {
-	case "clean":
-		cleanPublic();
-		break;
 	case "content":
 		compileContent();
 		break;
@@ -570,7 +511,7 @@ switch (command) {
 		runDev();
 		break;
 	case "post":
-		syncPublicAssets();
+		finalizePublicAssets();
 		generateSeo();
 		break;
 	case "prod":
@@ -578,6 +519,6 @@ switch (command) {
 		break;
 	default:
 		console.error(`Unknown command: ${command}`);
-		console.error("Usage: node scripts/build.js [clean|content|dev|post|prod]");
+		console.error("Usage: node scripts/build.js [content|dev|post|prod]");
 		process.exit(1);
 }

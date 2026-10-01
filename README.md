@@ -81,18 +81,18 @@ npm run prod
 
 This will:
 - Run code quality checks (`biome check`)
-- Remove the previous `public/` output so removed posts and routes never linger
+- Let `gofront build` replace the previous `public/` output so removed posts and routes never linger
 - Compile YAML configuration to `content.json`
 - Bundle and minify vendor dependencies (`gofront prep --minify`)
 - Compile, minify, and mangle GoFront application bundle to `public/app.js`
-- Copy runtime data (`content.json` plus blog/page Markdown) to `public/data/` and public assets (`index.html`, `fonts/`, `css/`, metadata) to `public/`; `404.html` is emitted as a copy of the processed `index.html`
+- Let GoFront copy standard web assets to `public/`, then copy selective blog/page Markdown to `public/data/`; `404.html` is emitted as a copy of the processed `index.html`
 - Generate `sitemap.xml` and `rss.xml`
 - Output complete, self-contained site to `public/` directory
 
 ### Asset Management
 
 - **Vendor Assets (`assetCopy`)**: Fonts and Prism themes are copied from npm packages to `app/` during `npm run prepare` via GoFront's `assetCopy` configuration in `package.json`. Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they are generated from npm packages.
-- **Production Assets (`publicAssets`)**: Static web files and directories are synchronized from `app/` to `public/` during `npm run prod` via `publicAssets` in `package.json`. Runtime data is handled separately: only `content.json` and the Markdown referenced by routes are copied to `public/data/` (never `content.yaml`).
+- **Production Assets**: `gofront build` synchronizes standard web files from `app/` to `public/`. Runtime data is finalized separately: `content.json` plus only Markdown or files referenced by live routes are copied to `public/data/` (never `content.yaml`).
 
 ### Code Quality Tools
 
