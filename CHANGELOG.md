@@ -4,6 +4,12 @@ All notable changes to this project will be documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased]
+
+### Changed
+
+- Upgraded `gofront` to `^1.3.10` and moved the `vendor` and `assetCopy` blocks in `package.json` under the `"gofront"` project config, which is the only location GoFront ≥ 1.3.10 reads them from (top-level keys are ignored). `publicAssets` is consumed by `scripts/build.js` and stays top-level.
+
 ## [2026-09]
 
 ### Added
