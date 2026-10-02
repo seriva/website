@@ -88,7 +88,10 @@ func updateMetaTags() {
 }
 
 func announceRoute(title string) {
-	announcer := document.getElementById("route-announcer")
+	announcer := appRefs["routeAnnouncer"]
+	if announcer == nil && document != nil {
+		announcer = document.getElementById("route-announcer")
+	}
 	if announcer != nil {
 		prefix := t("general.routeAnnounce")
 		if prefix == "general.routeAnnounce" {

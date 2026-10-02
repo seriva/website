@@ -104,6 +104,11 @@ blog:
   dateFormat: "MMMM D, YYYY"
   # Blog posts with metadata for search indexing
   posts:
+    - filename: "2026-10-01-migrating-simplefps-from-microtastic-to-gofront.md"
+      title: "Migrating SimpleFPS to GoFront: Retiring Microtastic and Going Full-Stack Go"
+      date: "2026-10-01"
+      excerpt: "SimpleFPS has completed its rewrite from ES6 and Microtastic to GoFront. Here is why we made the leap, how zero-allocation Go unlocked 120 FPS performance, the trade-offs, and why Microtastic is now officially deprecated."
+      tags: ["Game Development", "Go", "GoFront", "WebGPU", "Microtastic"]
     - filename: "2026-09-24-migrating-from-microtastic-to-gofront.md"
       title: "Dogfooding GoFront: A Real-World Test Bed for My Compiler"
       date: "2026-09-24"
@@ -180,34 +185,16 @@ projects:
         icon: "cube"
         href: "https://www.npmjs.com/package/gofront"
 
-  # AI-powered Snake Game
-  - id: "snakeai"
-    title: "SnakeAI"
-    description: "AI-powered Snake game with machine learning."
-    tags: 
-      - "Python"
-      - "AI"
-      - "Machine Learning"
-    order: 2
-    github_repo: "snakeai"
-    github_branch: "master"  # Branch to load README from
-    links:
-      - title: "Github"
-        icon: "github"
-        href: "https://github.com/seriva/snakeai"
-      - title: "Download"
-        icon: "download"
-        href: "https://github.com/seriva/snakeai/archive/master.zip"
-
   # First Person Shooter Game
   - id: "simplefps"
     title: "SimpleFPS"
     description: "Simple first person arena shooter game."
     tags:
-      - "Javascript"
+      - "Go"
+      - "GoFront"
+      - "WebGPU"
       - "PWA"
-      - "ES6"
-    order: 3
+    order: 2
     github_repo: "simplefps"
     github_branch: "master"
     demo_url: "https://seriva.github.io/simplefps"
@@ -224,40 +211,84 @@ projects:
         icon: "download"
         href: "https://github.com/seriva/simplefps/archive/master.zip"
 
-  # Node.js Framework
-  - id: "microtastic"
-    title: "Microtastic"
-    description: "Frontend framework for web applications development using Node.js."
-    tags:
-      - "Node.js"
-      - "Javascript"
-    order: 4
-    github_repo: "microtastic"
-    github_branch: "master"
-    links:
-      - title: "Github"
-        icon: "github"
-        href: "https://github.com/seriva/microtastic"
-      - title: "NPM"
-        icon: "cube"
-        href: "https://www.npmjs.com/package/microtastic"
-
   # Portfolio Website
   - id: "website"
     title: "Website"
     description: "Minimalist SPA portfolio website with dynamic theming."
     tags:
-      - "HTML"
-      - "CSS"
-      - "Javascript"
+      - "Go"
+      - "GoFront"
       - "SPA"
-    order: 5
+      - "PWA"
+    order: 3
     github_repo: "website"
     github_branch: "master"
     links:
       - title: "Github"
         icon: "github"
         href: "https://github.com/seriva/website"
+
+  # Agentic Development Bootstrap
+  - id: "bootstrap"
+    title: "Bootstrap"
+    description: "Generic project scaffold for agentic development."
+    tags:
+      - "AI"
+      - "DevOps"
+      - "Workflow"
+      - "Shell"
+    order: 4
+    github_repo: "bootstrap"
+    github_branch: "main"
+    links:
+      - title: "Github"
+        icon: "github"
+        href: "https://github.com/seriva/bootstrap"
+      - title: "Download"
+        icon: "download"
+        href: "https://github.com/seriva/bootstrap/archive/main.zip"
+
+  # AI-powered Snake Game
+  - id: "snakeai"
+    title: "SnakeAI"
+    description: "AI-powered Snake game with machine learning."
+    tags: 
+      - "Python"
+      - "AI"
+      - "Machine Learning"
+    order: 5
+    github_repo: "snakeai"
+    github_branch: "master"  # Branch to load README from
+    links:
+      - title: "Github"
+        icon: "github"
+        href: "https://github.com/seriva/snakeai"
+      - title: "Download"
+        icon: "download"
+        href: "https://github.com/seriva/snakeai/archive/master.zip"
+
+  # Asteroid Game
+  - id: "astrohunter"
+    title: "AstroHunter"
+    description: "A simple Asteroid game for web and Android."
+    tags:
+      - "Javascript"
+      - "PWA"
+      - "ES6"
+    order: 6
+    github_repo: "astrohunter"
+    github_branch: "master"
+    demo_url: "https://seriva.github.io/astrohunter/"
+    demo_label: "Play!"
+    demo_instructions: "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls."
+    demo_fullscreen: true
+    links:
+      - title: "Github"
+        icon: "github"
+        href: "https://github.com/seriva/astrohunter"
+      - title: "Download"
+        icon: "download"
+        href: "https://github.com/seriva/astrohunter/archive/master.zip"
 
   # WebGL FPS Game
   - id: "qdfps"
@@ -266,7 +297,7 @@ projects:
     tags:
       - "Javascript"
       - "WebGL"
-    order: 6
+    order: 7
     github_repo: "qdfps"
     github_branch: "master"
     youtube_videos:
@@ -290,7 +321,7 @@ projects:
       - "SDL"
       - "Newton"
       - "OpenAL"
-    order: 7
+    order: 8
     github_repo: "genesisdevice"
     github_branch: "master"
     youtube_videos:
@@ -304,48 +335,24 @@ projects:
         icon: "download"
         href: "https://github.com/seriva/genesisdevice/archive/master.zip"
 
-  # Asteroid Game
-  - id: "astrohunter"
-    title: "AstroHunter"
-    description: "A simple Asteroid game for web and Android."
+  # Node.js Framework (Deprecated)
+  - id: "microtastic"
+    title: "Microtastic (Archived)"
+    description: "Minimalist frontend build tool & component framework. Predecessor to GoFront, now officially deprecated."
     tags:
+      - "Node.js"
       - "Javascript"
-      - "PWA"
-      - "ES6"
-    order: 8
-    github_repo: "astrohunter"
-    github_branch: "master"
-    demo_url: "https://seriva.github.io/astrohunter/"
-    demo_label: "Play!"
-    demo_instructions: "On desktop use the arrow keys to control the ship and space to shoot. On mobile it should present onscreen controls."
-    demo_fullscreen: true
-    links:
-      - title: "Github"
-        icon: "github"
-        href: "https://github.com/seriva/astrohunter"
-      - title: "Download"
-        icon: "download"
-        href: "https://github.com/seriva/astrohunter/archive/master.zip"
-
-  # Agentic Development Bootstrap
-  - id: "bootstrap"
-    title: "Bootstrap"
-    description: "Generic project scaffold for agentic development."
-    tags:
-      - "AI"
-      - "DevOps"
-      - "Workflow"
-      - "Shell"
+      - "Archived"
     order: 9
-    github_repo: "bootstrap"
-    github_branch: "main"
+    github_repo: "microtastic"
+    github_branch: "master"
     links:
       - title: "Github"
         icon: "github"
-        href: "https://github.com/seriva/bootstrap"
-      - title: "Download"
-        icon: "download"
-        href: "https://github.com/seriva/bootstrap/archive/main.zip"
+        href: "https://github.com/seriva/microtastic"
+      - title: "NPM"
+        icon: "cube"
+        href: "https://www.npmjs.com/package/microtastic"
 
 
 # Website Pages

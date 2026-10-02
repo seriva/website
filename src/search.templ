@@ -38,7 +38,7 @@ templ SearchModal(open bool, query string, results []SearchResultItem, selectedI
 					@Icon("arrow-left", "1.2rem")
 				</button>
 				<div class="search-page-input-wrapper">
-					<input type="search" id="search-page-input" class="search-page-input" placeholder={ placeholder } autocomplete="off" aria-label={ t("aria.search") } value={ query }/>
+					<input ref="searchInput" type="search" id="search-page-input" class="search-page-input" placeholder={ placeholder } autocomplete="off" aria-label={ t("aria.search") } value={ query }/>
 					<button type="button" class={ cls("search-page-clear", query != "", "show") } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
 						@Icon("times", "1.2rem")
 					</button>

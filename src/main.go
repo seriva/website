@@ -48,7 +48,10 @@ func navigateHash(hash string) {
 }
 
 func setupEvents() {
-	app := document.querySelector("#app")
+	app := appRefs["appRoot"]
+	if app == nil && document != nil {
+		app = document.querySelector("#app")
+	}
 	if app == nil {
 		return
 	}
@@ -327,7 +330,7 @@ async func main() {
 	initInitialRoute()
 
 	// Shell is mounted once; routes and overlays re-render their own regions.
-	gom.Mount("#app", AppShell())
+	gom.Mount("#app", AppShell(), appRefs)
 	setupEvents()
 	await handleRoute()
 

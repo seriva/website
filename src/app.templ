@@ -32,9 +32,9 @@ templ MainContent() {
 }
 
 templ AppShell() {
-	<div class="app-root">
+	<div ref="appRoot" class="app-root">
 		<a href="#main-content" class="skip-link">{ t("nav.skipToContent") }</a>
-		<div id="route-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+		<div ref="routeAnnouncer" id="route-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 		<div id="navbar-slot">
 			@Navbar(route, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
 		</div>
