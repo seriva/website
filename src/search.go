@@ -145,7 +145,10 @@ func renderSearchResults() {
 
 // setSearchInput writes the input's value; it is user-owned DOM state, not derived.
 func setSearchInput(v string) {
-	inp := document.querySelector("#search-page-input")
+	inp := appRefs["searchInput"]
+	if inp == nil && document != nil {
+		inp = document.querySelector("#search-page-input")
+	}
 	if inp != nil {
 		inp.value = v
 	}

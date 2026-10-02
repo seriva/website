@@ -3,6 +3,8 @@ package main
 import "js:./browser.d.ts"
 import "strconv"
 
+var appRefs = map[string]any{}
+
 // ── Region renders ────────────────────────────────────────────
 // The app shell is mounted once in main(); these re-render only the
 // region that depends on the state that changed.
