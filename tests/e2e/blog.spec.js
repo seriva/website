@@ -43,7 +43,7 @@ test.describe("Blog", () => {
 
         // Click Last button to navigate to the last page
         await page.locator('.blog-pagination [aria-label="Last"]').click();
-        await expect(page).toHaveURL("/blog/page/2");
+        await expect(page).toHaveURL("/blog/page/3");
         await expect(page.locator('.blog-pagination .page-item:has([aria-label="Last"])')).toHaveClass(/disabled/);
         await expect(page.locator('.blog-pagination .page-item:has([aria-label="Next"])')).toHaveClass(/disabled/);
         await expect(page.locator('.blog-pagination .page-item:has([aria-label="First"])')).not.toHaveClass(/disabled/);
@@ -104,7 +104,7 @@ test.describe("Blog", () => {
 
     test("previous and next post navigation cards navigate between adjacent posts", async ({ page }) => {
         // Go to newest post
-        await page.goto("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        await page.goto("/blog/2026-10-01-migrating-simplefps-from-microtastic-to-gofront");
         await expect(page.locator(".blog-nav-prev")).toBeVisible();
         // Newest post has no next post
         await expect(page.locator(".blog-nav-next")).toHaveCount(0);
@@ -112,7 +112,7 @@ test.describe("Blog", () => {
         // Click older post link
         await page.locator(".blog-nav-prev").scrollIntoViewIfNeeded();
         await page.locator(".blog-nav-prev").click();
-        await expect(page).toHaveURL("/blog/2026-09-21-bootstrapping-agentic-development");
+        await expect(page).toHaveURL("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
         await expect(page.locator(".blog-post-view")).toBeVisible();
 
         // On middle post, both prev and next are visible
@@ -122,7 +122,7 @@ test.describe("Blog", () => {
         // Click newer post to return
         await page.locator(".blog-nav-next").scrollIntoViewIfNeeded();
         await page.locator(".blog-nav-next").click();
-        await expect(page).toHaveURL("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        await expect(page).toHaveURL("/blog/2026-10-01-migrating-simplefps-from-microtastic-to-gofront");
     });
 
     test("renders compact older and newer post navigation buttons", async ({ page }) => {
@@ -154,7 +154,7 @@ test.describe("Blog", () => {
         expect(Math.abs(prevBox.y - nextBox.y)).toBeLessThan(5);
 
         // Single post button on newest post
-        await page.goto("/blog/2026-09-24-migrating-from-microtastic-to-gofront");
+        await page.goto("/blog/2026-10-01-migrating-simplefps-from-microtastic-to-gofront");
         const navSingle = page.locator(".blog-post-nav");
         await expect(navSingle).toBeVisible();
         await navSingle.scrollIntoViewIfNeeded();
