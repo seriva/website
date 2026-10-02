@@ -8,19 +8,19 @@ templ SearchResultsList(results []SearchResultItem, query string, selectedIndex 
 		</div>
 	} else {
 		for i, item := range results {
-			<article class={ cls("search-result-item blog-post-card", i == selectedIndex, "selected") } data-action="open-post" data-href={ item.Url }>
+			<article class={ cls("search-result-item blog-post-card " + blogCardStyle(), i == selectedIndex, "selected") } data-action="open-post" data-href={ item.Url }>
 				<h2 class="blog-post-title">
 					<a href={ item.Url } data-action="nav">@templ.Raw(highlightMatch(item.Title, query))</a>
 				</h2>
 				<div class="blog-post-meta">
 					<span class="blog-post-tags">
 						if item.ItemType == "project" {
-							<span class="item-tag">{ t("badges.project") }</span>
+							<span class={ "item-tag " + itemTagStyle() }>{ t("badges.project") }</span>
 						} else {
-							<span class="item-tag">{ t("badges.blog") }</span>
+							<span class={ "item-tag " + itemTagStyle() }>{ t("badges.blog") }</span>
 						}
 						for _, tag := range item.Tags {
-							<span class="item-tag">{ tag }</span>
+							<span class={ "item-tag " + itemTagStyle() }>{ tag }</span>
 						}
 					</span>
 				</div>
@@ -30,8 +30,170 @@ templ SearchResultsList(results []SearchResultItem, query string, selectedIndex 
 	}
 }
 
+css searchModalStyle() {
+	display: flex;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--background-color);
+	z-index: 2000;
+	flex-direction: column;
+	overflow: hidden;
+	visibility: hidden;
+	opacity: 0;
+	transform: scale(0.95);
+	transition:
+		opacity 0.2s ease-in,
+		transform 0.2s ease-in,
+		visibility 0s linear 0.2s;
+
+	&.show {
+		visibility: visible;
+		opacity: 1;
+		transform: scale(1);
+		transition:
+			opacity 0.25s ease-out,
+			transform 0.25s ease-out,
+			visibility 0s;
+	}
+
+	& .search-page-header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 56px;
+		padding: 0 1rem;
+		background-color: var(--header-color);
+		border-bottom: var(--border-width) solid var(--accent);
+		transition:
+			background-color var(--theme-transition-duration) var(--theme-transition-timing),
+			color var(--theme-transition-duration) var(--theme-transition-timing),
+			border-color var(--theme-transition-duration) var(--theme-transition-timing);
+	}
+
+	&.show .search-page-header {
+		animation: slideDown var(--transition-normal) ease-out;
+	}
+
+	& .search-page-header-content {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 100%;
+		max-width: 900px;
+	}
+
+	& .search-page-back {
+		background: none;
+		border: none;
+		color: var(--font-color);
+		cursor: pointer;
+		padding: 0.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.2em;
+		transition: color var(--transition-fast);
+	}
+
+	& .search-page-back:hover {
+		color: var(--accent);
+	}
+
+	& .search-page-input-wrapper {
+		flex: 1;
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	& .search-page-input {
+		width: 100%;
+		padding: 0.5rem 2.5rem 0.5rem 1rem;
+		background-color: var(--hover-color);
+		border: 1px solid var(--border-color);
+		border-radius: 20px;
+		color: var(--font-color);
+		font-size: 1em;
+	}
+
+	& .search-page-input::-webkit-search-cancel-button {
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	& .search-page-input:focus {
+		outline: none;
+		border-color: var(--accent);
+		background-color: var(--background-color);
+		box-shadow: 0 0 0 3px var(--accent-glow);
+	}
+
+	& .search-page-clear {
+		position: absolute;
+		right: 0.5rem;
+		background: none;
+		border: none;
+		color: var(--text-light);
+		cursor: pointer;
+		padding: 0.25rem 0.5rem;
+		display: none;
+		transition: color var(--transition-fast);
+	}
+
+	& .search-page-clear:hover {
+		color: var(--accent);
+	}
+
+	& .search-page-clear.show {
+		display: block;
+	}
+
+	& .search-page-content {
+		flex: 1;
+		overflow-y: auto;
+		padding: 1rem;
+		display: flex;
+		justify-content: center;
+	}
+
+	&.show .search-page-content {
+		animation: fadeIn 0.4s ease-out 0.1s both;
+	}
+
+	& .search-page-results {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		width: 100%;
+		max-width: 900px;
+		text-align: left;
+	}
+
+	& .search-result-item.selected {
+		border-color: var(--accent);
+		background-color: var(--hover-color);
+		box-shadow:
+			0 0 0 1px var(--accent),
+			0 0 15px var(--accent-glow);
+	}
+
+	& .search-no-results {
+		padding: var(--spacing-xl);
+		text-align: center;
+		color: var(--text-light);
+	}
+
+	& .search-no-results p {
+		margin: 0;
+		font-size: 0.9em;
+	}
+}
+
 templ SearchModal(open bool, query string, results []SearchResultItem, selectedIndex int, placeholder string) {
-	<div id="search-page" class={ cls("", open, "show") } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
+	<div id="search-page" class={ cls(searchModalStyle(), open, "show") } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
 		<div class="search-page-header">
 			<div class="search-page-header-content">
 				<button type="button" class="search-page-back" id="search-page-back" aria-label={ t("aria.goBack") } data-action="close-search">

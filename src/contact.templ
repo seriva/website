@@ -23,8 +23,199 @@ templ ContactFormFields(form ContactState) {
 	</button>
 }
 
+css contactModalStyle() {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	z-index: 10000;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 2rem 1rem;
+	visibility: hidden;
+	opacity: 0;
+	transition:
+		opacity 0.2s ease-in-out,
+		visibility 0s linear 0.2s;
+
+	&.show {
+		visibility: visible;
+		opacity: 1;
+		transition:
+			opacity 0.25s ease-out,
+			visibility 0s;
+	}
+
+	& .contact-modal-content {
+		background-color: var(--background-color);
+		border: 2px solid var(--border-color);
+		border-radius: 8px;
+		padding: 1.5rem;
+		max-width: 450px;
+		width: 100%;
+		position: relative;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+		opacity: 0;
+		transform: scale(0.95);
+		transition:
+			opacity 0.2s ease-in,
+			transform 0.2s ease-in,
+			background-color var(--theme-transition-duration) var(--theme-transition-timing),
+			color var(--theme-transition-duration) var(--theme-transition-timing),
+			border-color var(--theme-transition-duration) var(--theme-transition-timing);
+	}
+
+	&.show .contact-modal-content {
+		opacity: 1;
+		transform: scale(1);
+		transition:
+			opacity 0.25s ease-out,
+			transform 0.25s ease-out,
+			background-color var(--theme-transition-duration) var(--theme-transition-timing),
+			color var(--theme-transition-duration) var(--theme-transition-timing),
+			border-color var(--theme-transition-duration) var(--theme-transition-timing);
+	}
+
+	& .contact-modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+
+	& .contact-modal-header h2 {
+		margin: 0;
+		color: var(--accent);
+		font-size: 1.25rem;
+	}
+
+	& .contact-modal-close {
+		background: none;
+		border: none;
+		color: var(--text-light);
+		font-size: 1.5rem;
+		cursor: pointer;
+		padding: 0;
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 4px;
+		transition: all 0.2s ease;
+	}
+
+	& .contact-modal-close:hover {
+		background-color: var(--hover-color);
+		color: var(--font-color);
+	}
+
+	& .contact-form .form-group {
+		margin-bottom: 0.75rem;
+	}
+
+	& .contact-form label {
+		display: block;
+		margin-bottom: 0.25rem;
+		color: var(--font-color);
+		font-weight: 600;
+		font-size: 0.9rem;
+		text-align: left;
+	}
+
+	& .contact-form input,
+	& .contact-form textarea {
+		width: 100%;
+		padding: 0.6rem;
+		background-color: var(--hover-color);
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
+		color: var(--font-color);
+		font-family: inherit;
+		font-size: 0.95rem;
+		transition: border-color 0.2s ease;
+	}
+
+	& .contact-form input:focus,
+	& .contact-form textarea:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+
+	& .contact-form input.error,
+	& .contact-form textarea.error {
+		border-color: #ef4444;
+	}
+
+	& .contact-form textarea {
+		resize: vertical;
+		min-height: 100px;
+	}
+
+	& .form-status {
+		padding: 0.6rem;
+		border-radius: 4px;
+		margin-bottom: 0.25rem;
+		text-align: center;
+		font-size: 0.9rem;
+		display: none;
+	}
+
+	& .form-status.success,
+	& .form-status.error {
+		display: block;
+	}
+
+	& .form-status.success {
+		background-color: rgba(16, 185, 129, 0.1);
+		border: 1px solid var(--accent);
+		color: var(--accent);
+	}
+
+	& .form-status.error {
+		background-color: rgba(239, 68, 68, 0.1);
+		border: 1px solid #ef4444;
+		color: #ef4444;
+	}
+
+	& .contact-form .btn {
+		width: 100%;
+		padding: 12px 24px;
+		margin-top: 0.75rem;
+		background-color: var(--hover-color);
+		border: 2px solid var(--accent);
+		border-radius: 8px;
+		color: var(--font-color);
+		font-weight: 600;
+		font-size: 1em;
+		cursor: pointer;
+		transition: all var(--transition-normal);
+	}
+
+	& .contact-form .btn:hover:not(:disabled) {
+		background-color: var(--hover-color);
+		border-color: var(--accent);
+		color: var(--accent);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px var(--accent-glow);
+	}
+
+	& .contact-form .btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
+	}
+}
+
 templ ContactModal(open bool, form ContactState) {
-	<div id="contact-modal" class={ cls("", open, "show") } role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+	<div id="contact-modal" class={ cls(contactModalStyle(), open, "show") } role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
 		<div class="contact-modal-content">
 			<div class="contact-modal-header">
 				<h2 id="contact-modal-title">{ t("contact.title") }</h2>

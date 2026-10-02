@@ -2,8 +2,21 @@ package main
 
 import "strconv"
 
+css footerStyle() {
+	margin-top: auto;
+	margin-bottom: 0;
+	padding: 1rem 0;
+	background-color: transparent;
+	flex-shrink: 0;
+	max-width: 1000px;
+	margin-inline: auto;
+	text-align: center;
+	font-size: 0.9em;
+	transition: color var(--theme-transition-duration) var(--theme-transition-timing);
+}
+
 templ Footer(year int, author string) {
-	<footer>
+	<footer class={ footerStyle() }>
 		{ "© " + strconv.Itoa(year) + " " + author + ". " + t("footer.rights") + "." }
 	</footer>
 }

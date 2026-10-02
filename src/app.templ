@@ -1,11 +1,11 @@
 package main
 
 templ NotFoundView() {
-	<div class="error-message">
+	<div class={ "error-message " + errorMessageStyle() }>
 		<h1>{ t("general.notFound") }</h1>
 		<p>{ t("general.notFoundMessage") }</p>
-		<div class="download-buttons" style="margin-top: 1.5rem;">
-			<a href="/" class="btn btn-primary" data-action="nav">{ t("general.backToHome") }</a>
+		<div class={ "download-buttons " + downloadButtonsStyle() } style="margin-top: 1.5rem; justify-content: center;">
+			<a href="/" class={ "btn btn-primary download-btn " + downloadBtnStyle() } data-action="nav">{ t("general.backToHome") }</a>
 		</div>
 	</div>
 }
@@ -25,14 +25,77 @@ templ RouteView(r RouteMatch) {
 	}
 }
 
+css mainContentStyle() {
+	margin: 0 auto;
+	padding: var(--spacing-lg);
+	flex: 1 0 auto;
+	max-width: 900px;
+	width: 100%;
+	background-color: var(--background-color);
+	color: var(--font-color);
+	animation: fadeIn 0.2s ease-in-out;
+	transition:
+		background-color var(--theme-transition-duration) var(--theme-transition-timing),
+		color var(--theme-transition-duration) var(--theme-transition-timing);
+
+	&:focus {
+		outline: none;
+	}
+
+	&.page-transition-out {
+		animation: fadeOut 0.2s ease-in-out forwards;
+	}
+}
+
 templ MainContent() {
-	<main id="main-content" tabindex="-1">
+	<main id="main-content" class={ mainContentStyle() } tabindex="-1">
 		@RouteView(route)
 	</main>
 }
 
+css appShellStyle() {
+	display: flex;
+	flex-direction: column;
+	min-height: calc(100vh - 56px);
+	flex: 1 0 auto;
+
+	& .icon {
+		display: inline-block;
+		vertical-align: middle;
+		transition: transform var(--transition-fast);
+	}
+	& .icon:hover {
+		transform: rotate(5deg) scale(1.1);
+	}
+	& a.icon:hover {
+		text-decoration: none;
+	}
+
+	& .skip-link {
+		position: fixed;
+		top: -100px;
+		left: 1rem;
+		background: var(--accent);
+		color: #ffffff;
+		padding: 0.5rem 1rem;
+		z-index: 10001;
+		border-radius: var(--border-radius-sm);
+		font-weight: 600;
+		text-decoration: none;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		transition: top 0.2s ease-in-out;
+	}
+	& .skip-link:focus {
+		top: 1rem;
+	}
+	& #navbar-slot,
+	& #content-slot {
+		display: contents;
+	}
+}
+
 templ AppShell() {
-	<div ref="appRoot" class="app-root">
+	<div ref="appRoot" class={ "app-root " + appShellStyle() }>
 		<a href="#main-content" class="skip-link">{ t("nav.skipToContent") }</a>
 		<div ref="routeAnnouncer" id="route-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 		<div id="navbar-slot">
@@ -46,3 +109,4 @@ templ AppShell() {
 		@ContactModal(contactOpen, contactForm)
 	</div>
 }
+
