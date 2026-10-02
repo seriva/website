@@ -2,143 +2,420 @@ package main
 
 import "strconv"
 
+css blogCardStyle() {
+	padding: 1.5rem;
+	background-color: rgba(255, 255, 255, 0.02);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-large);
+	transition: all var(--transition-normal);
+	cursor: pointer;
+
+	&:hover {
+		background-color: rgba(255, 255, 255, 0.05);
+		border-color: var(--accent);
+		transform: translateY(-4px) scale(1.01);
+		box-shadow: 0 8px 25px var(--accent-glow);
+	}
+	& .blog-post-title {
+		margin: 0 0 0.35rem 0;
+		font-size: 1.35em;
+		font-weight: bold;
+		line-height: 1.3;
+	}
+	& .blog-post-title a {
+		color: var(--accent);
+		text-decoration: none;
+		transition: color var(--transition-fast);
+	}
+	& .blog-post-title a:hover {
+		color: var(--font-color);
+	}
+	& .blog-post-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+		font-size: 1em;
+		color: var(--text-light);
+	}
+	& .blog-post-date {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+	& .blog-post-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+	& .blog-post-excerpt {
+		color: var(--text-light);
+		line-height: 1.5;
+		margin-bottom: 0;
+		font-size: 1.05em;
+	}
+	& mark {
+		background-color: var(--accent);
+		color: var(--background-color);
+		padding: 1px 3px;
+		border-radius: 2px;
+		font-weight: bold;
+	}
+
+	@media (max-width: 767px) {
+		padding: 1rem;
+		margin: 0.25rem;
+		text-align: center;
+		& .blog-post-title {
+			font-size: 1.25em;
+		}
+		& .blog-post-meta {
+			flex-direction: column;
+			align-items: center;
+			gap: 0.5rem;
+			font-size: 0.95em;
+			justify-content: center;
+		}
+		& .blog-post-excerpt {
+			font-size: 1em;
+		}
+	}
+}
+
 templ BlogPostCard(post BlogPost) {
-    <article
-    class="blog-post-card"
-    data-action="open-post"
-    data-href={ post.Href }
-    role="article"
-    aria-label={ post.Title }
-    >
-    <h2 class="blog-post-title">
-        <a href={ post.Href } data-action="nav">{ post.Title }</a>
-        </h2>
-        <div class="blog-post-meta">
-            <span class="blog-post-date">
-                @Icon("calendar", "1rem")
-                { " " + post.Date }
-            </span>
-            if len(post.Tags) > 0 {
-                <span class="blog-post-tags">
-                    for _, tag := range post.Tags {
-                        <span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
-                        }
-                    </span>
-                }
-            </div>
-            <p class="blog-post-excerpt">{ post.Excerpt }</p>
-            </article>
-        }
+	<article
+		class={ "blog-post-card " + blogCardStyle() }
+		data-action="open-post"
+		data-href={ post.Href }
+		role="article"
+		aria-label={ post.Title }
+	>
+		<h2 class="blog-post-title">
+			<a href={ post.Href } data-action="nav">{ post.Title }</a>
+		</h2>
+		<div class="blog-post-meta">
+			<span class="blog-post-date">
+				@Icon("calendar", "1rem")
+				{ " " + post.Date }
+			</span>
+			if len(post.Tags) > 0 {
+				<span class="blog-post-tags">
+					for _, tag := range post.Tags {
+						<span class={ "item-tag clickable-tag " + itemTagStyle() } data-search-tag={ tag }>{ tag }</span>
+					}
+				</span>
+			}
+		</div>
+		<p class="blog-post-excerpt">{ post.Excerpt }</p>
+	</article>
+}
 
-        templ Pagination(currentPage int, totalPages int) {
-            <nav class="blog-pagination" aria-label="Blog pagination">
-                <ul class="pagination">
-                    <li class={ cls("page-item", currentPage <= 1, "disabled") }>
-                        <a class="page-link" href={ pageHref(1) } data-action="nav" aria-label="First" title="First Page">
-                            @Icon("angles-left", "0.85em")
-                        </a>
-                    </li>
-                    <li class={ cls("page-item", currentPage <= 1, "disabled") }>
-                        <a class="page-link" href={ pageHref(currentPage - 1) } data-action="nav" aria-label="Previous" title="Previous Page">
-                            @Icon("chevron-left", "0.85em")
-                        </a>
-                    </li>
-                    for _, pageNum := range pageNumbers(totalPages) {
-                        <li class={ cls("page-item", pageNum == currentPage, "active") }>
-                            <a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ pageNum }</a>
-                            </li>
-                        }
-                        <li class={ cls("page-item", currentPage >= totalPages, "disabled") }>
-                            <a class="page-link" href={ pageHref(currentPage + 1) } data-action="nav" aria-label="Next" title="Next Page">
-                                @Icon("chevron-right", "0.85em")
-                            </a>
-                        </li>
-                        <li class={ cls("page-item", currentPage >= totalPages, "disabled") }>
-                            <a class="page-link" href={ pageHref(totalPages) } data-action="nav" aria-label="Last" title="Last Page">
-                                @Icon("angles-right", "0.85em")
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            }
+css paginationStyle() {
+	margin: 2rem 0;
+	display: flex;
+	justify-content: center;
 
-            templ BlogList(allPosts []BlogPost, currentPage int, perPage int) {
-                <div class="blog-container">
-                    <h1 class="sr-only">{ t("nav.blog") }</h1>
-                        if len(allPosts) == 0 {
-                            <p class="blog-empty">{ t("blog.noPosts") }</p>
-                            } else {
-                                <div class="blog-posts">
-                                    for _, post := range paginatedPosts(allPosts, currentPage, perPage) {
-                                        @BlogPostCard(post)
-                                    }
-                                </div>
-                                if calcTotalPages(len(allPosts), perPage) > 1 {
-                                    @Pagination(currentPage, calcTotalPages(len(allPosts), perPage))
-                                }
-                            }
-                        </div>
-                    }
+	& .pagination {
+		display: flex;
+		gap: 0.5rem;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	& .page-item {
+		display: flex;
+	}
+	& .page-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem 0.75rem;
+		background-color: rgba(255, 255, 255, 0.02);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		color: var(--font-color);
+		text-decoration: none;
+		transition: all var(--transition-fast);
+		cursor: pointer;
+		min-width: 40px;
+		height: 38px;
+		box-sizing: border-box;
+		text-align: center;
+	}
+	& .page-link svg {
+		display: inline-block;
+		vertical-align: middle;
+	}
+	& .page-link:hover {
+		background-color: var(--hover-color);
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+	& .page-item.active .page-link {
+		background-color: var(--accent);
+		border-color: var(--accent);
+		color: var(--background-color);
+		font-weight: bold;
+	}
+	& .page-item.disabled .page-link {
+		opacity: 0.5;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
 
-                    templ TableOfContents(items []TOCItem) {
-                        if len(items) >= 2 {
-                            <details class="blog-toc">
-                                <summary class="blog-toc-title">{ t("blog.tableOfContents") }</summary>
-                                    <nav class="blog-toc-nav" aria-label={ t("blog.tableOfContents") }>
-                                        <ul class="blog-toc-list">
-                                            for _, item := range items {
-                                                <li class={ "blog-toc-item blog-toc-level-" + strconv.Itoa(item.Level) }>
-                                                    <a href={ "#" + item.ID }>{ item.Text }</a>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        </nav>
-                                    </details>
-                                }
-                            }
+	@media (max-width: 767px) {
+		& .page-link {
+			padding: 0.4rem 0.6rem;
+			font-size: 0.9em;
+			min-width: 35px;
+			height: 35px;
+		}
+	}
+}
 
-                            templ BlogPostView(v ViewState, commentsEnabled bool) {
-                                if v.Status == LoadNotFound || v.Status == LoadFailed {
-                                    <div class="error-message">
-                                        <h1>{ t("general.blogNotFound") }</h1>
-                                            <p>{ t("general.blogNotFoundMessage") }</p>
-                                            </div>
-                                        } else {
-                                            <div class="blog-post-view">
-                                                <h1 class="project-title">{ v.Post.Title }</h1>
-                                                    <p class="project-description">{ v.Post.Date }</p>
-                                                        if len(v.Post.Tags) > 0 {
-                                                            <div class="project-tags">
-                                                                for _, tag := range v.Post.Tags {
-                                                                    <span class="item-tag clickable-tag" data-search-tag={ tag }>{ tag }</span>
-                                                                    }
-                                                                </div>
-                                                            }
-                                                            @TableOfContents(v.TOC)
-                                                            <div class="blog-post-content">
-                                                                <div class="markdown-body">
-                                                                    @templ.Raw(v.HTML)
-                                                                </div>
-                                                            </div>
-                                                            if v.HasPrev || v.HasNext {
-                                                                <nav class="download-buttons blog-post-nav" aria-label="Post navigation">
-                                                                    if v.HasPrev {
-                                                                        <a href={ v.PrevPost.Href } class="download-btn blog-nav-prev" data-action="nav" title={ v.PrevPost.Title }>
-                                                                            @Icon("arrow-left", "1rem")
-                                                                            <span>{ t("blog.previousPost") }</span>
-                                                                            </a>
-                                                                        }
-                                                                        if v.HasNext {
-                                                                            <a href={ v.NextPost.Href } class="download-btn blog-nav-next" data-action="nav" title={ v.NextPost.Title }>
-                                                                                <span>{ t("blog.nextPost") }</span>
-                                                                                    @Icon("arrow-right", "1rem")
-                                                                                </a>
-                                                                            }
-                                                                        </nav>
-                                                                    }
-                                                                    if commentsEnabled {
-                                                                        <div class="giscus-container"></div>
-                                                                        }
-                                                                    </div>
-                                                                }
-                                                            }
+templ Pagination(currentPage int, totalPages int) {
+	<nav class={ "blog-pagination " + paginationStyle() } aria-label="Blog pagination">
+		<ul class="pagination">
+			<li class={ cls("page-item", currentPage <= 1, "disabled") }>
+				<a class="page-link" href={ pageHref(1) } data-action="nav" aria-label="First" title="First Page">
+					@Icon("angles-left", "0.85em")
+				</a>
+			</li>
+			<li class={ cls("page-item", currentPage <= 1, "disabled") }>
+				<a class="page-link" href={ pageHref(currentPage - 1) } data-action="nav" aria-label="Previous" title="Previous Page">
+					@Icon("chevron-left", "0.85em")
+				</a>
+			</li>
+			for _, pageNum := range pageNumbers(totalPages) {
+				<li class={ cls("page-item", pageNum == currentPage, "active") }>
+					<a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ pageNum }</a>
+				</li>
+			}
+			<li class={ cls("page-item", currentPage >= totalPages, "disabled") }>
+				<a class="page-link" href={ pageHref(currentPage + 1) } data-action="nav" aria-label="Next" title="Next Page">
+					@Icon("chevron-right", "0.85em")
+				</a>
+			</li>
+			<li class={ cls("page-item", currentPage >= totalPages, "disabled") }>
+				<a class="page-link" href={ pageHref(totalPages) } data-action="nav" aria-label="Last" title="Last Page">
+					@Icon("angles-right", "0.85em")
+				</a>
+			</li>
+		</ul>
+	</nav>
+}
+
+css blogListStyle() {
+	max-width: 900px;
+	margin: 0 auto;
+	text-align: left;
+
+	& .blog-page-title {
+		color: var(--accent);
+		font-size: 2em;
+		margin-bottom: 1.5rem;
+		text-align: center;
+	}
+	& .blog-empty {
+		text-align: center;
+		color: var(--text-light);
+		font-size: 1.1em;
+		padding: 2rem 0;
+	}
+	& .blog-posts {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		margin-bottom: 2rem;
+	}
+
+	@media (max-width: 767px) {
+		& .blog-posts {
+			gap: 0.5rem;
+		}
+	}
+}
+
+templ BlogList(allPosts []BlogPost, currentPage int, perPage int) {
+	<div class={ "blog-container " + blogListStyle() }>
+		<h1 class="sr-only">{ t("nav.blog") }</h1>
+		if len(allPosts) == 0 {
+			<p class="blog-empty">{ t("blog.noPosts") }</p>
+		} else {
+			<div class="blog-posts">
+				for _, post := range paginatedPosts(allPosts, currentPage, perPage) {
+					@BlogPostCard(post)
+				}
+			</div>
+			if calcTotalPages(len(allPosts), perPage) > 1 {
+				@Pagination(currentPage, calcTotalPages(len(allPosts), perPage))
+			}
+		}
+	</div>
+}
+
+css tocStyle() {
+	background: transparent;
+	border: none;
+	border-left: 2px solid var(--border-color);
+	border-radius: 0;
+	padding: 0.25rem 0 0.25rem 0.85rem;
+	margin: 1.5rem 0 2rem 0;
+	text-align: left;
+	transition: border-color 0.2s ease;
+
+	&:hover,
+	&[open] {
+		border-left-color: color-mix(in srgb, var(--accent) 50%, var(--border-color));
+	}
+	& .blog-toc-title {
+		font-size: 1rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		cursor: pointer;
+		color: var(--text-light);
+		user-select: none;
+		transition: color 0.15s ease;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+	& .blog-toc-title:hover {
+		color: var(--accent);
+	}
+	& .blog-toc-title:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+	& .blog-toc-nav {
+		margin-top: 0.5rem;
+	}
+	& .blog-toc-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.35rem;
+	}
+	& .blog-toc-item {
+		text-align: left;
+	}
+	& .blog-toc-item a {
+		color: var(--text-light);
+		text-decoration: none;
+		font-size: 1rem;
+		line-height: 1.5;
+		transition: color 0.15s ease;
+		display: inline-block;
+	}
+	& .blog-toc-item a:hover {
+		color: var(--accent);
+		text-decoration: none;
+	}
+	& .blog-toc-level-3 {
+		padding-left: 1.25rem;
+	}
+	& .blog-toc-level-3 a {
+		font-size: 0.95rem;
+		opacity: 0.9;
+	}
+}
+
+templ TableOfContents(items []TOCItem) {
+	if len(items) >= 2 {
+		<details class={ "blog-toc " + tocStyle() }>
+			<summary class="blog-toc-title">{ t("blog.tableOfContents") }</summary>
+			<nav class="blog-toc-nav" aria-label={ t("blog.tableOfContents") }>
+				<ul class="blog-toc-list">
+					for _, item := range items {
+						<li class={ "blog-toc-item blog-toc-level-" + strconv.Itoa(item.Level) }>
+							<a href={ "#" + item.ID }>{ item.Text }</a>
+						</li>
+					}
+				</ul>
+			</nav>
+		</details>
+	}
+}
+
+css postNavStyle() {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 15px;
+	justify-content: space-between;
+	margin: 2.5rem 0;
+
+	& .blog-nav-next {
+		margin-left: auto;
+	}
+}
+
+css blogPostViewStyle() {
+	& .project-title {
+		color: var(--accent);
+		font-size: 1.5em;
+		margin: 0 0 0.02em 0;
+		font-weight: bold;
+	}
+	& .project-description {
+		margin: 0 0 0.5em 0;
+		color: var(--text-light);
+		font-size: 1.2em;
+		line-height: 1.6;
+	}
+	& .project-tags {
+		margin: 0.8em 0;
+		font-size: 1.1em;
+	}
+}
+
+templ BlogPostView(v ViewState, commentsEnabled bool) {
+	if v.Status == LoadNotFound || v.Status == LoadFailed {
+		<div class={ "error-message " + errorMessageStyle() }>
+			<h1>{ t("general.blogNotFound") }</h1>
+			<p>{ t("general.blogNotFoundMessage") }</p>
+		</div>
+	} else {
+		<div class={ "blog-post-view " + blogPostViewStyle() }>
+			<h1 class="project-title">{ v.Post.Title }</h1>
+			<p class="project-description">{ v.Post.Date }</p>
+			if len(v.Post.Tags) > 0 {
+				<div class="project-tags">
+					for _, tag := range v.Post.Tags {
+						<span class={ "item-tag clickable-tag " + itemTagStyle() } data-search-tag={ tag }>{ tag }</span>
+					}
+				</div>
+			}
+			@TableOfContents(v.TOC)
+			<div class="blog-post-content">
+				<div class={ "markdown-body " + markdownBodyStyle() }>
+					@templ.Raw(v.HTML)
+				</div>
+			</div>
+			if v.HasPrev || v.HasNext {
+				<nav class={ "download-buttons blog-post-nav " + postNavStyle() } aria-label="Post navigation">
+					if v.HasPrev {
+						<a href={ v.PrevPost.Href } class={ "download-btn blog-nav-prev " + downloadBtnStyle() } data-action="nav" title={ v.PrevPost.Title }>
+							@Icon("arrow-left", "1rem")
+							<span>{ t("blog.previousPost") }</span>
+						</a>
+					}
+					if v.HasNext {
+						<a href={ v.NextPost.Href } class={ "download-btn blog-nav-next " + downloadBtnStyle() } data-action="nav" title={ v.NextPost.Title }>
+							<span>{ t("blog.nextPost") }</span>
+							@Icon("arrow-right", "1rem")
+						</a>
+					}
+				</nav>
+			}
+			if commentsEnabled {
+				<div class={ "giscus-container " + giscusStyle() }></div>
+			}
+		</div>
+	}
+}

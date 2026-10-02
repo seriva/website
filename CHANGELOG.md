@@ -8,6 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 
+- Upgraded `gofront` to `^1.4.0`, enabling component-scoped `css` blocks in `.templ` templates.
+- Migrated component CSS from `app.css` into scoped `css` declarations across `.templ` files, introducing `src/styles.templ` for shared styles (`itemTagStyle`, `errorMessageStyle`, `giscusStyle`, `downloadButtonsStyle`, `downloadBtnStyle`, and `markdownBodyStyle`).
 - Upgraded `gofront` to `^1.3.11` and moved the `vendor` and `assetCopy` blocks in `package.json` under the `"gofront"` project config, which is the only location GoFront ≥ 1.3.10 reads them from (top-level keys are ignored).
 - Removed the website build script's duplicate output cleaning and standard static-asset copying; `gofront build` now owns both, while the website finalizer retains selective runtime-content copying, CSS minification, metadata/cache processing, SPA fallback, sitemap, and RSS generation.
 
