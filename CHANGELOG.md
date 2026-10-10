@@ -8,6 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 
+- Upgraded `gofront` to `^1.6.0` and updated dependencies to latest (`@emailjs/browser` `^5.0.2` with synced CDN/SRI pin, `@biomejs/biome` `^2.5.15`, `@playwright/test` `^1.64.0`, `jsdom` `^30.1.2`, `lefthook` `^2.2.1`, `marked` `^18.1.0`, `rolldown` `^1.2.13`, `yaml` `^2.9.1`).
 - Upgraded `gofront` to `^1.4.0`, enabling component-scoped `css` blocks in `.templ` templates.
 - Migrated component CSS from `app.css` into scoped `css` declarations across `.templ` files, introducing `src/styles.templ` for shared styles (`itemTagStyle`, `errorMessageStyle`, `giscusStyle`, `downloadButtonsStyle`, `downloadBtnStyle`, and `markdownBodyStyle`).
 - Upgraded `gofront` to `^1.3.11` and moved the `vendor` and `assetCopy` blocks in `package.json` under the `"gofront"` project config, which is the only location GoFront ≥ 1.3.10 reads them from (top-level keys are ignored).
