@@ -14,13 +14,13 @@ Personal portfolio website built with [GoFront](https://github.com/seriva/gofron
 
 ## Architecture
 
-The application is written in GoFront under `src/` and compiles to native JavaScript ES modules.
+The application is written in GoFront under `app/src/` and compiles to native JavaScript ES modules.
 
 ### Overview
 
 ```mermaid
 flowchart LR
-    subgraph Source ["Source (src/)"]
+    subgraph Source ["Source (app/src/)"]
         SRC["Go & .templ Files"]
         DATA["YAML & Markdown"]
     end
@@ -53,8 +53,8 @@ flowchart TD
 
 ### Key Modules
 
-- **Source (`src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state & data store, JSON hydration, `contentCache`) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, `loadRoute` fetch/cache/render path) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
-- **Components (`src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
+- **Source (`app/src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state & data store, JSON hydration, `contentCache`) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, `loadRoute` fetch/cache/render path) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
+- **Components (`app/src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
 - **Styles (`app/css/app.css`)**: single plain stylesheet linked from `index.html`, formatted and linted by Biome; loads in parallel with the JS bundles
 
 ## Development
@@ -116,7 +116,7 @@ npm run test:all     # Run all tests (GoFront + Playwright + build; runs last, r
 ```
 
 Tests cover:
-- **Go Unit Tests (`src/*_test.go`)**: route parsing, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), `loadRoute` (stubbed `fetch`, superseded navigation), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
+- **Go Unit Tests (`app/src/*_test.go`)**: route parsing, `ViewState` resolvers (cache hit/miss, not found, repo-less projects), `loadRoute` (stubbed `fetch`, superseded navigation), content JSON hydration and date sorting, theme precedence/persistence and CSS variable application (jsdom), search guards and result mapping (fake Fuse index), frontmatter stripping, contact validation, render helpers
 - **End-to-End Tests (`tests/e2e/`)**: 10 Playwright test suites across Chromium and Firefox:
   - Navigation, history, deep-linking, and route transitions
   - Markdown blog rendering, pagination, and code syntax highlighting
@@ -126,7 +126,7 @@ Tests cover:
   - EmailJS contact form validation and submission
   - Mobile hamburger navigation drawer
   - 404 and error state fallbacks
-- **Type Checking**: GoFront type checker (`npx gofront src --check`)
+- **Type Checking**: GoFront type checker (`npx gofront check`)
 
 All quality gates and tests must pass before production builds.
 
@@ -155,19 +155,19 @@ templ BlogPostCard(post BlogPost) {
 - **Go Syntax & Type Safety:** Components receive typed props and compile to clean ES modules.
 - **Dynamic Content Injection:** Markdown generated from `marked` is injected using `@templ.Raw(doc.HTML)`.
 - **Mermaid Diagrams:** ```` ```mermaid ```` fences in blog posts, pages and project READMEs are rendered as SVG. Mermaid is fetched from jsDelivr only when a rendered page contains a diagram, and diagrams are re-drawn with the matching `dark`/`default` theme when the theme toggles.
-- **Global Event Delegation:** Handled via `data-action` attributes registered centrally on `#app` in `src/main.go`.
+- **Global Event Delegation:** Handled via `data-action` attributes registered centrally on `#app` in `app/src/main.go`.
 
 ## Routing & SPA Support
 
 **Path-based URLs:** `/`, `/blog/`, `/blog/post-slug`, `/project/id`, `/page/id`
 
-**Dev Server:** `gofront src -o app/app.js --serve --port 8181` provides live reload and built-in SPA route fallback (serving `index.html` on clean paths)
+**Dev Server:** `npm run dev` (`gofront dev`, port 8181) provides live reload and built-in SPA route fallback (serving `index.html` on clean paths)
 
-**GitHub Pages:** Every known route gets a pre-generated `index.html` stub (200 with route-specific meta). `404.html` is the app shell itself — GitHub Pages serves it at the requested URL without redirecting, so `src/router.go` reads `location.pathname` directly for unknown deep links. No hash redirect.
+**GitHub Pages:** Every known route gets a pre-generated `index.html` stub (200 with route-specific meta). `404.html` is the app shell itself — GitHub Pages serves it at the requested URL without redirecting, so `app/src/router.go` reads `location.pathname` directly for unknown deep links. No hash redirect.
 
 **Absolute Paths:** All resources use root-relative paths (`/app.js`, `/data/content.json`) to work from any route depth
 
-**Event Delegation:** Dynamic content uses `data-action` attributes (e.g., `<a data-action="nav">`, `<button data-action="toggle-theme">`) handled centrally in `src/main.go`
+**Event Delegation:** Dynamic content uses `data-action` attributes (e.g., `<a data-action="nav">`, `<button data-action="toggle-theme">`) handled centrally in `app/src/main.go`
 
 ## Features & Configuration
 

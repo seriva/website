@@ -22,7 +22,6 @@
 		"check": "biome check . && gofront check"
 	},
 	"gofront": {
-		"src": "src",
 		"serveDir": "app",
 		"output": "app/app.js",
 		"outDir": "public",
