@@ -4,8 +4,8 @@ import "js:./browser.d.ts"
 import "strings"
 
 // Pinned + SRI: keep version and hash in sync with @emailjs/browser in package.json
-const emailJSSrc = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4.4.1/dist/email.min.js"
-const emailJSIntegrity = "sha384-SALc35EccAf6RzGw4iNsyj7kTPr33K7RoGzYu+7heZhT8s0GZouafRiCg1qy44AS"
+const emailJSSrc = "https://cdn.jsdelivr.net/npm/@emailjs/browser@5.0.2/dist/email.min.js"
+const emailJSIntegrity = "sha384-V6KRexbfAf9Omg2u7kh3sclVxYiK5mAuz/6E4WmpSQ3KO+ZjgX7SCoqhMOrLKfeG"
 
 func loadEmailJS() any {
 	return loadScript(emailJSSrc, emailJSIntegrity)

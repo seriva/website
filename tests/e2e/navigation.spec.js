@@ -132,6 +132,9 @@ test.describe("Navigation", () => {
 
     test("skip link is present, focusable and points to main content", async ({ page }) => {
         await page.goto("/");
+        // Wait for boot to finish: the shell is mounted and the hash handler is wired up
+        // only after `app-ready`; pressing Enter earlier is a plain browser anchor jump.
+        await page.waitForSelector("body.app-ready");
         const skipLink = page.locator(".skip-link");
         await expect(skipLink).toBeAttached();
         await expect(skipLink).toHaveAttribute("href", "#main-content");
