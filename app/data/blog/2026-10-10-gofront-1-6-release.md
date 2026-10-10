@@ -85,14 +85,13 @@ You can now flip targets without editing source. `--js-only` compiles everything
 
 I moved SimpleFPS's `physics` and `animation` packages to `wasm` and measured:
 
-| Workload | vs. JS |
+| Workload | Speed vs. JS |
 | --- | --- |
 | Raycasts | 1.11–1.15× |
 | FPS-controller fixed step | 2.4× |
 | 64-joint skinning (with a `gofront/shared` palette) | 1.27× |
-| `app.wasm` size with `--release` | 98.5 → 79.7 kB |
 
-The controller loop also dropped from about 48 B/frame to 0.2 B/frame, which matters when you are chasing zero allocations at 120 Hz.
+With `--release`, `app.wasm` shrank from 98.5 to 79.7 kB. The controller loop also dropped from about 48 B/frame to 0.2 B/frame of allocation, which matters when you are chasing zero allocations at 120 FPS.
 
 The honest takeaway: wasm is not a free win. Chatty calls across the boundary can cost more than they save. GoFront now warns when a `js` package calls into `wasm` from inside a loop, and the README has a step-by-step "choosing a target" checklist.
 
@@ -121,7 +120,7 @@ If you rely on `Println`/`Print` receiving a format string, switch those calls t
 
 ---
 
-Next up is more of the standard library, array and interface map keys, and moving more of SimpleFPS to wasm.
+Next up is GoFront 2.0: a rewrite of the compiler core in native Go, with byte-identical JS and wasm output and no Node requirement for `dev`, `build` and `check`.
 
 Try [GoFront](https://github.com/seriva/gofront) on GitHub and let me know how it goes.
 

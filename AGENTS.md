@@ -34,25 +34,25 @@ A modern personal portfolio website built with GoFront using `.templ` component 
 ## Tech Stack
 - **Framework**: GoFront (`.templ` components, Go-inspired frontend architecture)
 - **Reactivity & DOM**: Native GoFront `.templ` and `gom` DOM rendering
-- **Routing**: Path-based SPA routing via `src/router.go`
+- **Routing**: Path-based SPA routing via `app/src/router.go`
 - **Content**: YAML + Marked.js + Prism.js for Markdown rendering
 - **Search**: Fuse.js (fuzzy search)
 - **Integrations**: EmailJS (contact form), giscus (GitHub Discussions comments)
 - **Build / Dev**: `npm run dev` (port 8181), `npm run prod` (production bundle in `public/`)
 - **E2E Tests**: Playwright (`npm run test:e2e`) — tests/e2e/, requires dev server on port 8181
-- **Quality**: Biome (`npm run format`, `npm run check`), GoFront type checker (`gofront src --check`)
+- **Quality**: Biome (`npm run format`, `npm run check`), GoFront type checker (`gofront check`)
 
 ## Architecture
-The application is written in GoFront in `src/`. The entry point is `src/main.go`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `src/*.templ`. State and store logic reside in `src/store.go`, route content state (`ViewState`) and its pure resolvers in `src/view.go`, routing in `src/router.go`, markdown handling in `src/markdown.go`, theme management in `src/theme.go`, search in `src/search.go`, email handling in `src/email.go`. Global CSS is a plain stylesheet at `app/css/app.css` (linked from `index.html`, formatted and linted by Biome). Build output is generated to `app/app.js` (dev) and `public/app.js` (prod).
+The application is written in GoFront in `app/src/`. The entry point is `app/src/main.go`, which bootstraps the app and centralises global event delegation via `data-action` attributes. UI components live in `app/src/*.templ`. State and store logic reside in `app/src/store.go`, route content state (`ViewState`) and its pure resolvers in `app/src/view.go`, routing in `app/src/router.go`, markdown handling in `app/src/markdown.go`, theme management in `app/src/theme.go`, search in `app/src/search.go`, email handling in `app/src/email.go`. Global CSS is a plain stylesheet at `app/css/app.css` (linked from `index.html`, formatted and linted by Biome). Build output is generated to `app/app.js` (dev) and `public/app.js` (prod).
 
 ## Core Rules & Anti-Patterns
-- **GoFront Architecture:** All UI components are written in `.templ` files in `src/`. Go source code lives in `src/` under `package main`.
+- **GoFront Architecture:** All UI components are written in `.templ` files in `app/src/`. Go source code lives in `app/src/` under `package main`.
 - **Root-relative paths only:** always use root-relative paths for routes (e.g., `/blog`, `/project/:id`, `/page/:id`).
 - **Content lives in data:** all site content belongs in `app/data/content.yaml` and `app/data/blog/` / `app/data/pages/` Markdown files, never hard-coded in components.
 - **No scattered event listeners:** use `data-action` delegation in `main.go` instead of attaching `addEventListener` calls throughout components.
-- **State drives the DOM:** mutate the Go state, then call the matching region render (`renderMain`, `renderNavbar`, `renderContactForm`, `renderSearchResults`) or `syncOverlays()` in `src/ui.go`. Overlays are plain booleans (`searchOpen`, `contactOpen`); their exit animation is CSS-only (`visibility`/`opacity` transitions on `.show`), so there is no `closing` state or timer. Conditional classes in templates go through `cls(base, on, extra)`. Do not toggle classes or read form values ad hoc with `querySelector`.
-- **Route content lives in `view ViewState`:** one struct with a `LoadStatus` enum (`LoadReady`/`LoadPending`/`LoadFailed`/`LoadNotFound`), reset by `handleRoute` on every navigation. Rendered markdown is memoised in a single `contentCache map[string]cachedContent` keyed by route path (`/blog/<slug>`, `/project/<id>`, `/page/<id>`). Keep resolvers (`resolvePost`/`resolveProject`/`resolvePage`) pure — no DOM, no `fetch` — so they stay unit-testable; `loadRoute(key, url, transform)` in `src/router.go` is the one place that fetches, caches and guards against superseded navigations (`routeSeq`).
-- **Testable seams:** logic that touches `fetch`, `Fuse`, or the URL goes behind a small pure function (`parseRoute`, `postFromYAML`, `performSearch` over an injectable `fuseInstance`). DOM-dependent tests run under `gofront test src --dom` (jsdom); use `window.localStorage`, never bare `localStorage`, so code runs in both.
-- **No skipping quality gates:** never push without running `npm run check`, `gofront src --check`, `npm run test:e2e`, and `npm run prod`.
+- **State drives the DOM:** mutate the Go state, then call the matching region render (`renderMain`, `renderNavbar`, `renderContactForm`, `renderSearchResults`) or `syncOverlays()` in `app/src/ui.go`. Overlays are plain booleans (`searchOpen`, `contactOpen`); their exit animation is CSS-only (`visibility`/`opacity` transitions on `.show`), so there is no `closing` state or timer. Conditional classes in templates go through `cls(base, on, extra)`. Do not toggle classes or read form values ad hoc with `querySelector`.
+- **Route content lives in `view ViewState`:** one struct with a `LoadStatus` enum (`LoadReady`/`LoadPending`/`LoadFailed`/`LoadNotFound`), reset by `handleRoute` on every navigation. Rendered markdown is memoised in a single `contentCache map[string]cachedContent` keyed by route path (`/blog/<slug>`, `/project/<id>`, `/page/<id>`). Keep resolvers (`resolvePost`/`resolveProject`/`resolvePage`) pure — no DOM, no `fetch` — so they stay unit-testable; `loadRoute(key, url, transform)` in `app/src/router.go` is the one place that fetches, caches and guards against superseded navigations (`routeSeq`).
+- **Testable seams:** logic that touches `fetch`, `Fuse`, or the URL goes behind a small pure function (`parseRoute`, `postFromYAML`, `performSearch` over an injectable `fuseInstance`). DOM-dependent tests run under `gofront test --dom` (jsdom); use `window.localStorage`, never bare `localStorage`, so code runs in both.
+- **No skipping quality gates:** never push without running `npm run check`, `gofront check`, `npm run test:e2e`, and `npm run prod`.
 - **Unversioned project:** this project does not use version numbers or semver releases. Feature plans belong in `docs/plans/<feature>-plan.md` (never `docs/vX.Y.Z/`). Completed plans are moved to `docs/plans/archive/` (marked Completed with date, roadmap link updated). Roadmap, documentation, changelog, and package metadata do not maintain version numbers.
 

@@ -8,6 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Changed
 
+- Moved the GoFront source from `src/` to `app/src/` (matching SimpleFPS); the explicit `"src"` entry in the `gofront` project config is dropped since `app/src` is the default.
 - Upgraded `gofront` to `^1.6.0` and updated dependencies to latest (`@emailjs/browser` `^5.0.2` with synced CDN/SRI pin, `@biomejs/biome` `^2.5.15`, `@playwright/test` `^1.64.0`, `jsdom` `^30.1.2`, `lefthook` `^2.2.1`, `marked` `^18.1.0`, `rolldown` `^1.2.13`, `yaml` `^2.9.1`).
 - Upgraded `gofront` to `^1.4.0`, enabling component-scoped `css` blocks in `.templ` templates.
 - Migrated component CSS from `app.css` into scoped `css` declarations across `.templ` files, introducing `src/styles.templ` for shared styles (`itemTagStyle`, `errorMessageStyle`, `giscusStyle`, `downloadButtonsStyle`, `downloadBtnStyle`, and `markdownBodyStyle`).

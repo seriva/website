@@ -96,6 +96,18 @@
     "dateFormat": "MMMM D, YYYY",
     "posts": [
       {
+        "filename": "2026-10-10-gofront-1-6-release.md",
+        "title": "GoFront 1.6: WebAssembly Grows Up",
+        "date": "2026-10-10",
+        "excerpt": "GoFront 1.6 turns the experimental WasmGC backend into a serious tool: a much wider stdlib, generics, interfaces, defer/recover, zero-copy shared buffers, Binaryen optimisation and source maps.",
+        "tags": [
+          "Go",
+          "GoFront",
+          "WebAssembly",
+          "Release"
+        ]
+      },
+      {
         "filename": "2026-10-01-migrating-simplefps-from-microtastic-to-gofront.md",
         "title": "Migrating SimpleFPS to GoFront: Retiring Microtastic and Going Full-Stack Go",
         "date": "2026-10-01",
