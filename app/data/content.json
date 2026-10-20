@@ -96,6 +96,18 @@
     "dateFormat": "MMMM D, YYYY",
     "posts": [
       {
+        "filename": "2026-10-20-gofront-1-7-release.md",
+        "title": "GoFront 1.7: Reflection-Free JSON and Preact Hooks",
+        "date": "2026-10-20",
+        "excerpt": "GoFront 1.7 brings compile-time reflection-free encoding/json, TypeScript tuple returns for Preact hooks, experimental WASM SIMD, and major type system fixes.",
+        "tags": [
+          "Go",
+          "GoFront",
+          "WebAssembly",
+          "Release"
+        ]
+      },
+      {
         "filename": "2026-10-10-gofront-1-6-release.md",
         "title": "GoFront 1.6: WebAssembly Grows Up",
         "date": "2026-10-10",

@@ -1,5 +1,6 @@
 package main
 
+import "encoding/json"
 import "errors"
 import "js:./browser.d.ts"
 import "slices"
@@ -216,6 +217,25 @@ func projectFromJSON(p any) Project {
 	}
 }
 
+// themeFromRaw maps RawThemeColors to ThemeColors with default code theme fallback.
+func themeFromRaw(d RawThemeColors, defaultCodeTheme string) ThemeColors {
+	codeTheme := defaultCodeTheme
+	if d.Code.Theme != "" {
+		codeTheme = d.Code.Theme
+	}
+	return ThemeColors{
+		Primary:       d.Primary,
+		Secondary:     d.Secondary,
+		Background:    d.Background,
+		Text:          d.Text,
+		TextLight:     d.TextLight,
+		Border:        d.Border,
+		Hover:         d.Hover,
+		CodeTheme:     codeTheme,
+		CommentsTheme: d.Comments.Theme,
+	}
+}
+
 // themeFromJSON maps one `site.theme.<name>` entry to ThemeColors.
 func themeFromJSON(d any, defaultCodeTheme string) ThemeColors {
 	tc := ThemeColors{
@@ -266,112 +286,98 @@ func sortPagesByOrder(list []NavPage) {
 }
 
 async func initData() error {
-	var data any
+	var rawBytes []byte
 	el := document.getElementById("site-data")
 	if el != nil && el.textContent != nil && el.textContent != "" {
-		data = JSON.parse(strVal(el.textContent))
+		rawBytes = []byte(string(el.textContent))
 	} else {
 		res := await fetch("/data/content.json")
 		if res == nil || !res.ok {
 			return errors.New("failed to fetch /data/content.json")
 		}
-		data = await res.json()
+		text := await res.text()
+		rawBytes = []byte(string(text))
 	}
 
-	if data == nil {
+	if len(rawBytes) == 0 {
 		return errors.New("failed to parse /data/content.json")
 	}
 
-	siteData := data.site
-	if siteData != nil {
-		site.Title = strVal(siteData.title)
-		site.Url = strings.TrimSuffix(strVal(siteData.url), "/")
-		site.Description = strVal(siteData.description)
-		site.Author = strVal(siteData.author)
-		site.GithubUsername = strVal(siteData.github_username)
-
-		if siteData.theme != nil {
-			if siteData.theme.dark != nil {
-				site.DarkTheme = themeFromJSON(siteData.theme.dark, "prism-tomorrow")
-			}
-			if siteData.theme.light != nil {
-				site.LightTheme = themeFromJSON(siteData.theme.light, "prism-coy")
-			}
-		}
-
-		if siteData.search != nil {
-			site.Search = SearchConfig{
-				Enabled:     boolVal(siteData.search.enabled),
-				MinChars:    intVal(siteData.search.minChars),
-				Placeholder: strVal(siteData.search.placeholder),
-			}
-		}
-
-		if siteData.emailjs != nil {
-			site.EmailJS = EmailJSConfig{
-				Enabled:    boolVal(siteData.emailjs.enabled),
-				ServiceId:  strVal(siteData.emailjs.serviceId),
-				TemplateId: strVal(siteData.emailjs.templateId),
-				PublicKey:  strVal(siteData.emailjs.publicKey),
-			}
-		}
-
-		if siteData.comments != nil {
-			site.Comments = CommentsConfig{
-				BlogEnabled:     boolVal(siteData.comments.blogEnabled),
-				ProjectsEnabled: boolVal(siteData.comments.projectsEnabled),
-				Attrs:           siteData.comments,
-			}
-		}
-
-		if siteData.social != nil {
-			for _, item := range siteData.social {
-				site.Social = append(site.Social, SocialLink{
-					Icon:   strVal(item.icon),
-					Href:   strVal(item.href),
-					Target: strVal(item.target),
-					Rel:    strVal(item.rel),
-				})
-			}
-		}
+	var payload ContentPayload
+	if err := json.Unmarshal(rawBytes, &payload); err != nil {
+		return errors.New("failed to parse /data/content.json: " + err.Error())
 	}
 
+	site.Title = payload.Site.Title
+	site.Url = strings.TrimSuffix(payload.Site.Url, "/")
+	site.Description = payload.Site.Description
+	site.Author = payload.Site.Author
+	site.GithubUsername = payload.Site.GithubUsername
+
+	site.DarkTheme = themeFromRaw(payload.Site.Theme.Dark, "prism-tomorrow")
+	site.LightTheme = themeFromRaw(payload.Site.Theme.Light, "prism-coy")
+
+	site.Search = payload.Site.Search
+	site.EmailJS = payload.Site.EmailJS
+	site.Comments = CommentsConfig{
+		BlogEnabled:     boolVal(payload.Site.Comments["blogEnabled"]),
+		ProjectsEnabled: boolVal(payload.Site.Comments["projectsEnabled"]),
+		Attrs:           payload.Site.Comments,
+	}
+	site.Social = payload.Site.Social
+
 	// Translations
-	if data.translations != nil && data.translations.en != nil {
-		for k, v := range data.translations.en.(map[string]any) {
-			translations[k] = strVal(v)
+	if enTrans, ok := payload.Translations["en"]; ok {
+		for k, v := range enTrans {
+			if k == "__map" {
+				continue
+			}
+			translations[k] = v
 		}
 	}
 
 	// Blog
 	site.PostsPerPage = 5
-	if data.blog != nil {
-		if data.blog.postsPerPage != nil {
-			site.PostsPerPage = intVal(data.blog.postsPerPage)
-		}
-		if data.blog.posts != nil {
-			for _, p := range data.blog.posts {
-				posts = append(posts, postFromJSON(p))
-			}
-			sortPostsByDate(posts)
-		}
+	if payload.Blog.PostsPerPage > 0 {
+		site.PostsPerPage = payload.Blog.PostsPerPage
 	}
+	for _, p := range payload.Blog.Posts {
+		slug := strings.TrimSuffix(p.Filename, ".md")
+		p.Slug = slug
+		p.Href = "/blog/" + slug
+		if p.Tags == nil {
+			p.Tags = []string{}
+		}
+		posts = append(posts, p)
+	}
+	sortPostsByDate(posts)
 
 	// Projects
-	if data.projects != nil {
-		for _, p := range data.projects {
-			projects = append(projects, projectFromJSON(p))
+	for _, p := range payload.Projects {
+		p.Href = "/project/" + p.ID
+		if p.Tags == nil {
+			p.Tags = []string{}
 		}
-		sortProjectsByOrder(projects)
+		if p.YoutubeVideos == nil {
+			p.YoutubeVideos = []string{}
+		}
+		if p.Links == nil {
+			p.Links = []ProjectLink{}
+		}
+		projects = append(projects, p)
 	}
+	sortProjectsByOrder(projects)
 
 	// Pages
-	if data.pages != nil {
-		for id, p := range data.pages.(map[string]any) {
-			navPages = append(navPages, pageFromJSON(id, p))
+	for id, p := range payload.Pages {
+		if id == "__map" {
+			continue
 		}
-		sortPagesByOrder(navPages)
+		p.ID = id
+		p.Href = navPageHref(id)
+		navPages = append(navPages, p)
 	}
+	sortPagesByOrder(navPages)
 
 	updateMetaTags()
 	return nil
