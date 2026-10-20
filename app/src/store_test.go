@@ -234,3 +234,36 @@ func TestAnnounceRoute(t *testing.T) {
 		t.Errorf("expected announcer %q, got %q", expected, string(announcer.textContent))
 	}
 }
+
+async func TestInitDataFromScript(t *testing.T) {
+	script := document.createElement("script")
+	script.id = "site-data"
+	script.setAttribute("type", "application/json")
+	script.textContent = `{"site":{"title":"Test Site","url":"https://example.com/","description":"Test desc","author":"Tester","github_username":"testuser","theme":{"dark":{"primary":"#111"}},"search":{"enabled":true,"minChars":3}},"blog":{"postsPerPage":10,"posts":[{"filename":"2026-10-20-test.md","title":"Test Blog","date":"2026-10-20","excerpt":"Short excerpt","tags":["go","front"]}]},"projects":[{"id":"myproj","title":"My Project","description":"Proj desc","order":1}],"pages":{"help":{"title":"Help Page","order":2,"showInNav":true}},"translations":{"en":{"nav.test":"Test Label"}}}`
+	document.head.appendChild(script)
+	defer script.remove()
+
+	err := await initData()
+	if err != nil {
+		t.Fatalf("initData failed: %v", err)
+	}
+
+	if site.Title != "Test Site" {
+		t.Errorf("expected site.Title 'Test Site', got %q", site.Title)
+	}
+	if site.Url != "https://example.com" {
+		t.Errorf("expected site.Url 'https://example.com', got %q", site.Url)
+	}
+	if site.PostsPerPage != 10 {
+		t.Errorf("expected site.PostsPerPage 10, got %d", site.PostsPerPage)
+	}
+	if len(posts) == 0 || posts[0].Slug != "2026-10-20-test" || posts[0].Href != "/blog/2026-10-20-test" {
+		t.Errorf("expected post slug and href to be computed, got %+v", posts)
+	}
+	if len(projects) == 0 || projects[0].ID != "myproj" || projects[0].Href != "/project/myproj" {
+		t.Errorf("expected project href to be computed, got %+v", projects)
+	}
+	if translations["nav.test"] != "Test Label" {
+		t.Errorf("expected translation 'Test Label', got %q", translations["nav.test"])
+	}
+}
