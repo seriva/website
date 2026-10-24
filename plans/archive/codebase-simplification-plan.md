@@ -28,7 +28,7 @@ Baseline: `npm run test:gofront` green, `npm run test:e2e` green (chromium + fir
 ## Out of Scope
 
 - Switching `content.yaml` to JSON (considered separately; changes the authoring format).
-- Deleting `docs/plans/archive/` or trimming `README.md` (docs, not code).
+- Deleting `plans/archive/` or trimming `README.md` (docs, not code).
 - Any new feature, visual change, or dependency. `rolldown` stays — `gofront prep` loads it
   from our devDependencies for vendor bundling.
 - Touching the in-progress `src/loader.go` / `boot.js` change beyond rebasing on it once committed.

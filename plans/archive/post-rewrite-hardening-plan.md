@@ -130,9 +130,9 @@ Each test must be written **before** the corresponding refactor lands (TDD) — 
 
 ### Task 4: Documentation
 
-**What & Why:** Keep `AGENTS.md`, `README.md`, `CHANGELOG.md` and `docs/roadmap.md` truthful.
+**What & Why:** Keep `AGENTS.md`, `README.md`, `CHANGELOG.md` and `plans/roadmap.md` truthful.
 
-**Changes:** `AGENTS.md` Part 2 — "styles in `src/styles.go`" → "styles in `app/css/app.css`"; state rule mentions `view ViewState`. `README.md` — project structure and test command. `CHANGELOG.md` — one entry per task. `docs/roadmap.md` — move this plan to Completed on merge.
+**Changes:** `AGENTS.md` Part 2 — "styles in `src/styles.go`" → "styles in `app/css/app.css`"; state rule mentions `view ViewState`. `README.md` — project structure and test command. `CHANGELOG.md` — one entry per task. `plans/roadmap.md` — move this plan to Completed on merge.
 
 ---
 
