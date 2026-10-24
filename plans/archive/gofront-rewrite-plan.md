@@ -204,7 +204,7 @@ Remove all obsolete vanilla JS framework code, purge remaining Microtastic files
 - Delete: `app/src/services/*.js`
 - Delete: `app/src/dependencies/`
 - Delete: `.microtastic` (if not removed in Task 1)
-- Modify: `docs/roadmap.md` — mark rewrite status
+- Modify: `plans/roadmap.md` — mark rewrite status
 
 #### Steps
 - [x] **Step 1: Remove deprecated files in `app/src/` and `app/src/dependencies/`**
