@@ -85,7 +85,7 @@
 	"dependencies": {
 		"@emailjs/browser": "^5.0.3",
 		"fuse.js": "^7.5.0",
-		"marked": "^18.1.1",
+		"marked": "^18.1.2",
 		"prismjs": "^1.30.0"
 	}
 }
