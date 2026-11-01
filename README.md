@@ -91,7 +91,7 @@ This will:
 
 ### Asset Management
 
-- **Vendor Assets (`assetCopy`)**: Fonts and Prism themes are copied from npm packages to `app/` during `npm run prepare` via GoFront's `assetCopy` configuration in `package.json`. Note: `app/fonts/` and `app/css/prism-themes/` are gitignored as they are generated from npm packages.
+- **Vendor Assets (`assetCopy`)**: Fonts and Prism themes are copied from npm packages to `app/` during `npm run prepare` via GoFront's `assetCopy` configuration in `package.json`. Note: `app/fonts/`, `app/css/prism-themes/`, `app/vendor.js`, and `app/app.js` are gitignored as they are generated from npm packages and the build toolchain.
 - **Production Assets**: `gofront build` synchronizes standard web files from `app/` to `public/`. Runtime data is finalized separately: `content.json` plus only Markdown or files referenced by live routes are copied to `public/data/` (never `content.yaml`).
 
 ### Code Quality Tools
