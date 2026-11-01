@@ -27,6 +27,10 @@ app/fonts/
 app/css/prism-themes/
 app/js/
 
+# Generated bundles (built via gofront dev / prep)
+app/app.js
+app/vendor.js
+
 # Dependencies
 /node_modules/
 /example/node_modules/
