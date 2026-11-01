@@ -11,7 +11,6 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 - Migrated component styles from global stylesheets to scoped template styles.
 - Streamlined project layout and build pipeline to follow standard GoFront conventions.
-- Updated project dependencies and upgraded GoFront to `^1.8.0`.
 
 ## [2026-09]
 
