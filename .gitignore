@@ -29,6 +29,10 @@ app/js/
 
 # Generated bundles (built via gofront dev / prep)
 app/app.js
+app/app.js.map
+app/app.wasm
+app/app.wasm.map
+app/app.wat
 app/vendor.js
 
 # Dependencies
