@@ -88,6 +88,6 @@ With zero remaining projects using it, **Microtastic is officially deprecated an
 
 ---
 
-With the rewrite done, SimpleFPS can refocus on gameplay: next up are [engine pass cleanup](https://github.com/seriva/simplefps/blob/master/docs/architecture.md), mobile G-buffer depth reconstruction, and expanded P2P multiplayer.
+With the rewrite done, SimpleFPS can refocus on gameplay: next up are [engine pass cleanup](https://github.com/seriva/simplefps/blob/main/docs/architecture.md), mobile G-buffer depth reconstruction, and expanded P2P multiplayer.
 
 Check out [SimpleFPS](https://github.com/seriva/simplefps) and [GoFront](https://github.com/seriva/gofront) on GitHub.

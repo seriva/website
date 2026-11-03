@@ -182,7 +182,7 @@ projects:
       - "Go"
     order: 1
     github_repo: "gofront"
-    github_branch: "master"
+    github_branch: "main"
     demo_url: "https://seriva.github.io/gofront/"
     demo_label: "Todo App Demo"
     demo_instructions: "A fully functional todo app written in Go and compiled to JavaScript with GoFront."
@@ -206,7 +206,7 @@ projects:
       - "PWA"
     order: 2
     github_repo: "simplefps"
-    github_branch: "master"
+    github_branch: "main"
     demo_url: "https://seriva.github.io/simplefps"
     demo_label: "Play!"
     demo_instructions: "On desktop use WASD to move, mouse to look around, and left-click to shoot. On mobile it should present onscreen controls."
@@ -219,7 +219,7 @@ projects:
         href: "https://github.com/seriva/simplefps"
       - title: "Download"
         icon: "download"
-        href: "https://github.com/seriva/simplefps/archive/master.zip"
+        href: "https://github.com/seriva/simplefps/archive/main.zip"
 
   # Portfolio Website
   - id: "website"
@@ -232,7 +232,7 @@ projects:
       - "PWA"
     order: 3
     github_repo: "website"
-    github_branch: "master"
+    github_branch: "main"
     links:
       - title: "Github"
         icon: "github"

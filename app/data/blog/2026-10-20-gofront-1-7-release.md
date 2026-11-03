@@ -92,4 +92,4 @@ We also ironed out several edge cases in the JavaScript backend:
 npm install gofront@1.7.0
 ```
 
-Both `simplefps` and this website are now running on GoFront 1.7.0 in production. Check out the [full changelog](https://github.com/seriva/gofront/blob/master/CHANGELOG.md) on GitHub!
+Both `simplefps` and this website are now running on GoFront 1.7.0 in production. Check out the [full changelog](https://github.com/seriva/gofront/blob/main/CHANGELOG.md) on GitHub!

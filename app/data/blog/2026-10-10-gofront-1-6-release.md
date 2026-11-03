@@ -5,7 +5,7 @@ excerpt: "GoFront 1.6 turns the experimental WasmGC backend into a serious tool:
 tags: ["Go", "GoFront", "WebAssembly", "Release"]
 ---
 
-In [GoFront 1.5](https://github.com/seriva/gofront/blob/master/CHANGELOG.md) I introduced an experimental WasmGC backend and per-package compilation targets. It worked, but it was a proof of concept: plenty of Go simply wasn't supported yet in `wasm` packages.
+In [GoFront 1.5](https://github.com/seriva/gofront/blob/main/CHANGELOG.md) I introduced an experimental WasmGC backend and per-package compilation targets. It worked, but it was a proof of concept: plenty of Go simply wasn't supported yet in `wasm` packages.
 
 Version 1.6, released today, closes most of that gap. It is also the first release where the hybrid model has real numbers behind it, measured on [SimpleFPS](/blog/2026-10-01-migrating-simplefps-from-microtastic-to-gofront).
 
@@ -106,7 +106,7 @@ Moving more code through the wasm backend shook out a lot of bugs:
 - `app.wasm` is resolved relative to `app.js`, so sub-path routes and CDN hosting work.
 - `gofront dev` without `-o` no longer serves stale output.
 
-The [changelog](https://github.com/seriva/gofront/blob/master/CHANGELOG.md) has the full list.
+The [changelog](https://github.com/seriva/gofront/blob/main/CHANGELOG.md) has the full list.
 
 ## Upgrading
 
