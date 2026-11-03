@@ -10,6 +10,13 @@ export default defineConfig({
         baseURL: "http://localhost:8181",
         trace: "on-first-retry",
         actionTimeout: 10000,
+        launchOptions: {
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+            ],
+        },
     },
     webServer: {
         command: "npm run dev",
