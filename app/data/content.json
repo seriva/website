@@ -99,7 +99,7 @@
         "filename": "2026-11-07-bootstrap-loop-and-gofront-1-9.md",
         "title": "Full Agentic Automation with Bootstrap",
         "date": "2026-11-07",
-        "excerpt": "Bootstrap has gone from a shared workflow to full agentic automation, from plan to merged PR. Here is how it did most of the work on GoFront 1.8 and 1.9.",
+        "excerpt": "Bootstrap has gone from a shared workflow to full agentic execution: I still guide the planning, but everything from the first phase to the merged PR now runs on its own. Here is how it did most of the work on GoFront 1.8 and 1.9.",
         "tags": [
           "AI",
           "Workflow",

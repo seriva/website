@@ -1,7 +1,7 @@
 ---
 title: "Full Agentic Automation with Bootstrap"
 date: "2026-11-07"
-excerpt: "Bootstrap has gone from a shared workflow to full agentic automation, from plan to merged PR. Here is how it did most of the work on GoFront 1.8 and 1.9."
+excerpt: "Bootstrap has gone from a shared workflow to full agentic execution: I still guide the planning, but everything from the first phase to the merged PR now runs on its own. Here is how it did most of the work on GoFront 1.8 and 1.9."
 tags: ["AI", "Workflow", "DevOps", "Homelab", "Go", "GoFront"]
 ---
 
@@ -9,32 +9,38 @@ In September I wrote about [Bootstrapping Agentic Development](/blog/2026-09-21-
 
 The workflow was already there, but I was still the one driving it. I kicked off each plan, started every phase, reviewed each diff and kept track of side-effect bugs myself.
 
-Since then, [Bootstrap](/project/bootstrap) has taken over that driving as well. The whole cycle from plan to merged PR now runs agentically, and [GoFront](/project/gofront) 1.8 and 1.9 have been its proving ground.
+Since then, [Bootstrap](/project/bootstrap) has taken over the driving for everything after the plan. Planning is still the part I stay close to, but not because I do the work: the `/design-plan` agent does the heavy lifting of probing, scoping and cutting phases, and I guide it, because that is where the real decisions are made. Once the plan is signed off, the execution runs fully automated: every phase, test, review and PR up to the final merge. [GoFront](/project/gofront) 1.8 and 1.9 have been the proving ground for that split.
 
 ```mermaid
 flowchart LR
-    DP["/design-plan<br/>Probes & writes plan"] --> DPreview["/design-plan review<br/>Fresh AI plan audit"]
-    DPreview --> Plan["plans/…-plan.md"]
-    Plan --> EP["/execute-plan<br/>Runs phase by phase"]
-    EP -->|"One phase at a time"| DL["/dev-loop<br/>TDD → Gate → Review → PR"]
-    DL -->|"Phase PR merged"| EP
-    DL -.->|"Logs side-effect bugs"| FU["plans/follow-ups.md"]
+    subgraph Manual["Agent-driven, I guide"]
+        DP["/design-plan<br/>Probes & writes plan"] --> DPreview["/design-plan review<br/>Fresh AI plan audit"]
+        DPreview --> Plan["plans/…-plan.md"]
+    end
+    subgraph Auto["Fully automated"]
+        EP["/execute-plan<br/>Runs phase by phase"]
+        EP -->|"One phase at a time"| DL["/dev-loop<br/>TDD → Gate → 2-pass review → PR"]
+        DL -->|"Phase PR merged"| EP
+        DL -.->|"Logs side-effect bugs"| FU["plans/follow-ups.md"]
+        EP --> Final["Final PR into main"]
+    end
+    Plan --> EP
+    DL -->|"Blocked after pass 2"| Me["I step in"]
     FU -.->|"/design-plan follow-ups"| DP
-    EP --> Final["Final PR into main"]
 ```
 
 ## The Three-Skill Loop
 
-Bootstrap turns each step of the workflow into a skill that agents can run end to end, and chains them together. The skills work across Claude Code, Google Antigravity, Codex, OpenCode, Pi and Cursor.
+Bootstrap turns each step of the workflow into a skill that agents can run end to end, and chains them together. The first one I guide interactively; the other two run on their own. The skills work across Claude Code, Google Antigravity, Codex, OpenCode, Pi and Cursor.
 
 1. **`/design-plan`: probe before you build**  
-   Agents shouldn't guess how complex code behaves from reading it. `/design-plan` starts with small probe scripts in `.probes/` that run against the compiler and `go run`, and records the results in a **Verified Gaps** table. It then sets hard scope boundaries and splits the work into small, atomic phases. Before any code is written, `/design-plan review` hands the draft to a fresh reviewer agent, which checks the probe claims, task sizes and dependencies against the codebase until it signs off with `PLAN_LGTM`.
+   Agents shouldn't guess how complex code behaves from reading it. `/design-plan` starts with small probe scripts in `.probes/` that run against the compiler and `go run`, and records the results in a **Verified Gaps** table. It then sets hard scope boundaries and splits the work into small, atomic phases. The agent does all of that itself; my job is to guide it. It stops and asks me on every scope or design trade-off, I push back where the scope creeps or a phase is too big, and we iterate until the plan says what I actually want built. Before any code is written, `/design-plan review` hands the draft to a fresh reviewer agent, which checks the probe claims, task sizes and dependencies against the codebase until it signs off with `PLAN_LGTM`.
 
-2. **`/dev-loop`: TDD and fresh-context review**  
-   Every phase or standalone task runs through the same loop: write a failing test, implement the minimal code to pass it, run the pre-commit gates (Biome, `gofront check` and [Sentrux](https://github.com/sentrux/sentrux) architecture rules) and push a draft PR. A **fresh-context reviewer** then audits the diff with no author bias. With `--pairing` that reviewer can be a different model, for example Claude implementing and Antigravity reviewing.
+2. **`/dev-loop`: TDD and a two-pass review gate**  
+   Every phase or standalone task runs through the same loop: write a failing test, implement the minimal code to pass it, run the pre-commit gates (Biome, `gofront check` and [Sentrux](https://github.com/sentrux/sentrux) architecture rules) and push a draft PR. The PR then has to clear a **deterministic two-pass review**. In pass one, a **fresh-context reviewer** with no author bias audits the diff and runs its own probes against it. If it finds High or Medium issues, the implementer gets exactly one fix turn. Pass two is a *new* fresh reviewer that only checks whether those findings are resolved without regressions. It either signs off with `LGTM` or the PR is blocked and the run stops. There is no third attempt, so defects can't be argued down through endless back-and-forth. A blocked PR is the one place the automation hands back to me: two fresh reviewers disagreeing with the implementer usually means the plan or the codebase has a problem the agents can't see, so I step in, read the findings and decide whether to fix it by hand or send the phase back to planning. With `--pairing` the reviewers can be a different model, for example Claude implementing and Antigravity reviewing.
 
 3. **`/execute-plan` and the follow-up ledger**  
-   `/execute-plan` drives a multi-phase feature branch, running `/dev-loop` for each phase and ticking off the plan's checklist. Out-of-scope bugs found during review go into `plans/follow-ups.md` instead of derailing the current PR. Before the final merge into `main`, it audits the whole branch against the original plan.
+   This is where I step away. `/execute-plan` drives a multi-phase feature branch, running `/dev-loop` for each phase and ticking off the plan's checklist without waiting for me between phases. Out-of-scope bugs found during review go into `plans/follow-ups.md` instead of derailing the current PR. Before the final merge into `main`, it audits the whole branch against the original plan.
 
 I also keep a strict split between audiences: `README.md`, `docs/` and `CHANGELOG.md` are plain prose for humans, while `plans/` stays dense and written for agents.
 
@@ -54,6 +60,8 @@ docker compose exec agent t3-pair
 ```
 
 `t3-pair` prints a pairing link, so I can open T3 Code on my laptop or phone, start an `/execute-plan --auto` run and check in on it later.
+
+It is deliberately one run at a time. There is no fleet of agents working several plans in parallel, no scheduler and no queue. GoFront is a hobby project and these runs happen outside working hours, so a single `/execute-plan` chewing through a branch while I'm away is already more than enough throughput. Keeping it sequential also means one branch, one set of reviews and one place to look when something blocks.
 
 Isolation is the other reason. Paired reviews run headless reviewer CLIs without interactive permission prompts, which I'd rather not allow on my own machine. Inside the container, agents only see the mounted workspace, and the logins for the worker CLIs, the GitHub CLI and SSH live in volumes that survive rebuilds. Both web UIs bind to `127.0.0.1` by default, and the container refuses to start without a password, since code-server hands out a shell with passwordless sudo.
 
@@ -94,10 +102,10 @@ Follow-up plans moved `strings.Builder`, `math` and the runtime overlays (`os`, 
 
 The follow-up ledger proved its worth too. The reviewers were picky, and by early November `plans/follow-ups.md` held over 200 small divergences from `go run`, from name-mangling collisions in the JS backend to labelled `break` across nested switches in WASM.
 
-One `/design-plan follow-ups` run probed every entry across the `js`, `wasm` and `both` targets, confirmed **202 real defects**, grouped them by subsystem and drafted a 27-phase plan. `/execute-plan --auto` then worked through 27 branches, 27 fresh reviews and 27 merged PRs, and cleared the whole ledger without me triaging a single entry.
+One `/design-plan follow-ups` session probed every entry across the `js`, `wasm` and `both` targets, confirmed **202 real defects**, grouped them by subsystem and drafted a 27-phase plan. I guided that plan at the level of subsystems and phase order; the agent handled the individual entries. `/execute-plan --auto` then worked through 27 branches, 27 two-pass reviews and 27 merged PRs, and cleared the whole ledger while I was doing something else.
 
 ---
 
-With the standard library in Go and [Sentrux](https://github.com/sentrux/sentrux) guarding the architecture, the way is clear for the native Go rewrite in 2.0, and Bootstrap will be doing most of the driving there as well.
+With the standard library in Go and [Sentrux](https://github.com/sentrux/sentrux) guarding the architecture, the way is clear for the native Go rewrite in 2.0. I expect to keep guiding those plans, and to keep letting Bootstrap do the building.
 
 Try [Bootstrap](https://github.com/seriva/bootstrap) on your own projects, follow [GoFront](https://github.com/seriva/gofront) on GitHub, and let me know how it goes.
