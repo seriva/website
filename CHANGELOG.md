@@ -7,6 +7,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+
+- Blog post on full agentic automation with Bootstrap and GoFront 1.9.
+
 ### Changed
 
 - Migrated component styles from global stylesheets to scoped template styles.
