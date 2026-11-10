@@ -125,7 +125,7 @@ async func handleRoute() {
 		mainEl := document.querySelector("#main-content")
 		if mainEl != nil {
 			mainEl.classList.add("page-transition-out")
-			time.Sleep(200 * time.Millisecond)
+			await time.Sleep(200 * time.Millisecond)
 		}
 	}
 	isInitialRoute = false

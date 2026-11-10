@@ -125,24 +125,30 @@ func updateRouteMeta(title string, description string, canonicalPath string) {
 // `== nil` compiles to loose `== null`, so these also catch JS undefined.
 
 func strVal(v any) string {
-	if v == nil {
-		return ""
+	if s, ok := v.(string); ok {
+		return s
 	}
-	return string(v)
+	return ""
 }
 
 func boolVal(v any) bool {
-	if v == nil || string(v) == "false" {
-		return false
+	if b, ok := v.(bool); ok {
+		return b
 	}
-	return bool(v)
+	if s, ok := v.(string); ok {
+		return s != "" && s != "false"
+	}
+	return false
 }
 
 func intVal(v any) int {
-	if v == nil {
-		return 0
+	if n, ok := v.(int); ok {
+		return n
 	}
-	return int(v)
+	if f, ok := v.(float64); ok {
+		return int(f)
+	}
+	return 0
 }
 
 // strSlice maps a raw JSON array (or nil) to a non-nil []string.
