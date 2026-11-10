@@ -90,7 +90,7 @@ func TestBeginNavigation(t *testing.T) {
 	}
 }
 
-async func TestLoadRoute(t *testing.T) {
+async func TestLoadRouteSuperseded(t *testing.T) {
 	origFetch := fetch
 	defer func() {
 		fetch = origFetch
@@ -98,55 +98,67 @@ async func TestLoadRoute(t *testing.T) {
 		view = ViewState{}
 	}()
 
-	await t.Run("superseded fetch fills the cache but leaves view untouched", async func(t *testing.T) {
+	contentCache = map[string]cachedContent{}
+	view = ViewState{Status: LoadPending, HTML: "old"}
+	fetch = fakeFetchSuperseding
+
+	current := await loadRoute("/blog/x", "/x.md", upperContent)
+	if current {
+		t.Errorf("expected loadRoute to report the route as superseded")
+	}
+	if c, ok := contentCache["/blog/x"]; !ok || c.HTML == "" {
+		t.Errorf("expected cache to be filled for superseded fetch, got %+v", c)
+	}
+	if view.HTML != "old" || view.Status != LoadPending {
+		t.Errorf("expected view untouched, got %+v", view)
+	}
+}
+
+async func TestLoadRouteCurrent(t *testing.T) {
+	origFetch := fetch
+	defer func() {
+		fetch = origFetch
 		contentCache = map[string]cachedContent{}
-		view = ViewState{Status: LoadPending, HTML: "old"}
-		fetch = fakeFetchSuperseding
+		view = ViewState{}
+	}()
 
-		current := await loadRoute("/blog/x", "/x.md", upperContent)
-		if current {
-			t.Errorf("expected loadRoute to report the route as superseded")
-		}
-		if c, ok := contentCache["/blog/x"]; !ok || c.HTML == "" {
-			t.Errorf("expected cache to be filled for superseded fetch, got %+v", c)
-		}
-		if view.HTML != "old" || view.Status != LoadPending {
-			t.Errorf("expected view untouched, got %+v", view)
-		}
-	})
+	contentCache = map[string]cachedContent{}
+	view = ViewState{Status: LoadPending}
+	fetch = fakeFetchOK
 
-	await t.Run("current fetch renders into view and cache", async func(t *testing.T) {
+	if !await loadRoute("/blog/x", "/x.md", upperContent) {
+		t.Fatalf("expected loadRoute to report the route as current")
+	}
+	if view.Status != LoadReady || view.HTML != "<p># Hello\n\nWorld</p>" {
+		t.Errorf("unexpected view %+v", view)
+	}
+	if len(view.TOC) != 1 || view.TOC[0].ID != "hello" {
+		t.Errorf("expected TOC copied into view, got %+v", view.TOC)
+	}
+	if contentCache["/blog/x"].HTML != view.HTML {
+		t.Errorf("expected cache and view to agree")
+	}
+}
+
+async func TestLoadRouteFailed(t *testing.T) {
+	origFetch := fetch
+	defer func() {
+		fetch = origFetch
 		contentCache = map[string]cachedContent{}
-		view = ViewState{Status: LoadPending}
-		fetch = fakeFetchOK
+		view = ViewState{}
+	}()
 
-		if !await loadRoute("/blog/x", "/x.md", upperContent) {
-			t.Fatalf("expected loadRoute to report the route as current")
-		}
-		if view.Status != LoadReady || view.HTML != "<p># Hello\n\nWorld</p>" {
-			t.Errorf("unexpected view %+v", view)
-		}
-		if len(view.TOC) != 1 || view.TOC[0].ID != "hello" {
-			t.Errorf("expected TOC copied into view, got %+v", view.TOC)
-		}
-		if contentCache["/blog/x"].HTML != view.HTML {
-			t.Errorf("expected cache and view to agree")
-		}
-	})
+	contentCache = map[string]cachedContent{}
+	view = ViewState{Status: LoadPending}
+	fetch = fakeFetchFail
 
-	await t.Run("failed fetch marks view as failed without caching", async func(t *testing.T) {
-		contentCache = map[string]cachedContent{}
-		view = ViewState{Status: LoadPending}
-		fetch = fakeFetchFail
-
-		if !await loadRoute("/blog/x", "/x.md", upperContent) {
-			t.Fatalf("expected loadRoute to report the route as current")
-		}
-		if view.Status != LoadFailed {
-			t.Errorf("expected LoadFailed, got %d", view.Status)
-		}
-		if _, ok := contentCache["/blog/x"]; ok {
-			t.Errorf("expected no cache entry after failed fetch")
-		}
-	})
+	if !await loadRoute("/blog/x", "/x.md", upperContent) {
+		t.Fatalf("expected loadRoute to report the route as current")
+	}
+	if view.Status != LoadFailed {
+		t.Errorf("expected LoadFailed, got %d", view.Status)
+	}
+	if _, ok := contentCache["/blog/x"]; ok {
+		t.Errorf("expected no cache entry after failed fetch")
+	}
 }
