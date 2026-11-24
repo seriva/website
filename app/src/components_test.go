@@ -58,12 +58,9 @@ func TestPaginationMount(t *testing.T) {
 }
 
 func TestContactFormFieldsMount(t *testing.T) {
-	form := ContactState{Name: "Ann", ErrEmail: true, StatusText: "Bad email", StatusType: "error", ButtonState: "sending", ButtonDisabled: true}
+	form := gom.NewSignal(ContactState{ErrEmail: true, StatusText: "Bad email", StatusType: "error", ButtonState: "sending", ButtonDisabled: true})
 	c := mountTempl(ContactFormFields(form))
 
-	if string(c.querySelector("#contact-name").value) != "Ann" {
-		t.Errorf("expected name value mirrored into input")
-	}
 	email := c.querySelector("#contact-email")
 	if string(email.className) != "error" || string(email.getAttribute("aria-invalid")) != "true" {
 		t.Errorf("expected email marked invalid")
@@ -74,14 +71,27 @@ func TestContactFormFieldsMount(t *testing.T) {
 	if !strings.Contains(string(c.querySelector("#contact-status").className), "error") {
 		t.Errorf("expected error status class")
 	}
+	if string(c.querySelector("#contact-status").textContent) != "Bad email" {
+		t.Errorf("expected error status text")
+	}
 	btn := c.querySelector("#contact-submit")
 	if !bool(btn.hasAttribute("disabled")) {
 		t.Errorf("expected disabled?= to set the disabled attribute")
 	}
 
-	c2 := mountTempl(ContactFormFields(ContactState{ButtonState: "send"}))
-	if bool(c2.querySelector("#contact-submit").hasAttribute("disabled")) {
-		t.Errorf("expected enabled submit button")
+	// Updating the signal mutates error classes, status, and submit state in place.
+	form.Set(ContactState{ButtonState: "send", StatusText: "Sent!", StatusType: "success"})
+	if string(email.className) != "" || string(email.getAttribute("aria-invalid")) != "false" {
+		t.Errorf("expected email error cleared in place")
+	}
+	if !strings.Contains(string(c.querySelector("#contact-status").className), "success") {
+		t.Errorf("expected success status class")
+	}
+	if string(c.querySelector("#contact-status").textContent) != "Sent!" {
+		t.Errorf("expected success status text")
+	}
+	if bool(btn.hasAttribute("disabled")) {
+		t.Errorf("expected enabled submit button after signal update")
 	}
 }
 
@@ -169,7 +179,8 @@ func TestModalsReactToSignals(t *testing.T) {
 	}
 
 	contactOpenSig := gom.NewSignal(false)
-	cc := mountTempl(ContactModal(contactOpenSig, ContactState{ButtonState: "send"}))
+	contactFormSig := gom.NewSignal(ContactState{ButtonState: "send"})
+	cc := mountTempl(ContactModal(contactOpenSig, contactFormSig))
 	if strings.Contains(string(cc.querySelector("#contact-modal").className), "show") {
 		t.Errorf("expected contact modal hidden initially")
 	}

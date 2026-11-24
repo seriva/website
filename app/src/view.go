@@ -3,8 +3,7 @@ package main
 import "strings"
 
 // newViewState returns a ViewState with every nested slice initialised so
-// templ `len`/`range` never see a nil slice. Status is set explicitly because
-// named-int fields compile to null, not 0.
+// templ `len`/`range` never see a nil slice.
 func newViewState() ViewState {
 	return ViewState{
 		Post:     BlogPost{Tags: []string{}},

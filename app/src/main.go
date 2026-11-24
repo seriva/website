@@ -1,5 +1,6 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "strings"
 
@@ -38,8 +39,10 @@ func navigateHash(hash string) {
 }
 
 func setupEvents() {
-	app := appRefs["appRoot"]
-	if app == nil && document != nil {
+	var app dom.Element
+	if r := appRefs["appRoot"]; r != nil {
+		app = r.(dom.Element)
+	} else if document != nil {
 		app = document.querySelector("#app")
 	}
 	if app == nil {
@@ -47,8 +50,11 @@ func setupEvents() {
 	}
 
 	// Click delegation on #app
-	app.addEventListener("click", func(e any) {
-		target := e.target
+	app.addEventListener("click", func(e dom.Event) {
+		if e.target == nil {
+			return
+		}
+		target := e.target.(dom.Element)
 
 		// Tag click
 		tagEl := target.closest("[data-search-tag]")
@@ -193,27 +199,32 @@ func setupEvents() {
 	})
 
 	// Input on search and contact form fields
-	app.addEventListener("input", func(e any) {
-		if e.target.matches("#search-page-input") {
-			handleSearchInput(string(e.target.value))
+	app.addEventListener("input", func(e dom.Event) {
+		if e.target == nil {
 			return
 		}
-		if e.target.closest("#contact-form") != nil {
-			updateContactField(string(e.target.name), string(e.target.value))
+		target := e.target.(dom.Element)
+		if target.matches("#search-page-input") {
+			handleSearchInput(target.(dom.HTMLInputElement).value)
+			return
+		}
+		if target.closest("#contact-form") != nil {
+			field := any(target).(FormField)
+			updateContactField(field.name, field.value)
 		}
 	})
 
 	// Submit on contact form
-	app.addEventListener("submit", func(e any) {
-		if e.target.matches("#contact-form") {
+	app.addEventListener("submit", func(e dom.Event) {
+		if e.target != nil && e.target.(dom.Element).matches("#contact-form") {
 			e.preventDefault()
 			submitContact()
 		}
 	})
 
 	// Keydown for Escape and search shortcut (Cmd+K / Ctrl+K and /)
-	window.addEventListener("keydown", func(e any) {
-		key := strVal(e.key)
+	window.addEventListener("keydown", func(e dom.KeyboardEvent) {
+		key := e.key
 		if key == "Escape" {
 			if searchOpen.Get() {
 				closeSearch()
@@ -243,16 +254,16 @@ func setupEvents() {
 		}
 
 		if site.Search.Enabled && !contactOpen.Get() {
-			isCmdK := (boolVal(e.metaKey) || boolVal(e.ctrlKey)) && (key == "k" || key == "K")
+			isCmdK := (e.metaKey || e.ctrlKey) && (key == "k" || key == "K")
 			isSlash := key == "/"
 
 			if isCmdK || isSlash {
-				target := e.target
 				tagName := ""
 				isEditable := false
-				if target != nil {
-					tagName = strings.ToUpper(strVal(target.tagName))
-					isEditable = boolVal(target.isContentEditable)
+				if e.target != nil {
+					target := e.target.(dom.HTMLElement)
+					tagName = strings.ToUpper(target.tagName)
+					isEditable = target.isContentEditable
 				}
 
 				inInput := tagName == "INPUT" || tagName == "TEXTAREA" || tagName == "SELECT" || isEditable
@@ -275,28 +286,32 @@ func setupEvents() {
 	})
 
 	// Global click outside handlers
-	document.addEventListener("click", func(e any) {
+	document.addEventListener("click", func(e dom.Event) {
+		if e.target == nil {
+			return
+		}
+		target := e.target.(dom.Node)
 		navbar := document.querySelector("nav")
 		if navbar != nil && mobileMenuOpen.Get() {
 			isMobile := window.innerWidth <= 767
-			if isMobile && !navbar.contains(e.target) {
+			if isMobile && !navbar.contains(target) {
 				closeMobileMenu()
 			}
 		}
 
 		if projectsDropdownOpen.Get() {
 			dropdown := document.querySelector(".dropdown")
-			if dropdown == nil || !dropdown.contains(e.target) {
+			if dropdown == nil || !dropdown.contains(target) {
 				closeProjectsDropdown()
 			}
 		}
 	})
 
 	// Popstate handler
-	window.addEventListener("popstate", func(e any) {
-		newPath := string(window.location.pathname)
+	window.addEventListener("popstate", func(_ dom.Event) {
+		newPath := window.location.pathname
 		if newPath == currentPath {
-			hash := string(window.location.hash)
+			hash := window.location.hash
 			if hash != "" {
 				scrollToHash(hash, true)
 			} else {

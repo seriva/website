@@ -30,4 +30,27 @@ interface WindowGlobals {
     mermaid?: any;
 }
 
+// Common name/value shape shared by HTMLInputElement and HTMLTextAreaElement.
+interface FormField {
+    name: string;
+    value: string;
+}
+
+interface FuseItem {
+    id: string;
+    title: string;
+    description: string;
+    tags: string[];
+    kind: string;
+    url: string;
+}
+
+interface FuseResult {
+    item: FuseItem;
+}
+
+interface FuseInstance {
+    search(query: string): FuseResult[];
+}
+
 declare var globalThis: any;

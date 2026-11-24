@@ -1,28 +1,29 @@
 package main
 
+import "js:./browser.d.ts"
 import "testing"
 
 // fakeFuse returns an object with the only Fuse method performSearch uses.
-func fakeFuse(items []any) any {
-	return map[string]any{
-		"search": func(q string) []any {
-			out := []any{}
+func fakeFuse(items []FuseItem) FuseInstance {
+	return any(map[string]any{
+		"search": func(q string) []FuseResult {
+			out := []FuseResult{}
 			for _, it := range items {
-				out = append(out, map[string]any{"item": it})
+				out = append(out, FuseResult{item: it})
 			}
 			return out
 		},
-	}
+	}).(FuseInstance)
 }
 
-func searchItem(id string, tags []any) any {
-	return map[string]any{
-		"id":          id,
-		"title":       "Title " + id,
-		"description": "Desc " + id,
-		"tags":        tags,
-		"type":        "blog",
-		"url":         "/blog/" + id,
+func searchItem(id string, tags []string) FuseItem {
+	return FuseItem{
+		id:          id,
+		title:       "Title " + id,
+		description: "Desc " + id,
+		tags:        tags,
+		kind:        "blog",
+		url:         "/blog/" + id,
 	}
 }
 
@@ -42,7 +43,7 @@ func TestPerformSearch(t *testing.T) {
 	})
 
 	t.Run("empty and whitespace queries return empty", func(t *testing.T) {
-		fuseInstance = fakeFuse([]any{searchItem("a", []any{})})
+		fuseInstance = fakeFuse([]FuseItem{searchItem("a", []string{})})
 		if got := performSearch(""); len(got) != 0 {
 			t.Errorf("empty query returned %d", len(got))
 		}
@@ -52,7 +53,7 @@ func TestPerformSearch(t *testing.T) {
 	})
 
 	t.Run("below configured min chars returns empty", func(t *testing.T) {
-		fuseInstance = fakeFuse([]any{searchItem("a", []any{})})
+		fuseInstance = fakeFuse([]FuseItem{searchItem("a", []string{})})
 		site.Search.MinChars = 3
 		if got := performSearch("go"); len(got) != 0 {
 			t.Errorf("short query returned %d", len(got))
@@ -64,7 +65,7 @@ func TestPerformSearch(t *testing.T) {
 	})
 
 	t.Run("maps item fields and tags", func(t *testing.T) {
-		fuseInstance = fakeFuse([]any{searchItem("gofront", []any{"go", "js"})})
+		fuseInstance = fakeFuse([]FuseItem{searchItem("gofront", []string{"go", "js"})})
 		got := performSearch("gofront")
 		if len(got) != 1 {
 			t.Fatalf("expected 1 result, got %d", len(got))
@@ -79,9 +80,9 @@ func TestPerformSearch(t *testing.T) {
 	})
 
 	t.Run("caps results at eight", func(t *testing.T) {
-		items := []any{}
+		items := []FuseItem{}
 		for i := 0; i < 12; i++ {
-			items = append(items, searchItem("item-"+string(rune('a'+i)), []any{}))
+			items = append(items, searchItem("item-"+string(rune('a'+i)), []string{}))
 		}
 		fuseInstance = fakeFuse(items)
 		if got := performSearch("item"); len(got) != 8 {

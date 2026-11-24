@@ -1,6 +1,7 @@
 package main
 
 import "errors"
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "strconv"
 import "strings"
@@ -274,7 +275,7 @@ func attachCopyButtons() {
 		btn.setAttribute("data-action", "copy-code")
 		btn.setAttribute("aria-label", t("aria.copyCode"))
 		btn.textContent = t("code.copy")
-		pre.style.position = "relative"
+		pre.(dom.HTMLElement).style.setProperty("position", "relative")
 		pre.appendChild(btn)
 	}
 }

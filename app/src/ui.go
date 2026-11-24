@@ -6,16 +6,13 @@ import "js:./browser.d.ts"
 var appRefs = map[string]any{}
 
 // ── Region renders ────────────────────────────────────────────
-// The app shell (including navbar and modal shells) is mounted once in main();
-// overlay open/close and active nav state update in place via gom signals,
-// while content regions remount only when their content changes.
+// The app shell (including navbar, route announcer and modal shells) is mounted
+// once in main(); overlay open/close, active nav, contact form and route
+// announcements update in place via gom signals, while #content-slot remounts
+// only when the active route changes.
 
 func renderMain() {
 	gom.Mount("#content-slot", MainContent())
-}
-
-func renderContactForm() {
-	gom.Mount("#contact-form", ContactFormFields(contactForm))
 }
 
 func renderRoute() {

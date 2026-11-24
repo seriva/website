@@ -1,38 +1,37 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "strings"
 
-var fuseInstance any
+var fuseInstance FuseInstance
 var searchDebounceTimer int
 
 func initSearch() {
-	var searchItems []any
+	var searchItems []FuseItem
 
 	// Index projects
 	for _, p := range projects {
-		item := map[string]any{
-			"id":          p.ID,
-			"title":       p.Title,
-			"description": p.Description,
-			"tags":        p.Tags,
-			"type":        "project",
-			"url":         p.Href,
-		}
-		searchItems = append(searchItems, item)
+		searchItems = append(searchItems, FuseItem{
+			id:          p.ID,
+			title:       p.Title,
+			description: p.Description,
+			tags:        p.Tags,
+			kind:        "project",
+			url:         p.Href,
+		})
 	}
 
 	// Index blog posts
 	for _, p := range posts {
-		item := map[string]any{
-			"id":          p.Slug,
-			"title":       p.Title,
-			"description": p.Excerpt,
-			"tags":        p.Tags,
-			"type":        "blog",
-			"url":         p.Href,
-		}
-		searchItems = append(searchItems, item)
+		searchItems = append(searchItems, FuseItem{
+			id:          p.Slug,
+			title:       p.Title,
+			description: p.Excerpt,
+			tags:        p.Tags,
+			kind:        "blog",
+			url:         p.Href,
+		})
 	}
 
 	options := map[string]any{
@@ -46,7 +45,7 @@ func initSearch() {
 	}
 
 	// Go has no `new`; Fuse is a class exposed on window by vendor.js
-	fuseInstance = Reflect.construct(any(window).(WindowGlobals).Fuse, []any{searchItems, options})
+	fuseInstance = Reflect.construct(any(window).(WindowGlobals).Fuse, []any{searchItems, options}).(FuseInstance)
 }
 
 func searchMinChars() int {
@@ -73,18 +72,16 @@ func performSearch(q string) []SearchResultItem {
 		rawItem := results[i].item
 		tags := []string{}
 		if rawItem.tags != nil {
-			for _, t := range rawItem.tags {
-				tags = append(tags, string(t))
-			}
+			tags = append(tags, rawItem.tags...)
 		}
 
 		out = append(out, SearchResultItem{
-			ID:          string(rawItem.id),
-			Title:       string(rawItem.title),
-			Description: string(rawItem.description),
+			ID:          rawItem.id,
+			Title:       rawItem.title,
+			Description: rawItem.description,
 			Tags:        tags,
-			ItemType:    string(rawItem.type),
-			Url:         string(rawItem.url),
+			ItemType:    rawItem.kind,
+			Url:         rawItem.url,
 		})
 	}
 
@@ -145,9 +142,13 @@ func renderSearchResults() {
 
 // setSearchInput writes the input's value; it is user-owned DOM state, not derived.
 func setSearchInput(v string) {
-	inp := appRefs["searchInput"]
-	if inp == nil && document != nil {
-		inp = document.querySelector("#search-page-input")
+	var inp dom.HTMLInputElement
+	if r := appRefs["searchInput"]; r != nil {
+		inp = r.(dom.HTMLInputElement)
+	} else if document != nil {
+		if el := document.querySelector("#search-page-input"); el != nil {
+			inp = el.(dom.HTMLInputElement)
+		}
 	}
 	if inp != nil {
 		inp.value = v

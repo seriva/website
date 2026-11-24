@@ -2,6 +2,7 @@ package main
 
 import "encoding/json"
 import "errors"
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "slices"
 import "strings"
@@ -16,6 +17,7 @@ var projects = []Project{}
 var navPages = []NavPage{}
 var translations = map[string]string{}
 var route = gom.NewSignal(RouteMatch{Page: 1}) // zero Kind == RouteBlog
+var routeAnnouncement = gom.NewSignal("")
 var currentTheme = "dark"
 var mobileMenuOpen = gom.NewSignal(false)
 var projectsDropdownOpen = gom.NewSignal(false)
@@ -23,10 +25,7 @@ var searchOpen = gom.NewSignal(false)
 var searchQuery = gom.NewSignal("")
 var searchResults = []SearchResultItem{}
 var contactOpen = gom.NewSignal(false)
-var contactForm ContactState
-
-// Route view state; main() and handleRoute assign newViewState(). Not initialised
-// here: globals are emitted in file order, so LoadReady (types.go) would be in TDZ.
+var contactForm = gom.NewSignal(ContactState{ButtonState: "send"})
 var view ViewState
 
 // Rendered route content keyed by route path (/blog/<slug>, /project/<id>, /page/<id>).
@@ -44,7 +43,7 @@ func t(key string) string {
 // ── Meta Tags Updater ─────────────────────────────────────────
 
 // headEl returns the <head> element matching tag[attr="name"], creating it if missing.
-func headEl(tag string, attr string, name string) any {
+func headEl(tag string, attr string, name string) dom.Element {
 	el := document.querySelector(tag + "[" + attr + "=\"" + name + "\"]")
 	if el == nil {
 		el = document.createElement(tag)
@@ -89,17 +88,11 @@ func updateMetaTags() {
 }
 
 func announceRoute(title string) {
-	announcer := appRefs["routeAnnouncer"]
-	if announcer == nil && document != nil {
-		announcer = document.getElementById("route-announcer")
+	prefix := t("general.routeAnnounce")
+	if prefix == "general.routeAnnounce" {
+		prefix = "Navigated to "
 	}
-	if announcer != nil {
-		prefix := t("general.routeAnnounce")
-		if prefix == "general.routeAnnounce" {
-			prefix = "Navigated to "
-		}
-		announcer.textContent = prefix + title
-	}
+	routeAnnouncement.Set(prefix + title)
 }
 
 func updateRouteMeta(title string, description string, canonicalPath string) {
@@ -111,7 +104,7 @@ func updateRouteMeta(title string, description string, canonicalPath string) {
 	}
 	fullURL := canonicalPath
 	if strings.HasPrefix(canonicalPath, "/") {
-		origin := strVal(window.location.origin)
+		origin := window.location.origin
 		if origin == "" || origin == "null" {
 			origin = site.Url
 		}
@@ -122,7 +115,6 @@ func updateRouteMeta(title string, description string, canonicalPath string) {
 }
 
 // ── Data Initialization ───────────────────────────────────────
-// `== nil` compiles to loose `== null`, so these also catch JS undefined.
 
 func strVal(v any) string {
 	if s, ok := v.(string); ok {
@@ -141,44 +133,6 @@ func boolVal(v any) bool {
 	return false
 }
 
-func intVal(v any) int {
-	if n, ok := v.(int); ok {
-		return n
-	}
-	if f, ok := v.(float64); ok {
-		return int(f)
-	}
-	return 0
-}
-
-// strSlice maps a raw JSON array (or nil) to a non-nil []string.
-func strSlice(raw any) []string {
-	out := []string{}
-	if list, ok := raw.([]any); ok {
-		for _, v := range list {
-			out = append(out, strVal(v))
-		}
-	} else if list, ok := raw.([]string); ok {
-		out = append(out, list...)
-	}
-	return out
-}
-
-// postFromJSON maps one raw `blog.posts[]` entry to a BlogPost.
-func postFromJSON(p any) BlogPost {
-	fn := strVal(p.filename)
-	slug := strings.TrimSuffix(fn, ".md")
-	return BlogPost{
-		Slug:     slug,
-		Title:    strVal(p.title),
-		Date:     strVal(p.date),
-		Excerpt:  strVal(p.excerpt),
-		Tags:     strSlice(p.tags),
-		Filename: fn,
-		Href:     "/blog/" + slug,
-	}
-}
-
 // sortPostsByDate orders newest first; dates are ISO strings so lexical order works.
 func sortPostsByDate(list []BlogPost) {
 	slices.SortFunc(list, func(a BlogPost, b BlogPost) int {
@@ -190,39 +144,6 @@ func sortPostsByDate(list []BlogPost) {
 		}
 		return -1
 	})
-}
-
-// projectFromJSON maps one raw `projects[]` entry to a Project.
-func projectFromJSON(p any) Project {
-	links := []ProjectLink{}
-	if p.links != nil {
-		for _, l := range p.links {
-			links = append(links, ProjectLink{
-				Title: strVal(l.title),
-				Icon:  strVal(l.icon),
-				Href:  strVal(l.href),
-			})
-		}
-	}
-
-	id := strVal(p.id)
-	return Project{
-		ID:               id,
-		Title:            strVal(p.title),
-		Description:      strVal(p.description),
-		Tags:             strSlice(p.tags),
-		Order:            intVal(p.order),
-		GithubRepo:       strVal(p.github_repo),
-		GithubBranch:     strVal(p.github_branch),
-		DemoUrl:          strVal(p.demo_url),
-		DemoLabel:        strVal(p.demo_label),
-		DemoInstructions: strVal(p.demo_instructions),
-		DemoHeight:       strVal(p.demo_height),
-		DemoFullscreen:   boolVal(p.demo_fullscreen),
-		YoutubeVideos:    strSlice(p.youtube_videos),
-		Links:            links,
-		Href:             "/project/" + id,
-	}
 }
 
 // themeFromRaw maps RawThemeColors to ThemeColors with default code theme fallback.
@@ -244,27 +165,6 @@ func themeFromRaw(d RawThemeColors, defaultCodeTheme string) ThemeColors {
 	}
 }
 
-// themeFromJSON maps one `site.theme.<name>` entry to ThemeColors.
-func themeFromJSON(d any, defaultCodeTheme string) ThemeColors {
-	tc := ThemeColors{
-		Primary:    strVal(d.primary),
-		Secondary:  strVal(d.secondary),
-		Background: strVal(d.background),
-		Text:       strVal(d.text),
-		TextLight:  strVal(d.textLight),
-		Border:     strVal(d.border),
-		Hover:      strVal(d.hover),
-		CodeTheme:  defaultCodeTheme,
-	}
-	if d.code != nil {
-		tc.CodeTheme = strVal(d.code.theme)
-	}
-	if d.comments != nil {
-		tc.CommentsTheme = strVal(d.comments.theme)
-	}
-	return tc
-}
-
 func sortProjectsByOrder(list []Project) {
 	slices.SortFunc(list, func(a Project, b Project) int {
 		return a.Order - b.Order
@@ -274,17 +174,6 @@ func sortProjectsByOrder(list []Project) {
 // navPageHref is the route for a custom page id.
 func navPageHref(id string) string {
 	return "/page/" + id
-}
-
-// pageFromJSON maps one `pages.<id>` entry to a NavPage.
-func pageFromJSON(id string, p any) NavPage {
-	return NavPage{
-		ID:        id,
-		Title:     strVal(p.title),
-		Order:     intVal(p.order),
-		ShowInNav: boolVal(p.showInNav),
-		Href:      navPageHref(id),
-	}
 }
 
 func sortPagesByOrder(list []NavPage) {
@@ -304,7 +193,7 @@ async func initData() error {
 			return errors.New("failed to fetch /data/content.json")
 		}
 		text := await res.text()
-		rawBytes = []byte(string(text))
+		rawBytes = []byte(text)
 	}
 
 	if len(rawBytes) == 0 {
@@ -337,9 +226,6 @@ async func initData() error {
 	// Translations
 	if enTrans, ok := payload.Translations["en"]; ok {
 		for k, v := range enTrans {
-			if k == "__map" {
-				continue
-			}
 			translations[k] = v
 		}
 	}
@@ -378,9 +264,6 @@ async func initData() error {
 
 	// Pages
 	for id, p := range payload.Pages {
-		if id == "__map" {
-			continue
-		}
 		p.ID = id
 		p.Href = navPageHref(id)
 		navPages = append(navPages, p)

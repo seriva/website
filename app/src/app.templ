@@ -96,7 +96,7 @@ css appShellStyle() {
 templ AppShell() {
 	<div ref="appRoot" class={ "app-root " + appShellStyle() }>
 		<a href="#main-content" class="skip-link">{ t("nav.skipToContent") }</a>
-		<div ref="routeAnnouncer" id="route-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+		<div id="route-announcer" class="sr-only" aria-live="polite" aria-atomic="true">{ routeAnnouncement }</div>
 		@Navbar(route, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
 		<div id="content-slot">
 			@MainContent()

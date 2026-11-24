@@ -85,7 +85,7 @@ func parseRoute(path string) RouteMatch {
 }
 
 func initInitialRoute() {
-	path := strVal(window.location.pathname)
+	path := window.location.pathname
 	currentPath = path
 	r := parseRoute(path)
 	route.Set(r)
@@ -174,7 +174,7 @@ async func handleRoute() {
 		}, 100)
 	}
 
-	hash := string(window.location.hash)
+	hash := window.location.hash
 	if hash != "" {
 		scrollToHash(hash, false)
 	}

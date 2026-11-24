@@ -1,5 +1,6 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "strings"
 
@@ -28,10 +29,12 @@ async func preloadEmailJS() {
 	await loadEmailJS()
 }
 
-// resetContactForm clears the form back to its initial state and re-renders it.
+// resetContactForm clears the form inputs and resets state back to initial defaults.
 func resetContactForm() {
-	contactForm = ContactState{ButtonState: "send"}
-	renderContactForm()
+	if formEl := document.querySelector("#contact-form"); formEl != nil {
+		formEl.(dom.HTMLFormElement).reset()
+	}
+	contactForm.Set(ContactState{ButtonState: "send"})
 }
 
 func openContact() {
@@ -52,14 +55,18 @@ func closeContact() {
 
 // updateContactField mirrors a form field into state on every input event.
 func updateContactField(field string, value string) {
+	form := contactForm.Get()
 	switch field {
 	case "name":
-		contactForm.Name = value
+		form.Name = value
 	case "email":
-		contactForm.Email = value
+		form.Email = value
 	case "message":
-		contactForm.Message = value
+		form.Message = value
+	default:
+		return
 	}
+	contactForm.Set(form)
 }
 
 func isValidEmail(email string) bool {
@@ -99,31 +106,31 @@ func validateContact(form ContactState) (ContactState, bool) {
 }
 
 async func submitContact() {
-	form, ok := validateContact(contactForm)
-	contactForm = form
+	form, ok := validateContact(contactForm.Get())
 	if !ok {
-		renderContactForm()
+		contactForm.Set(form)
 		return
 	}
 
-	contactForm.ButtonState = "sending"
-	contactForm.ButtonDisabled = true
-	renderContactForm()
+	form.ButtonState = "sending"
+	form.ButtonDisabled = true
+	contactForm.Set(form)
 
 	params := map[string]any{
 		"title":   site.Title,
-		"name":    contactForm.Name,
-		"email":   contactForm.Email,
-		"message": contactForm.Message,
+		"name":    form.Name,
+		"email":   form.Email,
+		"message": form.Message,
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
-			contactForm.ButtonDisabled = false
-			contactForm.ButtonState = "send"
-			contactForm.StatusText = t("contact.error")
-			contactForm.StatusType = "error"
-			renderContactForm()
+			f := contactForm.Get()
+			f.ButtonDisabled = false
+			f.ButtonState = "send"
+			f.StatusText = t("contact.error")
+			f.StatusType = "error"
+			contactForm.Set(f)
 		}
 	}()
 
@@ -132,10 +139,11 @@ async func submitContact() {
 
 	await emailjs.send(site.EmailJS.ServiceId, site.EmailJS.TemplateId, params, site.EmailJS.PublicKey)
 
-	contactForm.StatusText = t("contact.success")
-	contactForm.StatusType = "success"
-	contactForm.ButtonState = "send"
-	renderContactForm()
+	f := contactForm.Get()
+	f.StatusText = t("contact.success")
+	f.StatusType = "success"
+	f.ButtonState = "send"
+	contactForm.Set(f)
 
 	setTimeout(func() {
 		closeContact()
