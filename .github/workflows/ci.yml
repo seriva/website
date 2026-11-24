@@ -63,12 +63,9 @@ jobs:
       - name: Run e2e tests
         run: npm run test:e2e
 
-  deploy:
+  build:
     needs: [tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    concurrency:
-      group: "pages"
-      cancel-in-progress: false
     runs-on: ubuntu-latest
 
     steps:
@@ -95,5 +92,20 @@ jobs:
         with:
           path: "./public"
 
+  deploy:
+    needs: [build]
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v5
