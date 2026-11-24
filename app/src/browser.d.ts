@@ -22,3 +22,12 @@ declare namespace emailjs {
     function init(publicKey: string): void;
     function send(serviceId: string, templateId: string, templateParams: any, publicKey?: string): Promise<any>;
 }
+
+// Third-party globals exposed on window by vendor.js or CDN scripts.
+interface WindowGlobals {
+    emailjs?: any;
+    Fuse?: any;
+    mermaid?: any;
+}
+
+declare var globalThis: any;

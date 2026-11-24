@@ -1,5 +1,6 @@
 package main
 
+import "js:./browser.d.ts"
 import "testing"
 
 func TestParseRoute(t *testing.T) {
@@ -91,16 +92,16 @@ func TestBeginNavigation(t *testing.T) {
 }
 
 async func TestLoadRouteSuperseded(t *testing.T) {
-	origFetch := fetch
+	origFetch := globalThis.fetch
 	defer func() {
-		fetch = origFetch
+		globalThis.fetch = origFetch
 		contentCache = map[string]cachedContent{}
 		view = ViewState{}
 	}()
 
 	contentCache = map[string]cachedContent{}
 	view = ViewState{Status: LoadPending, HTML: "old"}
-	fetch = fakeFetchSuperseding
+	globalThis.fetch = fakeFetchSuperseding
 
 	current := await loadRoute("/blog/x", "/x.md", upperContent)
 	if current {
@@ -115,16 +116,16 @@ async func TestLoadRouteSuperseded(t *testing.T) {
 }
 
 async func TestLoadRouteCurrent(t *testing.T) {
-	origFetch := fetch
+	origFetch := globalThis.fetch
 	defer func() {
-		fetch = origFetch
+		globalThis.fetch = origFetch
 		contentCache = map[string]cachedContent{}
 		view = ViewState{}
 	}()
 
 	contentCache = map[string]cachedContent{}
 	view = ViewState{Status: LoadPending}
-	fetch = fakeFetchOK
+	globalThis.fetch = fakeFetchOK
 
 	if !await loadRoute("/blog/x", "/x.md", upperContent) {
 		t.Fatalf("expected loadRoute to report the route as current")
@@ -141,16 +142,16 @@ async func TestLoadRouteCurrent(t *testing.T) {
 }
 
 async func TestLoadRouteFailed(t *testing.T) {
-	origFetch := fetch
+	origFetch := globalThis.fetch
 	defer func() {
-		fetch = origFetch
+		globalThis.fetch = origFetch
 		contentCache = map[string]cachedContent{}
 		view = ViewState{}
 	}()
 
 	contentCache = map[string]cachedContent{}
 	view = ViewState{Status: LoadPending}
-	fetch = fakeFetchFail
+	globalThis.fetch = fakeFetchFail
 
 	if !await loadRoute("/blog/x", "/x.md", upperContent) {
 		t.Fatalf("expected loadRoute to report the route as current")

@@ -12,7 +12,7 @@ func loadEmailJS() any {
 }
 
 func initEmailJS() {
-	if site.EmailJS.Enabled && site.EmailJS.PublicKey != "" && window.emailjs != nil {
+	if site.EmailJS.Enabled && site.EmailJS.PublicKey != "" && any(window).(WindowGlobals).emailjs != nil {
 		emailjs.init(site.EmailJS.PublicKey)
 	}
 }

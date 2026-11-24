@@ -1,5 +1,6 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "strconv"
 
@@ -47,7 +48,7 @@ func focusLater(selector string) {
 	setTimeout(func() {
 		el := document.querySelector(selector)
 		if el != nil {
-			el.focus()
+			el.(dom.HTMLElement).focus()
 		}
 	}, 50)
 }

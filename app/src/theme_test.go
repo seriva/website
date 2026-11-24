@@ -1,5 +1,6 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "testing"
 
@@ -118,7 +119,7 @@ func TestApplyTheme(t *testing.T) {
 	if got := string(document.documentElement.getAttribute("data-theme")); got != "light" {
 		t.Errorf("data-theme = %q", got)
 	}
-	style := document.documentElement.style
+	style := document.documentElement.(dom.HTMLElement).style
 	vars := map[string]string{
 		"--accent":           "#fff",
 		"--font-color":       "#000",

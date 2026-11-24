@@ -1,5 +1,6 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "strings"
 
@@ -51,7 +52,7 @@ func loadGiscus() {
 	// Clear any existing giscus content
 	container.innerHTML = ""
 
-	script := document.createElement("script")
+	script := document.createElement("script").(dom.HTMLScriptElement)
 	script.src = "https://giscus.app/client.js"
 	for name, value := range giscusAttrs(site.Comments.Attrs, giscusTheme()) {
 		script.setAttribute(name, value)
@@ -62,8 +63,12 @@ func loadGiscus() {
 }
 
 func updateGiscusTheme() {
-	iframe := document.querySelector("iframe.giscus-frame")
-	if iframe == nil {
+	iframeEl := document.querySelector("iframe.giscus-frame")
+	if iframeEl == nil {
+		return
+	}
+	iframe := iframeEl.(dom.HTMLIFrameElement)
+	if iframe.contentWindow == nil {
 		return
 	}
 

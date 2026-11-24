@@ -1,5 +1,6 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 
 const themeStorageKey = "theme-preference"
@@ -24,7 +25,7 @@ func getThemeColors(name string) ThemeColors {
 }
 
 func applyColorScheme(colors ThemeColors) {
-	root := document.documentElement
+	root := document.documentElement.(dom.HTMLElement)
 	root.style.setProperty("--accent", colors.Primary)
 	root.style.setProperty("--font-color", colors.Text)
 	root.style.setProperty("--background-color", colors.Background)
@@ -40,9 +41,9 @@ func applyPrismTheme(themeName string) {
 	href := "/css/prism-themes/" + themeName + ".min.css"
 
 	if link != nil {
-		link.href = href
+		link.(dom.HTMLLinkElement).href = href
 	} else {
-		newLink := document.createElement("link")
+		newLink := document.createElement("link").(dom.HTMLLinkElement)
 		newLink.id = id
 		newLink.rel = "stylesheet"
 		newLink.href = href
@@ -70,7 +71,7 @@ func applyTheme(theme string) {
 		applyPrismTheme(colors.CodeTheme)
 	}
 	updateGiscusTheme()
-	if window.mermaid != nil {
+	if any(window).(WindowGlobals).mermaid != nil {
 		renderMermaid()
 	}
 }

@@ -154,10 +154,12 @@ func intVal(v any) int {
 // strSlice maps a raw JSON array (or nil) to a non-nil []string.
 func strSlice(raw any) []string {
 	out := []string{}
-	if raw != nil {
-		for _, v := range raw {
+	if list, ok := raw.([]any); ok {
+		for _, v := range list {
 			out = append(out, strVal(v))
 		}
+	} else if list, ok := raw.([]string); ok {
+		out = append(out, list...)
 	}
 	return out
 }

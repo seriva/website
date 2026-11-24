@@ -4,7 +4,7 @@ import "js:./browser.d.ts"
 import "strings"
 
 var fuseInstance any
-var searchDebounceTimer any
+var searchDebounceTimer int
 
 func initSearch() {
 	var searchItems []any
@@ -46,7 +46,7 @@ func initSearch() {
 	}
 
 	// Go has no `new`; Fuse is a class exposed on window by vendor.js
-	fuseInstance = Reflect.construct(window.Fuse, []any{searchItems, options})
+	fuseInstance = Reflect.construct(any(window).(WindowGlobals).Fuse, []any{searchItems, options})
 }
 
 func searchMinChars() int {
@@ -196,7 +196,7 @@ func handleSearchInput(value string) {
 	searchQuery = value
 	searchSelectedIndex = -1
 	syncOverlays()
-	if searchDebounceTimer != nil {
+	if searchDebounceTimer != 0 {
 		clearTimeout(searchDebounceTimer)
 	}
 	searchDebounceTimer = setTimeout(func() {

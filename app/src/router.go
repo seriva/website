@@ -1,5 +1,6 @@
 package main
 
+import "gofront/dom"
 import "js:./browser.d.ts"
 import "strconv"
 import "strings"
@@ -25,7 +26,7 @@ func scrollToHash(hash string, smooth bool) {
 			targetEl.scrollIntoView(map[string]any{"behavior": behavior})
 			if id == "main-content" {
 				targetEl.setAttribute("tabindex", "-1")
-				targetEl.focus(map[string]any{"preventScroll": true})
+				targetEl.(dom.HTMLElement).focus(dom.FocusOptions{preventScroll: true})
 			}
 		}
 	}
@@ -36,9 +37,9 @@ func scrollToHash(hash string, smooth bool) {
 }
 
 func navigate(url string) {
-	curr := string(window.location.pathname)
-	if window.location.hash != nil && window.location.hash != "" {
-		curr += string(window.location.hash)
+	curr := window.location.pathname
+	if window.location.hash != "" {
+		curr += window.location.hash
 	}
 	if url != curr {
 		window.history.pushState(map[string]any{}, "", url)
@@ -165,7 +166,7 @@ async func handleRoute() {
 	mainEl := document.querySelector("#main-content")
 	if mainEl != nil {
 		mainEl.setAttribute("tabindex", "-1")
-		mainEl.focus(map[string]any{"preventScroll": true})
+		mainEl.(dom.HTMLElement).focus(dom.FocusOptions{preventScroll: true})
 		setTimeout(func() {
 			mainEl.removeAttribute("tabindex")
 		}, 100)
