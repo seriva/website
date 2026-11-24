@@ -48,7 +48,7 @@ css mainContentStyle() {
 }
 
 templ MainContent() {
-	<main id="main-content" class={ mainContentStyle() } tabindex="-1">
+	<main ref="mainContent" id="main-content" class={ cls(mainContentStyle(), pageTransitionOut.Get(), "page-transition-out") } tabindex="-1">
 		@RouteView(route.Get())
 	</main>
 }

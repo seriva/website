@@ -39,10 +39,8 @@ func navigateHash(hash string) {
 }
 
 func setupEvents() {
-	var app dom.Element
-	if r := appRefs["appRoot"]; r != nil {
-		app = r.(dom.Element)
-	} else if document != nil {
+	app := refElem("appRoot")
+	if app == nil && document != nil {
 		app = document.querySelector("#app")
 	}
 	if app == nil {
@@ -291,7 +289,7 @@ func setupEvents() {
 			return
 		}
 		target := e.target.(dom.Node)
-		navbar := document.querySelector("nav")
+		navbar := refElem("navbar")
 		if navbar != nil && mobileMenuOpen.Get() {
 			isMobile := window.innerWidth <= 767
 			if isMobile && !navbar.contains(target) {
@@ -300,7 +298,7 @@ func setupEvents() {
 		}
 
 		if projectsDropdownOpen.Get() {
-			dropdown := document.querySelector(".dropdown")
+			dropdown := refElem("projectsDropdown")
 			if dropdown == nil || !dropdown.contains(target) {
 				closeProjectsDropdown()
 			}

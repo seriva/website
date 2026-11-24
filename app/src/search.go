@@ -134,24 +134,15 @@ func searchOpenSelected() {
 }
 
 func renderSearchResults() {
-	el := document.querySelector("#search-page-results")
-	if el != nil {
+	if refElem("searchResults") != nil {
 		gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery.Get(), searchSelectedIndex))
 	}
 }
 
 // setSearchInput writes the input's value; it is user-owned DOM state, not derived.
 func setSearchInput(v string) {
-	var inp dom.HTMLInputElement
-	if r := appRefs["searchInput"]; r != nil {
-		inp = r.(dom.HTMLInputElement)
-	} else if document != nil {
-		if el := document.querySelector("#search-page-input"); el != nil {
-			inp = el.(dom.HTMLInputElement)
-		}
-	}
-	if inp != nil {
-		inp.value = v
+	if inp := refElem("searchInput"); inp != nil {
+		inp.(dom.HTMLInputElement).value = v
 	}
 }
 
@@ -174,12 +165,12 @@ func openSearchWithTag(tag string) {
 	closeMenus()
 	searchOpen.Set(true)
 	setSearchQuery(tag)
-	focusLater("#search-page-input")
+	focusLater("searchInput")
 }
 
 func clearSearch() {
 	setSearchQuery("")
-	focusLater("#search-page-input")
+	focusLater("searchInput")
 }
 
 // closeSearch hides the overlay; the exit fade is CSS-only (#search-page transition).

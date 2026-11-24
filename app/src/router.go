@@ -123,12 +123,9 @@ async func handleRoute() {
 	// so unknown deep links arrive here with their real pathname intact.
 	path := window.location.pathname
 
-	if !isInitialRoute {
-		mainEl := document.querySelector("#main-content")
-		if mainEl != nil {
-			mainEl.classList.add("page-transition-out")
-			await time.Sleep(200 * time.Millisecond)
-		}
+	if !isInitialRoute && refElem("mainContent") != nil {
+		pageTransitionOut.Set(true)
+		await time.Sleep(200 * time.Millisecond)
 	}
 	isInitialRoute = false
 
@@ -137,6 +134,7 @@ async func handleRoute() {
 		return
 	}
 
+	pageTransitionOut.Set(false)
 	currentPath = path
 	r := parseRoute(path)
 	route.Set(r)
@@ -165,8 +163,7 @@ async func handleRoute() {
 		return
 	}
 
-	mainEl := document.querySelector("#main-content")
-	if mainEl != nil {
+	if mainEl := refElem("mainContent"); mainEl != nil {
 		mainEl.setAttribute("tabindex", "-1")
 		mainEl.(dom.HTMLElement).focus(dom.FocusOptions{preventScroll: true})
 		setTimeout(func() {

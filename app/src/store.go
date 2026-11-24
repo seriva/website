@@ -18,6 +18,7 @@ var navPages = []NavPage{}
 var translations = map[string]string{}
 var route = gom.NewSignal(RouteMatch{Page: 1}) // zero Kind == RouteBlog
 var routeAnnouncement = gom.NewSignal("")
+var pageTransitionOut = gom.NewSignal(false)
 var currentTheme = "dark"
 var mobileMenuOpen = gom.NewSignal(false)
 var projectsDropdownOpen = gom.NewSignal(false)

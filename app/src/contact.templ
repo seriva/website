@@ -5,7 +5,7 @@ import "strconv"
 templ ContactFormFields(form *gom.Signal[ContactState]) {
 	<div class="form-group">
 		<label for="contact-name">{ t("contact.name") }*</label>
-		<input type="text" id="contact-name" name="name" required class={ cls("", form.Get().ErrName, "error") } aria-invalid={ strconv.FormatBool(form.Get().ErrName) }/>
+		<input ref="contactName" type="text" id="contact-name" name="name" required class={ cls("", form.Get().ErrName, "error") } aria-invalid={ strconv.FormatBool(form.Get().ErrName) }/>
 	</div>
 	<div class="form-group">
 		<label for="contact-email">{ t("contact.email") }*</label>
@@ -223,7 +223,7 @@ templ ContactModal(open *gom.Signal[bool], form *gom.Signal[ContactState]) {
 					@Icon("times", "1.2rem")
 				</button>
 			</div>
-			<form class="contact-form" id="contact-form" novalidate>
+			<form ref="contactForm" class="contact-form" id="contact-form" novalidate>
 				@ContactFormFields(form)
 			</form>
 		</div>

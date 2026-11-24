@@ -5,6 +5,13 @@ import "js:./browser.d.ts"
 
 var appRefs = map[string]any{}
 
+func refElem(name string) dom.Element {
+	if el := appRefs[name]; el != nil {
+		return el.(dom.Element)
+	}
+	return nil
+}
+
 // ── Region renders ────────────────────────────────────────────
 // The app shell (including navbar, route announcer and modal shells) is mounted
 // once in main(); overlay open/close, active nav, contact form and route
@@ -12,18 +19,17 @@ var appRefs = map[string]any{}
 // only when the active route changes.
 
 func renderMain() {
-	gom.Mount("#content-slot", MainContent())
+	gom.Mount("#content-slot", MainContent(), appRefs)
 }
 
 func renderRoute() {
 	renderMain()
 }
 
-// focusLater focuses the element once the overlay's open transition has started.
-func focusLater(selector string) {
+// focusLater focuses a ref'd element once its overlay's open transition starts.
+func focusLater(refName string) {
 	setTimeout(func() {
-		el := document.querySelector(selector)
-		if el != nil {
+		if el := refElem(refName); el != nil {
 			el.(dom.HTMLElement).focus()
 		}
 	}, 50)

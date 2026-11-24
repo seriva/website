@@ -1,46 +1,54 @@
 package main
 
-import (
-	"strings"
-	"testing"
-)
+import "testing"
 
-func TestIconSvg(t *testing.T) {
-	t.Run("known icon renders class, size and viewBox", func(t *testing.T) {
-		svg := iconSvg("search", "1.35rem")
-		if !strings.Contains(svg, `class="icon icon-search"`) {
-			t.Errorf("missing class, got %q", svg)
+func TestIconMount(t *testing.T) {
+	t.Run("known icon renders SVG class, size, viewBox and path", func(t *testing.T) {
+		c := mountTempl(Icon("search", "1.35rem"))
+		svg := c.querySelector("svg")
+		if svg == nil {
+			t.Fatal("expected svg element")
 		}
-		if !strings.Contains(svg, `width="1.35rem" height="1.35rem"`) {
-			t.Errorf("missing size, got %q", svg)
+		if string(svg.getAttribute("class")) != "icon icon-search" {
+			t.Errorf("class = %q", string(svg.getAttribute("class")))
 		}
-		if !strings.Contains(svg, `viewBox="0 0 512 512"`) {
-			t.Errorf("missing viewBox, got %q", svg)
+		if string(svg.getAttribute("width")) != "1.35rem" || string(svg.getAttribute("height")) != "1.35rem" {
+			t.Errorf("size = %q x %q", string(svg.getAttribute("width")), string(svg.getAttribute("height")))
 		}
-		if !strings.Contains(svg, `aria-hidden="true"`) {
-			t.Errorf("icon should be aria-hidden, got %q", svg)
+		if string(svg.getAttribute("viewBox")) != "0 0 512 512" {
+			t.Errorf("viewBox = %q", string(svg.getAttribute("viewBox")))
+		}
+		if string(svg.getAttribute("aria-hidden")) != "true" {
+			t.Errorf("expected aria-hidden=true")
+		}
+		if path := svg.querySelector("path"); path == nil || string(path.getAttribute("d")) == "" {
+			t.Errorf("expected path with d attribute")
 		}
 	})
 
 	t.Run("unknown icon renders nothing", func(t *testing.T) {
-		if iconSvg("does-not-exist", "1rem") != "" {
-			t.Error("expected empty string for unknown icon")
+		c := mountTempl(Icon("does-not-exist", "1rem"))
+		if int(c.children.length) != 0 {
+			t.Errorf("expected no elements for unknown icon, got %d", int(c.children.length))
 		}
 	})
 
-	t.Run("size is escaped", func(t *testing.T) {
-		svg := iconSvg("sun", `1rem" onload="x`)
-		if strings.Contains(svg, `onload="x`) {
-			t.Errorf("size was not escaped: %q", svg)
+	t.Run("unsafe size cannot inject attributes", func(t *testing.T) {
+		c := mountTempl(Icon("sun", `1rem" onload="x`))
+		svg := c.querySelector("svg")
+		if svg == nil {
+			t.Fatal("expected svg element")
 		}
-		if !strings.Contains(svg, "&#34;") && !strings.Contains(svg, "&quot;") {
-			t.Errorf("expected escaped quote in %q", svg)
+		if bool(svg.hasAttribute("onload")) {
+			t.Errorf("unexpected onload attribute injected")
 		}
 	})
 
 	t.Run("every registered icon renders", func(t *testing.T) {
-		for name, _ := range icons {
-			if !strings.Contains(iconSvg(name, "1em"), "<path d=") {
+		for name := range icons {
+			c := mountTempl(Icon(name, "1em"))
+			path := c.querySelector("svg path")
+			if path == nil || string(path.getAttribute("d")) == "" {
 				t.Errorf("icon %q did not render a path", name)
 			}
 		}

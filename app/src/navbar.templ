@@ -421,7 +421,7 @@ css navbarStyle() {
 }
 
 templ Navbar(r *gom.Signal[RouteMatch], pages []NavPage, projects []Project, dropdownOpen *gom.Signal[bool], mobileOpen *gom.Signal[bool], siteConfig SiteConfig) {
-	<nav class={ "navbar " + navbarStyle() }>
+	<nav ref="navbar" class={ "navbar " + navbarStyle() }>
 		<div class="navbar-inner">
 			<a class="navbar-brand" href="/" data-action="nav">{ siteConfig.Title }</a>
 			<button type="button" class={ cls("navbar-toggle", mobileOpen.Get(), "active") } aria-label="Toggle navigation" aria-expanded={ strconv.FormatBool(mobileOpen.Get()) } data-action="toggle-mobile-nav">
@@ -432,7 +432,7 @@ templ Navbar(r *gom.Signal[RouteMatch], pages []NavPage, projects []Project, dro
 					<li class="nav-item navbar-menu">
 						<a class={ cls("nav-link", r.Get().Kind == RouteBlog, "active") } href="/blog" data-action="nav">{ t("nav.blog") }</a>
 					</li>
-					<li class={ cls("nav-item navbar-menu dropdown", dropdownOpen.Get(), "show") }>
+					<li ref="projectsDropdown" class={ cls("nav-item navbar-menu dropdown", dropdownOpen.Get(), "show") }>
 						<button type="button" class={ cls("nav-link dropdown-toggle", r.Get().Kind == RouteProject, "active") } aria-haspopup="true" aria-controls="projects-dropdown" aria-expanded={ strconv.FormatBool(dropdownOpen.Get()) } data-action="toggle-projects-dropdown">
 							{ t("nav.projects") }
 							<span class="dropdown-chevron dropdown-chevron-down">@Icon("chevron-down", "0.8em")</span>

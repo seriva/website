@@ -36,29 +36,13 @@ func applyColorScheme(colors ThemeColors) {
 }
 
 func applyPrismTheme(themeName string) {
-	id := "prism-theme"
-	link := document.getElementById(id)
-	href := "/css/prism-themes/" + themeName + ".min.css"
-
-	if link != nil {
-		link.(dom.HTMLLinkElement).href = href
-	} else {
-		newLink := document.createElement("link").(dom.HTMLLinkElement)
-		newLink.id = id
-		newLink.rel = "stylesheet"
-		newLink.href = href
-		document.head.appendChild(newLink)
-	}
+	link := headEl("link", "id", "prism-theme").(dom.HTMLLinkElement)
+	link.rel = "stylesheet"
+	link.href = "/css/prism-themes/" + themeName + ".min.css"
 }
 
 func updateThemeColorMeta(theme string) {
-	meta := document.querySelector("meta[name=\"theme-color\"]")
-	if meta != nil {
-		colors := getThemeColors(theme)
-		if colors.Background != "" {
-			meta.setAttribute("content", colors.Background)
-		}
-	}
+	updateMeta("name", "theme-color", getThemeColors(theme).Background)
 }
 
 func applyTheme(theme string) {

@@ -31,7 +31,7 @@ async func preloadEmailJS() {
 
 // resetContactForm clears the form inputs and resets state back to initial defaults.
 func resetContactForm() {
-	if formEl := document.querySelector("#contact-form"); formEl != nil {
+	if formEl := refElem("contactForm"); formEl != nil {
 		formEl.(dom.HTMLFormElement).reset()
 	}
 	contactForm.Set(ContactState{ButtonState: "send"})
@@ -44,7 +44,7 @@ func openContact() {
 	closeMenus()
 	contactOpen.Set(true)
 	resetContactForm()
-	focusLater("#contact-name")
+	focusLater("contactName")
 }
 
 // closeContact hides the modal; the exit fade is CSS-only (#contact-modal transition).

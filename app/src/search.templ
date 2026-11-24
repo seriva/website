@@ -208,7 +208,7 @@ templ SearchModal(open *gom.Signal[bool], query *gom.Signal[string], results []S
 			</div>
 		</div>
 		<div class="search-page-content">
-			<div class="search-page-results" id="search-page-results">
+			<div ref="searchResults" class="search-page-results" id="search-page-results">
 				@SearchResultsList(results, query.Get(), selectedIndex)
 			</div>
 		</div>

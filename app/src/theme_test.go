@@ -9,9 +9,11 @@ import "testing"
 func resetThemeDOM() {
 	window.localStorage.clear()
 	document.documentElement.removeAttribute("data-theme")
-	link := document.getElementById("prism-theme")
-	if link != nil {
+	if link := document.getElementById("prism-theme"); link != nil {
 		link.remove()
+	}
+	if meta := document.querySelector("meta[name=\"theme-color\"]"); meta != nil {
+		meta.remove()
 	}
 	currentTheme = "dark"
 }
