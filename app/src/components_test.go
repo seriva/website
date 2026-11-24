@@ -90,9 +90,11 @@ func TestNavbarMount(t *testing.T) {
 	cfg.Search.Enabled = true
 	pages := []NavPage{{ID: "about", Title: "About", ShowInNav: true, Href: "/page/about"}, {ID: "hidden", Title: "Hidden", Href: "/page/hidden"}}
 	projs := []Project{{ID: "p1", Title: "P1", Href: "/project/p1"}}
-	r := RouteMatch{Kind: RoutePage, Param: "about"}
+	r := gom.NewSignal(RouteMatch{Kind: RoutePage, Param: "about"})
+	dropdownOpen := gom.NewSignal(false)
+	mobileOpen := gom.NewSignal(true)
 
-	c := mountTempl(Navbar(r, pages, projs, false, true, cfg))
+	c := mountTempl(Navbar(r, pages, projs, dropdownOpen, mobileOpen, cfg))
 
 	if string(c.querySelector(".navbar-brand").textContent) != "Site" {
 		t.Errorf("expected brand title")
@@ -118,6 +120,62 @@ func TestNavbarMount(t *testing.T) {
 	}
 	if c.querySelector("a[href=\"https://github.com/x\"] svg.icon-github") == nil {
 		t.Errorf("expected social github icon")
+	}
+
+	// Signal updates mutate classes and aria-expanded in place without remounting.
+	mobileOpen.Set(false)
+	if strings.Contains(string(c.querySelector(".navbar-collapse").className), "show") {
+		t.Errorf("expected collapse closed after mobileOpen.Set(false)")
+	}
+	if string(c.querySelector(".navbar-toggle").getAttribute("aria-expanded")) != "false" {
+		t.Errorf("expected aria-expanded=false after mobileOpen.Set(false)")
+	}
+
+	dropdownOpen.Set(true)
+	if !strings.Contains(string(c.querySelector(".dropdown").className), "show") {
+		t.Errorf("expected dropdown open after dropdownOpen.Set(true)")
+	}
+	if string(c.querySelector(".dropdown-toggle").getAttribute("aria-expanded")) != "true" {
+		t.Errorf("expected dropdown aria-expanded=true")
+	}
+
+	r.Set(RouteMatch{Kind: RouteProject, Param: "p1"})
+	if strings.Contains(string(about.className), "active") {
+		t.Errorf("expected about link inactive after route change")
+	}
+	if !strings.Contains(string(c.querySelector("#projects-dropdown a[href=\"/project/p1\"]").className), "active") {
+		t.Errorf("expected project link active after route change")
+	}
+}
+
+func TestModalsReactToSignals(t *testing.T) {
+	searchOpenSig := gom.NewSignal(false)
+	querySig := gom.NewSignal("")
+	sc := mountTempl(SearchModal(searchOpenSig, querySig, []SearchResultItem{}, -1, "Search..."))
+
+	if strings.Contains(string(sc.querySelector("#search-page").className), "show") {
+		t.Errorf("expected search modal hidden initially")
+	}
+	searchOpenSig.Set(true)
+	if !strings.Contains(string(sc.querySelector("#search-page").className), "show") {
+		t.Errorf("expected search modal visible after searchOpenSig.Set(true)")
+	}
+	if strings.Contains(string(sc.querySelector("#search-page-clear").className), "show") {
+		t.Errorf("expected clear button hidden when query is empty")
+	}
+	querySig.Set("go")
+	if !strings.Contains(string(sc.querySelector("#search-page-clear").className), "show") {
+		t.Errorf("expected clear button visible when query is non-empty")
+	}
+
+	contactOpenSig := gom.NewSignal(false)
+	cc := mountTempl(ContactModal(contactOpenSig, ContactState{ButtonState: "send"}))
+	if strings.Contains(string(cc.querySelector("#contact-modal").className), "show") {
+		t.Errorf("expected contact modal hidden initially")
+	}
+	contactOpenSig.Set(true)
+	if !strings.Contains(string(cc.querySelector("#contact-modal").className), "show") {
+		t.Errorf("expected contact modal visible after contactOpenSig.Set(true)")
 	}
 }
 

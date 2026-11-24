@@ -39,20 +39,15 @@ func openContact() {
 		preloadEmailJS()
 	}
 	closeMenus()
-	contactOpen = true
+	contactOpen.Set(true)
 	resetContactForm()
-	syncOverlays()
 	focusLater("#contact-name")
 }
 
 // closeContact hides the modal; the exit fade is CSS-only (#contact-modal transition).
 // The form is reset by openContact so its contents survive the fade.
 func closeContact() {
-	if !contactOpen {
-		return
-	}
-	contactOpen = false
-	syncOverlays()
+	contactOpen.Set(false)
 }
 
 // updateContactField mirrors a form field into state on every input event.

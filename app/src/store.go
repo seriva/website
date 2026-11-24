@@ -15,14 +15,14 @@ var posts = []BlogPost{}
 var projects = []Project{}
 var navPages = []NavPage{}
 var translations = map[string]string{}
-var route = RouteMatch{Page: 1} // zero Kind == RouteBlog
+var route = gom.NewSignal(RouteMatch{Page: 1}) // zero Kind == RouteBlog
 var currentTheme = "dark"
-var mobileMenuOpen bool
-var projectsDropdownOpen bool
-var searchOpen bool
-var searchQuery string
+var mobileMenuOpen = gom.NewSignal(false)
+var projectsDropdownOpen = gom.NewSignal(false)
+var searchOpen = gom.NewSignal(false)
+var searchQuery = gom.NewSignal("")
 var searchResults = []SearchResultItem{}
-var contactOpen bool
+var contactOpen = gom.NewSignal(false)
 var contactForm ContactState
 
 // Route view state; main() and handleRoute assign newViewState(). Not initialised

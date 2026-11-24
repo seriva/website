@@ -4,29 +4,19 @@ import "js:./browser.d.ts"
 import "strings"
 
 func toggleProjectsDropdown() {
-	projectsDropdownOpen = !projectsDropdownOpen
-	syncOverlays()
+	projectsDropdownOpen.Set(!projectsDropdownOpen.Get())
 }
 
 func closeProjectsDropdown() {
-	if !projectsDropdownOpen {
-		return
-	}
-	projectsDropdownOpen = false
-	syncOverlays()
+	projectsDropdownOpen.Set(false)
 }
 
 func toggleMobileMenu() {
-	mobileMenuOpen = !mobileMenuOpen
-	syncOverlays()
+	mobileMenuOpen.Set(!mobileMenuOpen.Get())
 }
 
 func closeMobileMenu() {
-	if !mobileMenuOpen {
-		return
-	}
-	mobileMenuOpen = false
-	syncOverlays()
+	mobileMenuOpen.Set(false)
 }
 
 // closeMenus collapses the nav menus before another overlay takes focus.
@@ -225,16 +215,16 @@ func setupEvents() {
 	window.addEventListener("keydown", func(e any) {
 		key := strVal(e.key)
 		if key == "Escape" {
-			if searchOpen {
+			if searchOpen.Get() {
 				closeSearch()
 			}
-			if contactOpen {
+			if contactOpen.Get() {
 				closeContact()
 			}
 			return
 		}
 
-		if searchOpen {
+		if searchOpen.Get() {
 			if key == "ArrowDown" {
 				e.preventDefault()
 				searchSelectNext()
@@ -252,7 +242,7 @@ func setupEvents() {
 			}
 		}
 
-		if site.Search.Enabled && !contactOpen {
+		if site.Search.Enabled && !contactOpen.Get() {
 			isCmdK := (boolVal(e.metaKey) || boolVal(e.ctrlKey)) && (key == "k" || key == "K")
 			isSlash := key == "/"
 
@@ -269,14 +259,14 @@ func setupEvents() {
 
 				if isCmdK {
 					e.preventDefault()
-					if searchOpen {
+					if searchOpen.Get() {
 						closeSearch()
 					} else {
 						openSearch()
 					}
 				} else if isSlash && !inInput {
 					e.preventDefault()
-					if !searchOpen {
+					if !searchOpen.Get() {
 						openSearch()
 					}
 				}
@@ -287,14 +277,14 @@ func setupEvents() {
 	// Global click outside handlers
 	document.addEventListener("click", func(e any) {
 		navbar := document.querySelector("nav")
-		if navbar != nil && mobileMenuOpen {
+		if navbar != nil && mobileMenuOpen.Get() {
 			isMobile := window.innerWidth <= 767
 			if isMobile && !navbar.contains(e.target) {
 				closeMobileMenu()
 			}
 		}
 
-		if projectsDropdownOpen {
+		if projectsDropdownOpen.Get() {
 			dropdown := document.querySelector(".dropdown")
 			if dropdown == nil || !dropdown.contains(e.target) {
 				closeProjectsDropdown()

@@ -87,14 +87,15 @@ func parseRoute(path string) RouteMatch {
 func initInitialRoute() {
 	path := strVal(window.location.pathname)
 	currentPath = path
-	route = parseRoute(path)
-	switch route.Kind {
+	r := parseRoute(path)
+	route.Set(r)
+	switch r.Kind {
 	case RoutePost:
-		view, _ = resolvePost(route.Param, posts, contentCache)
+		view, _ = resolvePost(r.Param, posts, contentCache)
 	case RouteProject:
-		view, _ = resolveProject(route.Param, projects, contentCache)
+		view, _ = resolveProject(r.Param, projects, contentCache)
 	case RoutePage:
-		view, _ = resolvePage(route.Param, navPages, contentCache)
+		view, _ = resolvePage(r.Param, navPages, contentCache)
 	default:
 		view = newViewState()
 	}
@@ -137,7 +138,8 @@ async func handleRoute() {
 	}
 
 	currentPath = path
-	route = parseRoute(path)
+	r := parseRoute(path)
+	route.Set(r)
 	view = newViewState()
 
 	// Reset scroll while the old content is faded out, so the new route paints at the top.
@@ -145,17 +147,17 @@ async func handleRoute() {
 	document.documentElement.scrollTop = 0
 	document.body.scrollTop = 0
 
-	switch route.Kind {
+	switch r.Kind {
 	case RoutePost:
-		await showPost(route.Param)
+		await showPost(r.Param)
 	case RouteProject:
-		await showProject(route.Param)
+		await showProject(r.Param)
 	case RoutePage:
-		await showPage(route.Param)
+		await showPage(r.Param)
 	case RouteNotFound:
 		showNotFound()
 	default:
-		showBlog(route.Page)
+		showBlog(r.Page)
 	}
 
 	// The loader may have awaited a fetch while a newer navigation took over.

@@ -139,7 +139,7 @@ func searchOpenSelected() {
 func renderSearchResults() {
 	el := document.querySelector("#search-page-results")
 	if el != nil {
-		gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery, searchSelectedIndex))
+		gom.Mount("#search-page-results", SearchResultsList(searchResults, searchQuery.Get(), searchSelectedIndex))
 	}
 }
 
@@ -156,7 +156,7 @@ func setSearchInput(v string) {
 
 // setSearchQuery updates query + results together and re-renders the list.
 func setSearchQuery(q string) {
-	searchQuery = q
+	searchQuery.Set(q)
 	searchSelectedIndex = -1
 	searchResults = performSearch(q)
 	setSearchInput(q)
@@ -171,36 +171,29 @@ func openSearch() {
 // don't vanish while the overlay is still fading out.
 func openSearchWithTag(tag string) {
 	closeMenus()
-	searchOpen = true
+	searchOpen.Set(true)
 	setSearchQuery(tag)
-	syncOverlays()
 	focusLater("#search-page-input")
 }
 
 func clearSearch() {
 	setSearchQuery("")
-	syncOverlays()
 	focusLater("#search-page-input")
 }
 
 // closeSearch hides the overlay; the exit fade is CSS-only (#search-page transition).
 func closeSearch() {
-	if !searchOpen {
-		return
-	}
-	searchOpen = false
-	syncOverlays()
+	searchOpen.Set(false)
 }
 
 func handleSearchInput(value string) {
-	searchQuery = value
+	searchQuery.Set(value)
 	searchSelectedIndex = -1
-	syncOverlays()
 	if searchDebounceTimer != 0 {
 		clearTimeout(searchDebounceTimer)
 	}
 	searchDebounceTimer = setTimeout(func() {
-		searchResults = performSearch(searchQuery)
+		searchResults = performSearch(searchQuery.Get())
 		renderSearchResults()
 	}, 150)
 }

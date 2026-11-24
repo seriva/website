@@ -49,7 +49,7 @@ css mainContentStyle() {
 
 templ MainContent() {
 	<main id="main-content" class={ mainContentStyle() } tabindex="-1">
-		@RouteView(route)
+		@RouteView(route.Get())
 	</main>
 }
 
@@ -88,7 +88,6 @@ css appShellStyle() {
 	& .skip-link:focus {
 		top: 1rem;
 	}
-	& #navbar-slot,
 	& #content-slot {
 		display: contents;
 	}
@@ -98,9 +97,7 @@ templ AppShell() {
 	<div ref="appRoot" class={ "app-root " + appShellStyle() }>
 		<a href="#main-content" class="skip-link">{ t("nav.skipToContent") }</a>
 		<div ref="routeAnnouncer" id="route-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-		<div id="navbar-slot">
-			@Navbar(route, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
-		</div>
+		@Navbar(route, navPages, projects, projectsDropdownOpen, mobileMenuOpen, site)
 		<div id="content-slot">
 			@MainContent()
 		</div>

@@ -192,16 +192,16 @@ css searchModalStyle() {
 	}
 }
 
-templ SearchModal(open bool, query string, results []SearchResultItem, selectedIndex int, placeholder string) {
-	<div id="search-page" class={ cls(searchModalStyle(), open, "show") } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
+templ SearchModal(open *gom.Signal[bool], query *gom.Signal[string], results []SearchResultItem, selectedIndex int, placeholder string) {
+	<div id="search-page" class={ cls(searchModalStyle(), open.Get(), "show") } role="dialog" aria-modal="true" aria-label={ t("aria.search") }>
 		<div class="search-page-header">
 			<div class="search-page-header-content">
 				<button type="button" class="search-page-back" id="search-page-back" aria-label={ t("aria.goBack") } data-action="close-search">
 					@Icon("arrow-left", "1.2rem")
 				</button>
 				<div class="search-page-input-wrapper">
-					<input ref="searchInput" type="search" id="search-page-input" class="search-page-input" placeholder={ placeholder } autocomplete="off" aria-label={ t("aria.search") } value={ query }/>
-					<button type="button" class={ cls("search-page-clear", query != "", "show") } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
+					<input ref="searchInput" type="search" id="search-page-input" class="search-page-input" placeholder={ placeholder } autocomplete="off" aria-label={ t("aria.search") }/>
+					<button type="button" class={ cls("search-page-clear", query.Get() != "", "show") } id="search-page-clear" aria-label={ t("aria.clearSearch") } data-action="clear-search">
 						@Icon("times", "1.2rem")
 					</button>
 				</div>
@@ -209,7 +209,7 @@ templ SearchModal(open bool, query string, results []SearchResultItem, selectedI
 		</div>
 		<div class="search-page-content">
 			<div class="search-page-results" id="search-page-results">
-				@SearchResultsList(results, query, selectedIndex)
+				@SearchResultsList(results, query.Get(), selectedIndex)
 			</div>
 		</div>
 	</div>

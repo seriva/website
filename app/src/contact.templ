@@ -214,8 +214,8 @@ css contactModalStyle() {
 	}
 }
 
-templ ContactModal(open bool, form ContactState) {
-	<div id="contact-modal" class={ cls(contactModalStyle(), open, "show") } role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+templ ContactModal(open *gom.Signal[bool], form ContactState) {
+	<div id="contact-modal" class={ cls(contactModalStyle(), open.Get(), "show") } role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
 		<div class="contact-modal-content">
 			<div class="contact-modal-header">
 				<h2 id="contact-modal-title">{ t("contact.title") }</h2>

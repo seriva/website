@@ -68,9 +68,6 @@ func updateGiscusTheme() {
 		return
 	}
 	iframe := iframeEl.(dom.HTMLIFrameElement)
-	if iframe.contentWindow == nil {
-		return
-	}
 
 	iframe.contentWindow.postMessage(map[string]any{
 		"giscus": map[string]any{
