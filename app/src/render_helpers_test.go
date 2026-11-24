@@ -129,21 +129,6 @@ func TestPageHref(t *testing.T) {
 	}
 }
 
-func TestPageNumbers(t *testing.T) {
-	nums := pageNumbers(4)
-	if len(nums) != 4 {
-		t.Fatalf("expected 4 numbers, got %d", len(nums))
-	}
-	for i, n := range nums {
-		if n != i+1 {
-			t.Errorf("expected %d at index %d, got %d", i+1, i, n)
-		}
-	}
-	if len(pageNumbers(0)) != 0 {
-		t.Errorf("expected 0 numbers for 0 pages")
-	}
-}
-
 // ── Project helpers ───────────────────────────────────────────
 
 func TestDemoLabel(t *testing.T) {

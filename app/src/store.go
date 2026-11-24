@@ -93,6 +93,9 @@ func announceRoute(title string) {
 	if prefix == "general.routeAnnounce" {
 		prefix = "Navigated to "
 	}
+	// Clear first so consecutive navigations with the same title still fire a
+	// live-region update (Signal.Set skips equal values).
+	routeAnnouncement.Set("")
 	routeAnnouncement.Set(prefix + title)
 }
 

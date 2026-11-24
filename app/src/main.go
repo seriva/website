@@ -34,7 +34,7 @@ func navigateHash(hash string) {
 		window.history.pushState(map[string]any{}, "", hash)
 		return
 	}
-	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
+	window.scrollTo(dom.ScrollToOptions{top: 0, left: 0, behavior: "smooth"})
 	window.history.pushState(map[string]any{}, "", window.location.pathname)
 }
 
@@ -313,7 +313,7 @@ func setupEvents() {
 			if hash != "" {
 				scrollToHash(hash, true)
 			} else {
-				window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "smooth"})
+				window.scrollTo(dom.ScrollToOptions{top: 0, left: 0, behavior: "smooth"})
 			}
 			return
 		}

@@ -93,7 +93,7 @@ var searchSelectedIndex = -1
 func scrollSelectedSearchResultIntoView() {
 	el := document.querySelector(".search-result-item.selected")
 	if el != nil {
-		el.scrollIntoView(map[string]any{"block": "nearest", "behavior": "smooth"})
+		el.scrollIntoView(dom.ScrollIntoViewOptions{block: "nearest", behavior: "smooth"})
 	}
 }
 

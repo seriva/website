@@ -140,7 +140,7 @@ type ThemeColors struct {
 type CommentsConfig struct {
 	BlogEnabled     bool
 	ProjectsEnabled bool
-	Attrs           any
+	Attrs           map[string]any
 }
 
 type EmailJSConfig struct {

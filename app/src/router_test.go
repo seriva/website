@@ -163,3 +163,28 @@ async func TestLoadRouteFailed(t *testing.T) {
 		t.Errorf("expected no cache entry after failed fetch")
 	}
 }
+
+func TestRenderMainClearsPageTransitionOut(t *testing.T) {
+	slot := document.createElement("div")
+	slot.id = "content-slot"
+	document.body.appendChild(slot)
+	prevMain := appRefs["mainContent"]
+	prevView := view
+	defer func() {
+		slot.remove()
+		appRefs["mainContent"] = prevMain
+		view = prevView
+		pageTransitionOut.Set(false)
+	}()
+
+	view = newViewState()
+	pageTransitionOut.Set(true)
+	renderMain()
+	if pageTransitionOut.Get() {
+		t.Errorf("expected renderMain to clear pageTransitionOut")
+	}
+	mainEl := slot.querySelector("#main-content")
+	if mainEl == nil || mainEl.classList.contains("page-transition-out") {
+		t.Errorf("expected newly mounted #main-content without page-transition-out class")
+	}
+}

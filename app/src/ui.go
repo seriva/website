@@ -1,7 +1,6 @@
 package main
 
 import "gofront/dom"
-import "js:./browser.d.ts"
 
 var appRefs = map[string]any{}
 
@@ -19,6 +18,7 @@ func refElem(name string) dom.Element {
 // only when the active route changes.
 
 func renderMain() {
+	pageTransitionOut.Set(false)
 	gom.Mount("#content-slot", MainContent(), appRefs)
 }
 

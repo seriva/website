@@ -56,15 +56,6 @@ func pageHref(page int) string {
 	return "/blog/page/" + strconv.Itoa(page)
 }
 
-// pageNumbers returns 1..n for templ range loops (templ `for` only supports range).
-func pageNumbers(n int) []int {
-	nums := make([]int, 0, n)
-	for i := 1; i <= n; i++ {
-		nums = append(nums, i)
-	}
-	return nums
-}
-
 // ── Project helpers ───────────────────────────────────────────
 
 func demoLabel(p Project) string {

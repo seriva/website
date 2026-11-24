@@ -30,15 +30,13 @@ func kebab(s string) string {
 
 // giscusAttrs maps the raw comments config to data-* attributes; the two page
 // toggles are ours, everything else is passed through to giscus.
-func giscusAttrs(raw any, theme string) map[string]string {
+func giscusAttrs(raw map[string]any, theme string) map[string]string {
 	attrs := map[string]string{"data-theme": theme}
-	if raw != nil {
-		for k, v := range raw.(map[string]any) {
-			if k == "blogEnabled" || k == "projectsEnabled" {
-				continue
-			}
-			attrs["data-"+kebab(k)] = strVal(v)
+	for k, v := range raw {
+		if k == "blogEnabled" || k == "projectsEnabled" {
+			continue
 		}
+		attrs["data-"+kebab(k)] = strVal(v)
 	}
 	return attrs
 }

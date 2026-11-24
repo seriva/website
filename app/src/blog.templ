@@ -187,7 +187,7 @@ templ Pagination(currentPage int, totalPages int) {
 					@Icon("chevron-left", "0.85em")
 				</a>
 			</li>
-			for _, pageNum := range pageNumbers(totalPages) {
+			for pageNum := 1; pageNum <= totalPages; pageNum++ {
 				<li class={ cls("page-item", pageNum == currentPage, "active") }>
 					<a class="page-link" href={ pageHref(pageNum) } data-action="nav">{ pageNum }</a>
 				</li>

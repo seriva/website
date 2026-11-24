@@ -23,7 +23,7 @@ func scrollToHash(hash string, smooth bool) {
 			if smooth {
 				behavior = "smooth"
 			}
-			targetEl.scrollIntoView(map[string]any{"behavior": behavior})
+			targetEl.scrollIntoView(dom.ScrollIntoViewOptions{behavior: behavior})
 			if id == "main-content" {
 				targetEl.setAttribute("tabindex", "-1")
 				targetEl.(dom.HTMLElement).focus(dom.FocusOptions{preventScroll: true})
@@ -134,14 +134,13 @@ async func handleRoute() {
 		return
 	}
 
-	pageTransitionOut.Set(false)
 	currentPath = path
 	r := parseRoute(path)
 	route.Set(r)
 	view = newViewState()
 
 	// Reset scroll while the old content is faded out, so the new route paints at the top.
-	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "instant"})
+	window.scrollTo(dom.ScrollToOptions{top: 0, left: 0, behavior: "instant"})
 	document.documentElement.scrollTop = 0
 	document.body.scrollTop = 0
 

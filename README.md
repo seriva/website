@@ -53,7 +53,7 @@ flowchart TD
 
 ### Key Modules
 
-- **Source (`app/src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, overlay state reconciliation) • `store.go` (state & data store, JSON hydration, `contentCache`) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, `loadRoute` fetch/cache/render path) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
+- **Source (`app/src/`)**: `main.go` (init, global event delegation) • `ui.go` (region renders, template refs, overlay reset) • `store.go` (state & data store, JSON hydration, `contentCache`) • `view.go` (`ViewState` + pure route resolvers) • `router.go` (`parseRoute`, SPA routing, `loadRoute` fetch/cache/render path) • `theme.go` (theme persistence & CSS variables) • `markdown.go` (markdown & code highlighting) • `search.go` (Fuse.js search) • `email.go` (EmailJS integration) • `icons.go` (SVG icon registry) • `comments.go` (giscus comments)
 - **Components (`app/src/*.templ`)**: `app.templ` • `navbar.templ` • `blog.templ` • `projects.templ` • `page.templ` • `footer.templ` • `search.templ` • `contact.templ` • `icons.templ`
 - **Styles (`app/css/app.css`)**: single plain stylesheet linked from `index.html`, formatted and linted by Biome; loads in parallel with the JS bundles
 

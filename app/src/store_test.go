@@ -106,6 +106,21 @@ func TestAnnounceRoute(t *testing.T) {
 	if announcer == nil || string(announcer.textContent) != expected {
 		t.Errorf("expected announcer DOM %q, got %q", expected, string(announcer.textContent))
 	}
+
+	// Repeating the same title must still emit a change for screen readers.
+	seen := []string{}
+	unsub := routeAnnouncement.Subscribe(func(v string) {
+		seen = append(seen, v)
+	})
+	defer unsub()
+
+	announceRoute("Test Page")
+	if len(seen) != 2 || seen[0] != "" || seen[1] != expected {
+		t.Errorf("expected repeated title to clear then re-set signal, got %v", seen)
+	}
+	if string(announcer.textContent) != expected {
+		t.Errorf("expected announcer DOM %q after repeat, got %q", expected, string(announcer.textContent))
+	}
 }
 
 async func TestInitDataFromScript(t *testing.T) {
