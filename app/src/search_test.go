@@ -9,7 +9,7 @@ func fakeFuse(items []FuseItem) FuseInstance {
 		"search": func(q string) []FuseResult {
 			out := []FuseResult{}
 			for _, it := range items {
-				out = append(out, FuseResult{item: it})
+				out = append(out, map[string]any{"item": it})
 			}
 			return out
 		},
@@ -17,13 +17,13 @@ func fakeFuse(items []FuseItem) FuseInstance {
 }
 
 func searchItem(id string, tags []string) FuseItem {
-	return FuseItem{
-		id:          id,
-		title:       "Title " + id,
-		description: "Desc " + id,
-		tags:        tags,
-		kind:        "blog",
-		url:         "/blog/" + id,
+	return map[string]any{
+		"id":          id,
+		"title":       "Title " + id,
+		"description": "Desc " + id,
+		"tags":        tags,
+		"kind":        "blog",
+		"url":         "/blog/" + id,
 	}
 }
 

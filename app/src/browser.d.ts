@@ -36,6 +36,7 @@ interface FormField {
     value: string;
 }
 
+/** @dictionary */
 interface FuseItem {
     id: string;
     title: string;
@@ -45,6 +46,7 @@ interface FuseItem {
     url: string;
 }
 
+/** @dictionary */
 interface FuseResult {
     item: FuseItem;
 }

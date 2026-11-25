@@ -265,8 +265,8 @@ async func loadMarkdownFile(url string) (string, error) {
 
 func attachCopyButtons() {
 	pres := document.querySelectorAll("pre")
-	for i := 0; i < len(pres); i++ {
-		pre := pres[i]
+	for i := 0; i < pres.length; i++ {
+		pre := pres.item(i).(dom.HTMLElement)
 		if pre.querySelector(".copy-code-button") != nil {
 			continue
 		}
@@ -275,7 +275,7 @@ func attachCopyButtons() {
 		btn.setAttribute("data-action", "copy-code")
 		btn.setAttribute("aria-label", t("aria.copyCode"))
 		btn.textContent = t("code.copy")
-		pre.(dom.HTMLElement).style.setProperty("position", "relative")
+		pre.style.setProperty("position", "relative")
 		pre.appendChild(btn)
 	}
 }
@@ -299,8 +299,8 @@ func highlightCode() {
 // render, keeping the source in data-mermaid-src so diagrams can be re-drawn.
 func convertMermaidBlocks() int {
 	codes := document.querySelectorAll("pre > code.language-mermaid")
-	for i := 0; i < len(codes); i++ {
-		code := codes[i]
+	for i := 0; i < codes.length; i++ {
+		code := codes.item(i)
 		src := string(code.textContent)
 		div := document.createElement("div")
 		div.className = "mermaid"
@@ -308,7 +308,7 @@ func convertMermaidBlocks() int {
 		div.textContent = src
 		code.parentElement.replaceWith(div)
 	}
-	return len(codes)
+	return codes.length
 }
 
 func mermaidTheme(theme string) string {
@@ -333,12 +333,12 @@ async func renderMermaid() {
 		}
 	}()
 	nodes := document.querySelectorAll(".mermaid[data-mermaid-src]")
-	if len(nodes) == 0 {
+	if nodes.length == 0 {
 		return
 	}
 	await loadMermaid()
-	for i := 0; i < len(nodes); i++ {
-		n := nodes[i]
+	for i := 0; i < nodes.length; i++ {
+		n := nodes.item(i).(dom.Element)
 		n.removeAttribute("data-processed")
 		n.textContent = n.getAttribute("data-mermaid-src")
 	}

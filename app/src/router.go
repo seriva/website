@@ -23,10 +23,10 @@ func scrollToHash(hash string, smooth bool) {
 			if smooth {
 				behavior = "smooth"
 			}
-			targetEl.scrollIntoView(dom.ScrollIntoViewOptions{behavior: behavior})
+			targetEl.scrollIntoView(map[string]any{"behavior": behavior})
 			if id == "main-content" {
 				targetEl.setAttribute("tabindex", "-1")
-				targetEl.(dom.HTMLElement).focus(dom.FocusOptions{preventScroll: true})
+				targetEl.(dom.HTMLElement).focus(map[string]any{"preventScroll": true})
 			}
 		}
 	}
@@ -140,7 +140,7 @@ async func handleRoute() {
 	view = newViewState()
 
 	// Reset scroll while the old content is faded out, so the new route paints at the top.
-	window.scrollTo(dom.ScrollToOptions{top: 0, left: 0, behavior: "instant"})
+	window.scrollTo(map[string]any{"top": 0, "left": 0, "behavior": "instant"})
 	document.documentElement.scrollTop = 0
 	document.body.scrollTop = 0
 
@@ -164,7 +164,7 @@ async func handleRoute() {
 
 	if mainEl := refElem("mainContent"); mainEl != nil {
 		mainEl.setAttribute("tabindex", "-1")
-		mainEl.(dom.HTMLElement).focus(dom.FocusOptions{preventScroll: true})
+		mainEl.(dom.HTMLElement).focus(map[string]any{"preventScroll": true})
 		setTimeout(func() {
 			mainEl.removeAttribute("tabindex")
 		}, 100)

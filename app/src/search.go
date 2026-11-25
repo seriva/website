@@ -12,25 +12,25 @@ func initSearch() {
 
 	// Index projects
 	for _, p := range projects {
-		searchItems = append(searchItems, FuseItem{
-			id:          p.ID,
-			title:       p.Title,
-			description: p.Description,
-			tags:        p.Tags,
-			kind:        "project",
-			url:         p.Href,
+		searchItems = append(searchItems, map[string]any{
+			"id":          p.ID,
+			"title":       p.Title,
+			"description": p.Description,
+			"tags":        p.Tags,
+			"kind":        "project",
+			"url":         p.Href,
 		})
 	}
 
 	// Index blog posts
 	for _, p := range posts {
-		searchItems = append(searchItems, FuseItem{
-			id:          p.Slug,
-			title:       p.Title,
-			description: p.Excerpt,
-			tags:        p.Tags,
-			kind:        "blog",
-			url:         p.Href,
+		searchItems = append(searchItems, map[string]any{
+			"id":          p.Slug,
+			"title":       p.Title,
+			"description": p.Excerpt,
+			"tags":        p.Tags,
+			"kind":        "blog",
+			"url":         p.Href,
 		})
 	}
 
@@ -93,7 +93,7 @@ var searchSelectedIndex = -1
 func scrollSelectedSearchResultIntoView() {
 	el := document.querySelector(".search-result-item.selected")
 	if el != nil {
-		el.scrollIntoView(dom.ScrollIntoViewOptions{block: "nearest", behavior: "smooth"})
+		el.scrollIntoView(map[string]any{"block": "nearest", "behavior": "smooth"})
 	}
 }
 
